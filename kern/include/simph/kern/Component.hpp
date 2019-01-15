@@ -10,7 +10,8 @@
 #ifndef __simph_kern_Component_HPP__
 #define __simph_kern_Component_HPP__
 #include "simph/kern/Object.hpp"
-#include "Smp/IComponet.h"
+#include "simph/kern/Collection.hpp"
+#include "Smp/IComponent.h"
 
 namespace simph {
 	namespace kern {
@@ -18,7 +19,7 @@ namespace simph {
 /**
  *
  */
-class Component: public Object, virtual public IComponent {
+class Component: public Object, virtual public Smp::IComponent {
 public:
     /**
      * Default constructor.
@@ -29,8 +30,20 @@ public:
      */
     virtual ~Component();
 
+    Smp::ComponentStateKind GetState() const;
+    void Publish(Smp::IPublication* receiver);
+    void Configure(Smp::Services::ILogger* logger);
+    void Connect(Smp::ISimulator* simulator);
+    Smp::IField* GetField(Smp::String8 fullName) const;
+    const Smp::FieldCollection* GetFields() const;
+protected:
+    Smp::ISimulator* getSimulator() const;
+    // TODO add log helpers ?
 private:
-
+    Smp::ComponentStateKind _state;
+    Smp::Services::ILogger* _logger;
+    Smp::ISimulator* _simulator;
+    Collection<Smp::IField> _fields;
 };
 
 }} // namespace simph::kern
