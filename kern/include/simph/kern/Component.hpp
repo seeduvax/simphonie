@@ -37,7 +37,12 @@ public:
     Smp::IField* GetField(Smp::String8 fullName) const;
     const Smp::FieldCollection* GetFields() const;
 protected:
-    Smp::ISimulator* getSimulator() const;
+    inline Smp::ISimulator* getSimulator() const {
+        return _simulator;
+    }
+    virtual void publish(Smp::IPublication* receiver)=0;
+    virtual void configure()=0;
+    virtual void connect()=0;
     // TODO add log helpers ?
 private:
     Smp::ComponentStateKind _state;

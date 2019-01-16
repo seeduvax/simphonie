@@ -18,7 +18,7 @@ namespace simph {
 /**
  *
  */
-class Object: public Smp::IObject {
+class Object: public virtual Smp::IObject {
 public:
     /**
      * Default constructor.
