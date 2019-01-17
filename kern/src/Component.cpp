@@ -27,7 +27,7 @@ Smp::ComponentStateKind Component::GetState() const {
 // ..........................................................
 void Component::Publish(Smp::IPublication* receiver) {
     if (_state!=Smp::ComponentStateKind::CSK_Created) {
-        throw InvalidComponentState(_state,Smp::ComponentStateKind::CSK_Created);
+        throw InvalidComponentState(this,_state,Smp::ComponentStateKind::CSK_Created);
     }
     publish(receiver);
     _state=Smp::ComponentStateKind::CSK_Publishing;
@@ -35,7 +35,7 @@ void Component::Publish(Smp::IPublication* receiver) {
 // ..........................................................
 void Component::Configure(Smp::Services::ILogger* logger) {
     if (_state!=Smp::ComponentStateKind::CSK_Publishing) {
-        throw InvalidComponentState(_state,Smp::ComponentStateKind::CSK_Publishing);
+        throw InvalidComponentState(this,_state,Smp::ComponentStateKind::CSK_Publishing);
     }
     _logger=logger;
     configure();
@@ -44,7 +44,7 @@ void Component::Configure(Smp::Services::ILogger* logger) {
 // ..........................................................
 void Component::Connect(Smp::ISimulator* simulator) {
     if (_state!=Smp::ComponentStateKind::CSK_Configured) {
-        throw InvalidComponentState(_state,Smp::ComponentStateKind::CSK_Configured);
+        throw InvalidComponentState(this,_state,Smp::ComponentStateKind::CSK_Configured);
     }
     _simulator=simulator;
     connect();
