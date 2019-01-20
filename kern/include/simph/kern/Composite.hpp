@@ -9,9 +9,9 @@
  */
 #ifndef __simph_kern_Composite_HPP__
 #define __simph_kern_Composite_HPP__
+#include <iostream>
 #include "Smp/IComposite.h"
 #include "simph/kern/Collection.hpp"
-
 namespace simph {
 	namespace kern {
 
@@ -31,7 +31,8 @@ public:
 
     const Smp::ContainerCollection* GetContainers() const;
     Smp::IContainer* GetContainer(Smp::String8 name) const;
-
+    void dump(std::ostream& out,int level=0) const;
+    void dump();
 private:
     Collection<Smp::IContainer> _containers;
 };
