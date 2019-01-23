@@ -64,6 +64,10 @@ private:
     Collection<Smp::IModel> _models;
     Collection<Smp::IService> _services;
     Collection<Smp::IFactory> _compFactories;
+    Smp::Services::ILogger* _logger;
+    void publish(Smp::IComponent* comp);
+    void configure(Smp::IComponent* comp);
+    void connect(Smp::IComponent* comp);
 };
 
 }} // namespace simph::kern
