@@ -62,6 +62,10 @@ void Exception::setMessage(Smp::String8 msg) {
     }
 }
 // ..........................................................
+Smp::IObject* Exception::GetSender() const noexcept {
+    return _sender;
+}
+// ..........................................................
 Smp::String8 Exception::GetMessage() const noexcept {
     return _msg.c_str();
 }

@@ -50,5 +50,13 @@ void Component::Connect(Smp::ISimulator* simulator) {
     connect();
     _state=Smp::ComponentStateKind::CSK_Connected;
 }
+// ..........................................................
+Smp::IField* Component::GetField(Smp::String8 fullName) const {
+    return _fields.at(fullName);
+}
+// ..........................................................
+const Smp::FieldCollection* Component::GetFields() const {
+    return &_fields;
+}
 
 }} // namespace simph::kern
