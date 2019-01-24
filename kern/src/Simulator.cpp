@@ -132,4 +132,108 @@ void Simulator::Restore(Smp::String8 filename) {
 // TODO deserialize models states from file
     _state=Smp::SimulatorStateKind::SSK_Standby;
 }
+// ..........................................................
+void Simulator::Reconnect(Smp::IComponent* root) {
+    if (_state!=Smp::SimulatorStateKind::SSK_Standby) {
+        // TODO throw exception
+        return;
+    }
+    // TODO is it needed to change state while running this?
+    connect(root);
+}
+// ..........................................................
+void Simulator::Exit() {
+    if (_state!=Smp::SimulatorStateKind::SSK_Standby) {
+        // TODO throw exception
+        return;
+    }
+    _state=Smp::SimulatorStateKind::SSK_Exiting;
+// TODO shutdown everything...
+}
+// ..........................................................
+void Simulator::Abort() {
+    _state=Smp::SimulatorStateKind::SSK_Aborting;
+    // TODO force stop of anything that is runnning.
+}
+// ..........................................................
+Smp::SimulatorStateKind Simulator::GetState() const {
+    return _state;
+}
+// ..........................................................
+void Simulator::AddService(Smp::IService* service) {
+    if (_services.at(service->GetName())==NULL) {
+        _services.push_back(service);
+    }
+    else {
+        // TODO throw Smp::DumplicateName
+    }
+}
+// ..........................................................
+Smp::IService* Simulator::GetService(Smp::String8 name) const {
+    return _services.at(name);
+}
+// ..........................................................
+void Simulator::AddInitEntryPoint(Smp::IEntryPoint* ep) {
+    if ( _state==Smp::SimulatorStateKind::SSK_Building
+           ||  _state==Smp::SimulatorStateKind::SSK_Connecting
+           ||  _state==Smp::SimulatorStateKind::SSK_Standby) {
+        _initEntryPoints.push_back(ep);
+    }    
+}
+// ..........................................................
+void Simulator::AddModel(Smp::IModel* model) {
+    if (_models.at(model->GetName())==NULL) {
+        _models.push_back(model);
+    }
+    else {
+        // TODO throw Smp::DumplicateName
+    }
+}
+// ..........................................................
+Smp::Services::ILogger* Simulator::GetLogger() const {
+    return _logger;
+}
+// ..........................................................
+Smp::Services::ITimeKeeper* Simulator::GetTimeKeeper() const {
+// TODO implement!
+return nullptr;
+}
+// ..........................................................
+Smp::Services::IScheduler* Simulator::GetScheduler() const {
+// TODO implement!
+return nullptr;
+}
+// ..........................................................
+Smp::Services::IEventManager* Simulator::GetEventManager() const {
+// TODO implement!
+return nullptr;
+}
+// ..........................................................
+Smp::Services::ILinkRegistry* Simulator::GetLinkRegistry() const {
+// TODO implement!
+return nullptr;
+}
+// ..........................................................
+Smp::Services::IResolver* Simulator::GetResolver() const {
+// TODO implement!
+return nullptr;
+}
+// ..........................................................
+void Simulator::RegisterFactory(Smp::IFactory* componentFactory) {
+// TODO implement!
+}
+// ..........................................................
+Smp::IComponent* Simulator::CreateInstance(Smp::Uuid uuid,
+                            Smp::String8 name,
+                            Smp::String8 description,
+                            Smp::IComposite* parent) {
+// TODO implement!
+return nullptr;
+}
+// ..........................................................
+Smp::IFactory* Simulator::GetFactory(Smp::Uuid uuid) const {
+// TODO implement!
+return nullptr;
+}
+
 }} // namespace simph::kern

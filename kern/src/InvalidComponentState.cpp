@@ -21,7 +21,8 @@ InvalidComponentState::InvalidComponentState(Smp::IObject* sender,
     setName("InvalidComponentState");
     setSender(sender);
     std::ostringstream d;
-    d<<"current state is "<<invalid<<" while expected is "<<expected<<"."<<std::ends;;
+// TODO once CSK stream operators are implemented.    
+//    d<<"current state is "<<invalid<<" while expected is "<<expected<<"."<<std::ends;;
     setDescription(d.str().c_str());
     setMessage();
 }
