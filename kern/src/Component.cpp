@@ -25,6 +25,8 @@ Smp::ComponentStateKind Component::GetState() const {
     return _state;
 }
 // ..........................................................
+void Component::publish(Smp::IPublication* receiver) {
+}
 void Component::Publish(Smp::IPublication* receiver) {
     if (_state!=Smp::ComponentStateKind::CSK_Created) {
         throw InvalidComponentState(this,_state,Smp::ComponentStateKind::CSK_Created);
@@ -33,6 +35,8 @@ void Component::Publish(Smp::IPublication* receiver) {
     _state=Smp::ComponentStateKind::CSK_Publishing;
 }
 // ..........................................................
+void Component::configure() {
+}
 void Component::Configure(Smp::Services::ILogger* logger) {
     if (_state!=Smp::ComponentStateKind::CSK_Publishing) {
         throw InvalidComponentState(this,_state,Smp::ComponentStateKind::CSK_Publishing);
@@ -42,6 +46,8 @@ void Component::Configure(Smp::Services::ILogger* logger) {
     _state=Smp::ComponentStateKind::CSK_Configured;
 }
 // ..........................................................
+void Component::connect() {
+}
 void Component::Connect(Smp::ISimulator* simulator) {
     if (_state!=Smp::ComponentStateKind::CSK_Configured) {
         throw InvalidComponentState(this,_state,Smp::ComponentStateKind::CSK_Configured);
@@ -57,6 +63,10 @@ Smp::IField* Component::GetField(Smp::String8 fullName) const {
 // ..........................................................
 const Smp::FieldCollection* Component::GetFields() const {
     return &_fields;
+}
+// ..........................................................
+const Smp::Uuid& Component::GetUuid() const {
+    return _uuid;
 }
 
 }} // namespace simph::kern

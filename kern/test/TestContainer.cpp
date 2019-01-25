@@ -35,21 +35,19 @@ public:
         DummyComponent c1("one");
         DummyComponent c2("two");
         DummyComponent c2bis("two");
-        CPPUNIT_ASSERT_EQUAL(0,c.GetCount());
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)0,c.GetCount());
         c.AddComponent(&c1);
-        CPPUNIT_ASSERT_EQUAL(1,c.GetCount());
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)1,c.GetCount());
         c.AddComponent(&c2);
-        CPPUNIT_ASSERT_EQUAL(2,c.GetCount());
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)2,c.GetCount());
         try {
             c.AddComponent(&c2bis);
-            CPPUNIT_ASSERT_MESSAGE("Adding to the container an entry with a already used name should raise Smp::DuplicateName execption",false)
+            CPPUNIT_ASSERT_MESSAGE("Adding to the container an entry with an already used name should raise Smp::DuplicateName execption",false);
         }
-        catch (Smp::DuplicateName ex) {
+        catch (Smp::DuplicateName& ex) {
+            // This is the expected exception, then OK, continue.
         }
-        catch (...) {
-            CPPUNIT_ASSERT_MESSAGE("Exception of unexpected type thrown, expected is Smp::DuplicateName",false)
-        }        
-        CPPUNIT_ASSERT_EQUAL(2,c.GetCount());
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)2,c.GetCount());
     }
 
 };

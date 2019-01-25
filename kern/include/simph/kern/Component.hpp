@@ -36,19 +36,21 @@ public:
     void Connect(Smp::ISimulator* simulator);
     Smp::IField* GetField(Smp::String8 fullName) const;
     const Smp::FieldCollection* GetFields() const;
+    const Smp::Uuid& GetUuid() const;
 protected:
     inline Smp::ISimulator* getSimulator() const {
         return _simulator;
     }
-    virtual void publish(Smp::IPublication* receiver)=0;
-    virtual void configure()=0;
-    virtual void connect()=0;
+    virtual void publish(Smp::IPublication* receiver);
+    virtual void configure();
+    virtual void connect();
     // TODO add log helpers ?
 private:
     Smp::ComponentStateKind _state;
     Smp::Services::ILogger* _logger;
     Smp::ISimulator* _simulator;
     Collection<Smp::IField> _fields;
+    Smp::Uuid _uuid;
 };
 
 }} // namespace simph::kern
