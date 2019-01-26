@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "simph/kern/Container.hpp"
+#include "simph/kern/DuplicateName.hpp"
 
 namespace simph {
 	namespace kern {
@@ -42,7 +43,7 @@ void Container::AddComponent(Smp::IComponent* component) {
         // TODO throw Smp::InvalidObjectType exception
     }
     if (_content.at(component->GetName())!=nullptr) {
-        // TODO throw Smp::DuplicateName Exception
+        throw DuplicateName(this,component->GetName());
     }
     _content.push_back(component);
 }

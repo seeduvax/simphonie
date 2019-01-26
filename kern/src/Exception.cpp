@@ -35,16 +35,10 @@ Smp::String8 Exception::GetDescription() const noexcept {
 // ..........................................................
 void Exception::setName(Smp::String8 name) {
     _name=name;
-    std::ostringstream s;
-    s<<"Exception "<<_name<<" from "<<_sender->GetName()<<": "<<_description<<std::ends;
-    _msg=s.str();
 }
 // ..........................................................
 void Exception::setDescription(Smp::String8 description) {
     _description=description;
-    std::ostringstream s;
-    s<<"Exception "<<_name<<" from "<<_sender->GetName()<<": "<<_description<<std::ends;
-    _msg=s.str();
 }
 // ..........................................................
 void Exception::setSender(Smp::IObject* sender) {
@@ -52,7 +46,7 @@ void Exception::setSender(Smp::IObject* sender) {
 }
 // ..........................................................
 void Exception::setMessage(Smp::String8 msg) {
-    if (msg==nullptr) {
+    if (msg==nullptr && _sender!=nullptr) {
         std::ostringstream s;
         s<<"Exception "<<_name<<" from "<<_sender->GetName()<<": "<<_description<<std::ends;
         _msg=s.str();

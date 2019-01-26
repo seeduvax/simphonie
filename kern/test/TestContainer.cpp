@@ -46,6 +46,7 @@ public:
         }
         catch (Smp::DuplicateName& ex) {
             // This is the expected exception, then OK, continue.
+            std::cout << ex.GetMessage() << std::endl;
         }
         CPPUNIT_ASSERT_EQUAL((Smp::Int64)2,c.GetCount());
     }
