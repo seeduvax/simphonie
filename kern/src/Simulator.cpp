@@ -13,7 +13,8 @@ namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-Simulator::Simulator() {
+Simulator::Simulator(Smp::String8 name) {
+    setName(name);
 }
 // ..........................................................
 Simulator::~Simulator() {

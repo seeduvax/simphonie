@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    Simulator();
+    Simulator(Smp::String8 name="simphonie");
     /**
      * Destructor.
      */
