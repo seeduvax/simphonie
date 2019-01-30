@@ -31,7 +31,7 @@ public:
     }
 
     void testContainer() {
-        Container c;
+        Container c("container");
         DummyComponent c1("one");
         DummyComponent c2("two");
         DummyComponent c2bis("two");

@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "simph/kern/Composite.hpp"
+#include "simph/kern/Container.hpp"
 
 namespace simph {
 	namespace kern {
@@ -17,6 +18,14 @@ Composite::Composite() {
 }
 // ..........................................................
 Composite::~Composite() {
+    for (auto container: _containers) {
+        delete container;
+    }
+}
+// --------------------------------------------------------------------
+// ..........................................................
+void Composite::addContainer(Smp::String8 name) {
+    _containers.push_back(new Container(name)); 
 }
 // --------------------------------------------------------------------
 // ..........................................................

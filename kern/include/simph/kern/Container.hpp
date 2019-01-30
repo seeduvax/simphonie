@@ -23,7 +23,7 @@ public:
     /**
      * Default constructor.
      */
-    Container();
+    Container(Smp::String8 name);
     /**
      * Destructor.
      */

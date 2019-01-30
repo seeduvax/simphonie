@@ -18,7 +18,7 @@ namespace simph {
 /**
  *
  */
-class Composite: public virtual Smp::IComposite {
+class Composite: virtual public Object, public virtual Smp::IComposite {
 public:
     /**
      * Default constructor.
@@ -33,6 +33,8 @@ public:
     Smp::IContainer* GetContainer(Smp::String8 name) const;
     void dump(std::ostream& out,int level=0) const;
     void dump();
+protected:
+    void addContainer(Smp::String8 name);
 private:
     Collection<Smp::IContainer> _containers;
 };
