@@ -68,6 +68,7 @@ private:
     void publish(Smp::IComponent* comp);
     void configure(Smp::IComponent* comp);
     void connect(Smp::IComponent* comp);
+    void setState(Smp::SimulatorStateKind newState);
 };
 
 }} // namespace simph::kern

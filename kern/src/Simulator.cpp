@@ -8,34 +8,90 @@
  * $Date$
  */
 #include "simph/kern/Simulator.hpp"
+#include "simph/kern/Logger.hpp"
 
+// --------------------------------------------------------------------
+// ..........................................................
+namespace Smp {
+std::ostream& operator << (std::ostream& os, 
+                                const Smp::SimulatorStateKind& obj) {
+    os << (Smp::Int32)obj;
+    switch (obj) {
+        case Smp::SimulatorStateKind::SSK_Building:
+            os << "(SSK_Building)";
+            break;
+        case Smp::SimulatorStateKind::SSK_Connecting:
+            os << "(SSK_Connecting)";
+            break;
+        case Smp::SimulatorStateKind::SSK_Initialising:
+            os << "(SSK_Initialising)";
+            break;
+        case Smp::SimulatorStateKind::SSK_Standby:
+            os << "(SSK_Standby)";
+            break;
+        case Smp::SimulatorStateKind::SSK_Executing:
+            os << "(SSK_Executing)";
+            break;
+        case Smp::SimulatorStateKind::SSK_Storing:
+            os << "(SSK_Storing)";
+            break;
+        case Smp::SimulatorStateKind::SSK_Restoring:
+            os << "(SSK_Restoring)";
+            break;
+        case Smp::SimulatorStateKind::SSK_Reconnecting:
+            os << "(SSK_Reconnecting)";
+            break;
+        case Smp::SimulatorStateKind::SSK_Exiting:
+            os << "(SSK_Exiting)";
+            break;
+        case Smp::SimulatorStateKind::SSK_Aborting:
+            os << "(SSK_Aborting)";
+            break;
+        default:
+            os << "()";
+            break;
+    }
+    return os;
+}
+}
+// ..........................................................
 namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
 Simulator::Simulator(Smp::String8 name) {
     setName(name);
+    _logger=new Logger();
+    setState(Smp::SimulatorStateKind::SSK_Building);
 }
 // ..........................................................
 Simulator::~Simulator() {
+    delete _logger;
 }
 // --------------------------------------------------------------------
+// ..........................................................
+void Simulator::setState(Smp::SimulatorStateKind newState) {
+    _state=newState;
+    std::ostringstream msg;
+    msg << "state changed: " << _state;
+    _logger->Log(this,msg.str().c_str());
+}
 // ..........................................................
 void Simulator::Initialise() {
     if (_state!=Smp::SimulatorStateKind::SSK_Standby) {
         // TODO throw exception
         return;
     }
-    _state=Smp::SimulatorStateKind::SSK_Initialising;
+    setState(Smp::SimulatorStateKind::SSK_Initialising);
     for (auto ep: _initEntryPoints) {
         ep->Execute();
     }
-    _state=Smp::SimulatorStateKind::SSK_Standby;
+    setState(Smp::SimulatorStateKind::SSK_Standby);
 }
 // ..........................................................
 void Simulator::publish(Smp::IComponent* comp) {
     if (comp->GetState()==Smp::ComponentStateKind::CSK_Created) {
-// TODO            service->Publish(this);
+// TODO            comp->Publish(this);
 // TODO recursive call on childs.
     }
 }
@@ -85,14 +141,14 @@ void Simulator::Connect() {
         // TODO throw exception
         return;
     }
-    _state=Smp::SimulatorStateKind::SSK_Connecting;
+    setState(Smp::SimulatorStateKind::SSK_Connecting);
     for (auto service: _services) {
         connect(service);
     }
     for (auto model: _models) {
         connect(model);
     }
-    _state=Smp::SimulatorStateKind::SSK_Standby;
+    setState(Smp::SimulatorStateKind::SSK_Standby);
     Initialise();
 }
 // ..........................................................
@@ -102,7 +158,7 @@ void Simulator::Run() {
         return;
     }
 // TODO start sequencer...
-    _state=Smp::SimulatorStateKind::SSK_Executing;
+    setState(Smp::SimulatorStateKind::SSK_Executing);
 }
 // ..........................................................
 void Simulator::Hold() {
@@ -111,7 +167,7 @@ void Simulator::Hold() {
         return;
     }
 // TODO stop sequencer...
-    _state=Smp::SimulatorStateKind::SSK_Standby;
+    setState(Smp::SimulatorStateKind::SSK_Standby);
 }
 // ..........................................................
 void Simulator::Store(Smp::String8 filename) {
@@ -119,9 +175,10 @@ void Simulator::Store(Smp::String8 filename) {
         // TODO throw exception
         return;
     }
-    _state=Smp::SimulatorStateKind::SSK_Storing;
+    setState(Smp::SimulatorStateKind::SSK_Storing);
 // TODO serialize models states in file
-    _state=Smp::SimulatorStateKind::SSK_Standby;
+_logger->Log(this,"Simulator::Store(filename) not implemented yet!",Smp::Services::ILogger::LMK_Error);
+    setState(Smp::SimulatorStateKind::SSK_Standby);
 }
 // ..........................................................
 void Simulator::Restore(Smp::String8 filename) {
@@ -129,9 +186,10 @@ void Simulator::Restore(Smp::String8 filename) {
         // TODO throw exception
         return;
     }
-    _state=Smp::SimulatorStateKind::SSK_Restoring;
+    setState(Smp::SimulatorStateKind::SSK_Restoring);
 // TODO deserialize models states from file
-    _state=Smp::SimulatorStateKind::SSK_Standby;
+_logger->Log(this,"Simulator::Restore(filename) not implemented yet!",Smp::Services::ILogger::LMK_Error);
+    setState(Smp::SimulatorStateKind::SSK_Standby);
 }
 // ..........................................................
 void Simulator::Reconnect(Smp::IComponent* root) {
@@ -148,12 +206,12 @@ void Simulator::Exit() {
         // TODO throw exception
         return;
     }
-    _state=Smp::SimulatorStateKind::SSK_Exiting;
+    setState(Smp::SimulatorStateKind::SSK_Exiting);
 // TODO shutdown everything...
 }
 // ..........................................................
 void Simulator::Abort() {
-    _state=Smp::SimulatorStateKind::SSK_Aborting;
+    setState(Smp::SimulatorStateKind::SSK_Aborting);
     // TODO force stop of anything that is runnning.
 }
 // ..........................................................

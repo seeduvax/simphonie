@@ -10,7 +10,7 @@
 #ifndef __simph_kern_Logger_HPP__
 #define __simph_kern_Logger_HPP__
 #include "Smp/Services/ILogger.h"
-#include "simph/kern/Object.hpp"
+#include "simph/kern/Component.hpp"
 #include "simph/sys/Logger.hpp"
 
 namespace simph {
@@ -19,7 +19,7 @@ namespace simph {
 /**
  *
  */
-class Logger: virtual public Object, virtual public Smp::Services::ILogger {
+class Logger: virtual public Component, virtual public Smp::Services::ILogger {
 public:
     /**
      * Default constructor.

@@ -9,12 +9,40 @@
  */
 #include "simph/kern/Component.hpp"
 #include "simph/kern/InvalidComponentState.hpp"
+#include <iostream>
 
+// --------------------------------------------------------------------
+// ..........................................................
+namespace Smp {
+std::ostream& operator << (std::ostream& os, 
+                                const ComponentStateKind& obj) {
+    os << (Smp::Int32)obj;
+    switch (obj) {
+        case ComponentStateKind::CSK_Created:
+            os << "(CSK_Created)";
+            break;
+        case ComponentStateKind::CSK_Publishing:
+            os << "(CSK_Publishing)";
+            break;
+        case ComponentStateKind::CSK_Configured:
+            os << "(CSK_Configured)";
+            break;
+        case ComponentStateKind::CSK_Connected:
+            os << "(CSK_Connected)";
+            break;
+        default:
+            os << "()";
+            break;
+    }
+    return os;
+}
+}
 namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
 Component::Component() {
+    _state=Smp::ComponentStateKind::CSK_Created;
 }
 // ..........................................................
 Component::~Component() {

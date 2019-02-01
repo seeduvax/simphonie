@@ -40,12 +40,12 @@ private:
 #define TRACE(msg) {\
     std::ostringstream s;\
     s << __FILE__ << ":" << __LINE__ << "\t" << msg;\
-    _logger->log("TRACE",s.str());\
+    simph::sys::_logger->log("TRACE",s.str());\
 }
 #define LOGD(msg) {\
     std::ostringstream s;\
     s << msg;\
-    _logger->log("DEBUG",s.str());\
+    simph::sys::_logger->log("DEBUG",s.str());\
 }
 #else
 #define TRACE(msg)
@@ -54,17 +54,17 @@ private:
 #define LOGI(msg) {\
     std::ostringstream s;\
     s << msg;\
-    _logger->log("INFO",s.str());\
+    simph::sys::_logger->log("INFO",s.str());\
 }
 #define LOGW(msg) {\
     std::ostringstream s;\
     s << msg;\
-    _logger->log("WARNING",s.str());\
+    simph::sys::_logger->log("WARNING",s.str());\
 }
 #define LOGE(msg) {\
     std::ostringstream s;\
     s << msg;\
-    _logger->log("ERROR",s.str());\
+    simph::sys::_logger->log("ERROR",s.str());\
 }
 
 extern simph::sys::Logger* _logger;
