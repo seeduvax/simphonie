@@ -23,7 +23,13 @@ public:
     /**
      * Default constructor.
      */
-    Field();
+    Field(Smp::String8 name, Smp::String8 description,
+            Smp::ViewKind viewKind, void* address,
+            unsigned int dataSize,
+            Smp::Bool isState,
+            Smp::Bool isInput,
+            Smp::Bool isOutput
+            );
     /**
      * Destructor.
      */
@@ -34,8 +40,33 @@ public:
     Smp::Bool IsInput() const;
     Smp::Bool IsOutput() const;
     const Smp::Publication::IType* GetType() const;
+    void copyFrom(Field* src);
 private:
+    Smp::Bool _stateType;
+    Smp::Bool _inputType;
+    Smp::Bool _outputType;
+    Smp::Publication::IType* _type;
+    Smp::ViewKind _viewKind;
+    void* _data;
+    unsigned int _dataSize;
+};
 
+template <typename T>
+class TField: public Field {
+public:
+    TField(Smp::String8 name, Smp::String8 description,
+            Smp::ViewKind viewKind, T* address,
+            Smp::Bool isState,
+            Smp::Bool isInput,
+            Smp::Bool isOutput
+            ): Field(name,description,viewKind,(void*)address,sizeof(T),
+                        isState,isInput,isOutput) {
+    }
+    virtual ~TField() {
+    }
+
+private:
+    T* _tData;
 };
 
 }} // namespace simph::kern
