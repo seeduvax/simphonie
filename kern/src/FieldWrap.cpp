@@ -1,5 +1,5 @@
 /*
- * @file Field.cpp
+ * @file FieldWrap.cpp
  *
  * Copyright 2019 . All rights reserved.
  * Use is subject to license terms.
@@ -7,13 +7,14 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Field.hpp"
+#include "simph/kern/FieldWrap.hpp"
+#include <string.h>
 
 namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-Field::Field(Smp::String8 name, Smp::String8 description,
+FieldWrap::FieldWrap(Smp::String8 name, Smp::String8 description,
         Smp::ViewKind viewKind, 
         void* address, unsigned int dataSize,
         Smp::Bool isState,
@@ -27,35 +28,40 @@ Field::Field(Smp::String8 name, Smp::String8 description,
     _inputType=isInput;
     _outputType=isOutput;
     _stateType=isState;
+    _src=nullptr;
 }
 // ..........................................................
-Field::~Field() {
+FieldWrap::~FieldWrap() {
 }
 // ..........................................................
-Smp::ViewKind Field::GetView() const {
+Smp::ViewKind FieldWrap::GetView() const {
     return _viewKind;
 }
 // ..........................................................
-Smp::Bool Field::IsState() const {
+Smp::Bool FieldWrap::IsState() const {
     return _stateType;
 }
 // ..........................................................
-Smp::Bool Field::IsInput() const {
+Smp::Bool FieldWrap::IsInput() const {
     return _inputType;
 }
 // ..........................................................
-Smp::Bool Field::IsOutput() const {
+Smp::Bool FieldWrap::IsOutput() const {
     return _outputType;
 }
 // ..........................................................
-const Smp::Publication::IType* Field::GetType() const {
+const Smp::Publication::IType* FieldWrap::GetType() const {
     return _type;
 }
 // ..........................................................
-void Field::copyFrom(Field* src) {
+void FieldWrap::connect(FieldWrap* src) {
     if (src->_dataSize==_dataSize) {
-        memcpy(src->_data,_data,_dataSize);
+        _src=src;
     }
+}
+// ..........................................................
+void FieldWrap::update() {
+    memcpy(src->_data,_data,_dataSize);
 }
 
 
