@@ -84,5 +84,65 @@ Smp::Bool Field::IsForced() {
 void Field::Freeze() {
     Force(GetValue());
 }
+// ..........................................................
+template<>
+Smp::AnySimple TField<Smp::Char8>::GetValue() const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Char8,*_tData);
+}
+// ..........................................................
+template<>
+Smp::AnySimple TField<Smp::Bool>::GetValue() const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Bool,*_tData);
+}
+// ..........................................................
+template<>
+Smp::AnySimple TField<Smp::Int8>::GetValue() const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int8,*_tData);
+}
+// ..........................................................
+template<>
+Smp::AnySimple TField<Smp::UInt8>::GetValue() const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt8,*_tData);
+}
+// ..........................................................
+template<>
+Smp::AnySimple TField<Smp::Int16>::GetValue() const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int16,*_tData);
+}
+// ..........................................................
+template<>
+Smp::AnySimple TField<Smp::UInt16>::GetValue() const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt16,*_tData);
+}
+// ..........................................................
+template<>
+Smp::AnySimple TField<Smp::Int32>::GetValue() const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int32,*_tData);
+}
+// ..........................................................
+template<>
+Smp::AnySimple TField<Smp::UInt32>::GetValue() const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt32,*_tData);
+}
+// ..........................................................
+template<>
+Smp::AnySimple TField<Smp::Int64>::GetValue() const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int64,*_tData);
+}
+// ..........................................................
+template<>
+Smp::AnySimple TField<Smp::UInt64>::GetValue() const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt64,*_tData);
+}
+// ..........................................................
+template<>
+Smp::AnySimple TField<Smp::Float32>::GetValue() const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float32,*_tData);
+}
+// ..........................................................
+template<>
+Smp::AnySimple TField<Smp::Float64>::GetValue() const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float64,*_tData);
+}
 
 }} // namespace simph::kern

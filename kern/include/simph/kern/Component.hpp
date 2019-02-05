@@ -44,6 +44,9 @@ protected:
     virtual void publish(Smp::IPublication* receiver);
     virtual void configure();
     virtual void connect();
+    inline void addField(Smp::IField* field) {
+        _fields.push_back(field);
+    }
     // TODO add log helpers ?
 private:
     Smp::ComponentStateKind _state;

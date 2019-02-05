@@ -78,9 +78,7 @@ public:
     virtual ~TField() {
     }
     // Smp::ISimpleField implementation
-    Smp::AnySimple GetValue() const {
-        return Smp::AnySimple(*_tData,*_tData);
-    }
+    Smp::AnySimple GetValue() const;
     void SetValue(Smp::AnySimple value) {
         *_tData=value;
     }
