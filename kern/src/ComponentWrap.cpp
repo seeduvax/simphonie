@@ -13,7 +13,7 @@ namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ComponentWrap::ComponentWrap() {
+ComponentWrap::ComponentWrap(Smp::Publication::ITypeRegistry* tReg) {
 }
 // ..........................................................
 ComponentWrap::~ComponentWrap() {

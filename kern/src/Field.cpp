@@ -1,5 +1,5 @@
 /*
- * @file FieldWrap.cpp
+ * @file Field.cpp
  *
  * Copyright 2019 . All rights reserved.
  * Use is subject to license terms.
@@ -7,14 +7,14 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/FieldWrap.hpp"
+#include "simph/kern/Field.hpp"
 #include <string.h>
 
 namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-FieldWrap::FieldWrap(Smp::String8 name, Smp::String8 description,
+Field::Field(Smp::String8 name, Smp::String8 description,
         Smp::ViewKind viewKind, 
         void* address, unsigned int dataSize,
         Smp::Bool isState,
@@ -29,40 +29,60 @@ FieldWrap::FieldWrap(Smp::String8 name, Smp::String8 description,
     _outputType=isOutput;
     _stateType=isState;
     _src=nullptr;
+    _forced=false;
 }
 // ..........................................................
-FieldWrap::~FieldWrap() {
+Field::~Field() {
 }
+// --------------------------------------------------------------------
 // ..........................................................
-Smp::ViewKind FieldWrap::GetView() const {
+Smp::ViewKind Field::GetView() const {
     return _viewKind;
 }
 // ..........................................................
-Smp::Bool FieldWrap::IsState() const {
+Smp::Bool Field::IsState() const {
     return _stateType;
 }
 // ..........................................................
-Smp::Bool FieldWrap::IsInput() const {
+Smp::Bool Field::IsInput() const {
     return _inputType;
 }
 // ..........................................................
-Smp::Bool FieldWrap::IsOutput() const {
+Smp::Bool Field::IsOutput() const {
     return _outputType;
 }
 // ..........................................................
-const Smp::Publication::IType* FieldWrap::GetType() const {
+const Smp::Publication::IType* Field::GetType() const {
     return _type;
 }
 // ..........................................................
-void FieldWrap::connect(FieldWrap* src) {
+void Field::connect(Field* src) {
     if (src->_dataSize==_dataSize) {
         _src=src;
     }
 }
 // ..........................................................
-void FieldWrap::update() {
-    memcpy(src->_data,_data,_dataSize);
+void Field::update() {
+    memcpy(_src->_data,_data,_dataSize);
 }
-
+// --------------------------------------------------------------------
+// Smp::IForcibleField implementation
+// ..........................................................
+void Field::Force(Smp::AnySimple value) {
+    _forcedValue=value;
+    _forced=true;
+}
+// ..........................................................
+void Field::Unforce() {
+    _forced=false;
+}
+// ..........................................................
+Smp::Bool Field::IsForced() {
+    return _forcedValue;
+}
+// ..........................................................
+void Field::Freeze() {
+    Force(GetValue());
+}
 
 }} // namespace simph::kern
