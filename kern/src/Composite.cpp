@@ -38,26 +38,35 @@ Smp::IContainer* Composite::GetContainer(Smp::String8 name) const {
 }
 // ..........................................................
 void Composite::dump() {
-    dump(std::cout);
+    dump(std::cout,this);
 }
 // ..........................................................
-void Composite::dump(std::ostream& out,int level) const {
-    int lnext=level+1;
+void Composite::dump(std::ostream& out,Smp::IComposite* c,int level) {
     for (int i=0;i<level;++i) {
-	out << "    ";
+        out << "    ";
     }
-    out << GetName()<<":" <</* TODO insert real type name here */ std::endl;
-    for (auto container: _containers) {
+    out << c->GetName()<<":" <</* TODO insert real type name here */ std::endl;
+    for (auto container: *(c->GetContainers())) {
         for (int i=0;i<level;++i) {
             out << "    ";
         }
         out << "  " << container->GetName() << std::endl;
-	for (auto comp: *(container->GetComponents())) {
-            for (int i=0;i<lnext;++i) {
-                out << "    ";
-            }
-            out << "  " << comp->GetName() << std::endl;
-	}
+        for (auto comp: *(container->GetComponents())) {
+            dump(out,comp,level+1);
+        }
+    }
+}
+// ..........................................................
+void Composite::dump(std::ostream& out,Smp::IComponent* c,int level) {
+    for (int i=0;i<level;++i) {
+        out << "    ";
+    }
+    out << c->GetName()<<":" <</* TODO insert real type name here */ std::endl;
+    for (auto field: *(c->GetFields())) {
+        for (int i=0;i<level;++i) {
+            out << "    ";
+        }
+        out << "    " << field->GetName() << /* TODO data type here*/ std::endl;
     }
 }
 }} // namespace simph::kern

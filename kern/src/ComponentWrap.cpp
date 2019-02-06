@@ -15,11 +15,22 @@ namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ComponentWrap::ComponentWrap(Smp::Publication::ITypeRegistry* tReg):
+ComponentWrap::ComponentWrap(Smp::IComponent* wrapped,
+                        Smp::Publication::ITypeRegistry* tReg):
+                    _wrapped(wrapped),
                     _typeRegistry(tReg) {
 }
 // ..........................................................
 ComponentWrap::~ComponentWrap() {
+}
+// --------------------------------------------------------------------
+// ..........................................................
+Smp::String8 ComponentWrap::GetName() {
+    return _wrapped->GetName();
+}
+// ..........................................................
+Smp::String8 ComponentWrap::GetDescription() {
+    return _wrapped->GetDescription();
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -36,7 +47,7 @@ void ComponentWrap::PublishField(
         Smp::Bool input,
         Smp::Bool output) {
     addField(new TField<Smp::Char8>(name,description,view,address,
-                    state,input,output));
+                    state,input,output,_wrapped));
 }
 // ..........................................................
 void ComponentWrap::PublishField(
@@ -48,7 +59,7 @@ void ComponentWrap::PublishField(
         Smp::Bool input,
         Smp::Bool output) {
     addField(new TField<Smp::Bool>(name,description,view,address,
-                    state,input,output));
+                    state,input,output,_wrapped));
 }
 // ..........................................................
 void ComponentWrap::PublishField(
@@ -60,7 +71,7 @@ void ComponentWrap::PublishField(
         Smp::Bool input,
         Smp::Bool output) {
     addField(new TField<Smp::Int8>(name,description,view,address,
-                    state,input,output));
+                    state,input,output,_wrapped));
 }
 // ..........................................................
 void ComponentWrap::PublishField(
@@ -72,7 +83,7 @@ void ComponentWrap::PublishField(
         Smp::Bool input,
         Smp::Bool output) {
     addField(new TField<Smp::Int16>(name,description,view,address,
-                    state,input,output));
+                    state,input,output,_wrapped));
 }
 // ..........................................................
 void ComponentWrap::PublishField(
@@ -84,7 +95,7 @@ void ComponentWrap::PublishField(
         Smp::Bool input,
         Smp::Bool output) {
     addField(new TField<Smp::Int32>(name,description,view,address,
-                    state,input,output));
+                    state,input,output,_wrapped));
 }
 // ..........................................................
 void ComponentWrap::PublishField(
@@ -96,7 +107,7 @@ void ComponentWrap::PublishField(
         Smp::Bool input,
         Smp::Bool output) {
     addField(new TField<Smp::Int64>(name,description,view,address,
-                    state,input,output));
+                    state,input,output,_wrapped));
 }
 // ..........................................................
 void ComponentWrap::PublishField(
@@ -108,7 +119,7 @@ void ComponentWrap::PublishField(
         Smp::Bool input,
         Smp::Bool output) {
     addField(new TField<Smp::UInt8>(name,description,view,address,
-                    state,input,output));
+                    state,input,output,_wrapped));
 }
 // ..........................................................
 void ComponentWrap::PublishField(
@@ -120,7 +131,7 @@ void ComponentWrap::PublishField(
         Smp::Bool input,
         Smp::Bool output) {
     addField(new TField<Smp::UInt16>(name,description,view,address,
-                    state,input,output));
+                    state,input,output,_wrapped));
 }
 // ..........................................................
 void ComponentWrap::PublishField(
@@ -132,7 +143,7 @@ void ComponentWrap::PublishField(
         Smp::Bool input,
         Smp::Bool output) {
     addField(new TField<Smp::UInt32>(name,description,view,address,
-                    state,input,output));
+                    state,input,output,_wrapped));
 }
 // ..........................................................
 void ComponentWrap::PublishField(
@@ -144,7 +155,7 @@ void ComponentWrap::PublishField(
         Smp::Bool input,
         Smp::Bool output) {
     addField(new TField<Smp::UInt64>(name,description,view,address,
-                    state,input,output));
+                    state,input,output,_wrapped));
 }
 // ..........................................................
 void ComponentWrap::PublishField(
@@ -156,7 +167,7 @@ void ComponentWrap::PublishField(
         Smp::Bool input,
         Smp::Bool output) {
     addField(new TField<Smp::Float32>(name,description,view,address,
-                    state,input,output));
+                    state,input,output,_wrapped));
 }
 // ..........................................................
 void ComponentWrap::PublishField(
@@ -168,7 +179,7 @@ void ComponentWrap::PublishField(
         Smp::Bool input,
         Smp::Bool output) {
     addField(new TField<Smp::Float64>(name,description,view,address,
-                    state,input,output));
+                    state,input,output,_wrapped));
 }
 // ..........................................................
 void ComponentWrap::PublishField(

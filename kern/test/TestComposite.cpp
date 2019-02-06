@@ -52,7 +52,7 @@ public:
         ct1->AddComponent(&one);        
         ct1->AddComponent(&two);        
         ct2->AddComponent(&three);
-        composite.dump(std::cout);        
+        Composite::dump(std::cout,&composite);        
     }
 
 };

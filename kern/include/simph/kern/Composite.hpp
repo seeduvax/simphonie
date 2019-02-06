@@ -31,7 +31,8 @@ public:
 
     const Smp::ContainerCollection* GetContainers() const;
     Smp::IContainer* GetContainer(Smp::String8 name) const;
-    void dump(std::ostream& out,int level=0) const;
+    static void dump(std::ostream& out,Smp::IComposite* c,int level=0);
+    static void dump(std::ostream& out,Smp::IComponent* c,int level=0);
     void dump();
 protected:
     void addContainer(Smp::String8 name);

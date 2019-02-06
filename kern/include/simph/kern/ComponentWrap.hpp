@@ -24,11 +24,15 @@ public:
     /**
      * Default constructor.
      */
-    ComponentWrap(Smp::Publication::ITypeRegistry* tReg);
+    ComponentWrap(Smp::IComponent* wrapped,
+                        Smp::Publication::ITypeRegistry* tReg);
     /**
      * Destructor.
      */
     virtual ~ComponentWrap();
+    // Smp::IComponent specialisation
+    Smp::String8 GetName();
+    Smp::String8 GetDescription();
     // Smp::IPublication implementation
     Smp::Publication::ITypeRegistry* GetTypeRegistry() const;
     void PublishField(
@@ -174,6 +178,7 @@ public:
 
 
 private:
+    Smp::IComponent* _wrapped;
     Smp::Publication::ITypeRegistry* _typeRegistry;
 
 };

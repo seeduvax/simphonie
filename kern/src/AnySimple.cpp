@@ -1,4 +1,5 @@
 #include "Smp/AnySimple.h"
+#include <string.h>
 
 namespace Smp {
 

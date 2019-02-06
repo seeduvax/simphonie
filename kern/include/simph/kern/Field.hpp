@@ -30,7 +30,8 @@ public:
             unsigned int dataSize,
             Smp::Bool isState,
             Smp::Bool isInput,
-            Smp::Bool isOutput
+            Smp::Bool isOutput,
+            Smp::IObject* parent
             );
     /**
      * Destructor.
@@ -70,9 +71,10 @@ public:
             Smp::ViewKind viewKind, T* address,
             Smp::Bool isState,
             Smp::Bool isInput,
-            Smp::Bool isOutput
+            Smp::Bool isOutput,
+            Smp::IObject* parent
             ): Field(name,description,viewKind,(void*)address,sizeof(T),
-                        isState,isInput,isOutput) {
+                        isState,isInput,isOutput,parent) {
         _tData=address;
     }
     virtual ~TField() {

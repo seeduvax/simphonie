@@ -19,9 +19,11 @@ Field::Field(Smp::String8 name, Smp::String8 description,
         void* address, unsigned int dataSize,
         Smp::Bool isState,
         Smp::Bool isInput,
-        Smp::Bool isOutput) {
+        Smp::Bool isOutput,
+        Smp::IObject* parent) {
     setName(name);
     setDescription(description);
+    setParent(parent);
     _viewKind=viewKind;
     _data=address;
     _dataSize=dataSize;
