@@ -30,7 +30,7 @@ public:
      */
     virtual ~ComponentWrap();
     // Smp::IPublication implementation
-    Smp::Publication::ITypeRegistry* GetTyperegistry() const;
+    Smp::Publication::ITypeRegistry* GetTypeRegistry() const;
     void PublishField(
         Smp::String8 name,
         Smp::String8 description,
@@ -167,11 +167,14 @@ public:
         Smp::Uuid typeUuid,
         Smp::AccessKind accessKind,
         Smp::ViewKind view=Smp::ViewKind::VK_None);
+    Smp::IField* GetField(Smp::String8 fullName) const;
+    const Smp::FieldCollection* GetFields() const;
     Smp::IRequest* CreateRequest(Smp::String8 operationName);
     void DeleteRequest(Smp::IRequest* request);
 
 
 private:
+    Smp::Publication::ITypeRegistry* _typeRegistry;
 
 };
 

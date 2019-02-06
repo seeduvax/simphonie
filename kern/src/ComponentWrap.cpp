@@ -15,12 +15,17 @@ namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ComponentWrap::ComponentWrap(Smp::Publication::ITypeRegistry* tReg) {
+ComponentWrap::ComponentWrap(Smp::Publication::ITypeRegistry* tReg):
+                    _typeRegistry(tReg) {
 }
 // ..........................................................
 ComponentWrap::~ComponentWrap() {
 }
 // --------------------------------------------------------------------
+// ..........................................................
+Smp::Publication::ITypeRegistry* ComponentWrap::GetTypeRegistry() const {
+    return _typeRegistry;
+}
 // ..........................................................
 void ComponentWrap::PublishField(
         Smp::String8 name,
@@ -228,6 +233,14 @@ void ComponentWrap::PublishProperty(
         Smp::AccessKind accessKind,
         Smp::ViewKind view) {
 LOGE("ComponentWrap::PublishProperty(...) not implemented yet!")
+}
+// ..........................................................
+Smp::IField* ComponentWrap::GetField(Smp::String8 fullName) const {
+    return Component::GetField(fullName);
+}
+// ..........................................................
+const Smp::FieldCollection* ComponentWrap::GetFields() const {
+    return Component::GetFields();
 }
 // ..........................................................
 Smp::IRequest* ComponentWrap::CreateRequest(Smp::String8 operationName) {
