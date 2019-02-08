@@ -24,7 +24,8 @@ public:
     /**
      * Default constructor.
      */
-    Logger();
+    Logger(Smp::String8 name, Smp::String8 descr="",
+                Smp::IObject* parent=nullptr);
     /**
      * Destructor.
      */

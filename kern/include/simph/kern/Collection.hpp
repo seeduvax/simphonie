@@ -26,7 +26,8 @@ public:
     /**
      * Default constructor.
      */
-    Collection() {
+    Collection(Smp::String8 name, Smp::String8 descr,
+            Smp::IObject* parent): Object(name,descr,parent) {
     }
     /**
      * Destructor.

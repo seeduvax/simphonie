@@ -24,7 +24,9 @@ public:
     /**
      * Default constructor.
      */
-    Component();
+    Component(Smp::String8 name,
+                Smp::String8 descr="",
+                Smp::IObject* parent=nullptr);
     /**
      * Destructor.
      */

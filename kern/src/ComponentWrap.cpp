@@ -16,7 +16,12 @@ namespace simph {
 // --------------------------------------------------------------------
 // ..........................................................
 ComponentWrap::ComponentWrap(Smp::IComponent* wrapped,
+                        Smp::IObject* parent,
                         Smp::Publication::ITypeRegistry* tReg):
+                    Component(wrapped->GetName(),
+                            wrapped->GetDescription(),
+                    // TODO check wich case we should use wrapped's parent
+                            parent), 
                     _wrapped(wrapped),
                     _typeRegistry(tReg) {
 }

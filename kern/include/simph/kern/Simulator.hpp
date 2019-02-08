@@ -11,6 +11,7 @@
 #define __simph_kern_Simulator_HPP__
 #include "Smp/ISimulator.h"
 #include "simph/kern/Composite.hpp"
+#include "Smp/Publication/ITypeRegistry.h"
 
 namespace simph {
 	namespace kern {
@@ -24,7 +25,9 @@ public:
     /**
      * Default constructor.
      */
-    Simulator(Smp::String8 name="simphonie");
+    Simulator(Smp::String8 name="Simphonie",
+            Smp::String8 descr="",
+            Smp::IObject* parent=nullptr);
     /**
      * Destructor.
      */
@@ -61,10 +64,11 @@ public:
 private:
     Smp::SimulatorStateKind _state;
     Collection<Smp::IEntryPoint> _initEntryPoints;
-    Collection<Smp::IModel> _models;
-    Collection<Smp::IService> _services;
+    Smp::IContainer* _models;
+    Smp::IContainer* _services;
     Collection<Smp::IFactory> _compFactories;
     Smp::Services::ILogger* _logger;
+    Smp::Publication::ITypeRegistry* _typeRegistry;
     void publish(Smp::IComponent* comp);
     void configure(Smp::IComponent* comp);
     void connect(Smp::IComponent* comp);

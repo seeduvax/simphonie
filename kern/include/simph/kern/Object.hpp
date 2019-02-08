@@ -23,7 +23,9 @@ public:
     /**
      * Default constructor.
      */
-    Object();
+    Object(Smp::String8 name, 
+            Smp::String8 descr="",
+            Smp::IObject* parent=nullptr);
     /**
      * Destructor.
      */
@@ -34,9 +36,6 @@ public:
     Smp::IObject* GetParent() const;
 
 protected:
-    void setName(Smp::String8 name);
-    void setDescription(Smp::String8 description);
-    void setParent(Smp::IObject* parent);
 
 private:
     std::string _name;
@@ -44,6 +43,10 @@ private:
     Smp::IObject* _parent;
     bool checkName();
 
+    // TODO reconsider to make the 3 following protected if really needed.
+    void setName(Smp::String8 name);
+    void setDescription(Smp::String8 description);
+    void setParent(Smp::IObject* parent);
 };
 
 }} // namespace simph::kern

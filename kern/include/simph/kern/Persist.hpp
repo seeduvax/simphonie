@@ -22,7 +22,8 @@ public:
     /**
      * Default constructor.
      */
-    Persist();
+    Persist(Smp::String8 name, Smp::String8 descr="",
+            Smp::IObject* parent=nullptr);
     /**
      * Destructor.
      */

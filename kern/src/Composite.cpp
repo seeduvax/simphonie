@@ -14,7 +14,9 @@ namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-Composite::Composite() {
+Composite::Composite(Smp::String8 name, Smp::String8 descr,
+        Smp::IObject* parent): Object(name,descr,parent),
+               _containers("Containers","",this) {
 }
 // ..........................................................
 Composite::~Composite() {
@@ -24,8 +26,8 @@ Composite::~Composite() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-void Composite::addContainer(Smp::String8 name) {
-    _containers.push_back(new Container(name)); 
+void Composite::addContainer(Smp::String8 name,Smp::String8 descr) {
+    _containers.push_back(new Container(name,descr,this)); 
 }
 // --------------------------------------------------------------------
 // ..........................................................

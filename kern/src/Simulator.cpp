@@ -8,11 +8,17 @@
  * $Date$
  */
 #include "simph/kern/Simulator.hpp"
+
+#include "simph/kern/ComponentWrap.hpp"
+#include "simph/kern/DuplicateName.hpp"
 #include "simph/kern/Logger.hpp"
 
 // --------------------------------------------------------------------
 // ..........................................................
 namespace Smp {
+constexpr Smp::Char8 Smp::ISimulator::SMP_SimulatorServices[];
+constexpr Smp::Char8 Smp::ISimulator::SMP_SimulatorModels[];
+
 std::ostream& operator << (std::ostream& os, 
                                 const Smp::SimulatorStateKind& obj) {
     os << (Smp::Int32)obj;
@@ -59,9 +65,16 @@ namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-Simulator::Simulator(Smp::String8 name) {
-    setName(name);
-    _logger=new Logger();
+Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
+                Smp::IObject* parent): Object(name,descr,parent),
+                            Composite(name,descr,parent),
+                    _initEntryPoints("InitEntryPoints","",this),
+                    _compFactories("ComponentFactories","",this) {
+    addContainer(Smp::ISimulator::SMP_SimulatorModels);
+    _models=GetContainer(Smp::ISimulator::SMP_SimulatorModels);
+    addContainer(Smp::ISimulator::SMP_SimulatorServices);
+    _services=GetContainer(Smp::ISimulator::SMP_SimulatorServices);
+    _logger=new Logger("Logger","Logging service",this);
     setState(Smp::SimulatorStateKind::SSK_Building);
 }
 // ..........................................................
@@ -101,10 +114,10 @@ void Simulator::Publish() {
         // TODO throw exception
         return;
     }
-    for (auto service: _services) {
+    for (auto service: *(_services->GetComponents())) {
         publish(service);
     }
-    for (auto model: _models) {
+    for (auto model: *(_models->GetComponents())) {
         publish(model);
     }
 }
@@ -121,10 +134,10 @@ void Simulator::Configure() {
         // TODO throw exception
         return;
     }
-    for (auto service: _services) {
+    for (auto service: *(_services->GetComponents())) {
         configure(service);
     }
-    for (auto model: _models) {
+    for (auto model: *(_models->GetComponents())) {
         configure(model);
     }
 }
@@ -142,10 +155,10 @@ void Simulator::Connect() {
         return;
     }
     setState(Smp::SimulatorStateKind::SSK_Connecting);
-    for (auto service: _services) {
+    for (auto service: *(_services->GetComponents())) {
         connect(service);
     }
-    for (auto model: _models) {
+    for (auto model: *(_models->GetComponents())) {
         connect(model);
     }
     setState(Smp::SimulatorStateKind::SSK_Standby);
@@ -220,16 +233,11 @@ Smp::SimulatorStateKind Simulator::GetState() const {
 }
 // ..........................................................
 void Simulator::AddService(Smp::IService* service) {
-    if (_services.at(service->GetName())==NULL) {
-        _services.push_back(service);
-    }
-    else {
-        // TODO throw Smp::DumplicateName
-    }
+    _services->AddComponent(service);
 }
 // ..........................................................
 Smp::IService* Simulator::GetService(Smp::String8 name) const {
-    return _services.at(name);
+    return dynamic_cast<Smp::IService*>(_services->GetComponent(name));
 }
 // ..........................................................
 void Simulator::AddInitEntryPoint(Smp::IEntryPoint* ep) {
@@ -241,11 +249,11 @@ void Simulator::AddInitEntryPoint(Smp::IEntryPoint* ep) {
 }
 // ..........................................................
 void Simulator::AddModel(Smp::IModel* model) {
-    if (_models.at(model->GetName())==NULL) {
-        _models.push_back(model);
+    if (_models->GetComponent(model->GetName())==NULL) {
+        _models->AddComponent(new ComponentWrap(model,_models,_typeRegistry));
     }
     else {
-        // TODO throw Smp::DumplicateName
+        throw DuplicateName(_models,model->GetName());
     }
 }
 // ..........................................................

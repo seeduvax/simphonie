@@ -36,7 +36,7 @@ public:
         Smp::Int32 intField=12;
         Smp::Float64 doubleField=42;
         DummyComponent one("one");
-        ComponentWrap cw(&one,nullptr);
+        ComponentWrap cw(&one,nullptr,nullptr);
         Composite::dump(std::cout,&cw);
         CPPUNIT_ASSERT(strcmp("one",cw.GetName())==0);
         cw.PublishField("integer","",&intField);

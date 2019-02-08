@@ -5,7 +5,8 @@
 namespace test {
 class DummyComponent: public virtual simph::kern::Component {
 public:
-    DummyComponent(Smp::String8 name);
+    DummyComponent(Smp::String8 name, Smp::String8 descr="",
+                        Smp::IObject* parent=nullptr);
 };
 }
 #endif

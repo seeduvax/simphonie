@@ -65,7 +65,7 @@ private:
 };
 
 template <typename T>
-class TField: public Field {
+class TField: virtual public Field {
 public:
     TField(Smp::String8 name, Smp::String8 description,
             Smp::ViewKind viewKind, T* address,
@@ -73,7 +73,9 @@ public:
             Smp::Bool isInput,
             Smp::Bool isOutput,
             Smp::IObject* parent
-            ): Field(name,description,viewKind,(void*)address,sizeof(T),
+            ): Object(name,description,parent),
+               Persist(name,description,parent),
+                Field(name,description,viewKind,(void*)address,sizeof(T),
                         isState,isInput,isOutput,parent) {
         _tData=address;
     }

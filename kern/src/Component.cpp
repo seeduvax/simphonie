@@ -41,7 +41,11 @@ namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-Component::Component() {
+Component::Component(Smp::String8 name,
+                Smp::String8 descr,
+                Smp::IObject* parent):
+                    Object(name,descr,parent),
+                    _fields("Fields","",this) {
     _state=Smp::ComponentStateKind::CSK_Created;
 }
 // ..........................................................

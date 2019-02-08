@@ -14,8 +14,9 @@ namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-Container::Container(Smp::String8 name) {
-    setName(name);
+Container::Container(Smp::String8 name,Smp::String8 descr, 
+                Smp::IObject* parent): Object(name,descr,parent),
+                        _content("Content","",this) {
 }
 // ..........................................................
 Container::~Container() {

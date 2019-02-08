@@ -25,6 +25,7 @@ public:
      * Default constructor.
      */
     ComponentWrap(Smp::IComponent* wrapped,
+                Smp::IObject* parent,
                         Smp::Publication::ITypeRegistry* tReg);
     /**
      * Destructor.

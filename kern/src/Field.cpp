@@ -20,10 +20,7 @@ Field::Field(Smp::String8 name, Smp::String8 description,
         Smp::Bool isState,
         Smp::Bool isInput,
         Smp::Bool isOutput,
-        Smp::IObject* parent) {
-    setName(name);
-    setDescription(description);
-    setParent(parent);
+        Smp::IObject* parent): Persist(name,description,parent) {
     _viewKind=viewKind;
     _data=address;
     _dataSize=dataSize;

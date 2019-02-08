@@ -23,7 +23,8 @@ public:
     /**
      * Default constructor.
      */
-    Composite();
+    Composite(Smp::String8 name, Smp::String8 descr="",
+            Smp::IObject* parent=nullptr);
     /**
      * Destructor.
      */
@@ -35,7 +36,7 @@ public:
     static void dump(std::ostream& out,Smp::IComponent* c,int level=0);
     void dump();
 protected:
-    void addContainer(Smp::String8 name);
+    void addContainer(Smp::String8 name, Smp::String8 descr="");
 private:
     Collection<Smp::IContainer> _containers;
 };

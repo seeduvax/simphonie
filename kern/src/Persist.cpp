@@ -14,7 +14,8 @@ namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-Persist::Persist() {
+Persist::Persist(Smp::String8 name, Smp::String8 descr,
+                Smp::IObject* parent): Object(name,descr,parent) {
 }
 // ..........................................................
 Persist::~Persist() {

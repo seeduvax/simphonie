@@ -13,10 +13,12 @@ namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-Object::Object() {
-    _name="anonymous_object";
-    _description="";
-    _parent=nullptr;
+Object::Object(Smp::String8 name,
+                Smp::String8 descr,
+                Smp::IObject* parent) {
+    _name=name;
+    _description=descr;
+    _parent=parent;
 }
 // ..........................................................
 Object::~Object() {

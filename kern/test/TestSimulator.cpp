@@ -31,6 +31,7 @@ public:
 
     void testStates() {
         Simulator sim;
+        sim.dump();
         sim.Publish();
         sim.Configure();
         sim.Connect();
