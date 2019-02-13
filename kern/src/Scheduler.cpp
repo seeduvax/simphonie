@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "simph/kern/Scheduler.hpp"
+#include "Smp/ISimulator.h"
 
 namespace simph {
 	namespace kern {
@@ -16,7 +17,7 @@ namespace simph {
 // ..........................................................
 class Schedule {
 public:
-    Schedule(Smp::IEntryPoint* ep, Smp::Duration simTime, Scheduler* owner):
+    Schedule(const Smp::IEntryPoint* ep, Smp::Duration simTime, Scheduler* owner):
             _ep(ep),
             _simTime(simTime),
             _owner(owner),
@@ -52,7 +53,7 @@ protected:
         return _owner;
     }
 private:
-    Smp::IEntryPoint* _ep;
+    const Smp::IEntryPoint* _ep;
     Smp::Duration _simTime;
     Scheduler* _owner;
     bool _completed;
@@ -65,7 +66,7 @@ bool scheduleOrder(Schedule* a,Schedule *b) {
 // ..........................................................
 class CyclicSchedule: public Schedule {
 public:
-    CyclicSchedule(Smp::IEntryPoint * ep, Smp::Duration simTime,
+    CyclicSchedule(const Smp::IEntryPoint * ep, Smp::Duration simTime,
             Scheduler* owner,
             Smp::Duration period,Smp::Int64 count):
                 Schedule(ep,simTime,owner) {
@@ -96,8 +97,69 @@ Scheduler::Scheduler(Smp::String8 name, Smp::String8 descr,
 Scheduler::~Scheduler() {
     // TODO delete remaing schedule if any...
 }
-
-
+// --------------------------------------------------------------------
+// ..........................................................
+void Scheduler::connect() {
+    _timeKeeper=getSimulator()->GetTimeKeeper();
+}
+// --------------------------------------------------------------------
+// ..........................................................
+Smp::Services::EventId Scheduler::AddImmediateEvent(const Smp::IEntryPoint* entryPoint) {
+    Schedule* s=new Schedule(entryPoint,_timeKeeper->GetSimulationTime(),this);
+    _scheduled.insert(s);
+    return s->getId();
+}
+// ..........................................................
+Smp::Services::EventId Scheduler::schedule(
+                                const Smp::IEntryPoint* entryPoint,
+                                Smp::Duration absoluteSimTime,
+                                Smp::Duration cycleTime,
+                                Smp::Int64 repeat) {
+    Schedule* s;
+    if (repeat==0) {
+        s=new Schedule(entryPoint,absoluteSimTime,this);
+    }
+    else {
+        s=new CyclicSchedule(entryPoint,absoluteSimTime,this,cycleTime,repeat);
+    }
+    _scheduled.insert(s);
+    return s->getId();
+}
+// ..........................................................
+Smp::Services::EventId Scheduler::AddSimulationTimeEvent(
+                                const Smp::IEntryPoint* entryPoint,
+                                Smp::Duration simulationTime,
+                                Smp::Duration cycleTime,
+                                Smp::Int64 repeat) {
+    return schedule(entryPoint,
+                    _timeKeeper->GetSimulationTime()+simulationTime,
+                    cycleTime,
+                    repeat);
+};
+// ..........................................................
+Smp::Services::EventId Scheduler::AddMissionTimeEvent(
+                                const Smp::IEntryPoint* entryPoint,
+                                Smp::Duration missionTime,
+                                Smp::Duration cycleTime,
+                                Smp::Int64 repeat) {
+    return schedule(entryPoint,
+                    _timeKeeper->GetSimulationTime()+missionTime
+                            -_timeKeeper->GetMissionTime(),
+                    cycleTime,
+                    repeat);
+}
+// ..........................................................
+Smp::Services::EventId Scheduler::AddEpochTimeEvent(
+                                const Smp::IEntryPoint* entryPoint,
+                                Smp::DateTime epochTime,
+                                Smp::Duration cycleTime,
+                                Smp::Int64 repeat) {
+    return schedule(entryPoint,
+                    _timeKeeper->GetSimulationTime()+epochTime
+                            -_timeKeeper->GetEpochTime(),
+                    cycleTime,
+                    repeat);
+}
 // --------------------------------------------------------------------
 // ..........................................................
 void Scheduler::schedule(Schedule* schedule) {
@@ -107,6 +169,10 @@ void Scheduler::schedule(Schedule* schedule) {
 void Scheduler::step() {
     if (!_scheduled.empty()) {
         Schedule* s=*(_scheduled.begin());
+        // advance simulation time to event time.
+        // TODO maybe only if event time is greater than current timekeeper time.
+        // TODO emit the required events....
+        _timeKeeper->SetSimulationTime(s->getTime());
         s->run();
         _scheduled.erase(_scheduled.begin());
         if (s->isCompleted()) {

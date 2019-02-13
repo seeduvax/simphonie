@@ -10,6 +10,7 @@
 #ifndef __simph_kern_Scheduler_HPP__
 #define __simph_kern_Scheduler_HPP__
 
+#include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Services/IScheduler.h"
 #include "simph/kern/Component.hpp"
 #include <set>
@@ -75,8 +76,17 @@ public:
 
     void step();
     void schedule(Schedule* schedule);
+protected:
+    // Component specialization
+    void connect();
+    Smp::Services::EventId schedule(
+                                const Smp::IEntryPoint* entryPoint,
+                                Smp::Duration absoluteSimTime,
+                                Smp::Duration cycleTime=0,
+                                Smp::Int64 repeat=0);
 private:
     std::multiset<Schedule*,bool (*)(Schedule*,Schedule*)> _scheduled;
+    Smp::Services::ITimeKeeper* _timeKeeper;
 };
 
 }} // namespace simph::kern
