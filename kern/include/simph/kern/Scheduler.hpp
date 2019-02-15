@@ -84,9 +84,13 @@ protected:
                                 Smp::Duration absoluteSimTime,
                                 Smp::Duration cycleTime=0,
                                 Smp::Int64 repeat=0);
+    void schedule(Smp::Services::EventId event,
+                  Smp::Duration absoluteSimTime);
+    Schedule* findSchedule(Smp::Services::EventId event, bool erase=false);
 private:
     std::multiset<Schedule*,bool (*)(Schedule*,Schedule*)> _scheduled;
     Smp::Services::ITimeKeeper* _timeKeeper;
+    Schedule* _currentSchedule;
 };
 
 }} // namespace simph::kern

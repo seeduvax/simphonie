@@ -52,5 +52,11 @@ Smp::DateTime TimeKeeper::GetZuluTime() const {
             - _y2kJan1Offset;
     
 }
+// ..........................................................
+void TimeKeeper::SetSimulationTime(Smp::Duration simulationTime) {
+    // TODO check simulation time is after current sim time and
+    // throw exception of not...
+    _simTime=simulationTime;
+}
 
 }} // namespace simph::kern

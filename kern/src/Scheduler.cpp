@@ -9,6 +9,7 @@
  */
 #include "simph/kern/Scheduler.hpp"
 #include "Smp/ISimulator.h"
+#include "simph/kern/Logger.hpp"
 
 namespace simph {
 	namespace kern {
@@ -17,10 +18,14 @@ namespace simph {
 // ..........................................................
 class Schedule {
 public:
-    Schedule(const Smp::IEntryPoint* ep, Smp::Duration simTime, Scheduler* owner):
+    Schedule(const Smp::IEntryPoint* ep, Smp::Duration simTime,
+            Scheduler* owner,
+            Smp::Duration period=0,Smp::Int64 repeat=0):
             _ep(ep),
             _simTime(simTime),
             _owner(owner),
+            _period(period),
+            _repeat(repeat),
             _completed(false) {
         // TODO mutex to ensure correct id sequencing
         _id=_nextId;
@@ -35,56 +40,42 @@ public:
     inline Smp::Duration getTime() const {
         return _simTime;
     }
+    inline void setPeriod(Smp::Duration period) {
+        _period=period;
+    }
+    inline void setRepeat(Smp::Int64 repeat) {
+        _repeat=repeat;
+    }
     inline Smp::Services::EventId getId() {
         return _id;
     }
     void run() {
-        runEp();
-        setCompleted();
-    }
-protected:
-    inline void runEp() {
         _ep->Execute();
-    }
-    inline void setCompleted() {
-        _completed=true;
-    }
-    inline Scheduler* getOwner() const {
-        return _owner;
+        if (_repeat>0) {
+            --_repeat;
+            if (_period>0) {
+                setTime(getTime()+_period);
+                _owner->schedule(this);
+            }
+        }
+        _completed=_repeat==0;
     }
 private:
     const Smp::IEntryPoint* _ep;
     Smp::Duration _simTime;
     Scheduler* _owner;
+    Smp::Duration _period;
+    Smp::Int64 _repeat;
     bool _completed;
     Smp::Services::EventId _id;
     static Smp::Services::EventId _nextId;
 };
+// ..........................................................
+Smp::Services::EventId Schedule::_nextId=0;
+// ..........................................................
 bool scheduleOrder(Schedule* a,Schedule *b) {
     return a->getTime() < b->getTime();
 }
-// ..........................................................
-class CyclicSchedule: public Schedule {
-public:
-    CyclicSchedule(const Smp::IEntryPoint * ep, Smp::Duration simTime,
-            Scheduler* owner,
-            Smp::Duration period,Smp::Int64 count):
-                Schedule(ep,simTime,owner) {
-    }
-    void run() {
-        runEp();
-        if (_count <0 || _count>1) {
-            setTime(getTime()+_period);
-            getOwner()->schedule(this);
-        }
-        else {
-            setCompleted();
-        }
-    }
-private:
-    Smp::Duration _period;
-    Smp::Int64 _count;
-};
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -115,15 +106,34 @@ Smp::Services::EventId Scheduler::schedule(
                                 Smp::Duration absoluteSimTime,
                                 Smp::Duration cycleTime,
                                 Smp::Int64 repeat) {
-    Schedule* s;
-    if (repeat==0) {
-        s=new Schedule(entryPoint,absoluteSimTime,this);
-    }
-    else {
-        s=new CyclicSchedule(entryPoint,absoluteSimTime,this,cycleTime,repeat);
-    }
+    Schedule* s=new Schedule(entryPoint,absoluteSimTime,this,cycleTime,repeat);
     _scheduled.insert(s);
     return s->getId();
+}
+// ..........................................................
+Schedule* Scheduler::findSchedule(Smp::Services::EventId event,
+                                    bool erase) {
+    Schedule* res=nullptr;
+    auto it=_scheduled.begin();
+    while (it!=_scheduled.end() && (*it)->getId()!=event) {
+        ++it;
+    }
+    if (it!=_scheduled.end()) {
+        res=*it;
+        if (erase) {
+            _scheduled.erase(it);
+        }
+    }
+    return res;
+}
+// ..........................................................
+void Scheduler::schedule(Smp::Services::EventId event,
+                         Smp::Duration absoluteSimTime) {
+    Schedule* s=findSchedule(event,true);
+    if (s!=nullptr) {
+        s->setTime(absoluteSimTime);
+        _scheduled.insert(s);
+    }
 }
 // ..........................................................
 Smp::Services::EventId Scheduler::AddSimulationTimeEvent(
@@ -159,6 +169,73 @@ Smp::Services::EventId Scheduler::AddEpochTimeEvent(
                             -_timeKeeper->GetEpochTime(),
                     cycleTime,
                     repeat);
+}
+// ..........................................................
+Smp::Services::EventId Scheduler::AddZuluTimeEvent(
+                                const Smp::IEntryPoint* entryPoint,
+                                Smp::DateTime zuluTime,
+                                Smp::Duration cycleTime,
+                                Smp::Int64 repeat) {
+    LOGE("Scheduler::AddZuluTimeEvent not implemented!!! (unsure of what shall be really done and what are the use case.")
+    return -1;
+}
+// ..........................................................
+void Scheduler::SetEventSimulationTime(Smp::Services::EventId event,
+                                       Smp::Duration simulationTime) {
+    schedule(event,simulationTime+_timeKeeper->GetSimulationTime());
+}
+// ..........................................................
+void Scheduler::SetEventMissionTime(Smp::Services::EventId event,
+                                       Smp::Duration missionTime) {
+    schedule(event,_timeKeeper->GetSimulationTime()+missionTime
+                            -_timeKeeper->GetMissionTime());
+}
+// ..........................................................
+void Scheduler::SetEventEpochTime(Smp::Services::EventId event,
+                                       Smp::DateTime epochTime) {
+    schedule(event,_timeKeeper->GetSimulationTime()+epochTime
+                            -_timeKeeper->GetEpochTime());
+}
+// ..........................................................
+void Scheduler::SetEventZuluTime(Smp::Services::EventId event,
+                                       Smp::DateTime zuluTime) {
+    LOGE("Scheduler::SetEventZuluTime not implemented!!! (unsure of what shall be really done and what are the use case.")
+}
+// ..........................................................
+void Scheduler::SetEventCycleTime(Smp::Services::EventId event,
+                                Smp::Duration cycleTime) {
+    Schedule* s=findSchedule(event);
+    if (s!=nullptr) {
+        s->setPeriod(cycleTime);
+    }
+}
+// ..........................................................
+void Scheduler::SetEventRepeat(Smp::Services::EventId event,
+                            Smp::Int64 repeat) {
+    Schedule* s=findSchedule(event);
+    if (s!=nullptr) {
+        s->setRepeat(repeat);
+    }
+}
+// ..........................................................
+void Scheduler::RemoveEvent(Smp::Services::EventId event) {
+    findSchedule(event,true);
+}
+// ..........................................................
+Smp::Services::EventId Scheduler::GetCurrentEventId() const {
+    // TODO mutex...
+    if (_currentSchedule!=nullptr) {
+        return _currentSchedule->getId();
+    }
+    return -1;
+}
+// ..........................................................
+Smp::Duration Scheduler::GetNextScheduledEventTime() const {
+    if (!_scheduled.empty()) {
+        Schedule* s=*(_scheduled.begin());
+        return s->getTime();
+    }
+    return 0;
 }
 // --------------------------------------------------------------------
 // ..........................................................
