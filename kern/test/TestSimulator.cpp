@@ -9,6 +9,7 @@
  */
 #include <cppunit/extensions/HelperMacros.h>
 #include "simph/kern/Simulator.hpp"
+#include "simph/sys/Logger.hpp"
 
 namespace test {
 using namespace simph::kern;

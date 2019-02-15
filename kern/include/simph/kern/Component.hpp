@@ -32,6 +32,7 @@ public:
      */
     virtual ~Component();
 
+    // Smp::IComponent implementation
     Smp::ComponentStateKind GetState() const;
     void Publish(Smp::IPublication* receiver);
     void Configure(Smp::Services::ILogger* logger);

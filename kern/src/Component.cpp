@@ -9,7 +9,7 @@
  */
 #include "simph/kern/Component.hpp"
 #include "simph/kern/InvalidComponentState.hpp"
-#include <iostream>
+#include "simph/sys/Logger.hpp"
 
 // --------------------------------------------------------------------
 // ..........................................................

@@ -12,6 +12,8 @@
 #include "simph/kern/ComponentWrap.hpp"
 #include "simph/kern/DuplicateName.hpp"
 #include "simph/kern/Logger.hpp"
+#include "simph/kern/Scheduler.hpp"
+#include "simph/kern/TimeKeeper.hpp"
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -75,6 +77,11 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
     addContainer(Smp::ISimulator::SMP_SimulatorServices);
     _services=GetContainer(Smp::ISimulator::SMP_SimulatorServices);
     _logger=new Logger("Logger","Logging service",this);
+    _scheduler=new Scheduler("Scheduler","Schedule service",this);
+    _timeKeeper=new TimeKeeper("TimeKeeper","Time service",this);
+    _services->AddComponent(_logger);
+    _services->AddComponent(_scheduler);
+    _services->AddComponent(_timeKeeper);
     setState(Smp::SimulatorStateKind::SSK_Building);
 }
 // ..........................................................
@@ -104,8 +111,7 @@ void Simulator::Initialise() {
 // ..........................................................
 void Simulator::publish(Smp::IComponent* comp) {
     if (comp->GetState()==Smp::ComponentStateKind::CSK_Created) {
-// TODO            comp->Publish(this);
-// TODO recursive call on childs.
+        comp->Publish(nullptr/* TODO receiver... */);
     }
 }
 // ..........................................................
@@ -262,13 +268,11 @@ Smp::Services::ILogger* Simulator::GetLogger() const {
 }
 // ..........................................................
 Smp::Services::ITimeKeeper* Simulator::GetTimeKeeper() const {
-// TODO implement!
-return nullptr;
+    return _timeKeeper;
 }
 // ..........................................................
 Smp::Services::IScheduler* Simulator::GetScheduler() const {
-// TODO implement!
-return nullptr;
+    return _scheduler;
 }
 // ..........................................................
 Smp::Services::IEventManager* Simulator::GetEventManager() const {
