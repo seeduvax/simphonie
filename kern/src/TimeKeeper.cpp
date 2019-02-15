@@ -99,7 +99,4 @@ void TimeKeeper::reset() {
     _missionStart=_epochOffset;
 }
 
-
-
-
 }} // namespace simph::kern
