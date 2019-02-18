@@ -9,9 +9,9 @@
  */
 #include "simph/kern/Simulator.hpp"
 
-#include "simph/kern/ComponentWrap.hpp"
 #include "simph/kern/DuplicateName.hpp"
 #include "simph/kern/Logger.hpp"
+#include "simph/kern/ObjectsRegistry.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/TimeKeeper.hpp"
 
@@ -82,6 +82,10 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
     _services->AddComponent(_logger);
     _services->AddComponent(_scheduler);
     _services->AddComponent(_timeKeeper);
+    _registry=new ObjectsRegistry("reg","Objects registry and resolver",_services);
+    _registry->add(this);
+    _registry->add(_models);
+    _registry->add(_services);
     setState(Smp::SimulatorStateKind::SSK_Building);
 }
 // ..........................................................
@@ -255,8 +259,9 @@ void Simulator::AddInitEntryPoint(Smp::IEntryPoint* ep) {
 }
 // ..........................................................
 void Simulator::AddModel(Smp::IModel* model) {
-    if (_models->GetComponent(model->GetName())==NULL) {
-        _models->AddComponent(new ComponentWrap(model,_models,_typeRegistry));
+    if (_models->GetComponent(model->GetName())==nullptr) {
+        _models->AddComponent(model);
+        _registry->add(model);
     }
     else {
         throw DuplicateName(_models,model->GetName());
