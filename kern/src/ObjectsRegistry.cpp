@@ -21,7 +21,7 @@ public:
     Node(Smp::IObject* toWrap, Node* parent):
             _wrapped(toWrap),
             _parent(parent) {
-        if (_parent!=NULL) {
+        if (_parent!=nullptr) {
             _parent->_childs.push_back(this);
         }
     }
@@ -48,10 +48,12 @@ public:
         return nullptr;
     }
     void dump(int level) {
-        for (int i;i<level;++i) {
-            std::cout << "  ";
+        if (_wrapped!=nullptr) {
+            for (int i=0;i<level;++i) {
+                std::cout << "  ";
+            }
+            std::cout << _wrapped->GetName() << std::endl;
         }
-        std::cout << _wrapped->GetName() << std::endl;
         for (auto child: _childs) {
             child->dump(level+1);
         }
@@ -66,6 +68,7 @@ private:
 ObjectsRegistry::ObjectsRegistry(Smp::String8 name, Smp::String8 descr,
                             Smp::IObject* parent):
                     Component(name,descr,parent) {
+    _root=new Node(nullptr,nullptr);
 }
 // ..........................................................
 ObjectsRegistry::~ObjectsRegistry() {

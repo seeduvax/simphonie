@@ -76,13 +76,14 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
     _models=GetContainer(Smp::ISimulator::SMP_SimulatorModels);
     addContainer(Smp::ISimulator::SMP_SimulatorServices);
     _services=GetContainer(Smp::ISimulator::SMP_SimulatorServices);
-    _logger=new Logger("Logger","Logging service",this);
-    _scheduler=new Scheduler("Scheduler","Schedule service",this);
-    _timeKeeper=new TimeKeeper("TimeKeeper","Time service",this);
+    _logger=new Logger("Logger","Logging service",_services);
+    _scheduler=new Scheduler("Scheduler","Schedule service",_services);
+    _timeKeeper=new TimeKeeper("TimeKeeper","Time service",_services);
     _services->AddComponent(_logger);
     _services->AddComponent(_scheduler);
     _services->AddComponent(_timeKeeper);
     _registry=new ObjectsRegistry("reg","Objects registry and resolver",_services);
+    _services->AddComponent(_registry);
     _registry->add(this);
     _registry->add(_models);
     _registry->add(_services);
@@ -115,7 +116,8 @@ void Simulator::Initialise() {
 // ..........................................................
 void Simulator::publish(Smp::IComponent* comp) {
     if (comp->GetState()==Smp::ComponentStateKind::CSK_Created) {
-        comp->Publish(nullptr/* TODO receiver... */);
+        _registry->add(comp);
+        comp->Publish(_registry);
     }
 }
 // ..........................................................
@@ -261,7 +263,6 @@ void Simulator::AddInitEntryPoint(Smp::IEntryPoint* ep) {
 void Simulator::AddModel(Smp::IModel* model) {
     if (_models->GetComponent(model->GetName())==nullptr) {
         _models->AddComponent(model);
-        _registry->add(model);
     }
     else {
         throw DuplicateName(_models,model->GetName());
@@ -291,8 +292,7 @@ return nullptr;
 }
 // ..........................................................
 Smp::Services::IResolver* Simulator::GetResolver() const {
-// TODO implement!
-return nullptr;
+    return _registry;
 }
 // ..........................................................
 void Simulator::RegisterFactory(Smp::IFactory* componentFactory) {
