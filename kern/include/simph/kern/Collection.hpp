@@ -62,6 +62,21 @@ public:
     void push_back(T* t) {
         _content.push_back(t);
     }
+    bool remove(T* t) {
+        bool res=false;
+        auto it=_content.begin();
+        while (it!=_content.end()) {
+            if (*it==t) {
+                _content.erase(it);
+                res=true;
+            }
+            else {
+                ++it;
+            }
+        }
+        return res;
+    }
+
 private:
     std::vector<T*> _content;
 };

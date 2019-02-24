@@ -82,7 +82,7 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
     _services->AddComponent(_logger);
     _services->AddComponent(_scheduler);
     _services->AddComponent(_timeKeeper);
-    _registry=new ObjectsRegistry("reg","Objects registry and resolver",_services);
+    _registry=new ObjectsRegistry("Resolver","Objects registry and resolver",_services);
     _services->AddComponent(_registry);
     _registry->add(this);
     _registry->add(_models);
@@ -296,20 +296,47 @@ Smp::Services::IResolver* Simulator::GetResolver() const {
 }
 // ..........................................................
 void Simulator::RegisterFactory(Smp::IFactory* componentFactory) {
-// TODO implement!
+    for (auto fac: _compFactories) {
+        if (fac==componentFactory) {
+            // already registered so nothing to do.
+            return;
+        }
+    }
+    _compFactories.push_back(componentFactory);
 }
 // ..........................................................
 Smp::IComponent* Simulator::CreateInstance(Smp::Uuid uuid,
                             Smp::String8 name,
                             Smp::String8 description,
                             Smp::IComposite* parent) {
-// TODO implement!
-return nullptr;
+    Smp::IComponent* res=nullptr;
+    for (auto fac: _compFactories) {
+        if (fac->GetUuid()==uuid) {
+            res=fac->CreateInstance(name,description,
+                        parent==nullptr?this:parent);
+            // TODO is it required to add new instance in a container?
+            if (dynamic_cast<Smp::IModel*>(res)) {
+                _models->AddComponent(res);
+            }
+            if (dynamic_cast<Smp::IService*>(res)) {
+                _services->AddComponent(res);
+            }
+            break;
+        }
+    }
+    // TODO check it is needed to pulish/configure/connect immediately
+    // according to current simulator state.
+    // TODO check what exception should be thrown when no factory found
+    return res;
 }
 // ..........................................................
 Smp::IFactory* Simulator::GetFactory(Smp::Uuid uuid) const {
-// TODO implement!
-return nullptr;
+    for (auto fac: _compFactories) {
+        if (fac->GetUuid()==uuid) {
+            return fac;
+        }
+    }
+    return nullptr;
 }
 
 }} // namespace simph::kern
