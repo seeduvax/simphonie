@@ -10,6 +10,7 @@
 #ifndef __simph_kern_TimeKeeper_HPP__
 #define __simph_kern_TimeKeeper_HPP__
 #include "Smp/Services/ITimeKeeper.h"
+#include "Smp/Services/IEventManager.h"
 #include "simph/kern/Component.hpp"
 
 namespace simph {
@@ -48,10 +49,13 @@ public:
     
     // TODO should not be public but binded to some simulation start even handling
     void reset();
+protected:
+    void connect();
 private:
     Smp::Duration _simTime;
     Smp::Duration _epochOffset;
     Smp::DateTime _missionStart;
+    Smp::Services::IEventManager* _eventMgr;
     static Smp::DateTime _y2kJan1Offset;
 
 };

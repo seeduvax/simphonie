@@ -70,6 +70,7 @@ private:
     Smp::Services::ILogger* _logger;
     Smp::Services::IScheduler* _scheduler;
     Smp::Services::ITimeKeeper* _timeKeeper;
+    Smp::Services::IEventManager* _eventMgr;
     Smp::Publication::ITypeRegistry* _typeRegistry;
     ObjectsRegistry* _registry;
     void publish(Smp::IComponent* comp);

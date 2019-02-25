@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "simph/kern/TimeKeeper.hpp"
+#include "Smp/ISimulator.h"
 #include <chrono>
 #include <sstream>
 #include <iomanip>
@@ -34,7 +35,8 @@ Smp::DateTime TimeKeeper::_y2kJan1Offset=__GetY2KOffset();
 TimeKeeper::TimeKeeper(Smp::String8 name,
                         Smp::String8 descr,
                         Smp::IObject* parent):
-                Component(name,descr,parent) {
+                Component(name,descr,parent),
+                _eventMgr(nullptr) {
 }
 // ..........................................................
 TimeKeeper::~TimeKeeper() {
@@ -67,7 +69,13 @@ Smp::DateTime TimeKeeper::GetZuluTime() const {
 // ..........................................................
 void TimeKeeper::SetSimulationTime(Smp::Duration simulationTime) {
     if (simulationTime>_simTime) {
+        if (_eventMgr!=nullptr) {
+            _eventMgr->Emit(Smp::Services::IEventManager::SMP_PreSimTimeChangeId);
+        }
         _simTime=simulationTime;
+        if (_eventMgr!=nullptr) {
+            _eventMgr->Emit(Smp::Services::IEventManager::SMP_PostSimTimeChangeId);
+        }
     }
     else {
 // TODO throw exception TBD.
@@ -76,27 +84,45 @@ void TimeKeeper::SetSimulationTime(Smp::Duration simulationTime) {
 // ..........................................................
 void TimeKeeper::SetEpochTime(Smp::DateTime epochTime) {
     _epochOffset=epochTime-_simTime;
-// TODO fire event TBD.
+    if (_eventMgr!=nullptr) {
+        _eventMgr->Emit(Smp::Services::IEventManager::SMP_EpochTimeChangedId);
+    }
 }
 // ..........................................................
 void TimeKeeper::SetMissionStartTime(Smp::DateTime missionStart) {
     _missionStart=missionStart;
-// TODO fire event TBD.
+    if (_eventMgr!=nullptr) {
+        _eventMgr->Emit(Smp::Services::IEventManager::SMP_MissionTimeChangedId);
+    }
 }
 // ..........................................................
 void TimeKeeper::SetMissionTime(Smp::Duration missionTime) {
     _missionStart=GetEpochTime() - missionTime;
-// TODO fire event TBD.
+    if (_eventMgr!=nullptr) {
+        _eventMgr->Emit(Smp::Services::IEventManager::SMP_MissionTimeChangedId);
+    }
 }
 // --------------------------------------------------------------------
+// ..........................................................
+void TimeKeeper::connect() {
+    _eventMgr=getSimulator()->GetEventManager();
+}
 // ..........................................................
 void TimeKeeper::reset() {
     // default : set epoch time to current zulu time.
     // set simTime to 0
     // set missionTime to 0 too.
+    if (_eventMgr!=nullptr) {
+        _eventMgr->Emit(Smp::Services::IEventManager::SMP_PreSimTimeChangeId);
+    }
     _simTime=0;
     _epochOffset=GetZuluTime();
     _missionStart=_epochOffset;
+    if (_eventMgr!=nullptr) {
+        _eventMgr->Emit(Smp::Services::IEventManager::SMP_PostSimTimeChangeId);
+        _eventMgr->Emit(Smp::Services::IEventManager::SMP_EpochTimeChangedId);
+        _eventMgr->Emit(Smp::Services::IEventManager::SMP_MissionTimeChangedId);
+    }
 }
 
 }} // namespace simph::kern

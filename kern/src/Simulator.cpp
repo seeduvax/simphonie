@@ -11,6 +11,7 @@
 
 #include "simph/kern/DuplicateName.hpp"
 #include "simph/kern/Logger.hpp"
+#include "simph/kern/EventManager.hpp"
 #include "simph/kern/ObjectsRegistry.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/TimeKeeper.hpp"
@@ -79,9 +80,11 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
     _logger=new Logger("Logger","Logging service",_services);
     _scheduler=new Scheduler("Scheduler","Schedule service",_services);
     _timeKeeper=new TimeKeeper("TimeKeeper","Time service",_services);
+    _eventMgr=new EventManager("","Event handling service",_services);
     _services->AddComponent(_logger);
     _services->AddComponent(_scheduler);
     _services->AddComponent(_timeKeeper);
+    _services->AddComponent(_eventMgr);
     _registry=new ObjectsRegistry("Resolver","Objects registry and resolver",_services);
     _services->AddComponent(_registry);
     _registry->add(this);
@@ -96,10 +99,67 @@ Simulator::~Simulator() {
 // --------------------------------------------------------------------
 // ..........................................................
 void Simulator::setState(Smp::SimulatorStateKind newState) {
-    _state=newState;
-    std::ostringstream msg;
-    msg << "state changed: " << _state;
-    _logger->Log(this,msg.str().c_str());
+    if (_state!=newState) {
+        switch (_state) {
+            case Smp::SimulatorStateKind::SSK_Connecting:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_LeaveConnectingId);
+                break;
+            case Smp::SimulatorStateKind::SSK_Reconnecting:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_LeaveReconnectingId);
+                break;
+            case Smp::SimulatorStateKind::SSK_Initialising:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_LeaveInitialisingId);
+                break;
+            case Smp::SimulatorStateKind::SSK_Standby:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_LeaveStandbyId);
+                break;
+            case Smp::SimulatorStateKind::SSK_Executing:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_LeaveExecutingId);
+                break;
+            case Smp::SimulatorStateKind::SSK_Storing:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_LeaveStoringId);
+                break;
+            case Smp::SimulatorStateKind::SSK_Restoring:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_LeaveRestoringId);
+                break;
+            default:
+                // no events to send on leaving for other states.
+                break;
+        }
+        _state=newState;
+        std::ostringstream msg;
+        msg << "state changed: " << _state;
+        _logger->Log(this,msg.str().c_str());
+        switch (_state) {
+            case Smp::SimulatorStateKind::SSK_Initialising:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_EnterInitialisingId);
+                break;
+            case Smp::SimulatorStateKind::SSK_Standby:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_EnterStandbyId);
+                break;
+            case Smp::SimulatorStateKind::SSK_Executing:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_EnterExecutingId);
+                break;
+            case Smp::SimulatorStateKind::SSK_Storing:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_EnterStoringId);
+                break;
+            case Smp::SimulatorStateKind::SSK_Restoring:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_EnterRestoringId);
+                break;
+            case Smp::SimulatorStateKind::SSK_Reconnecting:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_EnterReconnectingId);
+                break;
+            case Smp::SimulatorStateKind::SSK_Exiting:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_EnterExitingId);
+                break;
+            case Smp::SimulatorStateKind::SSK_Aborting:
+                _eventMgr->Emit(Smp::Services::IEventManager::SMP_EnterAbortingId);
+                break;
+            default:
+                // No event to emit when entering to other states.
+                break;
+        }
+    }
 }
 // ..........................................................
 void Simulator::Initialise() {
@@ -282,8 +342,7 @@ Smp::Services::IScheduler* Simulator::GetScheduler() const {
 }
 // ..........................................................
 Smp::Services::IEventManager* Simulator::GetEventManager() const {
-// TODO implement!
-return nullptr;
+    return _eventMgr;
 }
 // ..........................................................
 Smp::Services::ILinkRegistry* Simulator::GetLinkRegistry() const {
