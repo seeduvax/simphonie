@@ -71,6 +71,7 @@ private:
     Smp::Services::IScheduler* _scheduler;
     Smp::Services::ITimeKeeper* _timeKeeper;
     Smp::Services::IEventManager* _eventMgr;
+    Smp::Services::ILinkRegistry* _linkRegistry;
     Smp::Publication::ITypeRegistry* _typeRegistry;
     ObjectsRegistry* _registry;
     void publish(Smp::IComponent* comp);

@@ -15,6 +15,7 @@
 #include "simph/kern/ObjectsRegistry.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/TimeKeeper.hpp"
+#include "simph/kern/LinkRegistry.hpp"
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -81,10 +82,12 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
     _scheduler=new Scheduler("Scheduler","Schedule service",_services);
     _timeKeeper=new TimeKeeper("TimeKeeper","Time service",_services);
     _eventMgr=new EventManager("","Event handling service",_services);
+    _linkRegistry=new LinkRegistry("","Link registry service",_services);
     _services->AddComponent(_logger);
     _services->AddComponent(_scheduler);
     _services->AddComponent(_timeKeeper);
     _services->AddComponent(_eventMgr);
+    _services->AddComponent(_linkRegistry);
     _registry=new ObjectsRegistry("Resolver","Objects registry and resolver",_services);
     _services->AddComponent(_registry);
     _registry->add(this);
@@ -94,6 +97,11 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
 }
 // ..........................................................
 Simulator::~Simulator() {
+    // TODO delete load models and additional services ??? 
+    delete _scheduler;
+    delete _timeKeeper;
+    delete _eventMgr;
+    delete _linkRegistry;
     delete _logger;
 }
 // --------------------------------------------------------------------
@@ -346,8 +354,7 @@ Smp::Services::IEventManager* Simulator::GetEventManager() const {
 }
 // ..........................................................
 Smp::Services::ILinkRegistry* Simulator::GetLinkRegistry() const {
-// TODO implement!
-return nullptr;
+    return _linkRegistry;
 }
 // ..........................................................
 Smp::Services::IResolver* Simulator::GetResolver() const {
