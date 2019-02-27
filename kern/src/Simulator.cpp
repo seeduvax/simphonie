@@ -16,6 +16,7 @@
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/TimeKeeper.hpp"
 #include "simph/kern/LinkRegistry.hpp"
+#include "Smp/IEntryPointPublisher.h"
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -186,6 +187,13 @@ void Simulator::publish(Smp::IComponent* comp) {
     if (comp->GetState()==Smp::ComponentStateKind::CSK_Created) {
         _registry->add(comp);
         comp->Publish(_registry);
+        Smp::IEntryPointPublisher* epp=
+                                dynamic_cast<Smp::IEntryPointPublisher*>(comp);
+        if (epp!=nullptr) {
+            for (auto ep: *(epp->GetEntryPoints())) {
+                _registry->add(ep);
+            }
+        }
     }
 }
 // ..........................................................
@@ -224,6 +232,7 @@ void Simulator::Configure() {
 // ..........................................................
 void Simulator::connect(Smp::IComponent* comp) {
     if (comp->GetState()==Smp::ComponentStateKind::CSK_Configured) {
+TRACE("Connecting "<<comp->GetName());        
         comp->Connect(this);
 // TODO recursive call on childs.
     }
@@ -238,7 +247,9 @@ void Simulator::Connect() {
     for (auto service: *(_services->GetComponents())) {
         connect(service);
     }
+TRACE("")    
     for (auto model: *(_models->GetComponents())) {
+TRACE(""<<model->GetName())    
         connect(model);
     }
     setState(Smp::SimulatorStateKind::SSK_Standby);
