@@ -9,6 +9,7 @@
  */
 #include "simph/kern/TimeKeeper.hpp"
 #include "Smp/ISimulator.h"
+#include "Smp/IPublication.h"
 #include <chrono>
 #include <sstream>
 #include <iomanip>
@@ -64,6 +65,12 @@ Smp::DateTime TimeKeeper::GetZuluTime() const {
                 std::chrono::system_clock::now().time_since_epoch()).count()
             - _y2kJan1Offset;
     
+}
+// --------------------------------------------------------------------
+// ..........................................................
+void TimeKeeper::publish(Smp::IPublication* receiver) {
+    receiver->PublishField("simTime","Simulation time",&_simTime,
+                Smp::ViewKind::VK_All,true,false,true);
 }
 // --------------------------------------------------------------------
 // ..........................................................

@@ -51,6 +51,7 @@ public:
     void reset();
 protected:
     void connect();
+    void publish(Smp::IPublication* receiver);
 private:
     Smp::Duration _simTime;
     Smp::Duration _epochOffset;

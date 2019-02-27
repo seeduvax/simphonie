@@ -12,6 +12,12 @@
 #include "Smp/IForcibleField.h"
 #include "Smp/ISimpleField.h"
 #include "simph/kern/Persist.hpp"
+#include "simph/kern/Collection.hpp"
+// workaround Smp headers issue.
+namespace Smp {
+class IDataflowField;
+}
+#include "Smp/IDataflowField.h"
 
 namespace simph {
 	namespace kern {
@@ -20,6 +26,7 @@ namespace simph {
  *
  */
 class Field: virtual public Persist, 
+                    virtual public Smp::IDataflowField,
                     virtual public Smp::IForcibleField {
 public:
     /**
@@ -43,8 +50,8 @@ public:
     Smp::Bool IsInput() const;
     Smp::Bool IsOutput() const;
     const Smp::Publication::IType* GetType() const;
-    void connect(Field* src);
-    void update();
+    void Connect(Smp::IField* target);
+    void Push();
     // Smp::IForcibleField implementation
     void Force(Smp::AnySimple value);
     void Unforce();
@@ -62,6 +69,7 @@ private:
     Field* _src;
     Smp::Bool _forced;
     Smp::AnySimple _forcedValue;
+    Collection<Field> _targets;
 };
 
 template <typename T>

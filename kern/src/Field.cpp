@@ -8,7 +8,8 @@
  * $Date$
  */
 #include "simph/kern/Field.hpp"
-#include <string.h>
+#include "simph/sys/Logger.hpp"
+#include <cstring>
 
 namespace simph {
 	namespace kern {
@@ -21,7 +22,8 @@ Field::Field(Smp::String8 name, Smp::String8 description,
         Smp::Bool isInput,
         Smp::Bool isOutput,
         Smp::IObject* parent): Object(name,description,parent),
-                        Persist(name,description,parent) {
+                        Persist(name,description,parent),
+                        _targets("cnx","",this) {
     _viewKind=viewKind;
     _data=address;
     _dataSize=dataSize;
@@ -55,15 +57,27 @@ Smp::Bool Field::IsOutput() const {
 const Smp::Publication::IType* Field::GetType() const {
     return _type;
 }
+// --------------------------------------------------------------------
+// Smp::IDataflowField implentation
 // ..........................................................
-void Field::connect(Field* src) {
-    if (src->_dataSize==_dataSize) {
-        _src=src;
+void Field::Connect(Smp::IField* target) {
+    auto f=dynamic_cast<Field*>(target);
+    if (f!=nullptr 
+            && f->_type->GetUuid()==_type->GetUuid() 
+            && f->_dataSize==_dataSize) {
+        _targets.push_back(f);
+    }
+    else {
+// TODO throw exception...
+LOGE("Can't connect "<<GetName()<<" to "<<target->GetName()
+    <<": incompatible size, type or field implementation")
     }
 }
 // ..........................................................
-void Field::update() {
-    memcpy(_src->_data,_data,_dataSize);
+void Field::Push() {
+    for (auto f: _targets) {
+        std::memcpy(_data,f->_data,_dataSize);
+    }
 }
 // --------------------------------------------------------------------
 // Smp::IForcibleField implementation
