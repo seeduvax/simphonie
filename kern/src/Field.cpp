@@ -63,8 +63,9 @@ const Smp::Publication::IType* Field::GetType() const {
 void Field::Connect(Smp::IField* target) {
     auto f=dynamic_cast<Field*>(target);
     if (f!=nullptr 
-            && f->_type->GetUuid()==_type->GetUuid() 
-            && f->_dataSize==_dataSize) {
+// TODO            && f->_type->GetUuid()==_type->GetUuid() 
+            && f->_dataSize==_dataSize
+            && IsOutput() && f->IsInput()) {
         _targets.push_back(f);
     }
     else {
@@ -76,7 +77,7 @@ LOGE("Can't connect "<<GetName()<<" to "<<target->GetName()
 // ..........................................................
 void Field::Push() {
     for (auto f: _targets) {
-        std::memcpy(_data,f->_data,_dataSize);
+        std::memcpy(f->_data,_data,_dataSize);
     }
 }
 // --------------------------------------------------------------------

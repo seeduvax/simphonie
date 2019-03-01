@@ -12,6 +12,7 @@
 #include "simph/kern/Object.hpp"
 #include "simph/kern/Collection.hpp"
 #include "Smp/IComponent.h"
+#include "Smp/Services/ILogger.h"
 
 namespace simph {
 	namespace kern {
@@ -50,7 +51,21 @@ protected:
     inline void addField(Smp::IField* field) {
         _fields.push_back(field);
     }
-    // TODO add log helpers ?
+    inline void logDebug(Smp::String8 msg) {
+        _logger->Log(this,msg,Smp::Services::ILogger::LMK_Debug);
+    }
+    inline void logInfo(Smp::String8 msg) {
+        _logger->Log(this,msg,Smp::Services::ILogger::LMK_Information);
+    }
+    inline void logWarning(Smp::String8 msg) {
+        _logger->Log(this,msg,Smp::Services::ILogger::LMK_Warning);
+    }
+    inline void logError(Smp::String8 msg) {
+        _logger->Log(this,msg,Smp::Services::ILogger::LMK_Error);
+    }
+    inline void logEvent(Smp::String8 msg) {
+        _logger->Log(this,msg,Smp::Services::ILogger::LMK_Event);
+    }
 private:
     Smp::ComponentStateKind _state;
     Smp::Services::ILogger* _logger;

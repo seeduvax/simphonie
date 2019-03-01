@@ -10,6 +10,8 @@
 #include "simph/kern/Scheduler.hpp"
 #include "Smp/ISimulator.h"
 #include "simph/kern/Logger.hpp"
+#include "simph/kern/ObjectsRegistry.hpp"
+#include "Smp/IDataflowField.h"
 
 namespace simph {
 	namespace kern {
@@ -19,11 +21,12 @@ namespace simph {
 class Schedule {
 public:
     Schedule(const Smp::IEntryPoint* ep, Smp::Duration simTime,
-            Scheduler* owner,
+            Scheduler* owner, const std::vector<Smp::IDataflowField*>* fields,
             Smp::Duration period=0,Smp::Int64 repeat=0):
             _ep(ep),
             _simTime(simTime),
             _owner(owner),
+            _fields(fields),
             _period(period),
             _repeat(repeat),
             _completed(false) {
@@ -51,10 +54,16 @@ public:
     }
     void run() {
         _ep->Execute();
-        // TODO Push data flow of parent if any.
-        
-        if (_repeat>0) {
-            --_repeat;
+        // Push related data flow fields if any.
+        if (_fields!=nullptr) {
+            for (auto f: *_fields) {
+                f->Push();
+            }
+        }
+        if (_repeat!=0) {
+            if (_repeat>0) {
+                --_repeat;
+            }
             if (_period>0) {
                 setTime(getTime()+_period);
                 _owner->schedule(this);
@@ -66,6 +75,7 @@ private:
     const Smp::IEntryPoint* _ep;
     Smp::Duration _simTime;
     Scheduler* _owner;
+    const std::vector<Smp::IDataflowField*>* _fields;
     Smp::Duration _period;
     Smp::Int64 _repeat;
     bool _completed;
@@ -98,9 +108,8 @@ void Scheduler::connect() {
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::Services::EventId Scheduler::AddImmediateEvent(const Smp::IEntryPoint* entryPoint) {
-    Schedule* s=new Schedule(entryPoint,_timeKeeper->GetSimulationTime(),this);
-    _scheduled.insert(s);
-    return s->getId();
+
+    return schedule(entryPoint,_timeKeeper->GetSimulationTime(),0,0);
 }
 // ..........................................................
 Smp::Services::EventId Scheduler::schedule(
@@ -108,7 +117,13 @@ Smp::Services::EventId Scheduler::schedule(
                                 Smp::Duration absoluteSimTime,
                                 Smp::Duration cycleTime,
                                 Smp::Int64 repeat) {
-    Schedule* s=new Schedule(entryPoint,absoluteSimTime,this,cycleTime,repeat);
+    const std::vector<Smp::IDataflowField*>* flowFields=nullptr;
+    auto reg=dynamic_cast<ObjectsRegistry*>(getSimulator()->GetResolver());
+    if (reg!=nullptr) {
+        flowFields=reg->getRelatedFlowFields(entryPoint);
+    }
+    Schedule* s=new Schedule(entryPoint,absoluteSimTime,this,
+                    flowFields,cycleTime,repeat);
     _scheduled.insert(s);
     return s->getId();
 }

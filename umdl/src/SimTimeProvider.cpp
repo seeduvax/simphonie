@@ -35,7 +35,7 @@ Smp::Float64 SimTimeProvider::compute() {
     res/=1e9; // convert from nanosec to sec.
 std::ostringstream msg;
 msg << "step t="<<res;
-getSimulator()->GetLogger()->Log(this,msg.str().c_str());    
+logInfo(msg.str().c_str());    
     return res;
 }
 

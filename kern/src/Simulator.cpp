@@ -138,7 +138,7 @@ void Simulator::setState(Smp::SimulatorStateKind newState) {
         _state=newState;
         std::ostringstream msg;
         msg << "state changed: " << _state;
-        _logger->Log(this,msg.str().c_str());
+        _logger->Log(this,msg.str().c_str(),Smp::Services::ILogger::LMK_Event);
         switch (_state) {
             case Smp::SimulatorStateKind::SSK_Initialising:
                 _eventMgr->Emit(Smp::Services::IEventManager::SMP_EnterInitialisingId);

@@ -12,7 +12,12 @@
 #include "Smp/IPublication.h"
 #include "Smp/Services/IResolver.h"
 #include "simph/kern/Component.hpp"
+#include <vector>
 
+namespace Smp {
+    class IEntryPoint;
+    class IDataflowField;
+}
 namespace simph {
 	namespace kern {
 class Node;
@@ -35,6 +40,7 @@ public:
     void dump(Smp::IObject* from=nullptr);
 
     void add(Smp::IObject* obj);
+    const std::vector<Smp::IDataflowField*>* getRelatedFlowFields(const Smp::IEntryPoint* ep);
     // SMP::IResolver implementation.
     Smp::IObject* ResolveAbsolute(
                 Smp::String8 absolutePath);
@@ -190,6 +196,7 @@ private:
     Smp::Publication::ITypeRegistry* _typeRegistry;
     Smp::IObject* resolve(Node* from,Smp::String8 path);
     void addField(Smp::IField* field);
+    Smp::IObject* getFieldParent();
 };
 
 }} // namespace simph::kern

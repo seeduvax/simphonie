@@ -47,6 +47,19 @@ public:
     Smp::SimulatorStateKind GetState() const;
     void AddInitEntryPoint(Smp::IEntryPoint* entryPoint);
     void AddModel(Smp::IModel* model);
+    template <typename T>
+    T* AddModel(Smp::String8 name, Smp::String8 descr="") {
+        T* m=new T(name,descr,_models);
+        auto mdl=dynamic_cast<Smp::IModel*>(m);
+        if (mdl!=nullptr) {
+            AddModel(mdl);
+        }
+        else {
+            delete m;
+            m=nullptr;
+        }
+        return m;
+    }
     void AddService(Smp::IService* service);
     Smp::IService* GetService(Smp::String8 name) const;
     Smp::Services::ILogger* GetLogger() const;
