@@ -69,7 +69,9 @@ public:
                 _owner->schedule(this);
             }
         }
-        _completed=_repeat==0;
+        else {
+            _completed=true;
+        }
     }
 private:
     const Smp::IEntryPoint* _ep;

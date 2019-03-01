@@ -38,33 +38,33 @@ private:
 
 #if _abs_trace_debug
 #define TRACE(msg) {\
-    std::ostringstream s;\
-    s << __FILE__ << ":" << __LINE__ << "\t" << msg;\
-    simph::sys::_logger->log("TRACE",s.str());\
+    std::ostringstream _simph_sys_logger_stream_;\
+    _simph_sys_logger_stream_ << __FILE__ << ":" << __LINE__ << "\t" << msg;\
+    simph::sys::_logger->log("TRACE",_simph_sys_logger_stream_.str());\
 }
 #define LOGD(msg) {\
-    std::ostringstream s;\
-    s << msg;\
-    simph::sys::_logger->log("DEBUG",s.str());\
+    std::ostringstream _simph_sys_logger_stream_;\
+    _simph_sys_logger_stream_ << msg;\
+    simph::sys::_logger->log("DEBUG",_simph_sys_logger_stream_.str());\
 }
 #else
 #define TRACE(msg)
 #define LOGD(msg)
 #endif
 #define LOGI(msg) {\
-    std::ostringstream s;\
-    s << msg;\
-    simph::sys::_logger->log("INFO",s.str());\
+    std::ostringstream _simph_sys_logger_stream_;\
+    _simph_sys_logger_stream_ << msg;\
+    simph::sys::_logger->log("INFO",_simph_sys_logger_stream_.str());\
 }
 #define LOGW(msg) {\
-    std::ostringstream s;\
-    s << msg;\
-    simph::sys::_logger->log("WARNING",s.str());\
+    std::ostringstream _simph_sys_logger_stream_;\
+    _simph_sys_logger_stream_ << msg;\
+    simph::sys::_logger->log("WARNING",_simph_sys_logger_stream_.str());\
 }
 #define LOGE(msg) {\
-    std::ostringstream s;\
-    s << msg;\
-    simph::sys::_logger->log("ERROR",s.str());\
+    std::ostringstream _simph_sys_logger_stream_;\
+    _simph_sys_logger_stream_ << msg;\
+    simph::sys::_logger->log("ERROR",_simph_sys_logger_stream_.str());\
 }
 
 extern simph::sys::Logger* _logger;

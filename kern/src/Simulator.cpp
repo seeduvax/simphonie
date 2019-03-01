@@ -232,7 +232,6 @@ void Simulator::Configure() {
 // ..........................................................
 void Simulator::connect(Smp::IComponent* comp) {
     if (comp->GetState()==Smp::ComponentStateKind::CSK_Configured) {
-TRACE("Connecting "<<comp->GetName());        
         comp->Connect(this);
 // TODO recursive call on childs.
     }
@@ -247,9 +246,7 @@ void Simulator::Connect() {
     for (auto service: *(_services->GetComponents())) {
         connect(service);
     }
-TRACE("")    
     for (auto model: *(_models->GetComponents())) {
-TRACE(""<<model->GetName())    
         connect(model);
     }
     setState(Smp::SimulatorStateKind::SSK_Standby);
