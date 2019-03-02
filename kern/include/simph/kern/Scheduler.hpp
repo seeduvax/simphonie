@@ -13,6 +13,8 @@
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Services/IScheduler.h"
 #include "simph/kern/Component.hpp"
+#include "simph/sys/Synchro.hpp"
+#include "simph/sys/Thread.hpp"
 #include <set>
 
 namespace simph {
@@ -22,7 +24,8 @@ class Schedule;
  *
  */
 class Scheduler: virtual public Component, 
-                        virtual public Smp::Services::IScheduler {
+                 virtual public simph::sys::Runnable,
+                 virtual public Smp::Services::IScheduler {
 public:
     /**
      * Default constructor.
@@ -78,6 +81,8 @@ public:
     void step(Smp::Duration duration);
     void run();
     void schedule(Schedule* schedule);
+    void start();
+    void stop();
 protected:
     // Component specialization
     void connect();
@@ -96,6 +101,8 @@ private:
     bool _autoStop;
     Smp::Duration _stopSimTime;
     bool _run;
+    std::mutex _mutex;
+    simph::sys::Thread* _th;
 };
 
 }} // namespace simph::kern

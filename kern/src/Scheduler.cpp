@@ -30,7 +30,8 @@ public:
             _period(period),
             _repeat(repeat),
             _completed(false) {
-        // TODO mutex to ensure correct id sequencing
+        // no mutex here because Schedule are constructed only from inside
+        // a Scheduler critical section
         _id=_nextId;
         _nextId++;
     }
@@ -100,7 +101,8 @@ Scheduler::Scheduler(Smp::String8 name, Smp::String8 descr,
                     _currentSchedule(nullptr),
                     _autoStop(false),
                     _stopSimTime(0),
-                    _run(false) {
+                    _run(false),
+                    _th(nullptr) {
 }
 // ..........................................................
 Scheduler::~Scheduler() {
@@ -128,6 +130,7 @@ Smp::Services::EventId Scheduler::schedule(
     if (reg!=nullptr) {
         flowFields=reg->getRelatedFlowFields(entryPoint);
     }
+    Synchronized(_mutex);
     Schedule* s=new Schedule(entryPoint,absoluteSimTime,this,
                     flowFields,cycleTime,repeat);
     _scheduled.insert(s);
@@ -137,6 +140,7 @@ Smp::Services::EventId Scheduler::schedule(
 Schedule* Scheduler::findSchedule(Smp::Services::EventId event,
                                     bool erase) {
     Schedule* res=nullptr;
+    Synchronized(_mutex);
     auto it=_scheduled.begin();
     while (it!=_scheduled.end() && (*it)->getId()!=event) {
         ++it;
@@ -154,6 +158,7 @@ void Scheduler::schedule(Smp::Services::EventId event,
                          Smp::Duration absoluteSimTime) {
     Schedule* s=findSchedule(event,true);
     if (s!=nullptr) {
+        Synchronized(_mutex);
         s->setTime(absoluteSimTime);
         _scheduled.insert(s);
     }
@@ -263,23 +268,24 @@ Smp::Duration Scheduler::GetNextScheduledEventTime() const {
 // --------------------------------------------------------------------
 // ..........................................................
 void Scheduler::schedule(Schedule* schedule) {
+    Synchronized(_mutex);
     _scheduled.insert(schedule);
 }
 // ..........................................................
 void Scheduler::step() {
     if (!_scheduled.empty()) {
         {
-            // TODO mutex
+            Synchronized(_mutex);
             _currentSchedule=*(_scheduled.begin());
+            _scheduled.erase(_scheduled.begin());
         }
         // advance simulation time to event time.
         // TODO maybe only if event time is greater than current timekeeper time.
         // TODO emit the required events....
         _timeKeeper->SetSimulationTime(_currentSchedule->getTime());
         _currentSchedule->run();
-        _scheduled.erase(_scheduled.begin());
         if (_currentSchedule->isCompleted()) {
-            // TODO mutex
+            Synchronized(_mutex);
             delete _currentSchedule;
             _currentSchedule=nullptr;
         }
@@ -291,6 +297,23 @@ void Scheduler::step(Smp::Duration duration) {
     _autoStop=true;
     run();
     _autoStop=false;
+}
+// ..........................................................
+void Scheduler::start() {
+    Synchronized(_mutex);
+    if (!_run) {
+        _th=new simph::sys::Thread(GetName(),this);
+        _th->start();
+    }
+}
+// ..........................................................
+void Scheduler::stop() {
+    _run=false;
+    if (_th!=nullptr) {
+        _th->join();
+        delete _th;
+        _th=nullptr;
+    }
 }
 // ..........................................................
 void Scheduler::run() {

@@ -29,7 +29,7 @@ public:
      */
     virtual ~Thread();
 
-    inline void start();
+    void start();
 
     inline void run() {
         _running=true;
