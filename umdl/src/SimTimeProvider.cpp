@@ -33,9 +33,11 @@ Smp::Float64 SimTimeProvider::compute() {
     Smp::Float64 res=0.0;
     res+=simTime;
     res/=1e9; // convert from nanosec to sec.
-std::ostringstream msg;
-msg << "step t="<<res;
-logInfo(msg.str().c_str());    
+#ifdef _abs_trace_debug
+    std::ostringstream msg;
+    msg << "step t="<<res;
+    logDebug(msg.str().c_str());
+#endif    
     return res;
 }
 

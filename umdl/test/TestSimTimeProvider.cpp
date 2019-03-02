@@ -58,9 +58,7 @@ dynamic_cast<simph::kern::ObjectsRegistry*>(sim.GetResolver())->dump();
                 0, // 0ms offset
                 40000000, // 400ms period
                 -1); // for ever
-        for (int i=0;i<20;i++) {
-            sched->step();
-        }
+        sched->step(1000000000); // 1sec simulation
     }
 };
 

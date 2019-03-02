@@ -96,7 +96,11 @@ bool scheduleOrder(Schedule* a,Schedule *b) {
 Scheduler::Scheduler(Smp::String8 name, Smp::String8 descr,
                     Smp::IObject* parent): 
                     Component(name,descr,parent),
-                    _scheduled(scheduleOrder) {
+                    _scheduled(scheduleOrder),
+                    _currentSchedule(nullptr),
+                    _autoStop(false),
+                    _stopSimTime(0),
+                    _run(false) {
 }
 // ..........................................................
 Scheduler::~Scheduler() {
@@ -264,15 +268,39 @@ void Scheduler::schedule(Schedule* schedule) {
 // ..........................................................
 void Scheduler::step() {
     if (!_scheduled.empty()) {
-        Schedule* s=*(_scheduled.begin());
+        {
+            // TODO mutex
+            _currentSchedule=*(_scheduled.begin());
+        }
         // advance simulation time to event time.
         // TODO maybe only if event time is greater than current timekeeper time.
         // TODO emit the required events....
-        _timeKeeper->SetSimulationTime(s->getTime());
-        s->run();
+        _timeKeeper->SetSimulationTime(_currentSchedule->getTime());
+        _currentSchedule->run();
         _scheduled.erase(_scheduled.begin());
-        if (s->isCompleted()) {
-            delete s;
+        if (_currentSchedule->isCompleted()) {
+            // TODO mutex
+            delete _currentSchedule;
+            _currentSchedule=nullptr;
+        }
+    }
+}
+// ..........................................................
+void Scheduler::step(Smp::Duration duration) {
+    _stopSimTime=_timeKeeper->GetSimulationTime()+duration;
+    _autoStop=true;
+    run();
+    _autoStop=false;
+}
+// ..........................................................
+void Scheduler::run() {
+    _run=true;
+    while (_run) {
+        step();
+        if (_autoStop) {
+            _run=!_scheduled.empty() &&
+                    (_stopSimTime==0 || 
+                        GetNextScheduledEventTime()<_stopSimTime);
         }
     }
 }

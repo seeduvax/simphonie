@@ -75,6 +75,8 @@ public:
     Smp::Duration GetNextScheduledEventTime() const;
 
     void step();
+    void step(Smp::Duration duration);
+    void run();
     void schedule(Schedule* schedule);
 protected:
     // Component specialization
@@ -91,6 +93,9 @@ private:
     std::multiset<Schedule*,bool (*)(Schedule*,Schedule*)> _scheduled;
     Smp::Services::ITimeKeeper* _timeKeeper;
     Schedule* _currentSchedule;
+    bool _autoStop;
+    Smp::Duration _stopSimTime;
+    bool _run;
 };
 
 }} // namespace simph::kern
