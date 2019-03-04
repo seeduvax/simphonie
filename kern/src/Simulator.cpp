@@ -258,7 +258,7 @@ void Simulator::Run() {
         // TODO throw exception
         return;
     }
-// TODO start sequencer...
+    _scheduler->start();
     setState(Smp::SimulatorStateKind::SSK_Executing);
 }
 // ..........................................................
@@ -267,7 +267,7 @@ void Simulator::Hold() {
         // TODO throw exception
         return;
     }
-// TODO stop sequencer...
+    _scheduler->stop();
     setState(Smp::SimulatorStateKind::SSK_Standby);
 }
 // ..........................................................

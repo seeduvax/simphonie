@@ -16,6 +16,7 @@
 namespace simph {
 	namespace kern {
 class ObjectsRegistry;
+class Scheduler;
 /**
  *
  */
@@ -81,7 +82,7 @@ private:
     Smp::IContainer* _services;
     Collection<Smp::IFactory> _compFactories;
     Smp::Services::ILogger* _logger;
-    Smp::Services::IScheduler* _scheduler;
+    Scheduler* _scheduler;
     Smp::Services::ITimeKeeper* _timeKeeper;
     Smp::Services::IEventManager* _eventMgr;
     Smp::Services::ILinkRegistry* _linkRegistry;

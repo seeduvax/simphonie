@@ -36,8 +36,13 @@ public:
         sim.Publish();
         sim.Configure();
         sim.Connect();
+        TRACE(""<<sim.GetTimeKeeper()->GetSimulationTime());
+        // TODO schedule something, otherwise simulation time will
+        // never change because of the way the scheduler is implemented !
         sim.Run();
+        sleep(1);
         sim.Hold();
+        TRACE(""<<sim.GetTimeKeeper()->GetSimulationTime());
         sim.Exit();
     }
 
