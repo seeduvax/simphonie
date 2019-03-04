@@ -10,6 +10,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "simph/umdl/SimTimeProvider.hpp"
 #include "simph/umdl/Logger1D.hpp"
+#include "simph/umdl/SysTimeSynchro.hpp"
 #include "simph/kern/Simulator.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/ObjectsRegistry.hpp"
@@ -38,6 +39,7 @@ public:
         simph::kern::Simulator sim;
         auto mdl=sim.AddModel<SimTimeProvider>("clock");
         auto log=sim.AddModel<Logger1D>("log");
+        auto sync=sim.AddModel<SysTimeSynchro>("sync");
         sim.Publish();
         sim.Configure();
         sim.Connect();
@@ -48,6 +50,11 @@ public:
         CPPUNIT_ASSERT(f1!=nullptr);
 dynamic_cast<simph::kern::ObjectsRegistry*>(sim.GetResolver())->dump();        
         simph::kern::Scheduler* sched=dynamic_cast<simph::kern::Scheduler*>(sim.GetScheduler());
+        sched->AddSimulationTimeEvent(
+                sync->GetEntryPoint("step"),
+                0, // 0ms offset
+                10000000, // 10ms period
+                -1); // for ever
         sched->AddSimulationTimeEvent(
                 mdl->GetEntryPoint("step"),
                 15000000, // 1ms offset
