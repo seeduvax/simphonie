@@ -17,7 +17,7 @@ namespace simph {
 // --------------------------------------------------------------------
 // ..........................................................
 SysTimeSynchro::SysTimeSynchro(Smp::String8 name, Smp::String8 descr,
-            Smp::IObject* parent): Component(name,descr,parent),
+            Smp::IObject* parent): 
                                     AStepMdl(name,descr,parent),
                                     _nextTick(_nullTimePoint) {
     _period=10000000; // default 100Hz sync.

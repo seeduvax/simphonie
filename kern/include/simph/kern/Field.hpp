@@ -25,7 +25,7 @@ namespace simph {
 /**
  *
  */
-class Field: virtual public Persist, 
+class Field: public Persist, 
                     virtual public Smp::IDataflowField,
                     virtual public Smp::IForcibleField {
 public:
@@ -81,8 +81,7 @@ public:
             Smp::Bool isInput,
             Smp::Bool isOutput,
             Smp::IObject* parent
-            ): Object(name,description,parent),
-               Persist(name,description,parent),
+            ): 
                 Field(name,description,viewKind,(void*)address,sizeof(T),
                         isState,isInput,isOutput,parent) {
         _tData=address;

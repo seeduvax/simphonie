@@ -18,7 +18,7 @@ namespace simph {
 /**
  *
  */
-class Generator1D: public virtual simph::umdl::AStepMdl {
+class Generator1D: public simph::umdl::AStepMdl {
 public:
     /**
      * Default constructor.

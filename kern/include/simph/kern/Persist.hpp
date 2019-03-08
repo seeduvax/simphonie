@@ -17,7 +17,7 @@ namespace simph {
 /**
  *
  */
-class Persist: virtual public Object, virtual public Smp::IPersist {
+class Persist: public Object, virtual public Smp::IPersist {
 public:
     /**
      * Default constructor.

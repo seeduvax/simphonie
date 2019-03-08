@@ -21,7 +21,7 @@ Field::Field(Smp::String8 name, Smp::String8 description,
         Smp::Bool isState,
         Smp::Bool isInput,
         Smp::Bool isOutput,
-        Smp::IObject* parent): Object(name,description,parent),
+        Smp::IObject* parent):
                         Persist(name,description,parent),
                         _targets("cnx","",this) {
     _viewKind=viewKind;

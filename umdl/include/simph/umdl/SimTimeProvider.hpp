@@ -17,7 +17,7 @@ namespace simph {
 /**
  *
  */
-class SimTimeProvider: virtual public Generator1D {
+class SimTimeProvider: public Generator1D {
 public:
     /**
      * Default constructor.

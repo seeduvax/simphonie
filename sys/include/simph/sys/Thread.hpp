@@ -32,13 +32,11 @@ public:
     void start();
 
     inline void run() {
-        _running=true;
         _toRun->run();
-        _running=false;
     }
 
     inline void join() {
-        if (_running) {
+        if (_th->joinable()) {
             _th->join();
         }
     }
@@ -50,7 +48,6 @@ public:
 private:
     Runnable* _toRun;
     std::string _name;
-    bool _running;
     std::thread* _th;
 };
 

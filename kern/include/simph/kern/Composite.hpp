@@ -18,7 +18,7 @@ namespace simph {
 /**
  *
  */
-class Composite: virtual public Object, public virtual Smp::IComposite {
+class Composite: public Object, public virtual Smp::IComposite {
 public:
     /**
      * Default constructor.

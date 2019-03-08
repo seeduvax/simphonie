@@ -19,8 +19,6 @@ namespace simph {
 // ..........................................................
 SimTimeProvider::SimTimeProvider(Smp::String8 name, Smp::String8 descr,
                                 Smp::IObject* parent):
-                    Component(name,descr,parent), 
-                    AStepMdl(name,descr,parent), 
                     Generator1D(name,descr,parent) {
 }
 // ..........................................................

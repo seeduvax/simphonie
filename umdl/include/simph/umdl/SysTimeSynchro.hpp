@@ -18,7 +18,7 @@ namespace simph {
 /**
  *
  */
-class SysTimeSynchro: virtual public simph::umdl::AStepMdl {
+class SysTimeSynchro: public simph::umdl::AStepMdl {
 public:
     /**
      * Default constructor.

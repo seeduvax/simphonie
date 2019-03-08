@@ -18,7 +18,6 @@ using namespace simph::kern;
 class SampleComposite: virtual public Composite {
 public:
     SampleComposite(Smp::String8 name, Smp::IObject* parent=nullptr):
-                Object(name,"",parent),
                 Composite(name,"",parent) {
         addContainer("c1");
         addContainer("c2");

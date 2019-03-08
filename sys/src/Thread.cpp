@@ -22,22 +22,20 @@ void threadEntryPoint(Thread* th) {
 Thread::Thread(std::string name, Runnable* toRun):
         _toRun(toRun),
         _name(name),
-        _running(false),
         _th(nullptr) {
 }
 // ..........................................................
 Thread::~Thread() {
-    if (_running) {
-        join();
-    }
     if (_th!=nullptr) {
+        join();
         delete _th;
+        _th=nullptr;
     }
 }
 // --------------------------------------------------------------------
 // ..........................................................
 void Thread::start() {
-    if (_running) {
+    if (_th!=nullptr) {
         join();
         delete _th;
     }

@@ -21,7 +21,7 @@ namespace simph {
 /**
  *
  */
-class AStepMdl: public virtual simph::kern::Component,
+class AStepMdl: public simph::kern::Component,
                 public virtual Smp::IModel,
                 public virtual Smp::IEntryPointPublisher {
 public:
