@@ -371,8 +371,9 @@ Smp::Services::IResolver* Simulator::GetResolver() const {
 // ..........................................................
 void Simulator::RegisterFactory(Smp::IFactory* componentFactory) {
     for (auto fac: _compFactories) {
-        if (fac==componentFactory) {
-            // already registered so nothing to do.
+        if (fac->GetUuid()==componentFactory->GetUuid()) {
+            // A factory with same uuid already registered so nothing to do.
+            // TODO check whether an exception should be thrown
             return;
         }
     }

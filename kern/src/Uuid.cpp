@@ -1,10 +1,44 @@
 #include "Smp/Uuid.h"
+#include <cstring>
 
 namespace Smp {
 // --------------------------------------------------------------------
 // ..........................................................
 Uuid::Uuid(const char * value) {
-// TODO
+    // TODO check if this naive way of doing does not
+    // introduce endianness issue.
+    int bSize=sizeof(Data1)+sizeof(Data2)+sizeof(Data3);
+    uint8_t buf[bSize];
+    std::memset(buf,0,bSize);
+    const char* ptr=value;
+    int i=0;
+    while (*ptr!='\0' && i<2*bSize) {
+        int v=-1;
+        if (*ptr>='A' && *ptr<='F') {
+            v=*ptr - 'A' + 0x0A;
+        }
+        else if (*ptr>='a' && *ptr<='f') {
+            v=*ptr - 'a'+ 0x0A;
+        }
+        else if (*ptr>='0' && *ptr<='9') {
+            v=*ptr - '0';
+        }
+        ptr++;
+        if (v>=0) {
+            int j=i/2;
+            if (i%2!=0) {
+                buf[j]=buf[j]<<4;
+            }
+            buf[j]+=v;
+            i++;
+        }
+    }
+    uint32_t* bd1=(uint32_t*)buf;
+    Data1=*bd1;
+    std::array<uint16_t,3>* bd2=(std::array<uint16_t,3>*)(buf+sizeof(Data1));
+    Data2=*bd2;
+    std::array<uint8_t,6>* bd3=(std::array<uint8_t,6>*)(buf+sizeof(Data1)+sizeof(Data2));
+    Data3=*bd3;
 }
 // ..........................................................
 bool Uuid::operator==(const Smp::Uuid& other) const {
@@ -39,14 +73,5 @@ bool Uuid::operator<(const Smp::Uuid& other) const {
                 (Data3[4]==other.Data3[4] && (Data3[5]<other.Data3[5]
              ))))))))))))))))));
 }
-// ..........................................................
-// ..........................................................
-// ..........................................................
-// ..........................................................
-// ..........................................................
-// ..........................................................
-// ..........................................................
-// ..........................................................
-// ..........................................................
 // ..........................................................
 }
