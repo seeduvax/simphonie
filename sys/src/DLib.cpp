@@ -13,7 +13,7 @@ namespace simph {
 	namespace sys {
 // --------------------------------------------------------------------
 // ..........................................................
-DLib::DLib(const char* libName) {
+DLib::DLib(const char* libName): _name(libName) {
 #ifdef WIN32
     _lib=LoadLibrary(libName);
 #else

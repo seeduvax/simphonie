@@ -14,6 +14,7 @@
 #else
 #include <dlfcn.h>
 #endif
+#include <string>
 
 namespace simph {
 	namespace sys {
@@ -33,22 +34,24 @@ public:
     virtual ~DLib();
 
     template<typename FT>
-    FT getLib(const char* symbol) {
+    FT getEntry(const char* symbol) {
 #ifdef WIN32
-        return static_cast<FT>(GetProcAddress(_lib,symbol));
+        return reinterpret_cast<FT>(GetProcAddress(_lib,symbol));
 #else
-        return static_cast<FT>(dlsym(_lib,symbol));
+        return reinterpret_cast<FT>(dlsym(_lib,symbol));
 #endif
         // TODO throw exception on error.
     }
-
+    inline std::string getName() {
+        return _name;
+    }
 private:
 #ifdef WIN32
     HMODULE _lib;
 #else
     void* _lib;
 #endif
-
+    std::string _name;
 };
 
 }} // namespace simph::sys

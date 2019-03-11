@@ -104,6 +104,13 @@ Simulator::~Simulator() {
     delete _eventMgr;
     delete _linkRegistry;
     delete _logger;
+    for (auto lib: _libs) {
+        auto finalizeFunc=lib->getEntry<bool (*)()>("Finalize");
+        if (finalizeFunc!=nullptr) {
+            finalizeFunc();
+        }
+        delete lib;
+    }
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -378,6 +385,9 @@ void Simulator::RegisterFactory(Smp::IFactory* componentFactory) {
         }
     }
     _compFactories.push_back(componentFactory);
+    std::ostringstream msg;
+    msg << "Registered component factory: "<<componentFactory->GetName();
+    _logger->Log(this,msg.str().c_str(),Smp::Services::ILogger::LMK_Information);
 }
 // ..........................................................
 Smp::IComponent* Simulator::CreateInstance(Smp::Uuid uuid,
@@ -412,6 +422,24 @@ Smp::IFactory* Simulator::GetFactory(Smp::Uuid uuid) const {
         }
     }
     return nullptr;
+}
+// ..........................................................
+void Simulator::loadLibrary(Smp::String8 name) {
+    std::string libName=name;
+    simph::sys::DLib* fLib=nullptr;
+    for (auto lib: _libs) {
+        if (lib->getName()==libName) {
+            fLib=lib;
+        }
+    }
+    if (fLib==nullptr) {
+        fLib=new simph::sys::DLib(name);
+        auto init=fLib->getEntry<bool (*)(Smp::ISimulator*, Smp::Publication::ITypeRegistry* tReg)>("Initialize");
+        if (init!=nullptr) {
+            init(this,_typeRegistry);
+        }
+        _libs.push_back(fLib);
+    }
 }
 
 }} // namespace simph::kern

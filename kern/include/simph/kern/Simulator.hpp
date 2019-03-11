@@ -12,6 +12,7 @@
 #include "Smp/ISimulator.h"
 #include "simph/kern/Composite.hpp"
 #include "Smp/Publication/ITypeRegistry.h"
+#include "simph/sys/DLib.hpp"
 
 namespace simph {
 	namespace kern {
@@ -33,7 +34,7 @@ public:
      * Destructor.
      */
     virtual ~Simulator();
-
+    // Smp::ISimulator implementation
     void Initialise();
     void Publish();
     void Configure();
@@ -48,19 +49,6 @@ public:
     Smp::SimulatorStateKind GetState() const;
     void AddInitEntryPoint(Smp::IEntryPoint* entryPoint);
     void AddModel(Smp::IModel* model);
-    template <typename T>
-    T* AddModel(Smp::String8 name, Smp::String8 descr="") {
-        T* m=new T(name,descr,_models);
-        auto mdl=dynamic_cast<Smp::IModel*>(m);
-        if (mdl!=nullptr) {
-            AddModel(mdl);
-        }
-        else {
-            delete m;
-            m=nullptr;
-        }
-        return m;
-    }
     void AddService(Smp::IService* service);
     Smp::IService* GetService(Smp::String8 name) const;
     Smp::Services::ILogger* GetLogger() const;
@@ -75,6 +63,38 @@ public:
 		       Smp::String8 description,
 		       Smp::IComposite* parent);
     Smp::IFactory* GetFactory(Smp::Uuid uuid) const;
+    /**
+     * Create and add new model instance.
+     * Model type is defined as template argument.
+     * @param name new model instance name.
+     * @param descr instance description.
+     * @return pointer to the created model, may be nullptr in case
+     * of creation error, for instance when object to create type does
+     * not derive from Smp::IModel.
+     */
+    template <typename T>
+    T* AddModel(Smp::String8 name, Smp::String8 descr="") {
+        T* m=new T(name,descr,_models);
+        auto mdl=dynamic_cast<Smp::IModel*>(m);
+        if (mdl!=nullptr) {
+            AddModel(mdl);
+        }
+        else {
+            delete m;
+            m=nullptr;
+        }
+        return m;
+    }
+    /**
+     * Dynamic load a library.
+     * If library has an void Initialize(Smp::ISimulator*, Smp::ITypeRegistry*)
+     * function, it is called just after loading. It should register bundled
+     * type and component factories by calling bakc RegisterFactory and 
+     * RegisterType.
+     * TODO define behavior according to simulator state.
+     * @param lib library name.
+     */
+    void loadLibrary(Smp::String8 lib);
 private:
     Smp::SimulatorStateKind _state;
     Collection<Smp::IEntryPoint> _initEntryPoints;
@@ -88,10 +108,13 @@ private:
     Smp::Services::ILinkRegistry* _linkRegistry;
     Smp::Publication::ITypeRegistry* _typeRegistry;
     ObjectsRegistry* _registry;
+    std::vector<simph::sys::DLib*> _libs;
+
     void publish(Smp::IComponent* comp);
     void configure(Smp::IComponent* comp);
     void connect(Smp::IComponent* comp);
     void setState(Smp::SimulatorStateKind newState);
+
 };
 
 }} // namespace simph::kern
