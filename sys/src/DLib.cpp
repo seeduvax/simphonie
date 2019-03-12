@@ -18,8 +18,13 @@ DLib::DLib(const char* libName): _name(libName) {
     _lib=LoadLibrary(libName);
 #else
     _lib=dlopen(libName,RTLD_NOW | RTLD_LAZY);
+    if (_lib==nullptr) {
+        std::ostringstream msg;
+        msg << "Can't load library "<<libName<<": "<<dlerror();
+        LOGE(msg.str());
+        throw std::runtime_error(msg.str());
+    }
 #endif
-    // TODO throw exception on error
 }
 // ..........................................................
 DLib::~DLib() {

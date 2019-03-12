@@ -15,6 +15,7 @@
 #include <dlfcn.h>
 #endif
 #include <string>
+#include "simph/sys/Logger.hpp"
 
 namespace simph {
 	namespace sys {
@@ -38,9 +39,13 @@ public:
 #ifdef WIN32
         return reinterpret_cast<FT>(GetProcAddress(_lib,symbol));
 #else
-        return reinterpret_cast<FT>(dlsym(_lib,symbol));
+        FT fptr=reinterpret_cast<FT>(dlsym(_lib,symbol));
+        if (fptr==nullptr) {
+            LOGW("Can't find Symbol "<<symbol<<" from lib "
+                <<_name<<": "<<dlerror());
+        }
+        return fptr;
 #endif
-        // TODO throw exception on error.
     }
     inline std::string getName() {
         return _name;
