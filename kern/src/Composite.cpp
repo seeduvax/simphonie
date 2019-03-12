@@ -38,37 +38,4 @@ const Smp::ContainerCollection* Composite::GetContainers() const {
 Smp::IContainer* Composite::GetContainer(Smp::String8 name) const {
     return _containers.at(name);
 }
-// ..........................................................
-void Composite::dump() {
-    dump(std::cout,this);
-}
-// ..........................................................
-void Composite::dump(std::ostream& out,Smp::IComposite* c,int level) {
-    for (int i=0;i<level;++i) {
-        out << "    ";
-    }
-    out << c->GetName()<<":" <</* TODO insert real type name here */ std::endl;
-    for (auto container: *(c->GetContainers())) {
-        for (int i=0;i<level;++i) {
-            out << "    ";
-        }
-        out << "  " << container->GetName() << std::endl;
-        for (auto comp: *(container->GetComponents())) {
-            dump(out,comp,level+1);
-        }
-    }
-}
-// ..........................................................
-void Composite::dump(std::ostream& out,Smp::IComponent* c,int level) {
-    for (int i=0;i<level;++i) {
-        out << "    ";
-    }
-    out << c->GetName()<<":" <</* TODO insert real type name here */ std::endl;
-    for (auto field: *(c->GetFields())) {
-        for (int i=0;i<level;++i) {
-            out << "    ";
-        }
-        out << "    " << field->GetName() << /* TODO data type here*/ std::endl;
-    }
-}
 }} // namespace simph::kern

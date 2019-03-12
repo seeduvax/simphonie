@@ -32,7 +32,6 @@ public:
 
     void testStates() {
         Simulator sim;
-        sim.dump();
         sim.Publish();
         sim.Configure();
         sim.Connect();
@@ -45,7 +44,6 @@ public:
         TRACE(""<<sim.GetTimeKeeper()->GetSimulationTime());
         sim.Exit();
     }
-
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestSimulator);
