@@ -24,13 +24,15 @@ public:
     /**
      * Default constructor.
      */
-    Logger();
+    Logger(std::ostream& out = std::cout);
     /**
      * Destructor.
      */
     virtual ~Logger();
 
     virtual void log(std::string level, std::string msg);
+
+    //TODO add enum for log level
 private:
     std::ostream& _out;
     std::mutex _mutex;

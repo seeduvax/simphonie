@@ -23,15 +23,17 @@ Field::Field(Smp::String8 name, Smp::String8 description,
         Smp::Bool isOutput,
         Smp::IObject* parent):
                         Persist(name,description,parent),
+                        _stateType(isState),
+                        _inputType(isInput),
+                        _outputType(isOutput),
+                        _type(),
+                        _viewKind(viewKind),
+                        _data(address),
+                        _dataSize(dataSize),
+                        _src(nullptr),
+                        _forced(false),
+                        _forcedValue(),
                         _targets("cnx","",this) {
-    _viewKind=viewKind;
-    _data=address;
-    _dataSize=dataSize;
-    _inputType=isInput;
-    _outputType=isOutput;
-    _stateType=isState;
-    _src=nullptr;
-    _forced=false;
 }
 // ..........................................................
 Field::~Field() {
@@ -76,6 +78,7 @@ LOGE("Can't connect "<<GetName()<<" to "<<target->GetName()
 }
 // ..........................................................
 void Field::Push() {
+    // nice :)
     for (auto f: _targets) {
         std::memcpy(f->_data,_data,_dataSize);
     }

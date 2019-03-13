@@ -45,14 +45,14 @@ Component::Component(Smp::String8 name,
                 Smp::String8 descr,
                 Smp::IObject* parent):
                     Object(name,descr,parent),
-                    _fields("Fields","",this) {
-    _state=Smp::ComponentStateKind::CSK_Created;
+                    _state(Smp::ComponentStateKind::CSK_Created),
+                    _logger(nullptr),
+                    _fields("Fields","",this),
+                    _uuid(),
+                    _simulator(nullptr) {
 }
 // ..........................................................
 Component::~Component() {
-    for (auto field: _fields) {
-        delete field;
-    }
 }
 // --------------------------------------------------------------------
 // ..........................................................

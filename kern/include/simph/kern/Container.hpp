@@ -29,13 +29,14 @@ public:
      * Destructor.
      */
     virtual ~Container();
+
     // Smp::IComponent implementation
-    const Smp::ComponentCollection* GetComponents() const;
-    Smp::IComponent* GetComponent(Smp::String8 name) const;
-    void AddComponent(Smp::IComponent* component);
-    Smp::Int64 GetCount() const;
-    Smp::Int64 GetUpper() const;
-    Smp::Int64 GetLower() const;
+    const Smp::ComponentCollection* GetComponents() const override;
+    Smp::IComponent* GetComponent(Smp::String8 name) const override;
+    void AddComponent(Smp::IComponent* component) override;
+    Smp::Int64 GetCount() const override;
+    Smp::Int64 GetUpper() const override;
+    Smp::Int64 GetLower() const override;
 
 protected:
     virtual bool checkComponentType(Smp::IComponent* comp);

@@ -38,7 +38,8 @@ static Smp::String8 _LMK_NamesTable[]={
 // --------------------------------------------------------------------
 // ..........................................................
 Logger::Logger(Smp::String8 name,Smp::String8 descr, 
-        Smp::IObject* parent): Component(name,descr,parent) {
+        Smp::IObject* parent): Component(name,descr,parent),
+                _logger() {
 }
 // ..........................................................
 Logger::~Logger() {

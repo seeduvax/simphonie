@@ -29,8 +29,8 @@ public:
      */
     virtual ~Persist();
     // Smp::IPersist implementation
-    void Restore(Smp::IStorageReader* reader);
-    void Store(Smp::IStorageWriter* writer);
+    void Restore(Smp::IStorageReader* reader) override;
+    void Store(Smp::IStorageWriter* writer) override;
 private:
 
 };

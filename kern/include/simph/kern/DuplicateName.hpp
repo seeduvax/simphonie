@@ -19,7 +19,7 @@ namespace simph {
 /**
  *
  */
-class DuplicateName: public virtual Exception, 
+class DuplicateName: public Exception,
                     public virtual Smp::DuplicateName {
 public:
     /**

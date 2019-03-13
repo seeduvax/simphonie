@@ -20,9 +20,6 @@ Composite::Composite(Smp::String8 name, Smp::String8 descr,
 }
 // ..........................................................
 Composite::~Composite() {
-    for (auto container: _containers) {
-        delete container;
-    }
 }
 // --------------------------------------------------------------------
 // ..........................................................

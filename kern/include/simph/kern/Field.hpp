@@ -45,18 +45,18 @@ public:
      */
     virtual ~Field();
     // Smp::IField implementation
-    Smp::ViewKind GetView() const;
-    Smp::Bool IsState() const;
-    Smp::Bool IsInput() const;
-    Smp::Bool IsOutput() const;
-    const Smp::Publication::IType* GetType() const;
-    void Connect(Smp::IField* target);
-    void Push();
+    Smp::ViewKind GetView() const override;
+    Smp::Bool IsState() const override;
+    Smp::Bool IsInput() const override;
+    Smp::Bool IsOutput() const override;
+    const Smp::Publication::IType* GetType() const override;
+    void Connect(Smp::IField* target) override;
+    void Push() override;
     // Smp::IForcibleField implementation
-    void Force(Smp::AnySimple value);
-    void Unforce();
-    Smp::Bool IsForced();
-    void Freeze();
+    void Force(Smp::AnySimple value) override;
+    void Unforce() override;
+    Smp::Bool IsForced() override;
+    void Freeze() override;
 
 private:
     Smp::Bool _stateType;
@@ -82,14 +82,15 @@ public:
             Smp::Bool isOutput,
             Smp::IObject* parent
             ): 
-                Field(name,description,viewKind,(void*)address,sizeof(T),
-                        isState,isInput,isOutput,parent) {
-        _tData=address;
+                Field(name,description,viewKind,(void*) address,sizeof(T),
+                        isState,isInput,isOutput,parent),
+        _tData(address) {
     }
     virtual ~TField() {
     }
     // Smp::ISimpleField implementation
     Smp::AnySimple GetValue() const;
+
     void SetValue(Smp::AnySimple value) {
         *_tData=value;
     }

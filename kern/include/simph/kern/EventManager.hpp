@@ -12,7 +12,7 @@
 #include "Smp/Services/IEventManager.h"
 #include "simph/kern/Collection.hpp"
 #include "simph/kern/Component.hpp"
-#include <map>
+#include <unordered_map>
 
 namespace simph {
 	namespace kern {
@@ -20,7 +20,7 @@ namespace simph {
 /**
  *
  */
-class EventManager: virtual public Component,
+class EventManager: public Component,
                     virtual public Smp::Services::IEventManager {
 public:
     /**
@@ -42,7 +42,8 @@ public:
     void Emit(Smp::Services::EventId event, 
                 Smp::Bool syncrhonous=true);
 private:
-    std::map<Smp::Services::EventId,Collection<const Smp::IEntryPoint>* > _evRegistry;
+    typedef std::unordered_map<Smp::Services::EventId, Collection<const Smp::IEntryPoint>> EventRegisteryMap;
+    EventRegisteryMap _evRegistry;
 };
 
 }} // namespace simph::kern

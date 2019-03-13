@@ -30,12 +30,12 @@ public:
      */
     virtual ~Composite();
 
-    const Smp::ContainerCollection* GetContainers() const;
-    Smp::IContainer* GetContainer(Smp::String8 name) const;
+    const Smp::ContainerCollection* GetContainers() const override;
+    Smp::IContainer* GetContainer(Smp::String8 name) const override;
 protected:
     void addContainer(Smp::String8 name, Smp::String8 descr="");
 private:
-    Collection<Smp::IContainer> _containers;
+    CollectionUnique<Smp::IContainer> _containers;
 };
 
 }} // namespace simph::kern
