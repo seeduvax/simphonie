@@ -10,45 +10,54 @@
 #include "simph/kern/Object.hpp"
 
 namespace simph {
-	namespace kern {
-// --------------------------------------------------------------------
-// ..........................................................
-Object::Object(Smp::String8 name,
-                Smp::String8 descr,
-                Smp::IObject* parent) {
-    _name=name;
-    _description=descr;
-    _parent=parent;
-}
-// ..........................................................
-Object::~Object() {
-}
-// --------------------------------------------------------------------
-// ..........................................................
-bool Object::checkName() {
+    namespace kern {
+
+namespace {
+
+bool checkName(const std::string& name) {
+    //TODO use STL instead
+
     // only alphanum chars, _, [, and ] are valid
     // in names.
-    for (auto ch: _name) {
+    for (auto ch: name) {
         if (!(
                 (ch>='A' && ch<='Z')
-	        || (ch>='a' && ch<='z')
-	        || (ch>='0' && ch<='9')
-	        || ch=='_'
-	        || ch=='['
-	        || ch==']'
-	        )) {
-	    return false;
-	}
+            || (ch>='a' && ch<='z')
+            || (ch>='0' && ch<='9')
+            || ch=='_'
+            || ch=='['
+            || ch==']'
+            )) {
+        return false;
+    }
     }
     // empty names and C++ keywords are not valid.
-    if ( _name=="" 
-	|| _name=="for"
+    if ( name==""
+    || name=="for"
     ) {
         return false;
     }
 
     return true;
 }
+} // anonymous namespace
+
+// --------------------------------------------------------------------
+// ..........................................................
+Object::Object(Smp::String8 name,
+                Smp::String8 descr,
+                Smp::IObject* parent):
+                    _name(name)
+                  , _description(descr)
+                  , _parent(parent) {
+    if (!checkName(_name)) {
+        // TODO log something + exception
+    }
+}
+// ..........................................................
+Object::~Object() {
+}
+// --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 Object::GetName() const {
     return _name.c_str();
@@ -63,11 +72,9 @@ Smp::IObject* Object::GetParent() const {
 }
 // ..........................................................
 void Object::setName(Smp::String8 name) {
-    auto nb=_name;
     _name=name;
-    if (!checkName()) {
-        _name=nb;
-	// TODO log something + execption
+    if (!checkName(_name)) {
+    	// TODO log something + exception
     }
 }
 // ..........................................................

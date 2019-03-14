@@ -31,9 +31,9 @@ public:
      */
     virtual ~Object();
 
-    Smp::String8 GetName() const;
-    Smp::String8 GetDescription() const;
-    Smp::IObject* GetParent() const;
+    Smp::String8 GetName() const override;
+    Smp::String8 GetDescription() const override;
+    Smp::IObject* GetParent() const override;
 
 protected:
 
@@ -41,7 +41,6 @@ private:
     std::string _name;
     std::string _description;
     Smp::IObject* _parent;
-    bool checkName();
 
     // TODO reconsider to make the 3 following protected if really needed.
     void setName(Smp::String8 name);

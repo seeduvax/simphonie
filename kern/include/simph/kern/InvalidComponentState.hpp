@@ -17,7 +17,7 @@ namespace simph {
 /**
  *
  */
-class InvalidComponentState: virtual public Exception, virtual public Smp::InvalidComponentState {
+class InvalidComponentState: public Exception, virtual public Smp::InvalidComponentState {
 public:
     /**
      * Default constructor.

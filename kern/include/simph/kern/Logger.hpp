@@ -32,10 +32,10 @@ public:
     virtual ~Logger();
     // Smp::Services::ILogger implementation
     Smp::Services::LogMessageKind QueryLogMessageKind(
-                             Smp::String8 messageKindName);
+                             Smp::String8 messageKindName) override;
     void Log( const Smp::IObject* sender,
                 Smp::String8 message,
-                Smp::Services::LogMessageKind kind = 0);
+                Smp::Services::LogMessageKind kind = 0) override;
 private:
     simph::sys::Logger _logger;
 

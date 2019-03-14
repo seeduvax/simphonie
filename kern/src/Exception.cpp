@@ -14,7 +14,11 @@ namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-Exception::Exception() {
+Exception::Exception():
+        _name(),
+        _description(),
+        _sender(nullptr),
+        _msg() {
 }
 // ..........................................................
 Exception::~Exception() {

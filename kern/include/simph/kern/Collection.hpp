@@ -13,6 +13,7 @@
 #include "Smp/ICollection.h"
 #include "simph/kern/Object.hpp"
 #include <vector>
+#include <algorithm>
 
 namespace simph {
 	namespace kern {
@@ -35,50 +36,67 @@ public:
     virtual ~Collection() {
     }
 
-    T* at(Smp::String8 name) const {
-        for (auto entry: _content) {
-            if (strcmp(name,entry->GetName())==0) {
-                return entry;
-            }
-        }
-        return NULL;
+    T* at(Smp::String8 name) const final {
+        auto it = std::find_if(_content.begin(), _content.end(), [name](const T* elem) {
+            return elem!=nullptr && strcmp(name,elem->GetName())==0; });
+        return it!=_content.end()?*it:nullptr;
     }
-    T* at(size_t index) const {
+    T* at(size_t index) const final{
         if (index<_content.size()) {
             return _content[index];
         }
-        return NULL;
+        return nullptr;
     }
-    size_t size() const {
+    size_t size() const final {
         return _content.size();
     }
     typedef typename Smp::ICollection<T>::const_iterator const_iterator;
-    const_iterator begin() const {
+    const_iterator begin() const final {
         return const_iterator(*this,0);
     }
-    const_iterator end() const {
+    const_iterator end() const final {
         return const_iterator(*this,_content.size());
+    }
+    bool contain(const T* t) const {
+        return std::find(_content.begin(), _content.end(), t)!=_content.end();
     }
     void push_back(T* t) {
         _content.push_back(t);
     }
-    bool remove(T* t) {
-        bool res=false;
-        auto it=_content.begin();
-        while (it!=_content.end()) {
-            if (*it==t) {
-                _content.erase(it);
-                res=true;
-            }
-            else {
-                ++it;
-            }
-        }
-        return res;
+    bool remove(const T* t) {
+        size_t initialSize = _content.size();
+
+        // This is better than the iterator shift loop O(n^2)
+        // std::remove complexity is O(n). std::erase is O(1)
+        _content.erase(
+            std::remove(_content.begin(), _content.end(), t),
+            _content.end());
+
+        size_t newSize = _content.size();
+
+        return initialSize!=newSize;
     }
 
 private:
     std::vector<T*> _content;
+};
+
+
+/*
+ *
+ */
+template <typename T>
+class CollectionUnique: public Collection<T> {
+public:
+    CollectionUnique(Smp::String8 name, Smp::String8 descr,
+            Smp::IObject* parent): Collection<T>(name,descr,parent) {
+    }
+
+    virtual ~CollectionUnique() {
+        for (auto field: *this) {
+            delete field;
+        }
+    };
 };
 
 }} // namespace simph::kern

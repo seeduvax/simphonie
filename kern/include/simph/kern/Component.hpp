@@ -34,13 +34,14 @@ public:
     virtual ~Component();
 
     // Smp::IComponent implementation
-    Smp::ComponentStateKind GetState() const;
-    void Publish(Smp::IPublication* receiver);
-    void Configure(Smp::Services::ILogger* logger);
-    void Connect(Smp::ISimulator* simulator);
-    Smp::IField* GetField(Smp::String8 fullName) const;
-    const Smp::FieldCollection* GetFields() const;
-    const Smp::Uuid& GetUuid() const;
+    Smp::ComponentStateKind GetState() const override;
+    void Publish(Smp::IPublication* receiver) override;
+    void Configure(Smp::Services::ILogger* logger) override;
+    void Connect(Smp::ISimulator* simulator) override;
+    Smp::IField* GetField(Smp::String8 fullName) const override;
+    const Smp::FieldCollection* GetFields() const override;
+    const Smp::Uuid& GetUuid() const override;
+
 protected:
     inline Smp::ISimulator* getSimulator() const {
         return _simulator;
@@ -69,9 +70,9 @@ protected:
 private:
     Smp::ComponentStateKind _state;
     Smp::Services::ILogger* _logger;
-    Smp::ISimulator* _simulator;
-    Collection<Smp::IField> _fields;
+    CollectionUnique<Smp::IField> _fields;
     Smp::Uuid _uuid;
+    Smp::ISimulator* _simulator;
 };
 
 }} // namespace simph::kern

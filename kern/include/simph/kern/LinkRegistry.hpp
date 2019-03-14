@@ -12,7 +12,7 @@
 #include "Smp/Services/ILinkRegistry.h"
 #include "simph/kern/Component.hpp"
 #include "simph/kern/Collection.hpp"
-#include <map>
+#include <unordered_map>
 
 namespace simph {
 	namespace kern {
@@ -20,7 +20,7 @@ namespace simph {
 /**
  *
  */
-class LinkRegistry: virtual public Component,
+class LinkRegistry: public Component,
             virtual public Smp::Services::ILinkRegistry {
 public:
     /**
@@ -35,17 +35,22 @@ public:
     virtual ~LinkRegistry();
     // Smp::Services::ILinkRegistry implementation
     void AddLink(Smp::IComponent* source,
-                const Smp::IComponent* target);
+                const Smp::IComponent* target) override;
     Smp::Bool HasLink(const Smp::IComponent* source,
-                const Smp::IComponent* target);
+                const Smp::IComponent* target) override;
     void RemoveLink(const Smp::IComponent* source,
-                const Smp::IComponent* target);
+                const Smp::IComponent* target) override;
     const Smp::ComponentCollection* GetLinkSources(
-                const Smp::IComponent* target) const;
-    Smp::Bool CanRemove(const Smp::IComponent* target);
-    void RemoveLinks(const Smp::IComponent* target);
+                const Smp::IComponent* target) const override;
+    Smp::Bool CanRemove(const Smp::IComponent* target) override;
+    void RemoveLinks(const Smp::IComponent* target) override;
 private:
-    std::map<const Smp::IComponent*,Collection<Smp::IComponent>*> _links;
+    // may be ILinkingComponent::RemoveLinks shall be invoke when possible
+    // for each link. But when we are at destroying this, it is because Simulator is
+    // destroying. So, is it really needed to care about remaining links?
+    // (AA) Consider unordered_multimap for this containership ?
+    typedef std::unordered_map<const Smp::IComponent*,Collection<Smp::IComponent>> LinkMap;
+    LinkMap _links;
 };
 
 }} // namespace simph::kern

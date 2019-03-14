@@ -12,13 +12,15 @@
 #include "simph/kern/Logger.hpp"
 #include "simph/kern/ObjectsRegistry.hpp"
 #include "Smp/IDataflowField.h"
+#include "assert.h"
+#include <atomic>
 
 namespace simph {
 	namespace kern {
 
 // --------------------------------------------------------------------
 // ..........................................................
-class Schedule {
+class Scheduler::Schedule {
 public:
     Schedule(const Smp::IEntryPoint* ep, Smp::Duration simTime,
             Scheduler* owner, const std::vector<Smp::IDataflowField*>* fields,
@@ -28,16 +30,11 @@ public:
             _owner(owner),
             _fields(fields),
             _period(period),
-            _repeat(repeat),
-            _completed(false) {
-        // no mutex here because Schedule are constructed only from inside
-        // a Scheduler critical section
-        _id=_nextId;
-        _nextId++;
+            _repeat(repeat) {
+        static std::atomic<Smp::Services::EventId> _nextId(0);
+        _id = _nextId++;
     }
-    inline bool isCompleted() const {
-        return _completed;
-    }
+
     void setTime(Smp::Duration simTime) {
         _simTime=simTime;
     }
@@ -63,17 +60,18 @@ public:
         }
         if (_repeat!=0) {
             if (_repeat>0) {
-                --_repeat;
+                _repeat -= 1;
             }
             if (_period>0) {
-                setTime(getTime()+_period);
-                _owner->schedule(this);
+                _owner->schedule(_id,getTime()+_period);
             }
         }
         else {
-            _completed=true;
+            // completed
+            _owner->RemoveEvent(_id);
         }
     }
+
 private:
     const Smp::IEntryPoint* _ep;
     Smp::Duration _simTime;
@@ -81,42 +79,38 @@ private:
     const std::vector<Smp::IDataflowField*>* _fields;
     Smp::Duration _period;
     Smp::Int64 _repeat;
-    bool _completed;
     Smp::Services::EventId _id;
-    static Smp::Services::EventId _nextId;
 };
-// ..........................................................
-Smp::Services::EventId Schedule::_nextId=0;
-// ..........................................................
-bool scheduleOrder(Schedule* a,Schedule *b) {
-    return a->getTime() < b->getTime();
-}
-
 // --------------------------------------------------------------------
 // ..........................................................
 Scheduler::Scheduler(Smp::String8 name, Smp::String8 descr,
                     Smp::IObject* parent): 
                     Component(name,descr,parent),
-                    _scheduled(scheduleOrder),
-                    _currentSchedule(nullptr),
+                    _timeKeeper(nullptr),
                     _autoStop(false),
                     _stopSimTime(0),
                     _run(false),
-                    _th(nullptr) {
+                    _mutex(),
+                    _th(),
+                    _currentSchedule(nullptr),
+                    _scheduled(),
+                    _scheduledQueue(compareSchedule){
+    _scheduled.reserve(1000);
 }
 // ..........................................................
 Scheduler::~Scheduler() {
-    // TODO delete remaining schedule if any...
 }
 // --------------------------------------------------------------------
+bool Scheduler::compareSchedule(const ScheduledQueueData& a, const ScheduledQueueData& b) {
+    // TODO check queue order in case of equality
+    return a.first > b.first;
+}
 // ..........................................................
 void Scheduler::connect() {
     _timeKeeper=getSimulator()->GetTimeKeeper();
 }
-// --------------------------------------------------------------------
 // ..........................................................
 Smp::Services::EventId Scheduler::AddImmediateEvent(const Smp::IEntryPoint* entryPoint) {
-
     return schedule(entryPoint,_timeKeeper->GetSimulationTime(),0,0);
 }
 // ..........................................................
@@ -130,37 +124,38 @@ Smp::Services::EventId Scheduler::schedule(
     if (reg!=nullptr) {
         flowFields=reg->getRelatedFlowFields(entryPoint);
     }
+
+    auto mySchedule = std::make_shared<Schedule>( entryPoint,
+                                                  absoluteSimTime,
+                                                  this,
+                                                  flowFields,
+                                                  cycleTime,
+                                                  repeat);
+
     Synchronized(_mutex);
-    Schedule* s=new Schedule(entryPoint,absoluteSimTime,this,
-                    flowFields,cycleTime,repeat);
-    _scheduled.insert(s);
-    return s->getId();
+    _scheduled[mySchedule->getId()]=mySchedule;
+    pushToQueue(mySchedule);
+    return mySchedule->getId();
 }
 // ..........................................................
-Schedule* Scheduler::findSchedule(Smp::Services::EventId event,
-                                    bool erase) {
-    Schedule* res=nullptr;
-    Synchronized(_mutex);
-    auto it=_scheduled.begin();
-    while (it!=_scheduled.end() && (*it)->getId()!=event) {
-        ++it;
-    }
-    if (it!=_scheduled.end()) {
-        res=*it;
-        if (erase) {
-            _scheduled.erase(it);
-        }
-    }
-    return res;
+void Scheduler::pushToQueue(const SchedulePtr& schedule) {
+    _scheduledQueue.push( std::make_pair(
+                          schedule->getTime(),
+                          std::weak_ptr<Schedule>(schedule)));
+}
+// ..........................................................
+Scheduler::SchedulePtr Scheduler::findSchedule(Smp::Services::EventId event) const{
+    auto it = _scheduled.find(event);
+    return it!=_scheduled.end() ? it->second: nullptr;
 }
 // ..........................................................
 void Scheduler::schedule(Smp::Services::EventId event,
                          Smp::Duration absoluteSimTime) {
-    Schedule* s=findSchedule(event,true);
-    if (s!=nullptr) {
-        Synchronized(_mutex);
-        s->setTime(absoluteSimTime);
-        _scheduled.insert(s);
+    Synchronized(_mutex);
+    auto schedule=findSchedule(event);
+    if (schedule) {
+        schedule->setTime(absoluteSimTime);
+        pushToQueue(schedule);
     }
 }
 // ..........................................................
@@ -232,27 +227,29 @@ void Scheduler::SetEventZuluTime(Smp::Services::EventId event,
 // ..........................................................
 void Scheduler::SetEventCycleTime(Smp::Services::EventId event,
                                 Smp::Duration cycleTime) {
-    Schedule* s=findSchedule(event);
-    if (s!=nullptr) {
+    Synchronized(_mutex);
+    auto s=findSchedule(event);
+    if (s) {
         s->setPeriod(cycleTime);
     }
 }
 // ..........................................................
 void Scheduler::SetEventRepeat(Smp::Services::EventId event,
                             Smp::Int64 repeat) {
-    Schedule* s=findSchedule(event);
-    if (s!=nullptr) {
+    Synchronized(_mutex);
+    auto s=findSchedule(event);
+    if (s) {
         s->setRepeat(repeat);
     }
 }
 // ..........................................................
 void Scheduler::RemoveEvent(Smp::Services::EventId event) {
-    findSchedule(event,true);
+    Synchronized(_mutex);
+    _scheduled.erase(event);
 }
 // ..........................................................
 Smp::Services::EventId Scheduler::GetCurrentEventId() const {
-    // TODO mutex...
-    if (_currentSchedule!=nullptr) {
+    if (_currentSchedule) {
         return _currentSchedule->getId();
     }
     return -1;
@@ -260,35 +257,34 @@ Smp::Services::EventId Scheduler::GetCurrentEventId() const {
 // ..........................................................
 Smp::Duration Scheduler::GetNextScheduledEventTime() const {
     if (!_scheduled.empty()) {
-        Schedule* s=*(_scheduled.begin());
-        return s->getTime();
+         Synchronized(_mutex);
+        return _scheduledQueue.top().first;
     }
     return 0;
 }
-// --------------------------------------------------------------------
-// ..........................................................
-void Scheduler::schedule(Schedule* schedule) {
-    Synchronized(_mutex);
-    _scheduled.insert(schedule);
-}
 // ..........................................................
 void Scheduler::step() {
-    if (!_scheduled.empty()) {
+    if (!_scheduledQueue.empty()) {
+        Smp::Duration nextScheduleTime;
         {
             Synchronized(_mutex);
-            _currentSchedule=*(_scheduled.begin());
-            _scheduled.erase(_scheduled.begin());
+            auto& scheduledQueueData = _scheduledQueue.top();
+            nextScheduleTime = scheduledQueueData.first;
+            _currentSchedule= scheduledQueueData.second.lock();
+            _scheduledQueue.pop();
+
+            if (!_currentSchedule || nextScheduleTime!=_currentSchedule->getTime() ) {
+                return;
+            }
         }
+
         // advance simulation time to event time.
         // TODO maybe only if event time is greater than current timekeeper time.
         // TODO emit the required events....
-        _timeKeeper->SetSimulationTime(_currentSchedule->getTime());
+        _timeKeeper->SetSimulationTime(nextScheduleTime);
+
         _currentSchedule->run();
-        if (_currentSchedule->isCompleted()) {
-            Synchronized(_mutex);
-            delete _currentSchedule;
-            _currentSchedule=nullptr;
-        }
+        _currentSchedule.reset();
     }
 }
 // ..........................................................
@@ -302,17 +298,16 @@ void Scheduler::step(Smp::Duration duration) {
 void Scheduler::start() {
     Synchronized(_mutex);
     if (!_run) {
-        _th=new simph::sys::Thread(GetName(),this);
+        _th.reset(new simph::sys::Thread(GetName(),this));
         _th->start();
     }
 }
 // ..........................................................
 void Scheduler::stop() {
     _run=false;
-    if (_th!=nullptr) {
+    if (!_th) {
         _th->join();
-        delete _th;
-        _th=nullptr;
+        _th.reset();
     }
 }
 // ..........................................................
@@ -321,7 +316,7 @@ void Scheduler::run() {
     while (_run) {
         step();
         if (_autoStop) {
-            _run=!_scheduled.empty() &&
+            _run&=!_scheduled.empty() &&
                     (_stopSimTime==0 || 
                         GetNextScheduledEventTime()<_stopSimTime);
         }

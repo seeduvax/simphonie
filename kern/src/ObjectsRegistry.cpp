@@ -31,7 +31,8 @@ public:
     }
     inline Smp::IObject* getObject() const {
         return _wrapped;
-    } 
+    }
+
     inline Node* getParent() const {
         return _parent;
     }
@@ -85,8 +86,10 @@ private:
 // ..........................................................
 ObjectsRegistry::ObjectsRegistry(Smp::String8 name, Smp::String8 descr,
                             Smp::IObject* parent):
-                    Component(name,descr,parent) {
-    _root=new Node(nullptr,nullptr);
+                    Component(name,descr,parent),
+    _root(new Node(nullptr,nullptr)),
+    _currentNode(nullptr),
+    _typeRegistry(nullptr) {
 }
 // ..........................................................
 ObjectsRegistry::~ObjectsRegistry() {

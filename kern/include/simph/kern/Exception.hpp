@@ -29,11 +29,11 @@ public:
      */
     virtual ~Exception();
 
-    Smp::String8 what() const noexcept;
-    Smp::String8 GetName() const noexcept;
-    Smp::String8 GetDescription() const noexcept;
-    Smp::IObject* GetSender() const noexcept;
-    Smp::String8 GetMessage() const noexcept;
+    Smp::String8 what() const noexcept override;
+    Smp::String8 GetName() const noexcept override;
+    Smp::String8 GetDescription() const noexcept override;
+    Smp::IObject* GetSender() const noexcept override;
+    Smp::String8 GetMessage() const noexcept override;
 protected:
     void setName(Smp::String8 name);
     void setDescription(Smp::String8 description);
