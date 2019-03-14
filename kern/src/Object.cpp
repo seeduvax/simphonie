@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "simph/kern/Object.hpp"
+#include "simph/kern/ExInvalidObjectName.hpp"
 
 namespace simph {
     namespace kern {
@@ -32,13 +33,25 @@ bool checkName(const std::string& name) {
     }
     }
     // empty names and C++ keywords are not valid.
+    // TODO S.Devaux: about C++ keywords I read this somewhere but is is not
+    // in the Smp::IObject header. Is it really an issue to have an object
+    // named 'while'?
     if ( name==""
-    || name=="for"
+        || name=="for"
+        || name=="while"
+        || name=="do"
+        || name=="if"
+        || name=="else"
+        || name=="return"
+        || name=="public"
+        || name=="protected"
+        || name=="private"
     ) {
         return false;
     }
-
-    return true;
+    // finally check 1st is a letter.
+    char c1=name[0];
+    return (c1>='A' && c1<='Z') || (c1>='a' && c1<='z');
 }
 } // anonymous namespace
 
@@ -51,7 +64,7 @@ Object::Object(Smp::String8 name,
                   , _description(descr)
                   , _parent(parent) {
     if (!checkName(_name)) {
-        // TODO log something + exception
+        throw ExInvalidObjectName(this,name);
     }
 }
 // ..........................................................
@@ -72,10 +85,10 @@ Smp::IObject* Object::GetParent() const {
 }
 // ..........................................................
 void Object::setName(Smp::String8 name) {
-    _name=name;
-    if (!checkName(_name)) {
-    	// TODO log something + exception
+    if (!checkName(name)) {
+        throw ExInvalidObjectName(this,name);
     }
+    _name=name;
 }
 // ..........................................................
 void Object::setDescription(Smp::String8 description) {

@@ -79,7 +79,7 @@ public:
 
     void step();
     void step(Smp::Duration duration);
-    void run();
+    void run() override;
     void start();
     void stop();
 protected:

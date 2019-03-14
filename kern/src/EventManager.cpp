@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "simph/kern/EventManager.hpp"
+#include "simph/kern/ExInvalidEventId.hpp"
 #include "simph/sys/Logger.hpp"
 namespace Smp {
     namespace Services {
@@ -117,7 +118,7 @@ void EventManager::Subscribe(Smp::Services::EventId event,
         }
         itEps->second.push_back(entryPoint);
     } else {
-        // TODO throw unknown event id ?
+        throw ExInvalidEventId(this,event);
     }
 }
 // ..........................................................

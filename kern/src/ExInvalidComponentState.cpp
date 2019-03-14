@@ -1,5 +1,5 @@
 /*
- * @file InvalidComponentState.cpp
+ * @file ExInvalidComponentState.cpp
  *
  * Copyright 2019 . All rights reserved.
  * Use is subject to license terms.
@@ -8,13 +8,13 @@
  * $Date$
  */
 #include <sstream>
-#include "simph/kern/InvalidComponentState.hpp"
+#include "simph/kern/ExInvalidComponentState.hpp"
 
 namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-InvalidComponentState::InvalidComponentState(Smp::IObject* sender,
+ExInvalidComponentState::ExInvalidComponentState(Smp::IObject* sender,
             Smp::ComponentStateKind invalid,
             Smp::ComponentStateKind expected): 
                 _invalid(invalid),_expected(expected) {
@@ -26,15 +26,15 @@ InvalidComponentState::InvalidComponentState(Smp::IObject* sender,
     setMessage();
 }
 // ..........................................................
-InvalidComponentState::~InvalidComponentState() {
+ExInvalidComponentState::~ExInvalidComponentState() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-Smp::ComponentStateKind InvalidComponentState::GetInvalidState() const noexcept {
+Smp::ComponentStateKind ExInvalidComponentState::GetInvalidState() const noexcept {
     return _invalid;
 }
 // ..........................................................
-Smp::ComponentStateKind InvalidComponentState::GetExpectedState() const noexcept {
+Smp::ComponentStateKind ExInvalidComponentState::GetExpectedState() const noexcept {
     return _expected;
 }
 

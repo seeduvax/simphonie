@@ -114,7 +114,7 @@ private:
     void configure(Smp::IComponent* comp);
     void connect(Smp::IComponent* comp);
     void setState(Smp::SimulatorStateKind newState);
-
+    bool checkState(Smp::String8 opName,Smp::SimulatorStateKind expState);
 };
 
 }} // namespace simph::kern

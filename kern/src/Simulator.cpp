@@ -10,6 +10,7 @@
 #include "simph/kern/Simulator.hpp"
 
 #include "simph/kern/ExDuplicateName.hpp"
+#include "simph/kern/ExDuplicateUuid.hpp"
 #include "simph/kern/Logger.hpp"
 #include "simph/kern/EventManager.hpp"
 #include "simph/kern/ObjectsRegistry.hpp"
@@ -98,7 +99,7 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
 }
 // ..........................................................
 Simulator::~Simulator() {
-    // TODO delete load models and additional services ??? 
+    // TODO delete loaded models and additional services ??? 
     delete _scheduler;
     delete _timeKeeper;
     delete _eventMgr;
@@ -178,16 +179,28 @@ void Simulator::setState(Smp::SimulatorStateKind newState) {
     }
 }
 // ..........................................................
+bool Simulator::checkState(Smp::String8 opName,
+                            Smp::SimulatorStateKind expState) {
+    bool res=_state==expState;
+    if (!res) {
+        std::ostringstream msg;
+        msg <<opName
+            <<" request ingored, operation not available at current state: "
+            <<_state;
+        _logger->Log(this,msg.str().c_str(),
+                    Smp::Services::ILogger::LMK_Warning);
+    }
+    return res;
+}
+// ..........................................................
 void Simulator::Initialise() {
-    if (_state!=Smp::SimulatorStateKind::SSK_Standby) {
-        // TODO throw exception
-        return;
+    if (checkState("Initialise",Smp::SimulatorStateKind::SSK_Standby)) {
+        setState(Smp::SimulatorStateKind::SSK_Initialising);
+        for (auto ep: _initEntryPoints) {
+            ep->Execute();
+        }
+        setState(Smp::SimulatorStateKind::SSK_Standby);
     }
-    setState(Smp::SimulatorStateKind::SSK_Initialising);
-    for (auto ep: _initEntryPoints) {
-        ep->Execute();
-    }
-    setState(Smp::SimulatorStateKind::SSK_Standby);
 }
 // ..........................................................
 void Simulator::publish(Smp::IComponent* comp) {
@@ -205,15 +218,13 @@ void Simulator::publish(Smp::IComponent* comp) {
 }
 // ..........................................................
 void Simulator::Publish() {
-    if (_state!=Smp::SimulatorStateKind::SSK_Building) {
-        // TODO throw exception
-        return;
-    }
-    for (auto service: *(_services->GetComponents())) {
-        publish(service);
-    }
-    for (auto model: *(_models->GetComponents())) {
-        publish(model);
+    if (checkState("Publish",Smp::SimulatorStateKind::SSK_Building)) {
+        for (auto service: *(_services->GetComponents())) {
+            publish(service);
+        }
+        for (auto model: *(_models->GetComponents())) {
+            publish(model);
+        }
     }
 }
 // ..........................................................
@@ -225,15 +236,13 @@ void Simulator::configure(Smp::IComponent* comp) {
 }
 // ..........................................................
 void Simulator::Configure() {
-    if (_state!=Smp::SimulatorStateKind::SSK_Building) {
-        // TODO throw exception
-        return;
-    }
-    for (auto service: *(_services->GetComponents())) {
-        configure(service);
-    }
-    for (auto model: *(_models->GetComponents())) {
-        configure(model);
+    if (checkState("Configure",Smp::SimulatorStateKind::SSK_Building)) {
+        for (auto service: *(_services->GetComponents())) {
+            configure(service);
+        }
+        for (auto model: *(_models->GetComponents())) {
+            configure(model);
+        }
     }
 }
 // ..........................................................
@@ -245,77 +254,63 @@ void Simulator::connect(Smp::IComponent* comp) {
 }
 // ..........................................................
 void Simulator::Connect() {
-    if (_state!=Smp::SimulatorStateKind::SSK_Building) {
-        // TODO throw exception
-        return;
+    if (checkState("Connect",Smp::SimulatorStateKind::SSK_Building)) {
+        setState(Smp::SimulatorStateKind::SSK_Connecting);
+        for (auto service: *(_services->GetComponents())) {
+            connect(service);
+        }
+        for (auto model: *(_models->GetComponents())) {
+            connect(model);
+        }
+        setState(Smp::SimulatorStateKind::SSK_Standby);
+        Initialise();
     }
-    setState(Smp::SimulatorStateKind::SSK_Connecting);
-    for (auto service: *(_services->GetComponents())) {
-        connect(service);
-    }
-    for (auto model: *(_models->GetComponents())) {
-        connect(model);
-    }
-    setState(Smp::SimulatorStateKind::SSK_Standby);
-    Initialise();
 }
 // ..........................................................
 void Simulator::Run() {
-    if (_state!=Smp::SimulatorStateKind::SSK_Standby) {
-        // TODO throw exception
-        return;
+    if (checkState("Run",Smp::SimulatorStateKind::SSK_Standby)) {
+        _scheduler->start();
+        setState(Smp::SimulatorStateKind::SSK_Executing);
     }
-    _scheduler->start();
-    setState(Smp::SimulatorStateKind::SSK_Executing);
 }
 // ..........................................................
 void Simulator::Hold() {
-    if (_state!=Smp::SimulatorStateKind::SSK_Executing) {
-        // TODO throw exception
-        return;
+    if (checkState("Hold",Smp::SimulatorStateKind::SSK_Executing)) {
+        _scheduler->stop();
+        setState(Smp::SimulatorStateKind::SSK_Standby);
     }
-    _scheduler->stop();
-    setState(Smp::SimulatorStateKind::SSK_Standby);
 }
 // ..........................................................
 void Simulator::Store(Smp::String8 filename) {
-    if (_state!=Smp::SimulatorStateKind::SSK_Standby) {
-        // TODO throw exception
-        return;
-    }
-    setState(Smp::SimulatorStateKind::SSK_Storing);
+    if (checkState("Store",Smp::SimulatorStateKind::SSK_Standby)) {
+        setState(Smp::SimulatorStateKind::SSK_Storing);
 // TODO serialize models states in file
 _logger->Log(this,"Simulator::Store(filename) not implemented yet!",Smp::Services::ILogger::LMK_Error);
-    setState(Smp::SimulatorStateKind::SSK_Standby);
+        setState(Smp::SimulatorStateKind::SSK_Standby);
+    }
 }
 // ..........................................................
 void Simulator::Restore(Smp::String8 filename) {
-    if (_state!=Smp::SimulatorStateKind::SSK_Standby) {
-        // TODO throw exception
-        return;
+    if (checkState("Restore",Smp::SimulatorStateKind::SSK_Standby)) {
+        setState(Smp::SimulatorStateKind::SSK_Restoring);
+    // TODO deserialize models states from file
+    _logger->Log(this,"Simulator::Restore(filename) not implemented yet!",Smp::Services::ILogger::LMK_Error);
+        setState(Smp::SimulatorStateKind::SSK_Standby);
     }
-    setState(Smp::SimulatorStateKind::SSK_Restoring);
-// TODO deserialize models states from file
-_logger->Log(this,"Simulator::Restore(filename) not implemented yet!",Smp::Services::ILogger::LMK_Error);
-    setState(Smp::SimulatorStateKind::SSK_Standby);
 }
 // ..........................................................
 void Simulator::Reconnect(Smp::IComponent* root) {
-    if (_state!=Smp::SimulatorStateKind::SSK_Standby) {
-        // TODO throw exception
-        return;
+    if (checkState("Reconnect",Smp::SimulatorStateKind::SSK_Standby)) {
+        // TODO is it needed to change state while running this?
+        connect(root);
     }
-    // TODO is it needed to change state while running this?
-    connect(root);
 }
 // ..........................................................
 void Simulator::Exit() {
-    if (_state!=Smp::SimulatorStateKind::SSK_Standby) {
-        // TODO throw exception
-        return;
-    }
-    setState(Smp::SimulatorStateKind::SSK_Exiting);
+    if (checkState("Exit",Smp::SimulatorStateKind::SSK_Standby)) {
+        setState(Smp::SimulatorStateKind::SSK_Exiting);
 // TODO shutdown everything...
+    }
 }
 // ..........................................................
 void Simulator::Abort() {
@@ -379,9 +374,8 @@ Smp::Services::IResolver* Simulator::GetResolver() const {
 void Simulator::RegisterFactory(Smp::IFactory* componentFactory) {
     for (auto fac: _compFactories) {
         if (fac->GetUuid()==componentFactory->GetUuid()) {
-            // A factory with same uuid already registered so nothing to do.
-            // TODO check whether an exception should be thrown
-            return;
+            throw ExDuplicateUuid(this,fac->GetName(),
+                            componentFactory->GetName());
         }
     }
     _compFactories.push_back(componentFactory);
@@ -406,12 +400,13 @@ Smp::IComponent* Simulator::CreateInstance(Smp::Uuid uuid,
             if (dynamic_cast<Smp::IService*>(res)) {
                 _services->AddComponent(res);
             }
+            // TODO check it is needed to pulish/configure/connect immediately
+            // according to current simulator state.
             break;
         }
     }
-    // TODO check it is needed to pulish/configure/connect immediately
-    // according to current simulator state.
-    // TODO check what exception should be thrown when no factory found
+    // When no factory is found, Smp header tels to return null. So nothing
+    // particular to do since res is initialized at nullptr.
     return res;
 }
 // ..........................................................

@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "simph/kern/Field.hpp"
+#include "simph/kern/ExInvalidTarget.hpp"
 #include "simph/sys/Logger.hpp"
 #include <cstring>
 
@@ -71,14 +72,11 @@ void Field::Connect(Smp::IField* target) {
         _targets.push_back(f);
     }
     else {
-// TODO throw exception...
-LOGE("Can't connect "<<GetName()<<" to "<<target->GetName()
-    <<": incompatible size, type or field implementation")
+        throw ExInvalidTarget(this,target);
     }
 }
 // ..........................................................
 void Field::Push() {
-    // nice :)
     for (auto f: _targets) {
         std::memcpy(f->_data,_data,_dataSize);
     }

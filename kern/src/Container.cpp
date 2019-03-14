@@ -10,6 +10,7 @@
 #include "simph/kern/Container.hpp"
 #include "simph/kern/ExDuplicateName.hpp"
 #include "simph/kern/ExContainerFull.hpp"
+#include "simph/kern/ExInvalidObjectType.hpp"
 
 namespace simph {
 	namespace kern {
@@ -43,7 +44,7 @@ void Container::AddComponent(Smp::IComponent* component) {
         throw ExContainerFull(this);
     }
     if (!checkComponentType(component)) {
-        // TODO throw Smp::InvalidObjectType exception
+        throw ExInvalidObjectType(this, component);
     }
     if (_content.at(component->GetName())!=nullptr) {
         throw ExDuplicateName(this,component->GetName());

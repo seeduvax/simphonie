@@ -8,7 +8,7 @@
  * $Date$
  */
 #include "simph/kern/Component.hpp"
-#include "simph/kern/InvalidComponentState.hpp"
+#include "simph/kern/ExInvalidComponentState.hpp"
 #include "simph/sys/Logger.hpp"
 
 // --------------------------------------------------------------------
@@ -64,7 +64,7 @@ void Component::publish(Smp::IPublication* receiver) {
 }
 void Component::Publish(Smp::IPublication* receiver) {
     if (_state!=Smp::ComponentStateKind::CSK_Created) {
-        throw InvalidComponentState(this,_state,Smp::ComponentStateKind::CSK_Created);
+        throw ExInvalidComponentState(this,_state,Smp::ComponentStateKind::CSK_Created);
     }
     publish(receiver);
     _state=Smp::ComponentStateKind::CSK_Publishing;
@@ -74,7 +74,7 @@ void Component::configure() {
 }
 void Component::Configure(Smp::Services::ILogger* logger) {
     if (_state!=Smp::ComponentStateKind::CSK_Publishing) {
-        throw InvalidComponentState(this,_state,Smp::ComponentStateKind::CSK_Publishing);
+        throw ExInvalidComponentState(this,_state,Smp::ComponentStateKind::CSK_Publishing);
     }
     _logger=logger;
     configure();
@@ -85,7 +85,7 @@ void Component::connect() {
 }
 void Component::Connect(Smp::ISimulator* simulator) {
     if (_state!=Smp::ComponentStateKind::CSK_Configured) {
-        throw InvalidComponentState(this,_state,Smp::ComponentStateKind::CSK_Configured);
+        throw ExInvalidComponentState(this,_state,Smp::ComponentStateKind::CSK_Configured);
     }
     _simulator=simulator;
     connect();

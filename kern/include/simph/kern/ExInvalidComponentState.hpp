@@ -1,5 +1,5 @@
 /*
- * @file InvalidComponentState.h
+ * @file ExInvalidComponentState.h
  *
  * Copyright 2019 . All rights reserved.
  * Use is subject to license terms.
@@ -7,8 +7,8 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_InvalidComponentState_HPP__
-#define __simph_kern_InvalidComponentState_HPP__
+#ifndef __simph_kern_ExInvalidComponentState_HPP__
+#define __simph_kern_ExInvalidComponentState_HPP__
 #include "Smp/InvalidComponentState.h"
 #include "simph/kern/Exception.hpp"
 namespace simph {
@@ -17,18 +17,18 @@ namespace simph {
 /**
  *
  */
-class InvalidComponentState: public Exception, virtual public Smp::InvalidComponentState {
+class ExInvalidComponentState: public Exception, virtual public Smp::InvalidComponentState {
 public:
     /**
      * Default constructor.
      */
-    InvalidComponentState(Smp::IObject* sender,
+    ExInvalidComponentState(Smp::IObject* sender,
 		        Smp::ComponentStateKind invalid,
                         Smp::ComponentStateKind expected);
     /**
      * Destructor.
      */
-    virtual ~InvalidComponentState();
+    virtual ~ExInvalidComponentState();
     
     Smp::ComponentStateKind GetInvalidState() const noexcept;
     Smp::ComponentStateKind GetExpectedState() const noexcept;
@@ -40,4 +40,4 @@ private:
 };
 
 }} // namespace simph::kern
-#endif // __simph_kern_InvalidComponentState_HPP__
+#endif // __simph_kern_ExInvalidComponentState_HPP__
