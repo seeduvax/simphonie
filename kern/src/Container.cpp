@@ -8,7 +8,8 @@
  * $Date$
  */
 #include "simph/kern/Container.hpp"
-#include "simph/kern/DuplicateName.hpp"
+#include "simph/kern/ExDuplicateName.hpp"
+#include "simph/kern/ExContainerFull.hpp"
 
 namespace simph {
 	namespace kern {
@@ -39,13 +40,13 @@ bool Container::checkComponentType(Smp::IComponent* component) {
 void Container::AddComponent(Smp::IComponent* component) {
     Smp::Int64 maxSize=GetUpper();
     if (maxSize>=0 && _content.size()>=maxSize) {
-        // TODO throw ContainerFull exception
+        throw ExContainerFull(this);
     }
     if (!checkComponentType(component)) {
         // TODO throw Smp::InvalidObjectType exception
     }
     if (_content.at(component->GetName())!=nullptr) {
-        throw DuplicateName(this,component->GetName());
+        throw ExDuplicateName(this,component->GetName());
     }
     _content.push_back(component);
 }

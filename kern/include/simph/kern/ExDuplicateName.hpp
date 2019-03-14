@@ -19,19 +19,19 @@ namespace simph {
 /**
  *
  */
-class DuplicateName: public virtual Exception, 
+class ExDuplicateName: public Exception, 
                     public virtual Smp::DuplicateName {
 public:
     /**
      * Default constructor.
      */
-    DuplicateName(Smp::IObject* sender,Smp::String8 dName);
+    ExDuplicateName(Smp::IObject* sender,Smp::String8 dName);
     /**
      * Destructor.
      */
-    virtual ~DuplicateName();
+    virtual ~ExDuplicateName();
     // Smp::DuplicateName implementation
-    Smp::String8 GetDuplicateName() const noexcept;
+    Smp::String8 GetDuplicateName() const noexcept override;
 
 private:
     std::string _dName;

@@ -9,7 +9,7 @@
  */
 #include "simph/kern/Simulator.hpp"
 
-#include "simph/kern/DuplicateName.hpp"
+#include "simph/kern/ExDuplicateName.hpp"
 #include "simph/kern/Logger.hpp"
 #include "simph/kern/EventManager.hpp"
 #include "simph/kern/ObjectsRegistry.hpp"
@@ -348,7 +348,7 @@ void Simulator::AddModel(Smp::IModel* model) {
         _models->AddComponent(model);
     }
     else {
-        throw DuplicateName(_models,model->GetName());
+        throw ExDuplicateName(_models,model->GetName());
     }
 }
 // ..........................................................
