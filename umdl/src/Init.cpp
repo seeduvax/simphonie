@@ -27,7 +27,7 @@ extern "C" {
                             {0xd9e94d0c,0x42ab,0x11e9,0x8b8e,0x4bc383f9f8bc}));
         return true;
     }
-    SHARED_FUNCTION bool Finalise() {
+    SHARED_FUNCTION bool Finalize() {
         return true;
     }
 }

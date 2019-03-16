@@ -17,7 +17,7 @@ namespace simph {
 // ..........................................................
 Logger1D::Logger1D(Smp::String8 name, Smp::String8 descr,
                                            Smp::IObject* parent):
-                        AStepMdl(name,descr,parent) {
+                        AStepMdl(name,descr,parent), _in() {
 }
 // ..........................................................
 Logger1D::~Logger1D() {

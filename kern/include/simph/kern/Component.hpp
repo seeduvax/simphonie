@@ -70,7 +70,7 @@ protected:
 private:
     Smp::ComponentStateKind _state;
     Smp::Services::ILogger* _logger;
-    CollectionUnique<Smp::IField> _fields;
+    CollectionOwner<Smp::IField> _fields;
     Smp::Uuid _uuid;
     Smp::ISimulator* _simulator;
 };

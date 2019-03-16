@@ -26,7 +26,7 @@ Exception::~Exception() {
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 Exception::what() const noexcept {
-    return _name.c_str();
+    return _msg.c_str();
 }
 // ..........................................................
 Smp::String8 Exception::GetName() const noexcept {

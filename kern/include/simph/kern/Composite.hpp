@@ -35,7 +35,7 @@ public:
 protected:
     void addContainer(Smp::String8 name, Smp::String8 descr="");
 private:
-    CollectionUnique<Smp::IContainer> _containers;
+    CollectionOwner<Smp::IContainer> _containers;
 };
 
 }} // namespace simph::kern

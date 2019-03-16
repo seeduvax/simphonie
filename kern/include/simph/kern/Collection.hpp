@@ -27,8 +27,10 @@ public:
     /**
      * Default constructor.
      */
-    Collection(Smp::String8 name, Smp::String8 descr,
-            Smp::IObject* parent): Object(name,descr,parent) {
+    Collection( Smp::String8 name,
+                Smp::String8 descr="",
+                Smp::IObject* parent=nullptr):
+                            Object(name,descr,parent) {
     }
     /**
      * Destructor.
@@ -86,13 +88,13 @@ private:
  *
  */
 template <typename T>
-class CollectionUnique: public Collection<T> {
+class CollectionOwner: public Collection<T> {
 public:
-    CollectionUnique(Smp::String8 name, Smp::String8 descr,
+    CollectionOwner(Smp::String8 name, Smp::String8 descr,
             Smp::IObject* parent): Collection<T>(name,descr,parent) {
     }
 
-    virtual ~CollectionUnique() {
+    virtual ~CollectionOwner() {
         for (auto field: *this) {
             delete field;
         }
