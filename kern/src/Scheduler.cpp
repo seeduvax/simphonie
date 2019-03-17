@@ -102,6 +102,12 @@ Scheduler::Scheduler(Smp::String8 name, Smp::String8 descr,
 }
 // ..........................................................
 Scheduler::~Scheduler() {
+    // Ensure it is no more running
+    stop();
+    // delete all remaining schedules.
+    for (auto s: _scheduled) {
+        delete s;
+    }
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -261,7 +267,11 @@ void Scheduler::SetEventRepeat(Smp::Services::EventId event,
 }
 // ..........................................................
 void Scheduler::RemoveEvent(Smp::Services::EventId event) {
-    findSchedule(event,true);
+    Synchronized(_mutex);
+    Schedule* s=findSchedule(event,true);
+    if (s!=nullptr && s!=_currentSchedule) {
+        delete s;
+    }
 }
 // ..........................................................
 Smp::Services::EventId Scheduler::GetCurrentEventId() const {
@@ -326,7 +336,7 @@ void Scheduler::start() {
 // ..........................................................
 void Scheduler::stop() {
     _run=false;
-    if (!_th) {
+    if (_th!=nullptr) {
         _th->join();
         _th.reset();
     }
