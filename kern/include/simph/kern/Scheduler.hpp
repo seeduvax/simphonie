@@ -15,8 +15,7 @@
 #include "simph/kern/Component.hpp"
 #include "simph/sys/Synchro.hpp"
 #include "simph/sys/Thread.hpp"
-#include <queue>
-#include <unordered_map>
+#include <set>
 
 namespace simph {
 	namespace kern {
@@ -76,7 +75,12 @@ public:
     void RemoveEvent(Smp::Services::EventId event) override;
     Smp::Services::EventId GetCurrentEventId() const override;
     Smp::Duration GetNextScheduledEventTime() const override;
-
+    /**
+     * Run next schedule event.
+     * @warning partly thread safe. Can be called concurrently from other
+     * scheduler methods, but shall the step method itself is not fully 
+     * reentrant.
+     */  
     void step();
     void step(Smp::Duration duration);
     void run() override;
@@ -110,30 +114,16 @@ private:
     class Schedule;
 
     /*
-     * Registery of schedule objects by event id.
-     * Shared references to support nested scheduling call.
-     * TODO discuss the choice of implementation
-     */
-    typedef std::shared_ptr<Schedule> SchedulePtr;
-    typedef std::unordered_map<Smp::Services::EventId, SchedulePtr > ScheduledMap;
-    ScheduledMap _scheduled;
-
-    /*
      * Enqueue and sort schedule objects according to the schedule time in this.
      * Stored weak schedule references support nested call of RemoveEvent.
      * TODO discuss the choice of implementation
      */
-    typedef std::pair< Smp::Duration, std::weak_ptr<Schedule> > ScheduledQueueData;
-    typedef std::priority_queue< ScheduledQueueData, std::vector< ScheduledQueueData >, bool (*) (const ScheduledQueueData&, const ScheduledQueueData&) > ScheduledQueue;
-    ScheduledQueue _scheduledQueue;
-
-    SchedulePtr _currentSchedule;
-
-    void pushToQueue(const SchedulePtr& schedule);
-
-    SchedulePtr findSchedule(Smp::Services::EventId event) const;
-
-    static bool compareSchedule(const ScheduledQueueData& a, const ScheduledQueueData& b);
+    static bool compareSchedule(const Schedule* a, const Schedule* b);
+    typedef std::multiset< Schedule*, decltype(compareSchedule)*> ScheduledQueue;
+    ScheduledQueue _scheduled;
+    Schedule* _currentSchedule;
+    Schedule* findSchedule(Smp::Services::EventId event,bool remove=false);
+    void schedule(Schedule* s);
 };
 
 }} // namespace simph::kern

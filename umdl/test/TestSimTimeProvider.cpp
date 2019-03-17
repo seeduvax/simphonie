@@ -51,23 +51,29 @@ public:
         f1->Connect(f2);
         CPPUNIT_ASSERT(f1!=nullptr);
 dynamic_cast<simph::kern::ObjectsRegistry*>(sim.GetResolver())->dump();        
+TRACE("");
         simph::kern::Scheduler* sched=dynamic_cast<simph::kern::Scheduler*>(sim.GetScheduler());
+TRACE("");
         sched->AddSimulationTimeEvent(
                 sync->GetEntryPoint("step"),
                 0, // 0ms offset
                 10000000, // 10ms period
                 -1); // for ever
+TRACE("");
         sched->AddSimulationTimeEvent(
                 dynamic_cast<Smp::IEntryPoint*>(sim.GetResolver()->ResolveRelative("step",mdl)),
                 15000000, // 1ms offset
                 20000000, // 200ms period
                 10); // 10 times only
+TRACE("");
         sched->AddSimulationTimeEvent(
                 log->GetEntryPoint("step"),
                 0, // 0ms offset
                 40000000, // 400ms period
                 -1); // for ever
+TRACE("");
         sched->step(1000000000); // 1sec simulation
+TRACE("");
     }
 };
 
