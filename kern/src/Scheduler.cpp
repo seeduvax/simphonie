@@ -348,6 +348,7 @@ void Scheduler::run() {
     while (_run) {
         step();
         if (_autoStop) {
+            Synchronized(_mutex);
             _run&=!_scheduled.empty() &&
                     (_stopSimTime==0 || 
                         (*_scheduled.begin())->getTime()<=_stopSimTime);
