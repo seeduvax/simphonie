@@ -11,6 +11,7 @@
 #include "Smp/ISimulator.h"
 #include "simph/kern/Logger.hpp"
 #include "simph/kern/ObjectsRegistry.hpp"
+#include "simph/kern/TimeKeeper.hpp"
 #include "Smp/IDataflowField.h"
 #include "assert.h"
 #include <atomic>
@@ -122,7 +123,7 @@ void Scheduler::schedule(Schedule* s) {
 }
 // ..........................................................
 void Scheduler::connect() {
-    _timeKeeper=getSimulator()->GetTimeKeeper();
+    _timeKeeper=dynamic_cast<TimeKeeper*>(getSimulator()->GetTimeKeeper());
 }
 // ..........................................................
 Smp::Services::EventId Scheduler::AddImmediateEvent(const Smp::IEntryPoint* entryPoint) {
@@ -303,9 +304,8 @@ void Scheduler::step() {
     }
     if (toRun!=nullptr) {
         // advance simulation time to event time.
-        // TODO maybe only if event time is greater than current timekeeper time.
-        // TODO emit the required events....
-        _timeKeeper->SetSimulationTime(toRun->getTime());
+        // Exception and event handling is done by time keeper itself.
+        _timeKeeper->setNextEventTime(toRun->getTime());
         toRun->run();
         Synchronized(_mutex)
         if (toRun->isCompleted()) {

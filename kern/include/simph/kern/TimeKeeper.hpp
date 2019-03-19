@@ -49,16 +49,17 @@ public:
     
     // TODO should not be public but binded to some simulation start even handling
     void reset();
+    void setNextEventTime(Smp::Duration eventTime);
 protected:
     void connect();
     void publish(Smp::IPublication* receiver);
 private:
     Smp::Duration _simTime;
+    Smp::Duration _nextEventTime;
     Smp::Duration _epochOffset;
     Smp::DateTime _missionStart;
     Smp::Services::IEventManager* _eventMgr;
     static Smp::DateTime _y2kJan1Offset;
-
 };
 
 }} // namespace simph::kern

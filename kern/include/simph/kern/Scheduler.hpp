@@ -10,7 +10,6 @@
 #ifndef __simph_kern_Scheduler_HPP__
 #define __simph_kern_Scheduler_HPP__
 
-#include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Services/IScheduler.h"
 #include "simph/kern/Component.hpp"
 #include "simph/sys/Synchro.hpp"
@@ -19,6 +18,7 @@
 
 namespace simph {
 	namespace kern {
+class TimeKeeper;
 /**
  *
  */
@@ -99,7 +99,7 @@ protected:
                   Smp::Duration absoluteSimTime);
 
 private:
-    Smp::Services::ITimeKeeper* _timeKeeper;
+    TimeKeeper* _timeKeeper;
     bool _autoStop;
     Smp::Duration _stopSimTime;
     bool _run;

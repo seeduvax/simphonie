@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "simph/kern/TimeKeeper.hpp"
+#include "simph/kern/ExInvalidSimulationTime.hpp"
 #include "Smp/ISimulator.h"
 #include "Smp/IPublication.h"
 #include <chrono>
@@ -37,6 +38,8 @@ TimeKeeper::TimeKeeper(Smp::String8 name,
                         Smp::String8 descr,
                         Smp::IObject* parent):
                 Component(name,descr,parent),
+                _simTime(0),
+                _nextEventTime(0),
                 _eventMgr(nullptr) {
 }
 // ..........................................................
@@ -74,18 +77,30 @@ void TimeKeeper::publish(Smp::IPublication* receiver) {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-void TimeKeeper::SetSimulationTime(Smp::Duration simulationTime) {
+void TimeKeeper::setNextEventTime(Smp::Duration simulationTime) {
     if (simulationTime>_simTime) {
+        _nextEventTime=simulationTime;
         if (_eventMgr!=nullptr) {
             _eventMgr->Emit(Smp::Services::IEventManager::SMP_PreSimTimeChangeId);
         }
-        _simTime=simulationTime;
+        _simTime=_nextEventTime;
         if (_eventMgr!=nullptr) {
             _eventMgr->Emit(Smp::Services::IEventManager::SMP_PostSimTimeChangeId);
         }
+        _nextEventTime=0;
+    }
+    else if (simulationTime<_simTime) {
+        throw ExInvalidSimulationTime(this,_simTime,simulationTime,_nextEventTime);
+    }
+    // else simulation time is not changed and there is nothing to do.
+}
+// ..........................................................
+void TimeKeeper::SetSimulationTime(Smp::Duration simulationTime) {
+    if (simulationTime>=_simTime && simulationTime <= _nextEventTime) {
+        _simTime=simulationTime;
     }
     else {
-// TODO throw exception TBD.
+        throw ExInvalidSimulationTime(this,_simTime,simulationTime,_nextEventTime);
     }
 }
 // ..........................................................
