@@ -37,6 +37,7 @@ TimeKeeper::TimeKeeper(Smp::String8 name,
                         Smp::String8 descr,
                         Smp::IObject* parent):
                 Component(name,descr,parent),
+                _simTime(0),
                 _eventMgr(nullptr) {
 }
 // ..........................................................

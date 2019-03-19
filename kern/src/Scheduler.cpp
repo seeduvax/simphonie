@@ -119,6 +119,7 @@ Smp::Services::EventId Scheduler::schedule(
                                 Smp::Duration absoluteSimTime,
                                 Smp::Duration cycleTime,
                                 Smp::Int64 repeat) {
+    TRACE("[Scheduler::schedule] entryPoint='"<<entryPoint->GetName()<<"',absoluteSimTime="<<absoluteSimTime<<",cycleTime="<<cycleTime<<",repeat="<<repeat);
     const std::vector<Smp::IDataflowField*>* flowFields=nullptr;
     auto reg=dynamic_cast<ObjectsRegistry*>(getSimulator()->GetResolver());
     if (reg!=nullptr) {
@@ -257,7 +258,6 @@ Smp::Services::EventId Scheduler::GetCurrentEventId() const {
 // ..........................................................
 Smp::Duration Scheduler::GetNextScheduledEventTime() const {
     if (!_scheduled.empty()) {
-         Synchronized(_mutex);
         return _scheduledQueue.top().first;
     }
     return 0;
@@ -318,7 +318,7 @@ void Scheduler::run() {
         if (_autoStop) {
             _run&=!_scheduled.empty() &&
                     (_stopSimTime==0 || 
-                        GetNextScheduledEventTime()<_stopSimTime);
+                        GetNextScheduledEventTime()<=_stopSimTime);
         }
     }
 }

@@ -35,34 +35,34 @@ public:
      */
     virtual ~Simulator();
     // Smp::ISimulator implementation
-    void Initialise();
-    void Publish();
-    void Configure();
-    void Connect();
-    void Run();
-    void Hold();
-    void Store(Smp::String8 filename);
-    void Restore(Smp::String8 filename);
-    void Reconnect(Smp::IComponent* root);
-    void Exit();
-    void Abort();
-    Smp::SimulatorStateKind GetState() const;
-    void AddInitEntryPoint(Smp::IEntryPoint* entryPoint);
-    void AddModel(Smp::IModel* model);
-    void AddService(Smp::IService* service);
-    Smp::IService* GetService(Smp::String8 name) const;
-    Smp::Services::ILogger* GetLogger() const;
-    Smp::Services::ITimeKeeper* GetTimeKeeper() const;
-    Smp::Services::IScheduler* GetScheduler() const;
-    Smp::Services::IEventManager* GetEventManager() const;
-    Smp::Services::IResolver* GetResolver() const;
-    Smp::Services::ILinkRegistry* GetLinkRegistry() const;
-    void RegisterFactory(Smp::IFactory* componentFactory);
+    void Initialise() override;
+    void Publish() override;
+    void Configure() override;
+    void Connect() override;
+    void Run() override;
+    void Hold() override;
+    void Store(Smp::String8 filename) override;
+    void Restore(Smp::String8 filename) override;
+    void Reconnect(Smp::IComponent* root) override;
+    void Exit() override;
+    void Abort() override;
+    Smp::SimulatorStateKind GetState() const override;
+    void AddInitEntryPoint(Smp::IEntryPoint* entryPoint) override;
+    void AddModel(Smp::IModel* model) override;
+    void AddService(Smp::IService* service) override;
+    Smp::IService* GetService(Smp::String8 name) const override;
+    Smp::Services::ILogger* GetLogger() const override;
+    Smp::Services::ITimeKeeper* GetTimeKeeper() const override;
+    Smp::Services::IScheduler* GetScheduler() const override;
+    Smp::Services::IEventManager* GetEventManager() const override;
+    Smp::Services::IResolver* GetResolver() const override;
+    Smp::Services::ILinkRegistry* GetLinkRegistry() const override;
+    void RegisterFactory(Smp::IFactory* componentFactory) override;
     Smp::IComponent* CreateInstance(Smp::Uuid uuid,
 		       Smp::String8 name,
 		       Smp::String8 description,
-		       Smp::IComposite* parent);
-    Smp::IFactory* GetFactory(Smp::Uuid uuid) const;
+		       Smp::IComposite* parent) override;
+    Smp::IFactory* GetFactory(Smp::Uuid uuid) const override;
     /**
      * Create and add new model instance.
      * Model type is defined as template argument.

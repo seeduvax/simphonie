@@ -11,55 +11,82 @@
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/Simulator.hpp"
 #include "simph/sys/Logger.hpp"
+#include "simph/sys/Callback.hpp"
+#include "simph/kern/EntryPoint.hpp"
+
+#include <memory>
 
 namespace test {
 using namespace simph::kern;
+using namespace simph::sys;
 
 // ----------------------------------------------------------
 // test fixture implementation
-class TestScheduler: public CppUnit::TestFixture, virtual public Smp::IEntryPoint {
+class TestScheduler: public CppUnit::TestFixture {
 CPPUNIT_TEST_SUITE( TestScheduler );
 CPPUNIT_TEST( testSchedule );
+CPPUNIT_TEST( testSchedule2 );
 CPPUNIT_TEST_SUITE_END();
 
 private:
     Simulator* _sim;
+    Scheduler* _scheduler;
 public:
     void setUp() {
-    }
-
-    void tearDown() {
-    }
-    
-    void testSchedule() {
         _sim=new Simulator();
-        Scheduler* scheduler=dynamic_cast<Scheduler*>(_sim->GetScheduler());
+        _scheduler=dynamic_cast<Scheduler*>(_sim->GetScheduler());
         _sim->Publish();
         _sim->Configure();
         _sim->Connect();
-        scheduler->AddSimulationTimeEvent(this,10);
-        scheduler->AddSimulationTimeEvent(this,30);
-        scheduler->AddSimulationTimeEvent(this,20);
-        scheduler->AddSimulationTimeEvent(this,20);
-        scheduler->step();
-        scheduler->step();
-        scheduler->step();
-        scheduler->step();
+    }
+
+    void tearDown() {
         delete _sim;
     }
 
-    // Smp::IEntryPoint implementation
-    Smp::String8 GetName() const {
-        return "testEP";
+    void callback(std::vector<Smp::Duration>* vv) {
+        auto st = _sim->GetTimeKeeper()->GetSimulationTime();
+        vv->push_back(st);
+        TRACE(""<<st);
     }
-    Smp::String8 GetDescription() const {
-        return "";
+
+    void testSchedule() {
+        std::vector<Smp::Duration> scheduledTime;
+        auto cb = Callback::create(&TestScheduler::callback,this,&scheduledTime);
+        auto ep = std::make_unique<EntryPoint>(std::move(cb), "callback");
+
+        _scheduler->AddSimulationTimeEvent(ep.get(),10);
+        _scheduler->AddSimulationTimeEvent(ep.get(),30);
+        _scheduler->AddSimulationTimeEvent(ep.get(),20);
+        _scheduler->AddSimulationTimeEvent(ep.get(),20);
+        _scheduler->step();
+        _scheduler->step();
+        _scheduler->step();
+        _scheduler->step();
+
+        CPPUNIT_ASSERT_EQUAL((Smp::Duration) 10, scheduledTime[0]);
+        CPPUNIT_ASSERT_EQUAL((Smp::Duration) 20, scheduledTime[1]);
+        CPPUNIT_ASSERT_EQUAL((Smp::Duration) 20, scheduledTime[2]);
+        CPPUNIT_ASSERT_EQUAL((Smp::Duration) 30, scheduledTime[3]);
     }
-    Smp::IObject* GetParent() const {
-        return nullptr;
-    }
-    void Execute() const {
-        TRACE(""<<_sim->GetTimeKeeper()->GetSimulationTime());
+
+
+    void testSchedule2() {
+        std::vector<Smp::Duration> scheduledTime;
+        auto cb = Callback::create(&TestScheduler::callback,this,&scheduledTime);
+        auto ep = std::make_unique<EntryPoint>(std::move(cb), "callback");
+
+        _scheduler->AddSimulationTimeEvent(ep.get(),10);
+        _scheduler->AddSimulationTimeEvent(ep.get(),10);
+        _scheduler->AddSimulationTimeEvent(ep.get(),10);
+        _scheduler->AddSimulationTimeEvent(ep.get(),10);
+
+        _scheduler->step(10);
+
+        CPPUNIT_ASSERT_EQUAL((Smp::Duration) 10, scheduledTime[0]);
+        CPPUNIT_ASSERT_EQUAL((Smp::Duration) 10, scheduledTime[1]);
+        CPPUNIT_ASSERT_EQUAL((Smp::Duration) 10, scheduledTime[2]);
+        CPPUNIT_ASSERT_EQUAL((Smp::Duration) 10, scheduledTime[3]);
     }
 };
 
