@@ -15,8 +15,7 @@
 #include "simph/kern/Component.hpp"
 #include "simph/sys/Synchro.hpp"
 #include "simph/sys/Thread.hpp"
-#include <queue>
-#include <unordered_map>
+#include <set>
 
 namespace simph {
 	namespace kern {
@@ -76,7 +75,12 @@ public:
     void RemoveEvent(Smp::Services::EventId event) override;
     Smp::Services::EventId GetCurrentEventId() const override;
     Smp::Duration GetNextScheduledEventTime() const override;
-
+    /**
+     * Run next schedule event.
+     * @warning partly thread safe. Can be called concurrently from other
+     * scheduler methods, but shall the step method itself is not fully 
+     * reentrant.
+     */  
     void step();
     void step(Smp::Duration duration);
     void run() override;
@@ -110,30 +114,30 @@ private:
     class Schedule;
 
     /*
-     * Registery of schedule objects by event id.
-     * Shared references to support nested scheduling call.
-     * TODO discuss the choice of implementation
+     * No more used shared_ptr/weak_ptr but just reguular pointer since the
+     * Schedule pointers are not shared and used only internally by the 
+     * Scheduler where it iis quite easy to master life span of each Schedule
+     * instance. Then the overhead of the smart pointer (ref count management)
+     * has finally very low added value.
      */
-    typedef std::shared_ptr<Schedule> SchedulePtr;
-    typedef std::unordered_map<Smp::Services::EventId, SchedulePtr > ScheduledMap;
-    ScheduledMap _scheduled;
-
-    /*
-     * Enqueue and sort schedule objects according to the schedule time in this.
-     * Stored weak schedule references support nested call of RemoveEvent.
-     * TODO discuss the choice of implementation
-     */
-    typedef std::pair< Smp::Duration, std::weak_ptr<Schedule> > ScheduledQueueData;
-    typedef std::priority_queue< ScheduledQueueData, std::vector< ScheduledQueueData >, bool (*) (const ScheduledQueueData&, const ScheduledQueueData&) > ScheduledQueue;
-    ScheduledQueue _scheduledQueue;
-
-    SchedulePtr _currentSchedule;
-
-    void pushToQueue(const SchedulePtr& schedule);
-
-    SchedulePtr findSchedule(Smp::Services::EventId event) const;
-
-    static bool compareSchedule(const ScheduledQueueData& a, const ScheduledQueueData& b);
+    static bool compareSchedule(const Schedule* a, const Schedule* b);
+    typedef std::multiset< Schedule*, decltype(compareSchedule)*> ScheduledQueue;
+    ScheduledQueue _scheduled;
+    Schedule* _currentSchedule;
+    /**
+     * search for a schedule by evnet id.
+     * This method also optionnaly remove the ound schedule to avoid having
+     * to iterate the _scheduled once again when the found event is to be
+     * removed.
+     * @param event event id.
+     * @param remove 
+     *   - false, just return the schedule.
+     *   - true, the found schedule is removed from _scheduled.
+     * @return 1st schedule in scheduled having matching id or nullptr if not
+     * any.
+     */ 
+    Schedule* findSchedule(Smp::Services::EventId event,bool remove=false);
+    void schedule(Schedule* s);
 };
 
 }} // namespace simph::kern
