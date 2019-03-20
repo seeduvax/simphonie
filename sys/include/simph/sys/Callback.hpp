@@ -23,8 +23,8 @@ public:
     template<typename _Callable, typename... _Args>
     static CallbackImplPtr create(_Callable&& func, _Args&&... args) {
         return createCallbackImpl(
-                std::__bind_simple( std::forward<_Callable>(func),
-                                    std::forward<_Args>(args)... ));
+                std::bind( std::forward<_Callable>(func),
+                           std::forward<_Args>(args)... ));
     };
 
 private:
