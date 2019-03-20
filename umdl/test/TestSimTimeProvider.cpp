@@ -50,7 +50,7 @@ public:
         auto f2=dynamic_cast<Smp::IDataflowField*>(sim.GetResolver()->ResolveRelative("Fields/in",log));
         f1->Connect(f2);
         CPPUNIT_ASSERT(f1!=nullptr);
-dynamic_cast<simph::kern::ObjectsRegistry*>(sim.GetResolver())->dump();        
+        dynamic_cast<simph::kern::ObjectsRegistry*>(sim.GetResolver())->dump();
         simph::kern::Scheduler* sched=dynamic_cast<simph::kern::Scheduler*>(sim.GetScheduler());
         sched->AddSimulationTimeEvent(
                 sync->GetEntryPoint("step"),

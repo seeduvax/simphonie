@@ -21,7 +21,7 @@ class Scheduler;
 /**
  *
  */
-class Simulator: public virtual Composite, 
+class Simulator: public Composite,
 		public virtual Smp::ISimulator {
 public:
     /**

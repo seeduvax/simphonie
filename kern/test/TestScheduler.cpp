@@ -12,8 +12,9 @@
 #include "simph/kern/Simulator.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/sys/Callback.hpp"
+#include "simph/sys/ChronoTool.hpp"
 #include "simph/kern/EntryPoint.hpp"
-
+#include <unistd.h>
 #include <memory>
 
 namespace test {
@@ -26,6 +27,7 @@ class TestScheduler: public CppUnit::TestFixture {
 CPPUNIT_TEST_SUITE( TestScheduler );
 CPPUNIT_TEST( testSchedule );
 CPPUNIT_TEST( testSchedule2 );
+CPPUNIT_TEST( testScheduleLongTask );
 CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -88,6 +90,25 @@ public:
         CPPUNIT_ASSERT_EQUAL((Smp::Duration) 10, scheduledTime[2]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration) 10, scheduledTime[3]);
     }
+
+    void testScheduleLongTask() {
+        auto cb = Callback::create([](){ ::usleep(100000UL);}); // 100 ms sleep
+        auto ep = std::make_unique<EntryPoint>(std::move(cb), "callback");
+
+        _scheduler->AddSimulationTimeEvent(ep.get(),10);
+        _scheduler->AddSimulationTimeEvent(ep.get(),10);
+        _scheduler->AddSimulationTimeEvent(ep.get(),10);
+        _scheduler->AddSimulationTimeEvent(ep.get(),10);
+        _scheduler->AddSimulationTimeEvent(ep.get(),10);
+
+        auto runTo = Callback::create( [this]() {_scheduler->step();});
+        ChronoTool::Record rec = ChronoTool::execution(*runTo);
+
+        auto duration_ms = rec.count<std::chrono::milliseconds>();
+        TRACE("recorded duration = " << duration_ms << " ms")
+        CPPUNIT_ASSERT( duration_ms - 500 < 20 ) ; // 20ms margin for an expected 500ms execution time
+    }
+
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestScheduler);
