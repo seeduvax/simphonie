@@ -9,6 +9,7 @@
  */
 #include "simph/kern/EventManager.hpp"
 #include "simph/kern/ExInvalidEventId.hpp"
+#include "simph/kern/ExEntryPointAlreadySubscribed.hpp"
 #include "simph/sys/Logger.hpp"
 namespace Smp {
     namespace Services {
@@ -108,17 +109,17 @@ void EventManager::Subscribe(Smp::Services::EventId event,
                         const Smp::IEntryPoint* entryPoint) {
     // TODO make it thread safe.
     if (!entryPoint) {
-        // TODO check eventId and throw Smp::Services::InvalidEventId if needed.
-    }
-
-    auto itEps=_evRegistry.find(event);
-    if (itEps != _evRegistry.end() ) {
-        if (itEps->second.contain(entryPoint)) {
-            // TODO throw Smp::Services::EntryPointAlreadySubscribed
+        auto itEps=_evRegistry.find(event);
+        if (itEps != _evRegistry.end() ) {
+            if (itEps->second.contain(entryPoint)) {
+                // TODO throw Smp::Services::EntryPointAlreadySubscribed
+                throw ExEntryPointAlreadySubscribed(this,entryPoint,
+                        _SMP_EventNamesTable[itEps->first]);
+            }
+            itEps->second.push_back(entryPoint);
+        } else {
+            throw ExInvalidEventId(this,event);
         }
-        itEps->second.push_back(entryPoint);
-    } else {
-        throw ExInvalidEventId(this,event);
     }
 }
 // ..........................................................
