@@ -12,6 +12,7 @@
 
 #include "simph/sys/Runnable.hpp"
 #include <memory>
+#include <functional>
 
 namespace simph {
     namespace sys {

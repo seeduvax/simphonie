@@ -38,7 +38,7 @@ public:
         CPPUNIT_ASSERT_EQUAL((Smp::DateTime)0,tp.GetMissionTime());
         CPPUNIT_ASSERT(zulu<tp.GetZuluTime());
         tp.SetMissionTime(100);
-        tp.SetSimulationTime(10000);
+        tp.setNextEventTime(10000);
         TRACE("epoch="<<(int64_t)tp.GetEpochTime());
         TRACE("mission="<<(int64_t)tp.GetMissionTime());
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)10000,tp.GetSimulationTime());

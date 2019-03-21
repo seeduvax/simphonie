@@ -21,7 +21,7 @@ ExInvalidSimulationTime::ExInvalidSimulationTime(Smp::IObject* sender,
     setName("InvalidSimulationTime");
     std::ostringstream d;
     d << "provided time "<<_pTime<<" not bounded in [ "
-        <<_cTime<<" ; "<<_pTime<<" ]";
+        <<_cTime<<" ; "<<_mTime<<" ]";
     setDescription(d.str().c_str());
     setMessage();
 }
