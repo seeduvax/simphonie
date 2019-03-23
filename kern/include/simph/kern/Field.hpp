@@ -57,12 +57,16 @@ public:
     void Unforce() override;
     Smp::Bool IsForced() override;
     void Freeze() override;
+protected: 
+    inline void setType(const Smp::Publication::IType* type) {
+        _type=type;
+    }
 
 private:
     Smp::Bool _stateType;
     Smp::Bool _inputType;
     Smp::Bool _outputType;
-    Smp::Publication::IType* _type;
+    const Smp::Publication::IType* _type;
     Smp::ViewKind _viewKind;
     void* _data;
     unsigned int _dataSize;
@@ -73,7 +77,7 @@ private:
 };
 
 template <typename T>
-class TField: virtual public Field {
+class TField: public Field {
 public:
     TField(Smp::String8 name, Smp::String8 description,
             Smp::ViewKind viewKind, T* address,
@@ -85,6 +89,7 @@ public:
                 Field(name,description,viewKind,(void*) address,sizeof(T),
                         isState,isInput,isOutput,parent),
         _tData(address) {
+        initType();
     }
     virtual ~TField() {
     }
@@ -94,6 +99,7 @@ public:
     void SetValue(Smp::AnySimple value) {
         *_tData=value;
     }
+    void initType();
 
 private:
     T* _tData;

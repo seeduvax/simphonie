@@ -10,6 +10,7 @@
 #include "simph/kern/EventManager.hpp"
 #include "simph/kern/ExInvalidEventId.hpp"
 #include "simph/kern/ExEntryPointAlreadySubscribed.hpp"
+#include "simph/kern/ExEntryPointNotSubscribed.hpp"
 #include "simph/sys/Logger.hpp"
 namespace Smp {
     namespace Services {
@@ -112,7 +113,6 @@ void EventManager::Subscribe(Smp::Services::EventId event,
         auto itEps=_evRegistry.find(event);
         if (itEps != _evRegistry.end() ) {
             if (itEps->second.contain(entryPoint)) {
-                // TODO throw Smp::Services::EntryPointAlreadySubscribed
                 throw ExEntryPointAlreadySubscribed(this,entryPoint,
                         _SMP_EventNamesTable[itEps->first]);
             }
@@ -126,15 +126,15 @@ void EventManager::Subscribe(Smp::Services::EventId event,
 void EventManager::Unsubscribe(Smp::Services::EventId event,
                         const Smp::IEntryPoint* entryPoint) {
     // TODO make it thread safe.
-    // TODO check eventId and throw Smp::Services::InvalidEventId if needed.
     auto itEps=_evRegistry.find(event);
     if (itEps != _evRegistry.end() ) {
         bool res = itEps->second.remove(entryPoint);
         if (!res) {
-            // TODO throw Smp::Services::EntryPointNotSubscribed
+            new ExEntryPointNotSubscribed(this,entryPoint,
+                        _SMP_EventNamesTable[event]);
         }
     } else {
-        // TODO throw unknown event id ?
+        throw ExInvalidEventId(this,event);
     }
 }
 // ..........................................................
@@ -151,7 +151,7 @@ void EventManager::Emit(Smp::Services::EventId event,
             ep->Execute();
         }
     } else {
-        // TODO throw unknown event id ?
+        throw ExInvalidEventId(this,event);
     }
 
 
