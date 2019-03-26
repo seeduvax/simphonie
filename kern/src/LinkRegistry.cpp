@@ -37,21 +37,28 @@ void LinkRegistry::AddLink(Smp::IComponent* source,
     it.first->second.push_back(source);
 }
 // ..........................................................
-Smp::Bool LinkRegistry::HasLink(const Smp::IComponent* source,
-                                const Smp::IComponent* target) {
+Smp::UInt32 LinkRegistry::GetLinkCount(const Smp::IComponent* source,
+                                const Smp::IComponent* target) const {
+    Smp::UInt32 count=0;
     auto it=_links.find(target);
     if (it!=_links.end()) {
-        return it->second.contain(source);
+        for (auto t: it->second) {
+            if (t==target) {
+                count++;
+            }
+        }
     }
-    return false;
+    return count;;
 }
 // ..........................................................
-void LinkRegistry::RemoveLink(const Smp::IComponent* source,
+Smp::Bool LinkRegistry::RemoveLink(const Smp::IComponent* source,
                     const Smp::IComponent* target) {
     auto it=_links.find(target);
     if (it!=_links.end()) {
         it->second.remove(source);
+        return true;
     }
+    return false;
 }
 // ..........................................................
 const Smp::ComponentCollection* LinkRegistry::GetLinkSources(

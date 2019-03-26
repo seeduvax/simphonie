@@ -13,6 +13,7 @@
 #include "simph/kern/Collection.hpp"
 #include "Smp/IComponent.h"
 #include "Smp/Services/ILogger.h"
+#include "Smp/Services/ILinkRegistry.h"
 
 namespace simph {
 	namespace kern {
@@ -36,7 +37,8 @@ public:
     // Smp::IComponent implementation
     Smp::ComponentStateKind GetState() const override;
     void Publish(Smp::IPublication* receiver) override;
-    void Configure(Smp::Services::ILogger* logger) override;
+    void Configure(Smp::Services::ILogger* logger,
+                Smp::Services::ILinkRegistry* linkRegistry=nullptr) override;
     void Connect(Smp::ISimulator* simulator) override;
     Smp::IField* GetField(Smp::String8 fullName) const override;
     const Smp::FieldCollection* GetFields() const override;
@@ -67,9 +69,13 @@ protected:
     inline void logEvent(Smp::String8 msg) {
         _logger->Log(this,msg,Smp::Services::ILogger::LMK_Event);
     }
+    inline Smp::Services::ILinkRegistry* getLinkRegistry() {
+        return _linkRegistry;
+    }
 private:
     Smp::ComponentStateKind _state;
     Smp::Services::ILogger* _logger;
+    Smp::Services::ILinkRegistry* _linkRegistry;
     CollectionOwner<Smp::IField> _fields;
     Smp::Uuid _uuid;
     Smp::ISimulator* _simulator;

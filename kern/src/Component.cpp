@@ -47,6 +47,7 @@ Component::Component(Smp::String8 name,
                     Object(name,descr,parent),
                     _state(Smp::ComponentStateKind::CSK_Created),
                     _logger(nullptr),
+                    _linkRegistry(nullptr),
                     _fields("Fields","",this),
                     _uuid(),
                     _simulator(nullptr) {
@@ -72,11 +73,13 @@ void Component::Publish(Smp::IPublication* receiver) {
 // ..........................................................
 void Component::configure() {
 }
-void Component::Configure(Smp::Services::ILogger* logger) {
+void Component::Configure(Smp::Services::ILogger* logger,
+                         Smp::Services::ILinkRegistry* linkRegistry) {
     if (_state!=Smp::ComponentStateKind::CSK_Publishing) {
         throw ExInvalidComponentState(this,_state,Smp::ComponentStateKind::CSK_Publishing);
     }
     _logger=logger;
+    _linkRegistry=linkRegistry;
     configure();
     _state=Smp::ComponentStateKind::CSK_Configured;
 }

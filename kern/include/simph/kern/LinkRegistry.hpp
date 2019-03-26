@@ -36,9 +36,9 @@ public:
     // Smp::Services::ILinkRegistry implementation
     void AddLink(Smp::IComponent* source,
                 const Smp::IComponent* target) override;
-    Smp::Bool HasLink(const Smp::IComponent* source,
-                const Smp::IComponent* target) override;
-    void RemoveLink(const Smp::IComponent* source,
+    Smp::UInt32 GetLinkCount(const Smp::IComponent* source,
+                const Smp::IComponent* target) const override;
+    Smp::Bool RemoveLink(const Smp::IComponent* source,
                 const Smp::IComponent* target) override;
     const Smp::ComponentCollection* GetLinkSources(
                 const Smp::IComponent* target) const override;

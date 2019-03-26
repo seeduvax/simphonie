@@ -40,7 +40,7 @@ public:
         // never change because of the way the scheduler is implemented !
         sim.Run();
         sleep(1);
-        sim.Hold();
+        sim.Hold(true);
         TRACE(""<<sim.GetTimeKeeper()->GetSimulationTime());
         sim.Exit();
     }

@@ -40,7 +40,7 @@ public:
     void Configure() override;
     void Connect() override;
     void Run() override;
-    void Hold() override;
+    void Hold(Smp::Bool immediate) override;
     void Store(Smp::String8 filename) override;
     void Restore(Smp::String8 filename) override;
     void Reconnect(Smp::IComponent* root) override;
