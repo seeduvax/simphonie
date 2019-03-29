@@ -341,12 +341,7 @@ void Simulator::AddInitEntryPoint(Smp::IEntryPoint* ep) {
 }
 // ..........................................................
 void Simulator::AddModel(Smp::IModel* model) {
-    if (_models->GetComponent(model->GetName())==nullptr) {
-        _models->AddComponent(model);
-    }
-    else {
-        throw ExDuplicateName(_models,model->GetName());
-    }
+    _models->AddComponent(model);
 }
 // ..........................................................
 Smp::Services::ILogger* Simulator::GetLogger() const {
@@ -395,7 +390,8 @@ Smp::IComponent* Simulator::CreateInstance(Smp::Uuid uuid,
         if (fac->GetUuid()==uuid) {
             res=fac->CreateInstance(name,description,
                         parent==nullptr?this:parent);
-            // TODO is it required to add new instance in a container?
+            // TODO is it required to add new instance in a container when
+            // the parent is set?
             if (dynamic_cast<Smp::IModel*>(res)) {
                 _models->AddComponent(res);
             }
@@ -408,7 +404,7 @@ Smp::IComponent* Simulator::CreateInstance(Smp::Uuid uuid,
         }
     }
     // When no factory is found, Smp header tels to return null. So nothing
-    // particular to do since res is initialized at nullptr.
+    // particular to do since res is initialized as nullptr.
     return res;
 }
 // ..........................................................

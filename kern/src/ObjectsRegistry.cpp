@@ -149,7 +149,7 @@ Smp::IObject* ObjectsRegistry::ResolveRelative(
 }
 // ..........................................................
 Smp::IObject* ObjectsRegistry::getFieldParent() {
-// TODO unsure Fields should be attached direction to component or
+// TODO unsure Fields should be attached directly to component or
 // field container. May be it should be an option...
     Smp::IObject* res=nullptr;
     if (_currentNode!=nullptr) {

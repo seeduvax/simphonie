@@ -49,7 +49,7 @@ public:
     inline void setRepeat(Smp::Int64 repeat) {
         _repeat=repeat;
     }
-    inline Smp::Services::EventId getId() {
+    inline Smp::Services::EventId getId() const {
         return _id;
     }
     inline bool isCompleted() const {
@@ -113,8 +113,13 @@ Scheduler::~Scheduler() {
 // --------------------------------------------------------------------
 // ..........................................................
 bool Scheduler::compareSchedule(const Schedule* a, const Schedule* b) {
-    // TODO check queue order in case of equality
-    return a->getTime() < b->getTime();
+    // To define order:
+    // - 1st check time (obviously)
+    // - then if equals, check insert order (id is used since id is created and
+    // incremented on 1st insertion.
+    Smp::Duration ta=a->getTime();
+    Smp::Duration tb=b->getTime();
+    return ta < tb || (ta==tb && a->getId()<b->getId());
 }
 // ..........................................................
 void Scheduler::schedule(Schedule* s) {

@@ -12,7 +12,6 @@
 
 namespace Smp {
     namespace Services {
-// TODO Crazy to have to copy past this !!! 
 constexpr LogMessageKind ILogger::LMK_Debug;
 constexpr LogMessageKind ILogger::LMK_Error;
 constexpr LogMessageKind ILogger::LMK_Event;
