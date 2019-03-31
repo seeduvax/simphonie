@@ -9,50 +9,31 @@
  */
 #include "simph/kern/Object.hpp"
 #include "simph/kern/ExInvalidObjectName.hpp"
+#include <regex>
 
 namespace simph {
     namespace kern {
 
 namespace {
 
-bool checkName(const std::string& name) {
-    //TODO use STL instead
-
-    // only alphanum chars, _, [, and ] are valid
-    // in names.
-    for (auto ch: name) {
-        if (!(
-                (ch>='A' && ch<='Z')
-            || (ch>='a' && ch<='z')
-            || (ch>='0' && ch<='9')
-            || ch=='_'
-            || ch=='['
-            || ch==']'
-            )) {
+bool checkName(std::string name) {
+    // Check for non empty alphanumeric names.
+    // '_', '[' and ']' are also valid in names
+    // except for first character that must be alphabetical.
+    static const std::regex re("^[a-zA-Z][a-zA-Z0-9_\[\\]]+$");
+    if (!std::regex_match(name,re)) {
         return false;
     }
-    }
-    // empty names and C++ keywords are not valid.
+    // C++ keywords are not valid.
     // TODO S.Devaux: about C++ keywords I read this somewhere but is is not
     // in the Smp::IObject header. Is it really an issue to have an object
     // named 'while'?
-    if ( name==""
-        || name=="for"
-        || name=="while"
-        || name=="do"
-        || name=="if"
-        || name=="else"
-        || name=="return"
-        || name=="public"
-        || name=="protected"
-        || name=="private"
-    ) {
-        return false;
-    }
-    // finally check 1st is a letter.
-    char c1=name[0];
-    return (c1>='A' && c1<='Z') || (c1>='a' && c1<='z');
+    static const std::vector<std::string> forbidden = {
+        "for","while","do","if","else","return","public","protected","private"
+    };
+    return std::find(forbidden.begin(), forbidden.end(), name) == forbidden.end();
 }
+
 } // anonymous namespace
 
 // --------------------------------------------------------------------
