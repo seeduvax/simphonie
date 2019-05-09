@@ -203,54 +203,5 @@ bool AnySimple::operator==(const Smp::AnySimple& other) const {
 bool AnySimple::operator!=(const Smp::AnySimple& other) const {
     return !(*this==other);
 }
-// ..........................................................
-std::ostream& operator << (std::ostream& os, const PrimitiveTypeKind& t) {
-    os << (Smp::Int32)t;
-    switch (t) {
-        case PrimitiveTypeKind::PTK_Char8:
-            os << "(PTK_Char8)";
-            break;
-        case PrimitiveTypeKind::PTK_Bool:
-            os << "(PTK_Bool)";
-            break;
-        case PrimitiveTypeKind::PTK_String8:
-            os << "(PTK_String8)";
-            break;
-        case PrimitiveTypeKind::PTK_UInt8:
-            os << "(PTK_UInt8)";
-            break;
-        case PrimitiveTypeKind::PTK_UInt16:
-            os << "(PTK_UInt16)";
-            break;
-        case PrimitiveTypeKind::PTK_UInt32:
-            os << "(PTK_UInt32)";
-            break;
-        case PrimitiveTypeKind::PTK_UInt64:
-            os << "(PTK_UInt64)";
-            break;
-        case PrimitiveTypeKind::PTK_Int8:
-            os << "(PTK_Int8)";
-            break;
-        case PrimitiveTypeKind::PTK_Int16:
-            os << "(PTK_Int16)";
-            break;
-        case PrimitiveTypeKind::PTK_Int32:
-            os << "(PTK_Int32)";
-            break;
-        case PrimitiveTypeKind::PTK_Int64:
-            os << "(PTK_Int64)";
-            break;
-        case PrimitiveTypeKind::PTK_Float32:
-            os << "(PTK_Float32)";
-            break;
-        case PrimitiveTypeKind::PTK_Float64:
-            os << "(PTK_Float64)";
-            break;
-        default:
-            os<<"()";
-            break;
-    }
-    return os;
-}
 
 } // namespace Smp

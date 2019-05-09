@@ -31,6 +31,12 @@ public:
      * Destructor.
      */
     virtual ~TypeRegistry();
+    /**
+     * Get the name of a primitive type.
+     * @param type primitive type to use to fetch for a name
+     * @return name of the provided primitive type
+     */
+    static Smp::String8 getPrimitiveTypeName(Smp::PrimitiveTypeKind _type);
     // Smp::ITypeRegistry implementation
     Smp::Publication::IType* GetType(Smp::PrimitiveTypeKind type) const override;
     Smp::Publication::IType* GetType(Smp::Uuid typeUuid) const override;
