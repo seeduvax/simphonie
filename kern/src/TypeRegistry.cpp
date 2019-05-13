@@ -9,8 +9,10 @@
  */
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/kern/Type.hpp"
+#include "simph/kern/EnumerationType.hpp"
 #include "simph/kern/ExTypeAlreadyRegistered.hpp"
 #include "simph/kern/ExInvalidPrimitiveType.hpp"
+#include "simph/sys/Logger.hpp"
 #include <iostream>
 
 namespace Smp {
@@ -111,6 +113,63 @@ Smp::Publication::IType* TypeRegistry::AddFloatType(
     // TODO create Type subclass to store min, max, unit, etc. Once I can
     // find what to do with such additional attributes....
     _types.push_back(res);
+    return res;
+}
+// ..........................................................
+Smp::Publication::IType* TypeRegistry::AddIntegerType(
+                Smp::String8 name, Smp::String8 descr,
+                Smp::Uuid typeUuid, Smp::Int64 minimum, Smp::Int64 maximum,
+                Smp::String8 unit, Smp::PrimitiveTypeKind type) {
+    if (type!=Smp::PrimitiveTypeKind::PTK_Int8 &&
+            type!=Smp::PrimitiveTypeKind::PTK_Int16 &&
+            type!=Smp::PrimitiveTypeKind::PTK_Int32 &&
+            type!=Smp::PrimitiveTypeKind::PTK_Int64 &&
+            type!=Smp::PrimitiveTypeKind::PTK_UInt8 &&
+            type!=Smp::PrimitiveTypeKind::PTK_UInt16 &&
+            type!=Smp::PrimitiveTypeKind::PTK_UInt32 &&
+            type!=Smp::PrimitiveTypeKind::PTK_UInt64)  {
+        throw ExInvalidPrimitiveType(this,type);
+    }
+    Smp::Publication::IType* res=GetType(typeUuid);
+    if (res!=nullptr) {
+        throw ExTypeAlreadyRegistered(this,name,res);
+    }
+    res=new Type(typeUuid,type,name,descr,this);
+    // TODO create Type subclass to store min, max, unit, etc. Once I can
+    // find what to do with such additional attributes....
+    _types.push_back(res);
+    return res;
+}
+// ..........................................................
+Smp::Publication::IEnumerationType* TypeRegistry::AddEnumerationType(
+                Smp::String8 name, Smp::String8 descr,
+                Smp::Uuid typeUuid, Smp::Int16 memorySize) {
+    Smp::Publication::IType* ex=GetType(typeUuid);
+    if (ex!=nullptr) {
+        throw ExTypeAlreadyRegistered(this,name,ex);
+    }
+    Smp::PrimitiveTypeKind type=Smp::PrimitiveTypeKind::PTK_None;
+    switch (memorySize) {
+        case 1: type=Smp::PrimitiveTypeKind::PTK_Int8;
+           break;
+        case 2: type=Smp::PrimitiveTypeKind::PTK_Int16;
+           break;
+        case 4: type=Smp::PrimitiveTypeKind::PTK_Int32;
+           break;
+        case 8: type=Smp::PrimitiveTypeKind::PTK_Int64;
+           // There is an issue with SMP interface definition, this size
+           // is not really useable since IEnumerationType interface AddLiteral
+           // value use Smp::Int32 type to define the value.
+           break;
+    }
+    Smp::Publication::IEnumerationType* res=nullptr;
+    if (type!=Smp::PrimitiveTypeKind::PTK_None) {
+        res=new EnumerationType(typeUuid,type,name,descr,this);
+        _types.push_back(res);
+    }
+    else {
+        LOGE("Invalid memory size for type "<<name);
+    }
     return res;
 }
 

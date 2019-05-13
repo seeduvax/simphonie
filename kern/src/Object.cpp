@@ -13,28 +13,10 @@
 
 namespace simph {
     namespace kern {
+static const std::regex _validNameREx("^[a-zA-Z][a-zA-Z0-9_\[\\]]+$");
 
-namespace {
 
-bool checkName(std::string name) {
-    // Check for non empty alphanumeric names.
-    // '_', '[' and ']' are also valid in names
-    // except for first character that must be alphabetical.
-    static const std::regex re("^[a-zA-Z][a-zA-Z0-9_\[\\]]+$");
-    if (!std::regex_match(name,re)) {
-        return false;
-    }
-    // C++ keywords are not valid.
-    // TODO S.Devaux: about C++ keywords I read this somewhere but is is not
-    // in the Smp::IObject header. Is it really an issue to have an object
-    // named 'while'?
-    static const std::vector<std::string> forbidden = {
-        "for","while","do","if","else","return","public","protected","private"
-    };
-    return std::find(forbidden.begin(), forbidden.end(), name) == forbidden.end();
-}
 
-} // anonymous namespace
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -44,7 +26,7 @@ Object::Object(Smp::String8 name,
                     _name(name)
                   , _description(descr)
                   , _parent(parent) {
-    if (!checkName(_name)) {
+    if (!checkName(name)) {
         throw ExInvalidObjectName(this,name);
     }
 }
@@ -80,6 +62,23 @@ void Object::setParent(Smp::IObject* parent) {
     _parent=parent;
 }
 // ..........................................................
+bool Object::checkName(Smp::String8 name) {
+    std::string n=name;
+    // Check for non empty alphanumeric names.
+    // '_', '[' and ']' are also valid in names
+    // except for first character that must be alphabetical.
+    if (!std::regex_match(n,_validNameREx)) {
+        return false;
+    }
+    // C++ keywords are not valid.
+    // TODO S.Devaux: about C++ keywords I read this somewhere but is is not
+    // in the Smp::IObject header. Is it really an issue to have an object
+    // named 'while'?
+    static const std::vector<std::string> forbidden = {
+        "for","while","do","if","else","return","public","protected","private"
+    };
+    return std::find(forbidden.begin(), forbidden.end(), n) == forbidden.end();
+}
 
 
 }} // namespace simph::kern
