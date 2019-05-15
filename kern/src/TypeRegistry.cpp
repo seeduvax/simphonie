@@ -10,6 +10,7 @@
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/kern/Type.hpp"
 #include "simph/kern/EnumerationType.hpp"
+#include "simph/kern/ArrayType.hpp"
 #include "simph/kern/ExTypeAlreadyRegistered.hpp"
 #include "simph/kern/ExInvalidPrimitiveType.hpp"
 #include "simph/sys/Logger.hpp"
@@ -171,6 +172,22 @@ Smp::Publication::IEnumerationType* TypeRegistry::AddEnumerationType(
         LOGE("Invalid memory size for type "<<name);
     }
     return res;
+}
+// ..........................................................
+Smp::Publication::IArrayType* TypeRegistry::AddArrayType(
+            Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
+            Smp::Uuid itemTypeUuid, Smp::Int64 itemSize,
+            Smp::Int64 arrayCount) {
+    Smp::Publication::IType* ex=GetType(typeUuid);
+    if (ex!=nullptr) {
+        throw ExTypeAlreadyRegistered(this,name,ex);
+    }
+    Smp::Publication::IType* itemType=GetType(itemTypeUuid);
+    if (itemType!=nullptr) {
+        // TODO don't know what to do with itemSize
+        return new ArrayType(typeUuid,name,description,this,arrayCount,itemType);
+    }
+    return nullptr;
 }
 
 }} // namespace simph::kern
