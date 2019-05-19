@@ -10,6 +10,7 @@
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/kern/Type.hpp"
 #include "simph/kern/EnumerationType.hpp"
+#include "simph/kern/StructureType.hpp"
 #include "simph/kern/ArrayType.hpp"
 #include "simph/kern/ExTypeAlreadyRegistered.hpp"
 #include "simph/kern/ExInvalidPrimitiveType.hpp"
@@ -184,10 +185,39 @@ Smp::Publication::IArrayType* TypeRegistry::AddArrayType(
     }
     Smp::Publication::IType* itemType=GetType(itemTypeUuid);
     if (itemType!=nullptr) {
-        // TODO don't know what to do with itemSize
-        return new ArrayType(typeUuid,name,description,this,arrayCount,itemType);
+        // ODO don't know what to do with itemSize
+        Smp::Publication::IArrayType* res=
+                new ArrayType(typeUuid,name,description,this,arrayCount,itemType);
+        _types.push_back(res);
+        return res;
     }
     return nullptr;
+}
+// ..........................................................
+Smp::Publication::IType* TypeRegistry::AddStringType(
+        Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
+        Smp::Int64 length) {
+    // TODO don't know what to do with length
+    Smp::Publication::IType* res=GetType(typeUuid);
+    if (res!=nullptr) {
+        throw ExTypeAlreadyRegistered(this,name,res);
+    }
+    res=new Type(typeUuid,Smp::PrimitiveTypeKind::PTK_String8,
+                                        name,description,this);
+    _types.push_back(res);
+    return res;
+}
+// ..........................................................
+Smp::Publication::IStructureType* TypeRegistry::AddStructureType(
+        Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid) {
+    Smp::Publication::IType* ex=GetType(typeUuid);
+    if (ex!=nullptr) {
+        throw ExTypeAlreadyRegistered(this,name,ex);
+    }
+    Smp::Publication::IStructureType* res=
+                        new StructureType(typeUuid,name,description,this);
+    _types.push_back(res);
+    return res;
 }
 
 }} // namespace simph::kern

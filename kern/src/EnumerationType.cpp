@@ -11,6 +11,7 @@
 #include "simph/kern/ExInvalidObjectName.hpp"
 #include "simph/kern/ExDuplicateName.hpp"
 #include "simph/kern/ExDuplicateLiteral.hpp"
+#include <string.h>
 
 namespace simph {
 	namespace kern {
