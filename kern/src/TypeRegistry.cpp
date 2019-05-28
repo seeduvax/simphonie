@@ -10,6 +10,7 @@
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/kern/Type.hpp"
 #include "simph/kern/EnumerationType.hpp"
+#include "simph/kern/ClassType.hpp"
 #include "simph/kern/StructureType.hpp"
 #include "simph/kern/ArrayType.hpp"
 #include "simph/kern/ExTypeAlreadyRegistered.hpp"
@@ -216,6 +217,20 @@ Smp::Publication::IStructureType* TypeRegistry::AddStructureType(
     }
     Smp::Publication::IStructureType* res=
                         new StructureType(typeUuid,name,description,this);
+    _types.push_back(res);
+    return res;
+}
+// ..........................................................
+Smp::Publication::IClassType* TypeRegistry::AddClassType(
+        Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
+        Smp::Uuid baseClassUuid) {
+    Smp::Publication::IType* ex=GetType(typeUuid);
+    if (ex!=nullptr) {
+        throw ExTypeAlreadyRegistered(this,name,ex);
+    }
+    // TODO take care of base class type
+    Smp::Publication::IClassType* res=
+                        new ClassType(typeUuid,name,description,this);
     _types.push_back(res);
     return res;
 }
