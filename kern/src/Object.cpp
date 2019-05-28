@@ -9,14 +9,11 @@
  */
 #include "simph/kern/Object.hpp"
 #include "simph/kern/ExInvalidObjectName.hpp"
+#include "simph/sys/Logger.hpp"
 #include <regex>
 
 namespace simph {
     namespace kern {
-static const std::regex _validNameREx("^[a-zA-Z][a-zA-Z0-9_\[\\]]+$");
-
-
-
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -66,8 +63,7 @@ bool Object::checkName(Smp::String8 name) {
     std::string n=name;
     // Check for non empty alphanumeric names.
     // '_', '[' and ']' are also valid in names
-    // except for first character that must be alphabetical.
-    if (!std::regex_match(n,_validNameREx)) {
+    if (!std::regex_match(n,std::regex("[a-zA-Z][a-zA-Z0-9_\\[\\]]*"))) {
         return false;
     }
     // C++ keywords are not valid.
@@ -77,7 +73,12 @@ bool Object::checkName(Smp::String8 name) {
     static const std::vector<std::string> forbidden = {
         "for","while","do","if","else","return","public","protected","private"
     };
-    return std::find(forbidden.begin(), forbidden.end(), n) == forbidden.end();
+    for (auto kw: forbidden) {
+        if (kw==n) {
+            return false;
+        }
+    }
+    return true;
 }
 
 
