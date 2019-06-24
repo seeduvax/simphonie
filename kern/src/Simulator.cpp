@@ -17,6 +17,7 @@
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/TimeKeeper.hpp"
 #include "simph/kern/LinkRegistry.hpp"
+#include "simph/kern/TypeRegistry.hpp"
 #include "Smp/IEntryPointPublisher.h"
 
 // --------------------------------------------------------------------
@@ -83,14 +84,15 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
     _logger=new Logger("Logger","Logging service",_services);
     _scheduler=new Scheduler("Scheduler","Schedule service",_services);
     _timeKeeper=new TimeKeeper("TimeKeeper","Time service",_services);
-    _eventMgr=new EventManager("","Event handling service",_services);
-    _linkRegistry=new LinkRegistry("","Link registry service",_services);
+    _eventMgr=new EventManager("EventManager","Event handling service",_services);
+    _linkRegistry=new LinkRegistry("LinkRegistry","Link registry service",_services);
+    _typeRegistry=new TypeRegistry("TypeRegistry","Type registry service",_services);
+    _registry=new ObjectsRegistry("Resolver","Objects registry and resolver",_services);
     _services->AddComponent(_logger);
     _services->AddComponent(_scheduler);
     _services->AddComponent(_timeKeeper);
     _services->AddComponent(_eventMgr);
     _services->AddComponent(_linkRegistry);
-    _registry=new ObjectsRegistry("Resolver","Objects registry and resolver",_services);
     _services->AddComponent(_registry);
     _registry->add(this);
     _registry->add(_models);
@@ -99,12 +101,13 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
 }
 // ..........................................................
 Simulator::~Simulator() {
-    // TODO delete loaded models and additional services ??? 
-    delete _scheduler;
-    delete _timeKeeper;
-    delete _eventMgr;
-    delete _linkRegistry;
-    delete _logger;
+    delete _typeRegistry;
+    for (auto model: *(_models->GetComponents())) {
+        delete _models;
+    }
+    for (auto service: *(_services->GetComponents())) {
+        delete service;
+    }
     for (auto lib: _libs) {
         auto finalizeFunc=lib->getEntry<bool (*)()>("Finalize");
         if (finalizeFunc!=nullptr) {
