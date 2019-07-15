@@ -112,7 +112,12 @@ Smp::Publication::IType* TypeRegistry::AddFloatType(
     if (res!=nullptr) {
         throw ExTypeAlreadyRegistered(this,name,res);
     }
-    res=new Type(typeUuid,type,name,descr,this);
+    if (type==Smp::PrimitiveTypeKind::PTK_Float32) {
+        res=new Type(typeUuid,type,sizeof(Smp::Float32),name,descr,this);
+    }
+    else {
+        res=new Type(typeUuid,type,sizeof(Smp::Float64),name,descr,this);
+    }
     // TODO create Type subclass to store min, max, unit, etc. Once I can
     // find what to do with such additional attributes....
     _types.push_back(res);
@@ -123,21 +128,40 @@ Smp::Publication::IType* TypeRegistry::AddIntegerType(
                 Smp::String8 name, Smp::String8 descr,
                 Smp::Uuid typeUuid, Smp::Int64 minimum, Smp::Int64 maximum,
                 Smp::String8 unit, Smp::PrimitiveTypeKind type) {
-    if (type!=Smp::PrimitiveTypeKind::PTK_Int8 &&
-            type!=Smp::PrimitiveTypeKind::PTK_Int16 &&
-            type!=Smp::PrimitiveTypeKind::PTK_Int32 &&
-            type!=Smp::PrimitiveTypeKind::PTK_Int64 &&
-            type!=Smp::PrimitiveTypeKind::PTK_UInt8 &&
-            type!=Smp::PrimitiveTypeKind::PTK_UInt16 &&
-            type!=Smp::PrimitiveTypeKind::PTK_UInt32 &&
-            type!=Smp::PrimitiveTypeKind::PTK_UInt64)  {
-        throw ExInvalidPrimitiveType(this,type);
-    }
     Smp::Publication::IType* res=GetType(typeUuid);
     if (res!=nullptr) {
         throw ExTypeAlreadyRegistered(this,name,res);
     }
-    res=new Type(typeUuid,type,name,descr,this);
+    int size=0;
+    switch (type) {
+            case Smp::PrimitiveTypeKind::PTK_Int8:
+                size=sizeof(Smp::Int8);
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Int16:
+                size=sizeof(Smp::Int16);
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Int32:
+                size=sizeof(Smp::Int32);
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Int64:
+                size=sizeof(Smp::Int64);
+                break;
+            case Smp::PrimitiveTypeKind::PTK_UInt8:
+                size=sizeof(Smp::Int8);
+                break;
+            case Smp::PrimitiveTypeKind::PTK_UInt16:
+                size=sizeof(Smp::Int16);
+                break;
+            case Smp::PrimitiveTypeKind::PTK_UInt32:
+                size=sizeof(Smp::Int32);
+                break;
+            case Smp::PrimitiveTypeKind::PTK_UInt64:
+                size=sizeof(Smp::Int64);
+                break;
+            default:
+                throw ExInvalidPrimitiveType(this,type);
+    }
+    res=new Type(typeUuid,type,size,name,descr,this);
     // TODO create Type subclass to store min, max, unit, etc. Once I can
     // find what to do with such additional attributes....
     _types.push_back(res);
@@ -186,9 +210,9 @@ Smp::Publication::IArrayType* TypeRegistry::AddArrayType(
     }
     Smp::Publication::IType* itemType=GetType(itemTypeUuid);
     if (itemType!=nullptr) {
-        // ODO don't know what to do with itemSize
         Smp::Publication::IArrayType* res=
-                new ArrayType(typeUuid,name,description,this,arrayCount,itemType);
+                new ArrayType(typeUuid,name,description,this,
+                            itemSize,arrayCount,itemType);
         _types.push_back(res);
         return res;
     }
@@ -198,13 +222,12 @@ Smp::Publication::IArrayType* TypeRegistry::AddArrayType(
 Smp::Publication::IType* TypeRegistry::AddStringType(
         Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
         Smp::Int64 length) {
-    // TODO don't know what to do with length
     Smp::Publication::IType* res=GetType(typeUuid);
     if (res!=nullptr) {
         throw ExTypeAlreadyRegistered(this,name,res);
     }
     res=new Type(typeUuid,Smp::PrimitiveTypeKind::PTK_String8,
-                                        name,description,this);
+                                       length,name,description,this);
     _types.push_back(res);
     return res;
 }

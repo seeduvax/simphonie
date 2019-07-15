@@ -57,6 +57,8 @@ public:
     void Unforce() override;
     Smp::Bool IsForced() override;
     void Freeze() override;
+    Smp::AnySimple GetValue() const override;
+    void SetValue(Smp::AnySimple value) override;
 protected: 
     inline void setType(const Smp::Publication::IType* type) {
         _type=type;

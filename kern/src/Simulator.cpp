@@ -86,8 +86,10 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
     _timeKeeper=new TimeKeeper("TimeKeeper","Time service",_services);
     _eventMgr=new EventManager("EventManager","Event handling service",_services);
     _linkRegistry=new LinkRegistry("LinkRegistry","Link registry service",_services);
-    _typeRegistry=new TypeRegistry("TypeRegistry","Type registry service",_services);
-    _registry=new ObjectsRegistry("Resolver","Objects registry and resolver",_services);
+    TypeRegistry* tr=new TypeRegistry("TypeRegistry","Type registry service",_services);
+    _typeRegistry=tr;
+    _registry=new ObjectsRegistry("Resolver","Objects registry and resolver",
+                                        _services,tr);
     _services->AddComponent(_logger);
     _services->AddComponent(_scheduler);
     _services->AddComponent(_timeKeeper);

@@ -15,7 +15,7 @@ namespace simph {
 // ..........................................................
 StructureType::StructureType(Smp::Uuid uuid, Smp::String8 name, 
             Smp::String8 description, Smp::IObject* parent):
-        Type(uuid,Smp::PrimitiveTypeKind::PTK_None,name,description,parent) {
+        Type(uuid,Smp::PrimitiveTypeKind::PTK_None,0,name,description,parent) {
 }
 // ..........................................................
 StructureType::~StructureType() {
@@ -37,6 +37,8 @@ void StructureType::AddField(
     fd.input=input;
     fd.output=output;
     _fields.push_back(fd);
+    // TODO check uuid is valid and update size
+    // TODO need ref to type registry to be able of that...
 }
 
 }} // namespace simph::kern
