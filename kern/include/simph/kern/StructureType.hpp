@@ -15,6 +15,7 @@
 
 namespace simph {
 	namespace kern {
+class TypeRegistry;
 
 /**
  *
@@ -25,7 +26,7 @@ public:
     /**
      * Default constructor.
      */
-    StructureType(Smp::Uuid uuid, Smp::String8 name, 
+    StructureType(Smp::Uuid uuid, TypeRegistry* typeReg, Smp::String8 name, 
                 Smp::String8 description="", Smp::IObject* parent=nullptr);
     /**
      * Destructor.
@@ -50,6 +51,7 @@ private:
         Smp::Bool output;
     };
     std::vector<struct FieldDescr> _fields;
+    TypeRegistry* _typeRegistry;
 };
 
 }} // namespace simph::kern

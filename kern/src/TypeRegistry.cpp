@@ -239,7 +239,7 @@ Smp::Publication::IStructureType* TypeRegistry::AddStructureType(
         throw ExTypeAlreadyRegistered(this,name,ex);
     }
     Smp::Publication::IStructureType* res=
-                        new StructureType(typeUuid,name,description,this);
+                        new StructureType(typeUuid,this,name,description,this);
     _types.push_back(res);
     return res;
 }
@@ -253,7 +253,7 @@ Smp::Publication::IClassType* TypeRegistry::AddClassType(
     }
     // TODO take care of base class type
     Smp::Publication::IClassType* res=
-                        new ClassType(typeUuid,name,description,this);
+                        new ClassType(typeUuid,this,name,description,this);
     _types.push_back(res);
     return res;
 }

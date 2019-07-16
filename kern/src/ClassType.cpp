@@ -8,14 +8,15 @@
  * $Date$
  */
 #include "simph/kern/ClassType.hpp"
+#include "simph/kern/TypeRegistry.hpp"
 
 namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ClassType::ClassType(Smp::Uuid uuid, Smp::String8 name, 
+ClassType::ClassType(Smp::Uuid uuid, TypeRegistry* typeReg,Smp::String8 name, 
             Smp::String8 description, Smp::IObject* parent):
-        StructureType(uuid,name,description,parent) {
+        StructureType(uuid,typeReg,name,description,parent) {
 }
 // ..........................................................
 ClassType::~ClassType() {
