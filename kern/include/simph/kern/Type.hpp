@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    Type(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind,
+    Type(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind, Smp::UInt64 typeSize,
                     Smp::String8 name, Smp::String8 descr="", 
                     Smp::IObject* parent=nullptr);
     /**
@@ -42,9 +42,17 @@ public:
                  Smp::Bool state=true,
                  Smp::Bool input=false,
                  Smp::Bool output=false) override;
+    inline Smp::UInt64 getSize() const {
+        return _size;
+    }
+protected:
+    void setSize(Smp::UInt64 newSize) {
+        _size=newSize;
+    }
 private:
     Smp::Uuid _uuid;
     Smp::PrimitiveTypeKind _kind;
+    Smp::UInt64 _size;
 };
 
 }} // namespace simph::kern

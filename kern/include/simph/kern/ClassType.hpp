@@ -14,6 +14,7 @@
 
 namespace simph {
 	namespace kern {
+class TypeRegistry;
 
 /**
  *
@@ -24,7 +25,7 @@ public:
     /**
      * Default constructor.
      */
-    ClassType(Smp::Uuid, Smp::String8 name, 
+    ClassType(Smp::Uuid, TypeRegistry* typeReg, Smp::String8 name, 
                 Smp::String8 description="", Smp::IObject* parent=nullptr);
     /**
      * Destructor.

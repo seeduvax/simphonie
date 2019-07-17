@@ -14,11 +14,12 @@ namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-Type::Type(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind,
+Type::Type(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind, Smp::UInt64 typeSize,
             Smp::String8 name, Smp::String8 descr, Smp::IObject* parent):
                     Object(name,descr,parent),
                     _uuid(uuid),
-                    _kind(kind) {
+                    _kind(kind),
+                    _size(typeSize) {
 }
 // ..........................................................
 Type::~Type() {

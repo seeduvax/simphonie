@@ -26,7 +26,7 @@ public:
      */
     ArrayType(Smp::Uuid uuid, Smp::String8 name, Smp::String8 descr, 
             Smp::IObject* parent,
-            Smp::UInt64 size,Smp::Publication::IType* type);
+            Smp::UInt64 elemSize, Smp::UInt64 size,Smp::Publication::IType* type);
     /**
      * Destructor.
      */

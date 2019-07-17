@@ -12,6 +12,7 @@
 #include "Smp/IPublication.h"
 #include "Smp/Services/IResolver.h"
 #include "simph/kern/Component.hpp"
+#include "simph/kern/TypeRegistry.hpp"
 #include <vector>
 
 namespace Smp {
@@ -32,7 +33,7 @@ public:
      * Default constructor.
      */
     ObjectsRegistry(Smp::String8 name, Smp::String8 descr,
-                    Smp::IObject* parent);
+                    Smp::IObject* parent, TypeRegistry* typeRegistry);
     /**
      * Destructor.
      */
@@ -193,7 +194,7 @@ private:
     Node* _root;
     Node* _currentNode;
     Node* findNode(const Smp::IObject* obj);
-    Smp::Publication::ITypeRegistry* _typeRegistry;
+    TypeRegistry* _typeRegistry;
     Smp::IObject* resolve(Node* from,Smp::String8 path);
     void addField(Smp::IField* field);
     Smp::IObject* getFieldParent();

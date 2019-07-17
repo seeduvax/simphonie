@@ -19,7 +19,7 @@ namespace simph {
 // ..........................................................
 EnumerationType::EnumerationType(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind,
         Smp::String8 name, Smp::String8 descr, Smp::IObject* parent):
-        Type(uuid,kind,name,descr,parent) {
+        Type(uuid,kind,sizeof(Smp::Int32),name,descr,parent) {
 }
 // ..........................................................
 EnumerationType::~EnumerationType() {

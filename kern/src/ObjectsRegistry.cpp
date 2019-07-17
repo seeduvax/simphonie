@@ -9,6 +9,7 @@
  */
 #include "simph/kern/ObjectsRegistry.hpp"
 #include "simph/kern/Field.hpp"
+#include "simph/kern/Type.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/sys/RttiUtil.hpp"
 #include "Smp/IEntryPoint.h"
@@ -84,12 +85,14 @@ private:
 };
 // --------------------------------------------------------------------
 // ..........................................................
-ObjectsRegistry::ObjectsRegistry(Smp::String8 name, Smp::String8 descr,
-                            Smp::IObject* parent):
+ObjectsRegistry::ObjectsRegistry(Smp::String8 name,
+                            Smp::String8 descr,
+                            Smp::IObject* parent,
+                            TypeRegistry* typeRegistry):
                     Component(name,descr,parent),
     _root(new Node(nullptr,nullptr)),
     _currentNode(nullptr),
-    _typeRegistry(nullptr) {
+    _typeRegistry(typeRegistry) {
 }
 // ..........................................................
 ObjectsRegistry::~ObjectsRegistry() {
@@ -356,7 +359,16 @@ void ObjectsRegistry::PublishField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-LOGE("ObjectsRegistry::PublishField(...,void*,...) not implemented yet!")
+    Type* t=dynamic_cast<Type*>(_typeRegistry->GetType(typeUuid));
+    if (t!=nullptr) {
+        addField(new Field(name,description,view,address,t->getSize(),
+                    state,input,output,getFieldParent()));
+    }
+    else {
+LOGE("No type found or bad type. Can't add field "<<name<<" to "
+        <<getFieldParent()->GetName());
+        // TODO throw the right exception...
+    }
 }
 // ..........................................................
 void ObjectsRegistry::PublishField(Smp::IField* field) {

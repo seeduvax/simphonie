@@ -14,8 +14,9 @@ namespace simph {
 // --------------------------------------------------------------------
 // ..........................................................
 ArrayType::ArrayType(Smp::Uuid uuid, Smp::String8 name, Smp::String8 descr, 
-        Smp::IObject* parent, Smp::UInt64 size, Smp::Publication::IType* type):
-        Type(uuid,type->GetPrimitiveTypeKind(),name,descr,parent), 
+        Smp::IObject* parent, Smp::UInt64 elemSize, Smp::UInt64 size,
+        Smp::Publication::IType* type):
+        Type(uuid,type->GetPrimitiveTypeKind(),elemSize*size,name,descr,parent), 
         _size(size), _itemType(type) {
 }
 // ..........................................................
