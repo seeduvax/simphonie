@@ -236,4 +236,40 @@ template<>
 void TField<Smp::Float64>::initType() {
     setType(&_float64Type);
 }
+// --------------------------------------------------------------------
+// StructureField
+// ..........................................................
+StructureField::StructureField(Smp::String8 name,
+            Smp::String8 description, Smp::ViewKind viewKind, void* address,
+            Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+            Smp::IObject* parent): Field(name,description,viewKind,address,0,
+                    isState,isInput,isOutput,parent) {
+}
+// ..........................................................
+StructureField::~StructureField() {
+}
+// ..........................................................
+void StructureField::Push() {
+    for (auto f: _fields) {
+        f->Push();
+    }
+}
+// ..........................................................
+void StructureField::Connect(Smp::IField* target) {
+    auto f=dynamic_cast<StructureField*>(target);
+    if (f!=nullptr 
+            && f->getType()->GetUuid()==getType()->GetUuid() 
+            && IsOutput() && f->IsInput()
+            && _fields.size()==f->_fields.size()) {
+        for(int i=0;i<_fields.size();i++) {
+            _fields[i]->Connect(f->_fields[i]);
+        }
+    }
+    else {
+        throw ExInvalidTarget(this,target);
+    }
+}
+
+
+
 }} // namespace simph::kern

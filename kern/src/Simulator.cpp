@@ -103,7 +103,7 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
 Simulator::~Simulator() {
     delete _typeRegistry;
     for (auto model: *(_models->GetComponents())) {
-        delete _models;
+        delete model;
     }
     for (auto service: *(_services->GetComponents())) {
         delete service;

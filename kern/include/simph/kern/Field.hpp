@@ -61,6 +61,9 @@ protected:
     inline void setType(const Smp::Publication::IType* type) {
         _type=type;
     }
+    inline const Smp::Publication::IType* getType() {
+        return _type;
+    }
 
 private:
     Smp::Bool _stateType;
@@ -103,6 +106,22 @@ public:
 
 private:
     T* _tData;
+};
+
+class StructureField: public Field {
+public:
+    StructureField(Smp::String8 name, Smp::String8 description,
+            Smp::ViewKind viewKind, void* address,
+            Smp::Bool isState,
+            Smp::Bool isInput,
+            Smp::Bool isOutput,
+            Smp::IObject* parent
+            );
+    virtual ~StructureField();
+    void Push() override; 
+    void Connect(Smp::IField* target) override;
+    void addField(Field* f);
+    std::vector<Field*> _fields;
 };
 
 }} // namespace simph::kern
