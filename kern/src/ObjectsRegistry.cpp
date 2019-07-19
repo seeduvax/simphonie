@@ -10,6 +10,7 @@
 #include "simph/kern/ObjectsRegistry.hpp"
 #include "simph/kern/Field.hpp"
 #include "simph/kern/Type.hpp"
+#include "simph/kern/StructureType.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/sys/RttiUtil.hpp"
 #include "Smp/IEntryPoint.h"
@@ -361,8 +362,18 @@ void ObjectsRegistry::PublishField(
         Smp::Bool output) {
     Type* t=dynamic_cast<Type*>(_typeRegistry->GetType(typeUuid));
     if (t!=nullptr) {
-        addField(new Field(name,description,view,address,t->getSize(),
+        StructureType* st=dynamic_cast<StructureType*>(t);
+        if (st!=nullptr) {
+            StructureField* sf=new StructureField(name,description,view,
+                    address,state, input, output,
+                    getFieldParent());
+            st->setup(sf);
+            addField(sf);
+        }
+        else {
+            addField(new Field(name,description,view,address,t->getSize(),
                     state,input,output,getFieldParent()));
+        }    
     }
     else {
 LOGE("No type found or bad type. Can't add field "<<name<<" to "

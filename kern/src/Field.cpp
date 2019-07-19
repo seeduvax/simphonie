@@ -264,7 +264,8 @@ StructureField::StructureField(Smp::String8 name,
             Smp::String8 description, Smp::ViewKind viewKind, void* address,
             Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
             Smp::IObject* parent): Field(name,description,viewKind,address,0,
-                    isState,isInput,isOutput,parent) {
+                    isState,isInput,isOutput,parent),
+                    _baseAddress(address) {
 }
 // ..........................................................
 StructureField::~StructureField() {
@@ -289,6 +290,10 @@ void StructureField::Connect(Smp::IField* target) {
     else {
         throw ExInvalidTarget(this,target);
     }
+}
+// ..........................................................
+void StructureField::addField(Field* f) {
+    _fields.push_back(f);
 }
 
 

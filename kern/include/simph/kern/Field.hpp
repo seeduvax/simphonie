@@ -124,6 +124,11 @@ public:
     void Connect(Smp::IField* target) override;
     void addField(Field* f);
     std::vector<Field*> _fields;
+    inline void* getAddress() {
+        return _baseAddress;
+    }
+private:
+    void* _baseAddress;
 };
 
 }} // namespace simph::kern

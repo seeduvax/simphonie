@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "simph/kern/StructureType.hpp"
+#include "simph/kern/Field.hpp"
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/kern/Type.hpp"
 #include "simph/sys/Logger.hpp"
@@ -17,9 +18,11 @@ namespace simph {
 // --------------------------------------------------------------------
 // ..........................................................
 StructureType::StructureType(Smp::Uuid uuid, TypeRegistry* typeReg,
-            Smp::String8 name, Smp::String8 description, Smp::IObject* parent):
+            Smp::String8 name, Smp::String8 description, 
+            Smp::IObject* parent):
         Type(uuid,Smp::PrimitiveTypeKind::PTK_None,0,name,description,parent),
         _typeRegistry(typeReg) {
+
 }
 // ..........................................................
 StructureType::~StructureType() {
@@ -38,13 +41,14 @@ void StructureType::AddField(
         fd.description=description;
         fd.uuid=uuid;
         fd.offset=offset;
+        fd.size=t->getSize();
         fd.view=view;
         fd.state=state;
         fd.input=input;
         fd.output=output;
         _fields.push_back(fd);
         int size=getSize();
-        int newSize=offset+t->getSize();
+        int newSize=offset+fd.size;
         if (newSize>size) {
             setSize(newSize);
         }
@@ -53,6 +57,27 @@ void StructureType::AddField(
         // TODO throw somthing like InvalidType?
 LOGE("Can't add type "<<name<<" to structure type "<<GetName()
 <<", can't find uuid in registry.");
+    }
+}
+// ..........................................................
+void StructureType::setup(StructureField* sf) {
+    void* baseAddress=sf->getAddress();
+    for (auto fd: _fields) {
+        // TODO make better pointer arithmetic than this ugly hack to
+        // make it quicly compile. 
+        void* address=(void*)((int64_t)baseAddress+fd.offset);
+        Type* t=dynamic_cast<Type*>(_typeRegistry->GetType(fd.uuid));
+        if (t!=nullptr) {
+            // TODO according fd.uuid create field using right field subclass
+            Field* f=new Field(fd.name,fd.description,fd.view,address,
+                    fd.size,fd.state,fd.input,fd.output,this);
+            sf->addField(f);
+        }
+        else {
+            // should not happen if type registry is well managed.
+            LOGE("Can't add field "<<fd.name<<" to structure "<<GetName()
+                    <<". Type Uuid not found in registry");
+        }
     }
 }
 

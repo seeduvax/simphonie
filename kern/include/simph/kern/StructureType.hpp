@@ -16,7 +16,7 @@
 namespace simph {
 	namespace kern {
 class TypeRegistry;
-
+class StructureField;
 /**
  *
  */
@@ -38,13 +38,18 @@ public:
         Smp::Int64 offset, Smp::ViewKind view = Smp::ViewKind::VK_All,
         Smp::Bool state = true, Smp::Bool input = false,
         Smp::Bool output = false) override;
-
+    /**
+     * Setup structure field according to this structure type definition.
+     * @param sf StructureField to setup
+     */ 
+    void setup(StructureField* sf);
 private:
     struct FieldDescr {
         Smp::String8 name;
         Smp::String8 description;
         Smp::Uuid uuid;
         Smp::Int64 offset;
+        Smp::UInt64 size;
         Smp::ViewKind view;
         Smp::Bool state;
         Smp::Bool input;
