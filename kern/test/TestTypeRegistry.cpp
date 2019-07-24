@@ -9,6 +9,8 @@
  */
 #include <cppunit/extensions/HelperMacros.h>
 #include "simph/kern/TypeRegistry.hpp"
+#include "simph/kern/ObjectsRegistry.hpp"
+#include "simph/kern/StructureType.hpp"
 
 namespace test {
 using namespace simph::kern;
@@ -18,6 +20,7 @@ using namespace simph::kern;
 class TestTypeRegistry: public CppUnit::TestFixture {
 CPPUNIT_TEST_SUITE( TestTypeRegistry );
 CPPUNIT_TEST( testPublishTypes );
+CPPUNIT_TEST( testPublishStruct );
 CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -47,13 +50,26 @@ public:
         CPPUNIT_ASSERT(exception);
     }
     void testPublishStruct() {
+        struct ts {
+            int64_t f1;
+            double f2;
+        };
+        struct ts tField;
         Smp::Uuid structUuid("00000000-0000-0000-0000-000000000001");
         Smp::Publication::IStructureType* t=_reg->AddStructureType("struct",
                     "structure test", structUuid);
         CPPUNIT_ASSERT(t!=nullptr);
         t->AddField("f1","Field One integer",Smp::Uuids::Uuid_Int64,0);
-        t->AddField("f2","Field Two double",Smp::Uuids::Uuid_Float64,0);
-        
+        t->AddField("f2","Field Two double",Smp::Uuids::Uuid_Float64,
+                                    (uint64_t)&(tField.f2)-(uint64_t)&tField);
+        StructureType* st=dynamic_cast<StructureType*>(t);
+        CPPUNIT_ASSERT(t!=nullptr);
+        CPPUNIT_ASSERT_EQUAL((Smp::UInt64)16,st->getSize());
+
+        ObjectsRegistry* oReg=new ObjectsRegistry("oreg","",nullptr,_reg);
+        oReg->PublishField("tstruct","",&tField, structUuid);
+oReg->dump();
+        delete oReg;
     }
 
 };
