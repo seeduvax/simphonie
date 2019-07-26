@@ -92,7 +92,7 @@ ObjectsRegistry::ObjectsRegistry(Smp::String8 name,
                             TypeRegistry* typeRegistry):
                     Component(name,descr,parent),
     _root(new Node(nullptr,nullptr)),
-    _currentNode(nullptr),
+    _currentNode(_root),
     _typeRegistry(typeRegistry) {
 }
 // ..........................................................
@@ -199,8 +199,17 @@ const std::vector<Smp::IDataflowField*>* ObjectsRegistry::getRelatedFlowFields(
 }
 // ..........................................................
 void ObjectsRegistry::addField(Smp::IField* field) {
-    new Node(field,findNode(field->GetParent()));
+    Node* newNode=new Node(field,findNode(field->GetParent()));
     _currentNode->addField(field);
+    StructureField* sf=dynamic_cast<StructureField*>(field);
+    if (sf!=nullptr) {
+        Node* savedCurrent=_currentNode;
+        _currentNode=newNode;
+        for(auto subF: sf->getFields()) {
+            addField(subF);
+        }
+        _currentNode=savedCurrent;
+    }
 }
 // ..........................................................
 Smp::Publication::ITypeRegistry* ObjectsRegistry::GetTypeRegistry() const {
@@ -364,14 +373,15 @@ void ObjectsRegistry::PublishField(
     if (t!=nullptr) {
         StructureType* st=dynamic_cast<StructureType*>(t);
         if (st!=nullptr) {
-            StructureField* sf=new StructureField(name,description,view,
-                    address,state, input, output,
-                    getFieldParent());
-            st->setup(sf);
-            addField(sf);
+            addField(new StructureField(name,description,view,
+                        address, st,state, input, output,
+                        getFieldParent()));
         }
         else {
-            addField(new Field(name,description,view,address,t->getSize(),
+            // TODO should probably do a switch case of death to ensure
+            // proper field subclass is create. May be there is already
+            // one somewhere...
+            addField(new Field(name,description,view,address,t->getSize(),t,
                     state,input,output,getFieldParent()));
         }    
     }

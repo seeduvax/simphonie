@@ -70,7 +70,7 @@ void StructureType::setup(StructureField* sf) {
         if (t!=nullptr) {
             // TODO according fd.uuid create field using right field subclass
             Field* f=new Field(fd.name,fd.description,fd.view,address,
-                    fd.size,fd.state,fd.input,fd.output,this);
+                    fd.size,t,sf->IsState(),sf->IsInput(),sf->IsOutput(),sf);
             sf->addField(f);
         }
         else {

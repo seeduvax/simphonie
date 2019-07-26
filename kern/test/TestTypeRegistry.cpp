@@ -11,6 +11,7 @@
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/kern/ObjectsRegistry.hpp"
 #include "simph/kern/StructureType.hpp"
+#include "Smp/IDataflowField.h"
 
 namespace test {
 using namespace simph::kern;
@@ -54,21 +55,35 @@ public:
             int64_t f1;
             double f2;
         };
-        struct ts tField;
+        struct ts tFieldA={1,1.1};
+        struct ts tFieldB={2,2.2};
         Smp::Uuid structUuid("00000000-0000-0000-0000-000000000001");
         Smp::Publication::IStructureType* t=_reg->AddStructureType("struct",
                     "structure test", structUuid);
         CPPUNIT_ASSERT(t!=nullptr);
         t->AddField("f1","Field One integer",Smp::Uuids::Uuid_Int64,0);
         t->AddField("f2","Field Two double",Smp::Uuids::Uuid_Float64,
-                                    (uint64_t)&(tField.f2)-(uint64_t)&tField);
+                                    (uint64_t)&(tFieldA.f2)-(uint64_t)&tFieldA);
         StructureType* st=dynamic_cast<StructureType*>(t);
         CPPUNIT_ASSERT(t!=nullptr);
         CPPUNIT_ASSERT_EQUAL((Smp::UInt64)16,st->getSize());
 
         ObjectsRegistry* oReg=new ObjectsRegistry("oreg","",nullptr,_reg);
-        oReg->PublishField("tstruct","",&tField, structUuid);
+        oReg->PublishField("sA","",&tFieldA, structUuid,Smp::ViewKind::VK_All,false,false,true);
+        oReg->PublishField("sB","",&tFieldB, structUuid,Smp::ViewKind::VK_All,false,true,false);
 oReg->dump();
+        auto src=dynamic_cast<Smp::IDataflowField*>(oReg->ResolveAbsolute("sA"));
+        auto tgt=dynamic_cast<Smp::IDataflowField*>(oReg->ResolveAbsolute("sB"));
+        CPPUNIT_ASSERT(src!=nullptr);
+        CPPUNIT_ASSERT(tgt!=nullptr);
+        CPPUNIT_ASSERT_EQUAL(dynamic_cast<const Smp::Publication::IType*>(t),src->GetType());
+        CPPUNIT_ASSERT_EQUAL(dynamic_cast<const Smp::Publication::IType*>(t),tgt->GetType());
+        src->Connect(tgt);
+        CPPUNIT_ASSERT(tFieldA.f1!=tFieldB.f1);
+        CPPUNIT_ASSERT(tFieldA.f2!=tFieldB.f2);
+        src->Push();
+        CPPUNIT_ASSERT_EQUAL(tFieldA.f1,tFieldB.f1);
+        CPPUNIT_ASSERT_EQUAL(tFieldA.f2,tFieldB.f2);
         delete oReg;
     }
 

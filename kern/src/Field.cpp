@@ -10,6 +10,7 @@
 #include "simph/kern/Field.hpp"
 #include "simph/kern/ExInvalidTarget.hpp"
 #include "simph/kern/Type.hpp"
+#include "simph/kern/StructureType.hpp"
 #include "simph/sys/Logger.hpp"
 #include <cstring>
 
@@ -20,6 +21,7 @@ namespace simph {
 Field::Field(Smp::String8 name, Smp::String8 description,
         Smp::ViewKind viewKind, 
         void* address, unsigned int dataSize,
+        Smp::Publication::IType* type,
         Smp::Bool isState,
         Smp::Bool isInput,
         Smp::Bool isOutput,
@@ -28,7 +30,7 @@ Field::Field(Smp::String8 name, Smp::String8 description,
                         _stateType(isState),
                         _inputType(isInput),
                         _outputType(isOutput),
-                        _type(),
+                        _type(type),
                         _viewKind(viewKind),
                         _data(address),
                         _dataSize(dataSize),
@@ -176,10 +178,19 @@ Smp::AnySimple TField<Smp::Float64>::GetValue() const {
 // ..........................................................
 StructureField::StructureField(Smp::String8 name,
             Smp::String8 description, Smp::ViewKind viewKind, void* address,
+            Smp::Publication::IType* type,
             Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
             Smp::IObject* parent): Field(name,description,viewKind,address,0,
-                    isState,isInput,isOutput,parent),
+                    type,isState,isInput,isOutput,parent),
                     _baseAddress(address) {
+    auto st=dynamic_cast<StructureType*>(type);
+    if (st!=nullptr) {
+        st->setup(this);
+    }
+    else {
+        LOGE("Can't setup field "<<name<<", its type "<<type->GetName()
+            <<" is not an expected Structure Type.");
+    }
 }
 // ..........................................................
 StructureField::~StructureField() {
@@ -194,7 +205,7 @@ void StructureField::Push() {
 void StructureField::Connect(Smp::IField* target) {
     auto f=dynamic_cast<StructureField*>(target);
     if (f!=nullptr 
-            && f->getType()->GetUuid()==getType()->GetUuid() 
+            && f->GetType()->GetUuid()==GetType()->GetUuid() 
             && IsOutput() && f->IsInput()
             && _fields.size()==f->_fields.size()) {
         for(int i=0;i<_fields.size();i++) {

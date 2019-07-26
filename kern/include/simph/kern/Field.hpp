@@ -35,6 +35,7 @@ public:
     Field(Smp::String8 name, Smp::String8 description,
             Smp::ViewKind viewKind, void* address,
             unsigned int dataSize,
+            Smp::Publication::IType* type,
             Smp::Bool isState,
             Smp::Bool isInput,
             Smp::Bool isOutput,
@@ -59,12 +60,9 @@ public:
     void Freeze() override;
     Smp::AnySimple GetValue() const override;
     void SetValue(Smp::AnySimple value) override;
-protected: 
-    inline void setType(const Smp::Publication::IType* type) {
+protected:
+    inline void setType(Smp::Publication::IType* type) {
         _type=type;
-    }
-    inline const Smp::Publication::IType* getType() {
-        return _type;
     }
 
 private:
@@ -92,6 +90,7 @@ public:
             Smp::IObject* parent
             ): 
                 Field(name,description,viewKind,(void*) address,sizeof(T),
+                        nullptr,
                         isState,isInput,isOutput,parent),
         _tData(address) {
         initType();
@@ -114,6 +113,7 @@ class StructureField: public Field {
 public:
     StructureField(Smp::String8 name, Smp::String8 description,
             Smp::ViewKind viewKind, void* address,
+            Smp::Publication::IType* type,
             Smp::Bool isState,
             Smp::Bool isInput,
             Smp::Bool isOutput,
@@ -123,11 +123,14 @@ public:
     void Push() override; 
     void Connect(Smp::IField* target) override;
     void addField(Field* f);
-    std::vector<Field*> _fields;
     inline void* getAddress() {
         return _baseAddress;
     }
+    inline const std::vector<Field*> getFields() const {
+        return _fields;
+    } 
 private:
+    std::vector<Field*> _fields;
     void* _baseAddress;
 };
 
