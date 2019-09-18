@@ -38,15 +38,19 @@ public:
         return _uuid;
     }
     Smp::IComponent* CreateInstance(Smp::String8 name, Smp::String8 descr,
-                                    Smp::IComposite* parent) {
+                                    Smp::IComposite* parent) override {
         // TODO check name and throw Smp::InvalidObjectName if needed
         return new T(name,descr,parent);
     }
-    void DeleteInstance(Smp::IComponent* instance) {
+    void DeleteInstance(Smp::IComponent* instance) override {
         // TODO is it needed to check type or anything else before delete ?
         // If no, what is the purpose of DeleteInstance ? why not use delete
         // directly ?
         delete instance;
+    }
+    Smp::String8 GetTypeName() const override {
+        // TODO retrieve demangled type name
+        return typeid(T).name();
     }
 private:
     Smp::Uuid _uuid;

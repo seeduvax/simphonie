@@ -63,6 +63,9 @@ public:
 		       Smp::String8 description,
 		       Smp::IComposite* parent) override;
     Smp::IFactory* GetFactory(Smp::Uuid uuid) const override;
+    Smp::FactoryCollection* GetFactories() const override;
+    Smp::Publication::ITypeRegistry* GetTypeRegistry() const override;
+    void LoadLibrary(Smp::String8 libraryPath) override;
     /**
      * Create and add new model instance.
      * Model type is defined as template argument.
@@ -85,16 +88,6 @@ public:
         }
         return m;
     }
-    /**
-     * Dynamic load a library.
-     * If library has an void Initialize(Smp::ISimulator*, Smp::ITypeRegistry*)
-     * function, it is called just after loading. It should register bundled
-     * type and component factories by calling bakc RegisterFactory and 
-     * RegisterType.
-     * TODO define behavior according to simulator state.
-     * @param lib library name.
-     */
-    void loadLibrary(Smp::String8 lib);
 private:
     Smp::SimulatorStateKind _state;
     Collection<Smp::IEntryPoint> _initEntryPoints;

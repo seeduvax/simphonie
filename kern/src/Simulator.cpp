@@ -111,6 +111,7 @@ Simulator::~Simulator() {
         delete service;
     }
     for (auto lib: _libs) {
+        // TODO Finalize or Finalise 
         auto finalizeFunc=lib->getEntry<bool (*)()>("Finalize");
         if (finalizeFunc!=nullptr) {
             finalizeFunc();
@@ -422,7 +423,7 @@ Smp::IFactory* Simulator::GetFactory(Smp::Uuid uuid) const {
     return nullptr;
 }
 // ..........................................................
-void Simulator::loadLibrary(Smp::String8 name) {
+void Simulator::LoadLibrary(Smp::String8 name) {
     std::string libName=name;
     simph::sys::DLib* fLib=nullptr;
     for (auto lib: _libs) {
@@ -438,6 +439,17 @@ void Simulator::loadLibrary(Smp::String8 name) {
         }
         _libs.push_back(fLib);
     }
+    // TODO check Initialize or Initialise
+}
+// ..........................................................
+Smp::FactoryCollection* Simulator::GetFactories() const {
+// TODO
+LOGE("Simulator::Fectories not implemented yet!")
+return nullptr;
+}
+// ..........................................................
+Smp::Publication::ITypeRegistry* Simulator::GetTypeRegistry() const {
+    return _typeRegistry;
 }
 
 }} // namespace simph::kern

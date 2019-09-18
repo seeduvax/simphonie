@@ -68,6 +68,10 @@ void Field::SetValue(Smp::AnySimple value)  {
     LOGW("Can't set simple value to non simple field " << GetName());
 }
 // ..........................................................
+Smp::PrimitiveTypeKind Field::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_None;
+}
+// ..........................................................
 Smp::AnySimple Field::GetValue() const {
     LOGW("Requesting simple value from non simple field "<<GetName());
     return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int64,0);
@@ -111,6 +115,66 @@ Smp::Bool Field::IsForced() {
 // ..........................................................
 void Field::Freeze() {
     Force(GetValue());
+}
+// ..........................................................
+template<>
+Smp::PrimitiveTypeKind TField<Smp::Char8>::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_Char8;
+}
+// ..........................................................
+template<>
+Smp::PrimitiveTypeKind TField<Smp::Bool>::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_Bool;
+}
+// ..........................................................
+template<>
+Smp::PrimitiveTypeKind TField<Smp::Int8>::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_Int8;
+}
+// ..........................................................
+template<>
+Smp::PrimitiveTypeKind TField<Smp::Int16>::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_Int16;
+}
+// ..........................................................
+template<>
+Smp::PrimitiveTypeKind TField<Smp::Int32>::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_Int32;
+}
+// ..........................................................
+template<>
+Smp::PrimitiveTypeKind TField<Smp::Int64>::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_Int64;
+}
+// ..........................................................
+template<>
+Smp::PrimitiveTypeKind TField<Smp::UInt8>::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_UInt8;
+}
+// ..........................................................
+template<>
+Smp::PrimitiveTypeKind TField<Smp::UInt16>::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_UInt16;
+}
+// ..........................................................
+template<>
+Smp::PrimitiveTypeKind TField<Smp::UInt32>::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_UInt32;
+}
+// ..........................................................
+template<>
+Smp::PrimitiveTypeKind TField<Smp::UInt64>::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_UInt64;
+}
+// ..........................................................
+template<>
+Smp::PrimitiveTypeKind TField<Smp::Float32>::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_Float32;
+}
+// ..........................................................
+template<>
+Smp::PrimitiveTypeKind TField<Smp::Float64>::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_Float64;
 }
 // ..........................................................
 template<>

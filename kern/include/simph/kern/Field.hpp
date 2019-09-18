@@ -58,6 +58,7 @@ public:
     void Unforce() override;
     Smp::Bool IsForced() override;
     void Freeze() override;
+    Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
     Smp::AnySimple GetValue() const override;
     void SetValue(Smp::AnySimple value) override;
 protected:
@@ -98,7 +99,8 @@ public:
     virtual ~TField() {
     }
     // Smp::ISimpleField implementation
-    Smp::AnySimple GetValue() const;
+    Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
+    Smp::AnySimple GetValue() const override;
 
     void SetValue(Smp::AnySimple value) {
         *_tData=value;

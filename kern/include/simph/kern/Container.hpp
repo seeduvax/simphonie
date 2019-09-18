@@ -34,6 +34,7 @@ public:
     const Smp::ComponentCollection* GetComponents() const override;
     Smp::IComponent* GetComponent(Smp::String8 name) const override;
     void AddComponent(Smp::IComponent* component) override;
+    void DeleteComponent(Smp::IComponent* component) override;
     Smp::Int64 GetCount() const override;
     Smp::Int64 GetUpper() const override;
     Smp::Int64 GetLower() const override;

@@ -52,6 +52,15 @@ void Container::AddComponent(Smp::IComponent* component) {
     _content.push_back(component);
 }
 // ..........................................................
+void Container::DeleteComponent(Smp::IComponent* component) {
+    if (_content.remove(component)) {
+        delete component;
+    }
+    else {
+            // TODO  throw NotMember exception
+    }
+}
+// ..........................................................
 Smp::Int64 Container::GetCount() const {
     return _content.size();
 }    
