@@ -15,7 +15,7 @@
 #include "simph/sys/DlDef.h"
 
 extern "C" {
-    SHARED_FUNCTION bool Initialize(Smp::ISimulator* simulator, Smp::Publication::ITypeRegistry* tReg) {
+    SHARED_FUNCTION bool Initialise(Smp::ISimulator* simulator, Smp::Publication::ITypeRegistry* tReg) {
         simulator->RegisterFactory(new simph::kern::Factory<simph::umdl::SimTimeProvider>(
                 "SimTimeProvider_Factory","",simulator,
                             {0x2adfaf7c,0x42ab,0x11e9,0x9feb,0x0f29cca3fa03}));
@@ -27,7 +27,7 @@ extern "C" {
                             {0xd9e94d0c,0x42ab,0x11e9,0x8b8e,0x4bc383f9f8bc}));
         return true;
     }
-    SHARED_FUNCTION bool Finalize() {
+    SHARED_FUNCTION bool Finalise() {
         return true;
     }
 }

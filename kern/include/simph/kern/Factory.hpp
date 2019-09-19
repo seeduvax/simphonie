@@ -9,6 +9,7 @@
  */
 #ifndef __simph_kern_Factory_HPP__
 #define __simph_kern_Factory_HPP__
+#include "simph/sys/RttiUtil.hpp"
 #include "simph/kern/Object.hpp"
 #include "Smp/IFactory.h"
 
@@ -27,6 +28,7 @@ public:
                 Smp::Uuid uuid):
                 Object(name,descr,parent),
                 _uuid(uuid) {
+        _name=simph::sys::RttiUtil::demangle(typeid(T).name());
     }
     /**
      * Destructor.
@@ -49,11 +51,11 @@ public:
         delete instance;
     }
     Smp::String8 GetTypeName() const override {
-        // TODO retrieve demangled type name
-        return typeid(T).name();
+        return _name.c_str();
     }
 private:
     Smp::Uuid _uuid;
+    std::string _name;
 };
 
 }} // namespace simph::kern

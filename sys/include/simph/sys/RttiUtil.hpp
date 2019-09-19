@@ -30,9 +30,11 @@ public:
     virtual ~RttiUtil();
 
     template <typename T>
-    static std::string getTypeName(T* ptr) {
+    static inline std::string getTypeName(T* ptr) {
+        return demangle(typeid(*ptr).name());
+    }
+    static inline std::string demangle(std::string name) {
         int status=-1;
-        std::string name=typeid(*ptr).name();
         char* dn=abi::__cxa_demangle(name.c_str(),NULL,NULL,&status);
         if (status==0) {
             name=dn;

@@ -111,8 +111,7 @@ Simulator::~Simulator() {
         delete service;
     }
     for (auto lib: _libs) {
-        // TODO Finalize or Finalise 
-        auto finalizeFunc=lib->getEntry<bool (*)()>("Finalize");
+        auto finalizeFunc=lib->getEntry<bool (*)()>("Finalise");
         if (finalizeFunc!=nullptr) {
             finalizeFunc();
         }
@@ -433,13 +432,12 @@ void Simulator::LoadLibrary(Smp::String8 name) {
     }
     if (fLib==nullptr) {
         fLib=new simph::sys::DLib(name);
-        auto init=fLib->getEntry<bool (*)(Smp::ISimulator*, Smp::Publication::ITypeRegistry* tReg)>("Initialize");
+        auto init=fLib->getEntry<bool (*)(Smp::ISimulator*, Smp::Publication::ITypeRegistry* tReg)>("Initialise");
         if (init!=nullptr) {
             init(this,_typeRegistry);
         }
         _libs.push_back(fLib);
     }
-    // TODO check Initialize or Initialise
 }
 // ..........................................................
 Smp::FactoryCollection* Simulator::GetFactories() const {
