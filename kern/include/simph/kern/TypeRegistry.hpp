@@ -32,6 +32,12 @@ public:
      */
     virtual ~TypeRegistry();
     /**
+     * Get the byte size of a primitive type.
+     * @param type primitive type to query for byte size 
+     * @return byte size of the provided primitive type
+     */
+    static size_t getPrimitiveTypeSize(Smp::PrimitiveTypeKind type);
+    /**
      * Get the name of a primitive type.
      * @param type primitive type to use to fetch for a name
      * @return name of the provided primitive type

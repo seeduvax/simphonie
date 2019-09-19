@@ -10,6 +10,7 @@
 #include "simph/kern/Field.hpp"
 #include "simph/kern/ExInvalidTarget.hpp"
 #include "simph/kern/Type.hpp"
+#include "simph/kern/TypeRegistry.hpp"
 #include "simph/kern/StructureType.hpp"
 #include "simph/sys/Logger.hpp"
 #include <cstring>
@@ -284,7 +285,23 @@ void StructureField::Connect(Smp::IField* target) {
 void StructureField::addField(Field* f) {
     _fields.push_back(f);
 }
-
-
+// --------------------------------------------------------------------
+// Array Field
+// ..........................................................
+ArrayField::ArrayField(Smp::String8 name,
+            Smp::String8 description, 
+            Smp::Int64 count,
+            void* address,
+            Smp::PrimitiveTypeKind type,
+            Smp::ViewKind view,
+            Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+            Smp::IObject* parent): Field(name,description,view,address,
+                    TypeRegistry::getPrimitiveTypeSize(type)*count,
+                    nullptr /* TODO primitive type ? Any related Array type ? */,
+                    isState,isInput,isOutput,parent) {
+}
+// ..........................................................
+ArrayField::~ArrayField() {
+}
 
 }} // namespace simph::kern

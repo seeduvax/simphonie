@@ -136,5 +136,18 @@ private:
     void* _baseAddress;
 };
 
+class ArrayField: public Field {
+public:
+    ArrayField(Smp::String8 name, Smp::String8 description,
+            Smp::Int64 count, void* address, Smp::PrimitiveTypeKind type,
+            Smp::ViewKind viewKind, 
+            Smp::Bool isState,
+            Smp::Bool isInput,
+            Smp::Bool isOutput,
+            Smp::IObject* parent
+            );
+    virtual ~ArrayField();
+};
+
 }} // namespace simph::kern
 #endif // __simph_kern_Field_HPP__

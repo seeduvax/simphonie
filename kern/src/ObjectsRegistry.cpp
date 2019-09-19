@@ -406,7 +406,8 @@ void ObjectsRegistry::PublishArray(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-LOGE("ObjectsRegistry::PublishArray(...,void*,...) not implemented yet!")
+    addField(new ArrayField(name,description,count,address,type,
+            view,state,input,output,getFieldParent()));
 }
 // ..........................................................
 Smp::IPublication* ObjectsRegistry::PublishArray(

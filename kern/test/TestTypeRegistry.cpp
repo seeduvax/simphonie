@@ -22,6 +22,7 @@ class TestTypeRegistry: public CppUnit::TestFixture {
 CPPUNIT_TEST_SUITE( TestTypeRegistry );
 CPPUNIT_TEST( testPublishTypes );
 CPPUNIT_TEST( testPublishStruct );
+CPPUNIT_TEST( testPublishArray );
 CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -85,6 +86,10 @@ oReg->dump();
         CPPUNIT_ASSERT_EQUAL(tFieldA.f1,tFieldB.f1);
         CPPUNIT_ASSERT_EQUAL(tFieldA.f2,tFieldB.f2);
         delete oReg;
+    }
+
+    void testPublishArray() {
+        CPPUNIT_ASSERT_MESSAGE("TODO",false);
     }
 
 };

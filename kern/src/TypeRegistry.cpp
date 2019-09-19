@@ -143,8 +143,43 @@ TypeRegistry::~TypeRegistry() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-Smp::String8 TypeRegistry::getPrimitiveTypeName(Smp::PrimitiveTypeKind _type) {
-    switch (_type) {
+size_t TypeRegistry::getPrimitiveTypeSize(Smp::PrimitiveTypeKind type) {
+    switch (type) {
+        case Smp::PrimitiveTypeKind::PTK_Char8:
+            return sizeof(Smp::Char8);
+        case Smp::PrimitiveTypeKind::PTK_Bool:
+            return sizeof(Smp::Bool);
+        case Smp::PrimitiveTypeKind::PTK_Int8:
+            return sizeof(Smp::Int8);
+        case Smp::PrimitiveTypeKind::PTK_Int16:
+            return sizeof(Smp::Int16);
+        case Smp::PrimitiveTypeKind::PTK_Int32:
+            return sizeof(Smp::Int32);
+        case Smp::PrimitiveTypeKind::PTK_Int64:
+            return sizeof(Smp::Int64);
+        case Smp::PrimitiveTypeKind::PTK_UInt8:
+            return sizeof(Smp::UInt8);
+        case Smp::PrimitiveTypeKind::PTK_UInt16:
+            return sizeof(Smp::UInt16);
+        case Smp::PrimitiveTypeKind::PTK_UInt32:
+            return sizeof(Smp::UInt32);
+        case Smp::PrimitiveTypeKind::PTK_UInt64:
+            return sizeof(Smp::UInt64);
+        case Smp::PrimitiveTypeKind::PTK_Float32:
+            return sizeof(Smp::Float32);
+        case Smp::PrimitiveTypeKind::PTK_Float64:
+            return sizeof(Smp::Float64);
+        case Smp::PrimitiveTypeKind::PTK_Duration:
+            return sizeof(Smp::Duration);
+        case Smp::PrimitiveTypeKind::PTK_DateTime:
+            return sizeof(Smp::DateTime);
+        default:
+            return 0;
+    }
+}
+// ..........................................................
+Smp::String8 TypeRegistry::getPrimitiveTypeName(Smp::PrimitiveTypeKind type) {
+    switch (type) {
         case Smp::PrimitiveTypeKind::PTK_None:
             return "PTK_None";
         case Smp::PrimitiveTypeKind::PTK_Char8:
