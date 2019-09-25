@@ -406,8 +406,71 @@ void ObjectsRegistry::PublishArray(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-    addField(new ArrayField(name,description,count,address,type,
-            view,state,input,output,getFieldParent()));
+    switch (type) {
+        case Smp::PrimitiveTypeKind::PTK_Bool:
+           addField(new SimpleArrayField<Smp::Bool>(name,description,
+                    count,address,type,
+                    view,state,input,output,getFieldParent()));
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Char8:
+           addField(new SimpleArrayField<Smp::Char8>(name,description,
+                    count,address,type,
+                    view,state,input,output,getFieldParent()));
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int8:
+           addField(new SimpleArrayField<Smp::Int8>(name,description,
+                    count,address,type,
+                    view,state,input,output,getFieldParent()));
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int16:
+           addField(new SimpleArrayField<Smp::Int16>(name,description,
+                    count,address,type,
+                    view,state,input,output,getFieldParent()));
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int32:
+           addField(new SimpleArrayField<Smp::Int32>(name,description,
+                    count,address,type,
+                    view,state,input,output,getFieldParent()));
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int64:
+           addField(new SimpleArrayField<Smp::Int64>(name,description,
+                    count,address,type,
+                    view,state,input,output,getFieldParent()));
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt8:
+           addField(new SimpleArrayField<Smp::UInt8>(name,description,
+                    count,address,type,
+                    view,state,input,output,getFieldParent()));
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt16:
+           addField(new SimpleArrayField<Smp::UInt16>(name,description,
+                    count,address,type,
+                    view,state,input,output,getFieldParent()));
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt32:
+           addField(new SimpleArrayField<Smp::UInt32>(name,description,
+                    count,address,type,
+                    view,state,input,output,getFieldParent()));
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt64:
+           addField(new SimpleArrayField<Smp::UInt64>(name,description,
+                    count,address,type,
+                    view,state,input,output,getFieldParent()));
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Float32:
+           addField(new SimpleArrayField<Smp::Float32>(name,description,
+                    count,address,type,
+                    view,state,input,output,getFieldParent()));
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Float64:
+           addField(new SimpleArrayField<Smp::Float64>(name,description,
+                    count,address,type,
+                    view,state,input,output,getFieldParent()));
+            break;
+        default:
+            LOGE("Unsupported array base type "<<type);
+            break;
+    }
 }
 // ..........................................................
 Smp::IPublication* ObjectsRegistry::PublishArray(

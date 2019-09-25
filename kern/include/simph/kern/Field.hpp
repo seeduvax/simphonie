@@ -11,8 +11,11 @@
 #define __simph_kern_Field_HPP__
 #include "Smp/IForcibleField.h"
 #include "Smp/ISimpleField.h"
+#include "Smp/ISimpleArrayField.h"
 #include "simph/kern/Persist.hpp"
 #include "simph/kern/Collection.hpp"
+#include <cstring>
+#include <sstream>
 // workaround Smp headers issue.
 namespace Smp {
 class IDataflowField;
@@ -136,17 +139,76 @@ private:
     void* _baseAddress;
 };
 
-class ArrayField: public Field {
+template <typename T>
+class SimpleArrayField: public Field, virtual public Smp::ISimpleArrayField {
 public:
-    ArrayField(Smp::String8 name, Smp::String8 description,
-            Smp::Int64 count, void* address, Smp::PrimitiveTypeKind type,
+    SimpleArrayField(Smp::String8 name, Smp::String8 description,
+            Smp::UInt64 count, void* address, Smp::PrimitiveTypeKind type,
             Smp::ViewKind viewKind, 
             Smp::Bool isState,
             Smp::Bool isInput,
             Smp::Bool isOutput,
             Smp::IObject* parent
-            );
-    virtual ~ArrayField();
+            ): Field(name,description,viewKind,address,sizeof(T)*count,nullptr,
+                    isState,isInput,isOutput,parent),
+                _tData((T*)address),
+                _count(count),
+                _primitiveType(type) {
+        _itemFields=new TField<T>*[_count];
+        for (int i=0;i<_count;i++) {
+            std::ostringstream s;
+            s<<"e"<<i;
+            _itemFields[i]=new TField<T>(s.str().c_str(),"",viewKind,
+                        &(_tData[i]),
+                        isState,isInput,isOutput,
+                        this);
+        }
+    }
+    virtual ~SimpleArrayField() {
+        for (int i=0;i<_count;i++) {
+            delete _itemFields[i];
+        }
+        delete[] _itemFields;
+    }
+    // specialization
+    Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override {
+        return _primitiveType;
+    }
+    // Smp::IArrayField implementation
+/*
+    Smp::UInt64 GetSize() const override {
+        return _count;
+    }
+    Smp::IField* GetItem(Smp::UInt64 index) const override {
+        if (index<_count) {
+            return _itemFields[index];
+        }
+        // TODO throw Smp::InvalidArrayIndex exception
+return nullptr;
+    }
+*/
+    // Smp::ISimpleArrayField implementation
+    Smp::AnySimple GetValue(Smp::UInt64 index) const override;
+    void SetValue(Smp::UInt64 index,Smp::AnySimple value) override {
+        _tData[index]=value;
+    }
+    void GetValues(Smp::UInt64 length,
+                    Smp::AnySimpleArray values) const override {
+        Smp::UInt64 c=length>_count?_count:length;
+        std::memcpy(values,_tData,c*sizeof(T));
+    }
+    void SetValues(Smp::UInt64 length,
+                    Smp::AnySimpleArray values) override {
+        Smp::UInt64 c=length>_count?_count:length;
+        std::memcpy(_tData,values,c*sizeof(T));
+    }
+    
+private:
+    T* _tData;
+    Smp::UInt64 _count;
+    Smp::PrimitiveTypeKind _primitiveType;
+    TField<T>** _itemFields;
+    
 };
 
 }} // namespace simph::kern

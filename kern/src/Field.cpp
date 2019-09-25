@@ -13,7 +13,6 @@
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/kern/StructureType.hpp"
 #include "simph/sys/Logger.hpp"
-#include <cstring>
 
 namespace simph {
 	namespace kern {
@@ -83,7 +82,8 @@ Smp::AnySimple Field::GetValue() const {
 void Field::Connect(Smp::IField* target) {
     auto f=dynamic_cast<Field*>(target);
     if (f!=nullptr 
-            && f->_type->GetUuid()==_type->GetUuid() 
+            && ( (f->_type==nullptr && _type==nullptr /* TODO remove this ugly thing once Arrays got their right type */) 
+                || f->_type->GetUuid()==_type->GetUuid() )
             && f->_dataSize==_dataSize
             && IsOutput() && f->IsInput()) {
         _targets.push_back(f);
@@ -288,20 +288,64 @@ void StructureField::addField(Field* f) {
 // --------------------------------------------------------------------
 // Array Field
 // ..........................................................
-ArrayField::ArrayField(Smp::String8 name,
-            Smp::String8 description, 
-            Smp::Int64 count,
-            void* address,
-            Smp::PrimitiveTypeKind type,
-            Smp::ViewKind view,
-            Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
-            Smp::IObject* parent): Field(name,description,view,address,
-                    TypeRegistry::getPrimitiveTypeSize(type)*count,
-                    nullptr /* TODO primitive type ? Any related Array type ? */,
-                    isState,isInput,isOutput,parent) {
+template<>
+Smp::AnySimple SimpleArrayField<Smp::Char8>::GetValue(Smp::UInt64 index) const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Char8,_tData[index]);
 }
 // ..........................................................
-ArrayField::~ArrayField() {
+template<>
+Smp::AnySimple SimpleArrayField<Smp::Bool>::GetValue(Smp::UInt64 index) const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Bool,_tData[index]);
+}
+// ..........................................................
+template<>
+Smp::AnySimple SimpleArrayField<Smp::Int8>::GetValue(Smp::UInt64 index) const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int8,_tData[index]);
+}
+// ..........................................................
+template<>
+Smp::AnySimple SimpleArrayField<Smp::Int16>::GetValue(Smp::UInt64 index) const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int16,_tData[index]);
+}
+// ..........................................................
+template<>
+Smp::AnySimple SimpleArrayField<Smp::Int32>::GetValue(Smp::UInt64 index) const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int32,_tData[index]);
+}
+// ..........................................................
+template<>
+Smp::AnySimple SimpleArrayField<Smp::Int64>::GetValue(Smp::UInt64 index) const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int64,_tData[index]);
+}
+// ..........................................................
+template<>
+Smp::AnySimple SimpleArrayField<Smp::UInt8>::GetValue(Smp::UInt64 index) const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt8,_tData[index]);
+}
+// ..........................................................
+template<>
+Smp::AnySimple SimpleArrayField<Smp::UInt16>::GetValue(Smp::UInt64 index) const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt16,_tData[index]);
+}
+// ..........................................................
+template<>
+Smp::AnySimple SimpleArrayField<Smp::UInt32>::GetValue(Smp::UInt64 index) const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt32,_tData[index]);
+}
+// ..........................................................
+template<>
+Smp::AnySimple SimpleArrayField<Smp::UInt64>::GetValue(Smp::UInt64 index) const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt64,_tData[index]);
+}
+// ..........................................................
+template<>
+Smp::AnySimple SimpleArrayField<Smp::Float32>::GetValue(Smp::UInt64 index) const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float32,_tData[index]);
+}
+// ..........................................................
+template<>
+Smp::AnySimple SimpleArrayField<Smp::Float64>::GetValue(Smp::UInt64 index) const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float64,_tData[index]);
 }
 
 }} // namespace simph::kern
