@@ -8,9 +8,11 @@
  * $Date$
  */
 #include "simph/kern/Container.hpp"
+#include "simph/kern/ExCannotDelete.hpp"
 #include "simph/kern/ExDuplicateName.hpp"
 #include "simph/kern/ExContainerFull.hpp"
 #include "simph/kern/ExInvalidObjectType.hpp"
+#include "simph/kern/ExNotContained.hpp"
 
 namespace simph {
 	namespace kern {
@@ -53,11 +55,16 @@ void Container::AddComponent(Smp::IComponent* component) {
 }
 // ..........................................................
 void Container::DeleteComponent(Smp::IComponent* component) {
+    // TODO should throw CannotDelete when min number of element is
+    // already reached.
+    if (_content.size()<=GetLower()) {
+        throw ExCannotDelete(this,component);
+    }
     if (_content.remove(component)) {
         delete component;
     }
     else {
-            // TODO  throw NotMember exception
+        throw ExNotContained(this,component);
     }
 }
 // ..........................................................

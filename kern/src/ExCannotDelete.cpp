@@ -1,5 +1,5 @@
 /*
- * @file ExContainerFull.cpp
+ * @file ExCannotDelete.cpp
  *
  * Copyright 2019 . All rights reserved.
  * Use is subject to license terms.
@@ -7,34 +7,41 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExContainerFull.hpp"
+#include "simph/kern/ExCannotDelete.hpp"
 #include <sstream>
 
 namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExContainerFull::ExContainerFull(Smp::IContainer* sender) {
-    _size=sender->GetCount();
-    setName("ContainerFull");
+ExCannotDelete::ExCannotDelete(Smp::IContainer* sender, Smp::IComponent* comp):
+                _comp(comp) {
+    _lower=sender->GetLower();
+    setName("CannotDelete");
     setSender(sender);
     std::ostringstream d;
-    d << "From "<<sender->GetName()<<": max size "
-        <<sender->GetUpper()<<" is reached, can't add more content.";
+    d << "From "<<sender->GetName()<<": can't remove component "
+      << comp->GetName() << ", min size "<<_lower
+      << " is reached.";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExContainerFull::~ExContainerFull() {
+ExCannotDelete::~ExCannotDelete() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-Smp::String8 ExContainerFull::GetContainerName() const noexcept {
+Smp::String8 ExCannotDelete::GetContainerName() const noexcept {
     return GetSender()->GetName();
 }
 // ..........................................................
-Smp::Int64 ExContainerFull::GetContainerSize() const noexcept {
-    return _size;
+const Smp::IComponent* ExCannotDelete::GetComponent() const noexcept {
+    return _comp;
 }
+// ..........................................................
+Smp::Int64 ExCannotDelete::GetLowerLimit() const noexcept {
+    return _lower;
+}
+
 
 }} // namespace simph::kern
