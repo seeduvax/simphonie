@@ -140,7 +140,9 @@ private:
 };
 
 template <typename T>
-class SimpleArrayField: public Field, virtual public Smp::ISimpleArrayField {
+class SimpleArrayField: public Field, 
+                public virtual Smp::ISimpleArrayField ,
+                public virtual Smp::IArrayField {
 public:
     SimpleArrayField(Smp::String8 name, Smp::String8 description,
             Smp::UInt64 count, void* address, Smp::PrimitiveTypeKind type,
@@ -175,7 +177,6 @@ public:
         return _primitiveType;
     }
     // Smp::IArrayField implementation
-/*
     Smp::UInt64 GetSize() const override {
         return _count;
     }
@@ -186,7 +187,6 @@ public:
         // TODO throw Smp::InvalidArrayIndex exception
 return nullptr;
     }
-*/
     // Smp::ISimpleArrayField implementation
     Smp::AnySimple GetValue(Smp::UInt64 index) const override;
     void SetValue(Smp::UInt64 index,Smp::AnySimple value) override {
