@@ -36,7 +36,7 @@ Smp::IComponent* Container::GetComponent(Smp::String8 name) const {
 }
 // ..........................................................
 bool Container::checkComponentType(Smp::IComponent* component) {
-    // default: any kond of component is allowed.
+    // default: any kind of component is allowed.
     return true;
 }
 // ..........................................................
@@ -55,8 +55,6 @@ void Container::AddComponent(Smp::IComponent* component) {
 }
 // ..........................................................
 void Container::DeleteComponent(Smp::IComponent* component) {
-    // TODO should throw CannotDelete when min number of element is
-    // already reached.
     if (_content.size()<=GetLower()) {
         throw ExCannotDelete(this,component);
     }
