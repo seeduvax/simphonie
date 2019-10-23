@@ -68,6 +68,9 @@ protected:
     inline void setType(Smp::Publication::IType* type) {
         _type=type;
     }
+    inline const void* getDataPtr() {
+        return _data;
+    }
 
 private:
     Smp::Bool _stateType;
@@ -77,6 +80,7 @@ private:
     Smp::ViewKind _viewKind;
     void* _data;
     unsigned int _dataSize;
+    bool _allocated;
     Field* _src;
     Smp::Bool _forced;
     Smp::AnySimple _forcedValue;
@@ -128,15 +132,14 @@ public:
     void Push() override; 
     void Connect(Smp::IField* target) override;
     void addField(Field* f);
-    inline void* getAddress() {
-        return _baseAddress;
+    inline const void* getAddress(Smp::Int64 offset=0) {
+        return (const void*)((int64_t)getDataPtr()+offset);
     }
     inline const std::vector<Field*> getFields() const {
         return _fields;
     } 
 private:
     std::vector<Field*> _fields;
-    void* _baseAddress;
 };
 
 template <typename T>

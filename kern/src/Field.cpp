@@ -32,8 +32,9 @@ Field::Field(Smp::String8 name, Smp::String8 description,
                         _outputType(isOutput),
                         _type(type),
                         _viewKind(viewKind),
-                        _data(address),
+                        _data(address==nullptr?malloc(dataSize):address),
                         _dataSize(dataSize),
+                        _allocated(address==nullptr),
                         _src(nullptr),
                         _forced(false),
                         _forcedValue(),
@@ -41,6 +42,9 @@ Field::Field(Smp::String8 name, Smp::String8 description,
 }
 // ..........................................................
 Field::~Field() {
+    if (_allocated) {
+        free(_data);
+    }
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -246,8 +250,7 @@ StructureField::StructureField(Smp::String8 name,
             Smp::Publication::IType* type,
             Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
             Smp::IObject* parent): Field(name,description,viewKind,address,0,
-                    type,isState,isInput,isOutput,parent),
-                    _baseAddress(address) {
+                    type,isState,isInput,isOutput,parent) {
     auto st=dynamic_cast<StructureType*>(type);
     if (st!=nullptr) {
         st->setup(this);

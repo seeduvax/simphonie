@@ -11,6 +11,7 @@
 #include "simph/kern/Field.hpp"
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/kern/Type.hpp"
+#include "simph/kern/ExInvalidPrimitiveType.hpp"
 #include "simph/sys/Logger.hpp"
 
 namespace simph {
@@ -54,22 +55,21 @@ void StructureType::AddField(
         }
     }
     else {
-        // TODO throw somthing like InvalidType?
-LOGE("Can't add type "<<name<<" to structure type "<<GetName()
-<<", can't find uuid in registry.");
+        LOGE("Can't add type "<<name<<" to structure type "<<GetName()
+            <<", can't find uuid in registry.");
+        throw new ExInvalidPrimitiveType(this,Smp::PrimitiveTypeKind::PTK_None);
     }
 }
 // ..........................................................
 void StructureType::setup(StructureField* sf) {
-    void* baseAddress=sf->getAddress();
     for (auto fd: _fields) {
         // TODO make better pointer arithmetic than this ugly hack to
         // make it quicly compile. 
-        void* address=(void*)((int64_t)baseAddress+fd.offset);
+        const void* address=sf->getAddress(fd.offset);
         Type* t=dynamic_cast<Type*>(_typeRegistry->GetType(fd.uuid));
         if (t!=nullptr) {
             // TODO according fd.uuid create field using right field subclass
-            Field* f=new Field(fd.name,fd.description,fd.view,address,
+            Field* f=new Field(fd.name,fd.description,fd.view,(void*)address,
                     fd.size,t,sf->IsState(),sf->IsInput(),sf->IsOutput(),sf);
             sf->addField(f);
         }
