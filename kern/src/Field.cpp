@@ -10,7 +10,6 @@
 #include "simph/kern/Field.hpp"
 #include "simph/kern/ExInvalidTarget.hpp"
 #include "simph/kern/Type.hpp"
-#include "simph/kern/TypeRegistry.hpp"
 #include "simph/kern/StructureType.hpp"
 #include "simph/sys/Logger.hpp"
 
@@ -86,8 +85,7 @@ Smp::AnySimple Field::GetValue() const {
 void Field::Connect(Smp::IField* target) {
     auto f=dynamic_cast<Field*>(target);
     if (f!=nullptr 
-            && ( (f->_type==nullptr && _type==nullptr /* TODO remove this ugly thing once Arrays got their right type */) 
-                || f->_type->GetUuid()==_type->GetUuid() )
+            && ( f->_type->GetUuid()==_type->GetUuid() )
             && f->_dataSize==_dataSize
             && IsOutput() && f->IsInput()) {
         _targets.push_back(f);

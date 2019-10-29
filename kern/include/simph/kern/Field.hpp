@@ -148,17 +148,18 @@ class SimpleArrayField: public Field,
                 public virtual Smp::IArrayField {
 public:
     SimpleArrayField(Smp::String8 name, Smp::String8 description,
-            Smp::UInt64 count, void* address, Smp::PrimitiveTypeKind type,
+            Smp::UInt64 count, void* address, Smp::PrimitiveTypeKind ptype,
             Smp::ViewKind viewKind, 
+            Smp::Publication::IType* type,
             Smp::Bool isState,
             Smp::Bool isInput,
             Smp::Bool isOutput,
             Smp::IObject* parent
-            ): Field(name,description,viewKind,address,sizeof(T)*count,nullptr,
+            ): Field(name,description,viewKind,address,sizeof(T)*count,type,
                     isState,isInput,isOutput,parent),
                 _tData((T*)address),
                 _count(count),
-                _primitiveType(type) {
+                _primitiveType(ptype) {
         _itemFields=new TField<T>*[_count];
         for (int i=0;i<_count;i++) {
             std::ostringstream s;

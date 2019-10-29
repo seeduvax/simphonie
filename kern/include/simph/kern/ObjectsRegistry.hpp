@@ -192,6 +192,7 @@ public:
     Smp::IRequest* CreateRequest(Smp::String8 operationName) override;
     void DeleteRequest(Smp::IRequest* request) override;
 private:
+    Smp::Publication::IType* getArrayType(Smp::PrimitiveTypeKind ptk,Smp::Int64 count);
     Node* _root;
     Node* _currentNode;
     Node* findNode(const Smp::IObject* obj);

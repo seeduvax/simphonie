@@ -11,6 +11,7 @@
 #include "simph/kern/Field.hpp"
 #include "simph/kern/Type.hpp"
 #include "simph/kern/StructureType.hpp"
+#include "simph/kern/ExInvalidPrimitiveType.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/sys/RttiUtil.hpp"
 #include "Smp/IEntryPoint.h"
@@ -396,6 +397,30 @@ void ObjectsRegistry::PublishField(Smp::IField* field) {
 LOGE("ObjectsRegistry::PublishField(Smp::IField*) not implemented yet!")
 }
 // ..........................................................
+Smp::Publication::IType* ObjectsRegistry::getArrayType(Smp::PrimitiveTypeKind ptk,
+                                                        Smp::Int64 count) {
+    Type* pt=dynamic_cast<Type*>(_typeRegistry->GetType(ptk)); 
+    if (pt==nullptr) {
+        throw ExInvalidPrimitiveType(this,ptk);
+    }
+    Smp::Uuid arrayTypeUuid(
+            (uint32_t)(count>>32),
+            {(uint16_t)((count&0xffff0000)>>16),
+            (uint16_t)(count&0xffff),
+            0},
+            pt->GetUuid().Data3);
+    Smp::Publication::IType* t=_typeRegistry->GetType(arrayTypeUuid);
+    if (t==nullptr) {
+        std::string tname="A";
+        tname=tname+pt->GetName();
+        std::string tdescr="Array of ";
+        tdescr=tdescr+pt->GetDescription();
+        t=_typeRegistry->AddArrayType(tname.c_str(),tdescr.c_str(),
+                arrayTypeUuid,pt->GetUuid(),pt->getSize(),count);
+    }
+    return t;
+}
+// ..........................................................
 void ObjectsRegistry::PublishArray(
         Smp::String8 name,
         Smp::String8 description,
@@ -406,66 +431,67 @@ void ObjectsRegistry::PublishArray(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
+    Smp::Publication::IType* t=getArrayType(type,count);
     switch (type) {
         case Smp::PrimitiveTypeKind::PTK_Bool:
-           addField(new SimpleArrayField<Smp::Bool>(name,description,
+            addField(new SimpleArrayField<Smp::Bool>(name,description,
                     count,address,type,
-                    view,state,input,output,getFieldParent()));
+                    view,t,state,input,output,getFieldParent()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Char8:
            addField(new SimpleArrayField<Smp::Char8>(name,description,
                     count,address,type,
-                    view,state,input,output,getFieldParent()));
+                    view,t,state,input,output,getFieldParent()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Int8:
            addField(new SimpleArrayField<Smp::Int8>(name,description,
                     count,address,type,
-                    view,state,input,output,getFieldParent()));
+                    view,t,state,input,output,getFieldParent()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Int16:
            addField(new SimpleArrayField<Smp::Int16>(name,description,
                     count,address,type,
-                    view,state,input,output,getFieldParent()));
+                    view,t,state,input,output,getFieldParent()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Int32:
            addField(new SimpleArrayField<Smp::Int32>(name,description,
                     count,address,type,
-                    view,state,input,output,getFieldParent()));
+                    view,t,state,input,output,getFieldParent()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Int64:
            addField(new SimpleArrayField<Smp::Int64>(name,description,
                     count,address,type,
-                    view,state,input,output,getFieldParent()));
+                    view,t,state,input,output,getFieldParent()));
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt8:
            addField(new SimpleArrayField<Smp::UInt8>(name,description,
                     count,address,type,
-                    view,state,input,output,getFieldParent()));
+                    view,t,state,input,output,getFieldParent()));
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt16:
            addField(new SimpleArrayField<Smp::UInt16>(name,description,
                     count,address,type,
-                    view,state,input,output,getFieldParent()));
+                    view,t,state,input,output,getFieldParent()));
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt32:
            addField(new SimpleArrayField<Smp::UInt32>(name,description,
                     count,address,type,
-                    view,state,input,output,getFieldParent()));
+                    view,t,state,input,output,getFieldParent()));
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt64:
            addField(new SimpleArrayField<Smp::UInt64>(name,description,
                     count,address,type,
-                    view,state,input,output,getFieldParent()));
+                    view,t,state,input,output,getFieldParent()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Float32:
            addField(new SimpleArrayField<Smp::Float32>(name,description,
                     count,address,type,
-                    view,state,input,output,getFieldParent()));
+                    view,t,state,input,output,getFieldParent()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Float64:
            addField(new SimpleArrayField<Smp::Float64>(name,description,
                     count,address,type,
-                    view,state,input,output,getFieldParent()));
+                    view,t,state,input,output,getFieldParent()));
             break;
         default:
             LOGE("Unsupported array base type "<<type);
