@@ -77,7 +77,7 @@ public:
      */
     template <typename T>
     T* AddModel(Smp::String8 name, Smp::String8 descr="") {
-        T* m=new T(name,descr,_models);
+        T* m=new T(name,descr,this);
         auto mdl=dynamic_cast<Smp::IModel*>(m);
         if (mdl!=nullptr) {
             AddModel(mdl);
