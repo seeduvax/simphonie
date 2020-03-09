@@ -32,17 +32,17 @@ public:
     Smp::String8 what() const noexcept override;
     Smp::String8 GetName() const noexcept override;
     Smp::String8 GetDescription() const noexcept override;
-    Smp::IObject* GetSender() const noexcept override;
+    const Smp::IObject* GetSender() const noexcept override;
     Smp::String8 GetMessage() const noexcept override;
 protected:
     void setName(Smp::String8 name);
     void setDescription(Smp::String8 description);
-    void setSender(Smp::IObject* sender);
+    void setSender(const Smp::IObject* sender);
     void setMessage(Smp::String8 msg=nullptr);
 private:
     std::string _name;
     std::string _description;
-    Smp::IObject* _sender;
+    const Smp::IObject* _sender;
     std::string _msg;
 
 };

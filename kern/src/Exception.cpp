@@ -45,7 +45,7 @@ void Exception::setDescription(Smp::String8 description) {
     _description=description;
 }
 // ..........................................................
-void Exception::setSender(Smp::IObject* sender) {
+void Exception::setSender(const Smp::IObject* sender) {
     _sender=sender;
 }
 // ..........................................................
@@ -60,7 +60,7 @@ void Exception::setMessage(Smp::String8 msg) {
     }
 }
 // ..........................................................
-Smp::IObject* Exception::GetSender() const noexcept {
+const Smp::IObject* Exception::GetSender() const noexcept {
     return _sender;
 }
 // ..........................................................
