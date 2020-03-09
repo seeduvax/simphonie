@@ -14,6 +14,7 @@
 #include "Smp/ISimpleArrayField.h"
 #include "simph/kern/Persist.hpp"
 #include "simph/kern/Collection.hpp"
+#include "simph/kern/ExInvalidArrayIndex.hpp"
 #include <cstring>
 #include <sstream>
 // workaround Smp headers issue.
@@ -188,8 +189,7 @@ public:
         if (index<_count) {
             return _itemFields[index];
         }
-        // TODO throw Smp::InvalidArrayIndex exception
-return nullptr;
+        throw ExInvalidArrayIndex(this,index,_count);
     }
     // Smp::ISimpleArrayField implementation
     Smp::AnySimple GetValue(Smp::UInt64 index) const override;
