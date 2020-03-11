@@ -97,8 +97,6 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
     _services->AddComponent(_linkRegistry);
     _services->AddComponent(_registry);
     _registry->add(this);
-    _registry->add(_models);
-    _registry->add(_services);
     setState(Smp::SimulatorStateKind::SSK_Building);
 }
 // ..........................................................

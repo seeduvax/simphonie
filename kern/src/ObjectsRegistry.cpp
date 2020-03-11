@@ -28,9 +28,9 @@ public:
             _wrapped(toWrap),
             _parent(parent) {
         if (_parent!=nullptr) {
+// TODO check for duplicate names
             _parent->_children.push_back(this);
         }
-
     }
     inline Smp::IObject* getObject() const {
         return _wrapped;
@@ -154,15 +154,8 @@ Smp::IObject* ObjectsRegistry::ResolveRelative(
 }
 // ..........................................................
 Smp::IObject* ObjectsRegistry::getFieldParent() {
-// TODO unsure Fields should be attached directly to component or
-// field container. May be it should be an option...
     Smp::IObject* res=nullptr;
     if (_currentNode!=nullptr) {
-        for (auto child: *(_currentNode->getChildren())) {
-            if (dynamic_cast<Smp::FieldCollection*>(child->getObject())) {
-                return child->getObject();
-            }
-        }
         res=_currentNode->getObject();
     }
     return res;
@@ -171,10 +164,6 @@ Smp::IObject* ObjectsRegistry::getFieldParent() {
 void ObjectsRegistry::add(Smp::IObject* obj) {
     Node* parent=findNode(obj->GetParent());
     _currentNode=new Node(obj,parent);
-    auto c=dynamic_cast<Smp::IComponent*>(obj); 
-    if (c!=nullptr && c->GetFields()!=nullptr) {
-        new Node((Smp::IObject*)c->GetFields(),_currentNode);
-    }
 }
 // ..........................................................
 Node* ObjectsRegistry::findNode(const Smp::IObject* obj) {

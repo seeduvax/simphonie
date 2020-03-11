@@ -45,9 +45,9 @@ public:
         sim.Publish();
         sim.Configure();
         sim.Connect();
-        auto f1=dynamic_cast<Smp::IDataflowField*>(sim.GetResolver()->ResolveRelative("Fields/out",mdl));
+        auto f1=dynamic_cast<Smp::IDataflowField*>(sim.GetResolver()->ResolveRelative("out",mdl));
         CPPUNIT_ASSERT(f1!=nullptr);
-        auto f2=dynamic_cast<Smp::IDataflowField*>(sim.GetResolver()->ResolveRelative("Fields/in",log));
+        auto f2=dynamic_cast<Smp::IDataflowField*>(sim.GetResolver()->ResolveRelative("in",log));
         f1->Connect(f2);
         CPPUNIT_ASSERT(f1!=nullptr);
         dynamic_cast<simph::kern::ObjectsRegistry*>(sim.GetResolver())->dump();
