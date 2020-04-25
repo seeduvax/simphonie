@@ -7,13 +7,12 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Object.hpp"
-#include "simph/kern/ExInvalidObjectName.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simph/smpdk/Object.hpp"
+#include "simph/smpdk/ExInvalidObjectName.hpp"
 #include <regex>
 
 namespace simph {
-    namespace kern {
+    namespace smpdk {
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -82,4 +81,4 @@ bool Object::checkName(Smp::String8 name) {
 }
 
 
-}} // namespace simph::kern
+}} // namespace simph::smpdk

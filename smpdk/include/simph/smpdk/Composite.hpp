@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Composite_HPP__
-#define __simph_kern_Composite_HPP__
+#ifndef __simph_smpdk_Composite_HPP__
+#define __simph_smpdk_Composite_HPP__
 #include <iostream>
 #include "Smp/IComposite.h"
-#include "simph/kern/Collection.hpp"
+#include "simph/smpdk/Collection.hpp"
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 
 /**
  *
@@ -38,5 +38,5 @@ private:
     CollectionOwner<Smp::IContainer> _containers;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_Composite_HPP__
+}} // namespace simph::smpdk
+#endif // __simph_smpdk_Composite_HPP__

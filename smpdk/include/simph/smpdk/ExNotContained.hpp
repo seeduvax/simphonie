@@ -7,14 +7,14 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_ExNotContained_HPP__
-#define __simph_kern_ExNotContained_HPP__
+#ifndef __simph_smpdk_ExNotContained_HPP__
+#define __simph_smpdk_ExNotContained_HPP__
 #include "Smp/NotContained.h"
 #include "Smp/IContainer.h"
-#include "simph/kern/Exception.hpp"
+#include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 
 /**
  *
@@ -37,5 +37,5 @@ private:
     const Smp::IComponent* _comp;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_ExNotContained_HPP__
+}} // namespace simph::smpdk
+#endif // __simph_smpdk_ExNotContained_HPP__

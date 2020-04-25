@@ -7,16 +7,16 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Collection_HPP__
-#define __simph_kern_Collection_HPP__
+#ifndef __simph_smpdk_Collection_HPP__
+#define __simph_smpdk_Collection_HPP__
 #include <string.h>
 #include "Smp/ICollection.h"
-#include "simph/kern/Object.hpp"
+#include "simph/smpdk/Object.hpp"
 #include <vector>
 #include <algorithm>
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 
 /**
  *
@@ -101,5 +101,5 @@ public:
     };
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_Collection_HPP__
+}} // namespace simph::smpdk
+#endif // __simph_smpdk_Collection_HPP__

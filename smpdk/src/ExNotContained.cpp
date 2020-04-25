@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExNotContained.hpp"
+#include "simph/smpdk/ExNotContained.hpp"
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ExNotContained::ExNotContained(Smp::IContainer* sender, Smp::IComponent* comp):
@@ -37,4 +37,4 @@ const Smp::IComponent* ExNotContained::GetComponent() const noexcept {
     return _comp;
 }
 
-}} // namespace simph::kern
+}} // namespace simph::smpdk

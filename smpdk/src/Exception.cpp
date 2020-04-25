@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Exception.hpp"
+#include "simph/smpdk/Exception.hpp"
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 Exception::Exception():
@@ -69,4 +69,4 @@ Smp::String8 Exception::GetMessage() const noexcept {
 }
 
 
-}} // namespace simph::kern
+}} // namespace simph::smpdk

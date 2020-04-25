@@ -7,15 +7,15 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Container.hpp"
-#include "simph/kern/ExCannotDelete.hpp"
-#include "simph/kern/ExDuplicateName.hpp"
-#include "simph/kern/ExContainerFull.hpp"
-#include "simph/kern/ExInvalidObjectType.hpp"
-#include "simph/kern/ExNotContained.hpp"
+#include "simph/smpdk/Container.hpp"
+#include "simph/smpdk/ExCannotDelete.hpp"
+#include "simph/smpdk/ExDuplicateName.hpp"
+#include "simph/smpdk/ExContainerFull.hpp"
+#include "simph/smpdk/ExInvalidObjectType.hpp"
+#include "simph/smpdk/ExNotContained.hpp"
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 Container::Container(Smp::String8 name,Smp::String8 descr, 
@@ -78,4 +78,4 @@ Smp::Int64 Container::GetLower() const {
     return 0;
 }
 
-}} // namespace simph::kern
+}} // namespace simph::smpdk

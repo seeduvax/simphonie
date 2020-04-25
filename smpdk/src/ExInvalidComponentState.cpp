@@ -8,10 +8,10 @@
  * $Date$
  */
 #include <sstream>
-#include "simph/kern/ExInvalidComponentState.hpp"
+#include "simph/smpdk/ExInvalidComponentState.hpp"
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ExInvalidComponentState::ExInvalidComponentState(Smp::IObject* sender,
@@ -38,4 +38,4 @@ Smp::ComponentStateKind ExInvalidComponentState::GetExpectedState() const noexce
     return _expected;
 }
 
-}} // namespace simph::kern
+}} // namespace simph::smpdk

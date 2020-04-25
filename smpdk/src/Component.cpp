@@ -7,9 +7,9 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Component.hpp"
-#include "simph/kern/ExInvalidComponentState.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simph/smpdk/Component.hpp"
+#include "simph/smpdk/ExInvalidComponentState.hpp"
+#include <sstream> 
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -38,7 +38,7 @@ std::ostream& operator << (std::ostream& os,
 }
 }
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 Component::Component(Smp::String8 name,
@@ -107,4 +107,4 @@ const Smp::Uuid& Component::GetUuid() const {
     return _uuid;
 }
 
-}} // namespace simph::kern
+}} // namespace simph::smpdk

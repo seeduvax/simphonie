@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Object_HPP__
-#define __simph_kern_Object_HPP__
+#ifndef __simph_smpdk_Object_HPP__
+#define __simph_smpdk_Object_HPP__
 #include "Smp/IObject.h"
 #include <string>
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 
 /**
  *
@@ -49,5 +49,5 @@ private:
     void setParent(Smp::IObject* parent);
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_Object_HPP__
+}} // namespace simph::smpdk
+#endif // __simph_smpdk_Object_HPP__

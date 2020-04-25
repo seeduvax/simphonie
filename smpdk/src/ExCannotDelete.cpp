@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExCannotDelete.hpp"
+#include "simph/smpdk/ExCannotDelete.hpp"
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ExCannotDelete::ExCannotDelete(Smp::IContainer* sender, Smp::IComponent* comp):
@@ -44,4 +44,4 @@ Smp::Int64 ExCannotDelete::GetLowerLimit() const noexcept {
 }
 
 
-}} // namespace simph::kern
+}} // namespace simph::smpdk

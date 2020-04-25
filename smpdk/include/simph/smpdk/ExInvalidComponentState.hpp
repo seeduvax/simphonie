@@ -7,12 +7,12 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_ExInvalidComponentState_HPP__
-#define __simph_kern_ExInvalidComponentState_HPP__
+#ifndef __simph_smpdk_ExInvalidComponentState_HPP__
+#define __simph_smpdk_ExInvalidComponentState_HPP__
 #include "Smp/InvalidComponentState.h"
-#include "simph/kern/Exception.hpp"
+#include "simph/smpdk/Exception.hpp"
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 
 /**
  *
@@ -39,5 +39,5 @@ private:
 
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_ExInvalidComponentState_HPP__
+}} // namespace simph::smpdk
+#endif // __simph_smpdk_ExInvalidComponentState_HPP__

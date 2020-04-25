@@ -7,16 +7,16 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Component_HPP__
-#define __simph_kern_Component_HPP__
-#include "simph/kern/Object.hpp"
-#include "simph/kern/Collection.hpp"
+#ifndef __simph_smpdk_Component_HPP__
+#define __simph_smpdk_Component_HPP__
+#include "simph/smpdk/Object.hpp"
+#include "simph/smpdk/Collection.hpp"
 #include "Smp/IComponent.h"
 #include "Smp/Services/ILogger.h"
 #include "Smp/Services/ILinkRegistry.h"
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 
 /**
  *
@@ -81,5 +81,5 @@ private:
     Smp::ISimulator* _simulator;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_Component_HPP__
+}} // namespace simph::smpdk
+#endif // __simph_smpdk_Component_HPP__

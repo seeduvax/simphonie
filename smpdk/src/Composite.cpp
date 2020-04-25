@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Composite.hpp"
-#include "simph/kern/Container.hpp"
+#include "simph/smpdk/Composite.hpp"
+#include "simph/smpdk/Container.hpp"
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 Composite::Composite(Smp::String8 name, Smp::String8 descr,
@@ -35,4 +35,4 @@ const Smp::ContainerCollection* Composite::GetContainers() const {
 Smp::IContainer* Composite::GetContainer(Smp::String8 name) const {
     return _containers.at(name);
 }
-}} // namespace simph::kern
+}} // namespace simph::smpdk

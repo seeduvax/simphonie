@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Container_HPP__
-#define __simph_kern_Container_HPP__
+#ifndef __simph_smpdk_Container_HPP__
+#define __simph_smpdk_Container_HPP__
 #include "Smp/IContainer.h"
-#include "simph/kern/Collection.hpp"
+#include "simph/smpdk/Collection.hpp"
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 
 /**
  *
@@ -46,5 +46,5 @@ private:
     Collection<Smp::IComponent> _content;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_Container_HPP__
+}} // namespace simph::smpdk
+#endif // __simph_smpdk_Container_HPP__

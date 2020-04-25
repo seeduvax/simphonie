@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_ExInvalidObjectName_HPP__
-#define __simph_kern_ExInvalidObjectName_HPP__
-#include "simph/kern/Exception.hpp"
+#ifndef __simph_smpdk_ExInvalidObjectName_HPP__
+#define __simph_smpdk_ExInvalidObjectName_HPP__
+#include "simph/smpdk/Exception.hpp"
 #include "Smp/InvalidObjectName.h"
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 
 /**
  *
@@ -35,5 +35,5 @@ private:
     Smp::String8 _invalidName;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_ExInvalidObjectName_HPP__
+}} // namespace simph::smpdk
+#endif // __simph_smpdk_ExInvalidObjectName_HPP__

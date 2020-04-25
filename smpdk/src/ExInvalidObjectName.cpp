@@ -1,5 +1,5 @@
 /*
- * @file ExInvalidObjectType.cpp
+ * @file ExInvalidObjectName.cpp
  *
  * Copyright 2019 . All rights reserved.
  * Use is subject to license terms.
@@ -7,29 +7,30 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExInvalidObjectType.hpp"
+#include "simph/smpdk/ExInvalidObjectName.hpp"
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidObjectType::ExInvalidObjectType(Smp::IObject* sender,
-                                Smp::IObject* invalid):
-        _invalidObject(invalid) {
-    setName("InvalidObjectType");
+ExInvalidObjectName::ExInvalidObjectName(Smp::IObject* sender,
+                                Smp::String8 invalidName):
+                        _invalidName(invalidName) {
+    setName("InvalidObjectName");
     setSender(sender);
     std::ostringstream d;
-    d << "Object "<<invalid->GetName()<<" has invalid type.";
+    d << "'" << _invalidName 
+        << "' include char(s) not useable in a Smp object name.";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExInvalidObjectType::~ExInvalidObjectType() {
+ExInvalidObjectName::~ExInvalidObjectName() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-Smp::IObject* ExInvalidObjectType::GetInvalidObject() const noexcept {
-    return _invalidObject;
+Smp::String8 ExInvalidObjectName::GetInvalidName() const noexcept {
+    return _invalidName;
 }
-}} // namespace simph::kern
+}} // namespace simph::smpdk

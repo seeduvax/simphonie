@@ -1,5 +1,5 @@
 /*
- * @file ExDuplicateName.cpp
+ * @file ExInvalidObjectType.cpp
  *
  * Copyright 2019 . All rights reserved.
  * Use is subject to license terms.
@@ -7,30 +7,29 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExDuplicateName.hpp"
+#include "simph/smpdk/ExInvalidObjectType.hpp"
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExDuplicateName::ExDuplicateName(Smp::IObject* sender, Smp::String8 dName) {
-    _dName=dName;
-    setName("DuplicateName");
+ExInvalidObjectType::ExInvalidObjectType(Smp::IObject* sender,
+                                Smp::IObject* invalid):
+        _invalidObject(invalid) {
+    setName("InvalidObjectType");
     setSender(sender);
     std::ostringstream d;
-    d << "From "<<sender->GetName() << ": object named "
-            <<_dName<<" already exists.";
+    d << "Object "<<invalid->GetName()<<" has invalid type.";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExDuplicateName::~ExDuplicateName() {
+ExInvalidObjectType::~ExInvalidObjectType() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-Smp::String8 ExDuplicateName::GetDuplicateName() const noexcept {
-    return _dName.c_str();
+Smp::IObject* ExInvalidObjectType::GetInvalidObject() const noexcept {
+    return _invalidObject;
 }
-
-}} // namespace simph::kern
+}} // namespace simph::smpdk

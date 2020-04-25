@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExContainerFull.hpp"
+#include "simph/smpdk/ExContainerFull.hpp"
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+	namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ExContainerFull::ExContainerFull(Smp::IContainer* sender) {
@@ -37,4 +37,4 @@ Smp::Int64 ExContainerFull::GetContainerSize() const noexcept {
     return _size;
 }
 
-}} // namespace simph::kern
+}} // namespace simph::smpdk
