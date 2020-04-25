@@ -11,13 +11,14 @@
 #define __simph_kern_Scheduler_HPP__
 
 #include "Smp/Services/IScheduler.h"
-#include "simph/kern/Component.hpp"
+#include "simph/smpdk/Component.hpp"
 #include "simph/sys/Synchro.hpp"
 #include "simph/sys/Thread.hpp"
 #include <set>
 
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
 class TimeKeeper;
 /**
  *

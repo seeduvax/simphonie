@@ -11,7 +11,7 @@
 #define __simph_kern_ObjectsRegistry_HPP__
 #include "Smp/IPublication.h"
 #include "Smp/Services/IResolver.h"
-#include "simph/kern/Component.hpp"
+#include "simph/smpdk/Component.hpp"
 #include "simph/kern/TypeRegistry.hpp"
 #include <vector>
 
@@ -21,6 +21,7 @@ namespace Smp {
 }
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
 class Node;
 /**
  *

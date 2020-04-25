@@ -9,12 +9,13 @@
  */
 #ifndef __simph_kern_TypeRegistry_HPP__
 #define __simph_kern_TypeRegistry_HPP__
-#include "simph/kern/Component.hpp"
-#include "simph/kern/Collection.hpp"
+#include "simph/smpdk/Component.hpp"
+#include "simph/smpdk/Collection.hpp"
 #include "Smp/Publication/ITypeRegistry.h"
 
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
 
 /**
  *

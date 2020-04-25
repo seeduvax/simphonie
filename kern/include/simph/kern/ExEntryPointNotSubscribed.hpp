@@ -9,12 +9,12 @@
  */
 #ifndef __simph_kern_ExEntryPointNotSubscribed_HPP__
 #define __simph_kern_ExEntryPointNotSubscribed_HPP__
-#include "simph/kern/Exception.hpp"
+#include "simph/smpdk/Exception.hpp"
 #include "Smp/Services/EntryPointNotSubscribed.h"
 
 namespace simph {
 	namespace kern {
-
+using namespace simph::smpdk;
 /**
  *
  */

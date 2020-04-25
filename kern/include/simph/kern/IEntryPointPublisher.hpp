@@ -11,12 +11,13 @@
 #define __simph_kern_IEntryPointPublisher_HPP__
 
 #include "Smp/IEntryPointPublisher.h"
-#include "simph/kern/Collection.hpp"
+#include "simph/smpdk/Collection.hpp"
 #include "simph/kern/EntryPoint.hpp"
 #include "simph/sys/Runnable.hpp"
 
 namespace simph {
     namespace kern {
+using namespace simph::smpdk;
 
 using simph::sys::Runnable;
 

@@ -12,7 +12,7 @@
 #include "Smp/IModel.h"
 #include "Smp/IEntryPoint.h"
 #include "simph/kern/IEntryPointPublisher.hpp"
-#include "simph/kern/Component.hpp"
+#include "simph/smpdk/Component.hpp"
 
 
 namespace simph {
@@ -21,7 +21,7 @@ namespace simph {
 /**
  *
  */
-class AStepMdl: public simph::kern::Component,
+class AStepMdl: public simph::smpdk::Component,
                 public virtual Smp::IModel,
                 public virtual simph::kern::IEntryPointPublisher {
 public:

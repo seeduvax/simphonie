@@ -13,7 +13,7 @@
 #include "Smp/ISimpleField.h"
 #include "Smp/ISimpleArrayField.h"
 #include "simph/kern/Persist.hpp"
-#include "simph/kern/Collection.hpp"
+#include "simph/smpdk/Collection.hpp"
 #include "simph/kern/ExInvalidArrayIndex.hpp"
 #include <cstring>
 #include <sstream>
@@ -25,7 +25,7 @@ class IDataflowField;
 
 namespace simph {
 	namespace kern {
-
+using namespace simph::smpdk;
 /**
  *
  */

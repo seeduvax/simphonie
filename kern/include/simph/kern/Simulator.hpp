@@ -10,12 +10,14 @@
 #ifndef __simph_kern_Simulator_HPP__
 #define __simph_kern_Simulator_HPP__
 #include "Smp/ISimulator.h"
-#include "simph/kern/Composite.hpp"
+#include "simph/smpdk/Composite.hpp"
 #include "Smp/Publication/ITypeRegistry.h"
 #include "simph/sys/DLib.hpp"
 
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
+
 class ObjectsRegistry;
 class Scheduler;
 /**

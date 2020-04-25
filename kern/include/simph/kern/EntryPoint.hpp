@@ -10,13 +10,13 @@
 #ifndef __simph_kern_EntryPoint_HPP__
 #define __simph_kern_EntryPoint_HPP__
 
-#include "simph/kern/Object.hpp"
+#include "simph/smpdk/Object.hpp"
 #include "simph/sys/Runnable.hpp"
 #include "Smp/IEntryPoint.h"
 
 namespace simph {
     namespace kern {
-
+using namespace simph::smpdk;
 using simph::sys::Runnable;
 
 class EntryPoint: public Object,

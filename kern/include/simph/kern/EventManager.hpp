@@ -10,12 +10,13 @@
 #ifndef __simph_kern_EventManager_HPP__
 #define __simph_kern_EventManager_HPP__
 #include "Smp/Services/IEventManager.h"
-#include "simph/kern/Collection.hpp"
-#include "simph/kern/Component.hpp"
+#include "simph/smpdk/Collection.hpp"
+#include "simph/smpdk/Component.hpp"
 #include <unordered_map>
 
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
 
 /**
  *

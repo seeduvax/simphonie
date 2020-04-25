@@ -8,13 +8,13 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "simph/kern/Composite.hpp"
-#include "simph/kern/Container.hpp"
+#include "simph/smpdk/Composite.hpp"
+#include "simph/smpdk/Container.hpp"
 #include "DummyComponent.hpp"
 
 
 namespace test {
-using namespace simph::kern;
+using namespace simph::smpdk;
 class SampleComposite: virtual public Composite {
 public:
     SampleComposite(Smp::String8 name, Smp::IObject* parent=nullptr):

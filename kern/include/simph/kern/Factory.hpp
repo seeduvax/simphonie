@@ -10,11 +10,12 @@
 #ifndef __simph_kern_Factory_HPP__
 #define __simph_kern_Factory_HPP__
 #include "simph/sys/RttiUtil.hpp"
-#include "simph/kern/Object.hpp"
+#include "simph/smpdk/Object.hpp"
 #include "Smp/IFactory.h"
 
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
 /**
  *
  */

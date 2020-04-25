@@ -10,12 +10,13 @@
 #ifndef __simph_kern_LinkRegistry_HPP__
 #define __simph_kern_LinkRegistry_HPP__
 #include "Smp/Services/ILinkRegistry.h"
-#include "simph/kern/Component.hpp"
-#include "simph/kern/Collection.hpp"
+#include "simph/smpdk/Component.hpp"
+#include "simph/smpdk/Collection.hpp"
 #include <unordered_map>
 
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
 
 /**
  *

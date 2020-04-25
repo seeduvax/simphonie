@@ -9,11 +9,12 @@
  */
 #ifndef __simph_kern_ExDuplicateLiteral_HPP__
 #define __simph_kern_ExDuplicateLiteral_HPP__
-#include "simph/kern/Exception.hpp"
+#include "simph/smpdk/Exception.hpp"
 #include "Smp/Publication/DuplicateLiteral.h"
 
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
 
 /**
  *

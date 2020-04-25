@@ -8,13 +8,14 @@
  * $Date$
  */
 #include "simph/kern/EnumerationType.hpp"
-#include "simph/kern/ExInvalidObjectName.hpp"
-#include "simph/kern/ExDuplicateName.hpp"
+#include "simph/smpdk/ExInvalidObjectName.hpp"
+#include "simph/smpdk/ExDuplicateName.hpp"
 #include "simph/kern/ExDuplicateLiteral.hpp"
 #include <string.h>
 
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
 // --------------------------------------------------------------------
 // ..........................................................
 EnumerationType::EnumerationType(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind,

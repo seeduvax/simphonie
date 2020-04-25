@@ -11,10 +11,11 @@
 #define __simph_kern_TimeKeeper_HPP__
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Services/IEventManager.h"
-#include "simph/kern/Component.hpp"
+#include "simph/smpdk/Component.hpp"
 
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
 
 /**
  *

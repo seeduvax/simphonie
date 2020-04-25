@@ -9,11 +9,12 @@
  */
 #ifndef __simph_kern_Type_HPP__
 #define __simph_kern_Type_HPP__
-#include "simph/kern/Object.hpp"
+#include "simph/smpdk/Object.hpp"
 #include "Smp/Publication/IType.h"
 
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
 
 /**
  *

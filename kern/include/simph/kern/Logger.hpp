@@ -10,11 +10,12 @@
 #ifndef __simph_kern_Logger_HPP__
 #define __simph_kern_Logger_HPP__
 #include "Smp/Services/ILogger.h"
-#include "simph/kern/Component.hpp"
+#include "simph/smpdk/Component.hpp"
 #include "simph/sys/Logger.hpp"
 
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
 
 /**
  *

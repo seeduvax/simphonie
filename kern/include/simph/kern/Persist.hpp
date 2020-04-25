@@ -10,9 +10,10 @@
 #ifndef __simph_kern_Persist_HPP__
 #define __simph_kern_Persist_HPP__
 #include "Smp/IPersist.h"
-#include "simph/kern/Object.hpp"
+#include "simph/smpdk/Object.hpp"
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
 
 /**
  *

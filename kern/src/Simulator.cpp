@@ -9,7 +9,7 @@
  */
 #include "simph/kern/Simulator.hpp"
 
-#include "simph/kern/ExDuplicateName.hpp"
+#include "simph/smpdk/ExDuplicateName.hpp"
 #include "simph/kern/ExDuplicateUuid.hpp"
 #include "simph/kern/Logger.hpp"
 #include "simph/kern/EventManager.hpp"

@@ -11,10 +11,11 @@
 #define __simph_kern_Request_HPP__
 
 #include "Smp/IRequest.h"
-#include "simph/kern/Collection.hpp"
+#include "simph/smpdk/Collection.hpp"
 
 namespace simph {
 	namespace kern {
+using namespace simph::smpdk;
 
 class Request: public Smp::IRequest {
 public:
