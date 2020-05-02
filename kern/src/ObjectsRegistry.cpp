@@ -535,6 +535,14 @@ Smp::IField* ObjectsRegistry::GetField(Smp::String8 fullName) const {
 const Smp::FieldCollection* ObjectsRegistry::GetFields() const {
     return Component::GetFields();
 }
+const Smp::PropertyCollection* ObjectsRegistry::GetProperties() const {
+// TODO
+    return nullptr;
+}
+const Smp::OperationCollection* ObjectsRegistry::GetOperations() const {
+// TODO
+    return nullptr;
+}
 // ..........................................................
 Smp::IRequest* ObjectsRegistry::CreateRequest(Smp::String8 operationName) {
 LOGE("ObjectsRegistry::CreateRequest(...) not implemented yet!")

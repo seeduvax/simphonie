@@ -341,7 +341,8 @@ Smp::Publication::IEnumerationType* TypeRegistry::AddEnumerationType(
 Smp::Publication::IArrayType* TypeRegistry::AddArrayType(
             Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
             Smp::Uuid itemTypeUuid, Smp::Int64 itemSize,
-            Smp::Int64 arrayCount) {
+            Smp::Int64 arrayCount, Smp::Bool simpleArray) {
+// TODO complete behavior regarding simpleArray arg value.
     Smp::Publication::IType* ex=GetType(typeUuid);
     if (ex!=nullptr) {
         throw ExTypeAlreadyRegistered(this,name,ex);

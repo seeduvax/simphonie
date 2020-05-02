@@ -190,6 +190,8 @@ public:
     void Unpublish() override;
     Smp::IField* GetField(Smp::String8 fullName) const override;
     const Smp::FieldCollection* GetFields() const override;
+    const Smp::PropertyCollection* GetProperties() const override;
+    const Smp::OperationCollection* GetOperations() const override; 
     Smp::IRequest* CreateRequest(Smp::String8 operationName) override;
     void DeleteRequest(Smp::IRequest* request) override;
 private:

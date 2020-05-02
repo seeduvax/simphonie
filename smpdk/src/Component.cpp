@@ -95,6 +95,15 @@ void Component::Connect(Smp::ISimulator* simulator) {
     _state=Smp::ComponentStateKind::CSK_Connected;
 }
 // ..........................................................
+void Component::disconnect() {
+}
+void Component::Disconnect() {
+    _simulator=nullptr;
+    _logger=nullptr;
+    _linkRegistry=nullptr;
+// TODO to be completed
+}
+// ..........................................................
 Smp::IField* Component::GetField(Smp::String8 fullName) const {
     return _fields.at(fullName);
 }

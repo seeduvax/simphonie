@@ -1,4 +1,0 @@
-SiMPhonie: simulation kernel implementing SMP (ECSS-ST-E-40-07-C)
-
-project tools:
-- git-bug: Distributed bug tracker embedded in Git.

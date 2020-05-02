@@ -39,7 +39,7 @@ public:
                 const Smp::IComponent* target) override;
     Smp::UInt32 GetLinkCount(const Smp::IComponent* source,
                 const Smp::IComponent* target) const override;
-    Smp::Bool RemoveLink(const Smp::IComponent* source,
+    Smp::Bool RemoveLink(Smp::IComponent* source,
                 const Smp::IComponent* target) override;
     const Smp::ComponentCollection* GetLinkSources(
                 const Smp::IComponent* target) const override;

@@ -40,6 +40,7 @@ public:
     void Configure(Smp::Services::ILogger* logger,
                 Smp::Services::ILinkRegistry* linkRegistry=nullptr) override;
     void Connect(Smp::ISimulator* simulator) override;
+    void Disconnect() override;
     Smp::IField* GetField(Smp::String8 fullName) const override;
     const Smp::FieldCollection* GetFields() const override;
     const Smp::Uuid& GetUuid() const override;
@@ -51,6 +52,7 @@ protected:
     virtual void publish(Smp::IPublication* receiver);
     virtual void configure();
     virtual void connect();
+    virtual void disconnect();
     inline void addField(Smp::IField* field) {
         _fields.push_back(field);
     }

@@ -76,7 +76,8 @@ public:
             Smp::Uuid typeUuid,
             Smp::Uuid itemTypeUuid,
             Smp::Int64 itemSize,
-            Smp::Int64 arrayCount) override;
+            Smp::Int64 arrayCount,
+            Smp::Bool simpleArray=false) override;
     Smp::Publication::IType* AddStringType(
             Smp::String8 name,
             Smp::String8 description,

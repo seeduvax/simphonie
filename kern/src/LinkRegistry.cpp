@@ -51,7 +51,7 @@ Smp::UInt32 LinkRegistry::GetLinkCount(const Smp::IComponent* source,
     return count;;
 }
 // ..........................................................
-Smp::Bool LinkRegistry::RemoveLink(const Smp::IComponent* source,
+Smp::Bool LinkRegistry::RemoveLink(Smp::IComponent* source,
                     const Smp::IComponent* target) {
     auto it=_links.find(target);
     if (it!=_links.end()) {
