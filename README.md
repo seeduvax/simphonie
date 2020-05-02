@@ -1,14 +1,13 @@
 # SiMPhonie: simulation kernel implementing SMP (ECSS-ST-E-40-07-C)
+---
 
 ## SMP / ECSS-E-ST-40-07C
-
 SMP stands for Simulation Modelling Platform. It is an [ECSS][0] standard 
 defining C++ interface for simulation models and simulation execution
 infrastructure. Simphonie is a direct and simplistic (partial) implementation
 of this standard enabling its learning and experimentation. 
 
-## Disclamer
-
+## Disclamer
 Do not expect simphonie to be a full and validated SMP implementation. It was
 created for prototyping and training purpose and shall be use for anything else
 only after a strong validation of the fitness to the target use case.
@@ -27,25 +26,30 @@ material][1], the makefile includes a specific target to assist in the header
 integration into the project.
 
 ## Build
-
 - Clone the project and checkout the branch or tag you need.
 - Enter the project root directory (the one holding the `app.cfg` file)
 - Download the SMP zip file from the [standard's introduction page][1].
 - install the header
-
+```
     make install_smpheader <zipfile>
-
+```
 - build the project
 
+```
     make
+```
 
 - run tests
 
+```
     make test
 
+```
 - build installation package
 
+```
     make distinstall
+```
 
 See [AcrobatomaticBuildSystem][5] documentation for more details about the 
 build features. 
