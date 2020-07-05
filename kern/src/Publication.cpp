@@ -9,6 +9,7 @@
  */
 #include "simph/kern/Publication.hpp"
 #include "simph/smpdk/ExDuplicateName.hpp"
+#include <string.h>
 
 namespace simph {
 	namespace kern {
@@ -42,7 +43,7 @@ Smp::IObject* Publication::GetParent() const {
 // --------------------------------------------------------------------
 // Childs management
 // ..........................................................
-void Publication::addChild(Publication* pub) throw (Smp::DuplicateName) {
+void Publication::addChild(Publication* pub) { 
     Publication* p=getChild(pub->GetName());
     if (p!=nullptr) {
         throw simph::smpdk::ExDuplicateName(_pubObj,pub->GetName());

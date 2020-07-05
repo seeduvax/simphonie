@@ -44,7 +44,7 @@ public:
         return _pubObj;
     }
 
-    void addChild(Publication* pub) throw (Smp::DuplicateName);
+    void addChild(Publication* pub);
     Publication* getChild(Smp::String8 name) const;
     void removeChild(Publication* pub);
 
