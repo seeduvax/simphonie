@@ -525,7 +525,7 @@ LOGE("ObjectsRegistry::PublishProperty(...) not implemented yet!")
 // ..........................................................
 void ObjectsRegistry::Unpublish() {
 // TODO
-LOGE("ObjectsRegistry::PublishProperty(...) not implemented yet!")
+LOGE("ObjectsRegistry::Unpublish(...) not implemented yet!")
 }
 // ..........................................................
 Smp::IField* ObjectsRegistry::GetField(Smp::String8 fullName) const {
