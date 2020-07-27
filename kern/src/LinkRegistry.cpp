@@ -10,11 +10,6 @@
 #include "simph/kern/LinkRegistry.hpp"
 #include "Smp/ILinkingComponent.h"
 
-namespace Smp {
-    namespace Services {
-constexpr Smp::Char8 ILinkRegistry::SMP_LinkRegistry[];
-}}
-
 namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------

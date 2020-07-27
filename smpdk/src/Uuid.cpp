@@ -1,20 +1,9 @@
 #include "Smp/Uuid.h"
 #include "Smp/PrimitiveTypes.h"
 #include <cstring>
+#include <iomanip>
 
 namespace Smp {
-constexpr Uuid Smp::Uuids::Uuid_Char8;
-constexpr Uuid Smp::Uuids::Uuid_Bool;
-constexpr Uuid Smp::Uuids::Uuid_Int8;
-constexpr Uuid Smp::Uuids::Uuid_Int16;
-constexpr Uuid Smp::Uuids::Uuid_Int32;
-constexpr Uuid Smp::Uuids::Uuid_Int64;
-constexpr Uuid Smp::Uuids::Uuid_UInt8;
-constexpr Uuid Smp::Uuids::Uuid_UInt16;
-constexpr Uuid Smp::Uuids::Uuid_UInt32;
-constexpr Uuid Smp::Uuids::Uuid_UInt64;
-constexpr Uuid Smp::Uuids::Uuid_Float32;
-constexpr Uuid Smp::Uuids::Uuid_Float64;
 // --------------------------------------------------------------------
 // ..........................................................
 Uuid::Uuid(const char * value) {
@@ -87,4 +76,21 @@ bool Uuid::operator<(const Smp::Uuid& other) const {
              ))))))))))))))))));
 }
 // ..........................................................
+std::ostream& operator<<(std::ostream& os, const Smp::Uuid& uuid) {
+    os << std::hex << std::setfill('0')
+        << std::setw(8) << uuid.Data1 
+        << std::setw(4)
+        << "-" << uuid.Data2[0]
+        << "-" << uuid.Data2[1]
+        << "-" << uuid.Data2[2]
+        << std::setw(2)
+        << uuid.Data3[1]
+        << uuid.Data3[2]
+        << uuid.Data3[3]
+        << uuid.Data3[4]
+        << uuid.Data3[5]
+        << uuid.Data3[6]
+        << std::dec;
+    return os;
+}
 }

@@ -20,53 +20,6 @@
 #include "simph/kern/TypeRegistry.hpp"
 #include "Smp/IEntryPointPublisher.h"
 
-// --------------------------------------------------------------------
-// ..........................................................
-namespace Smp {
-constexpr Smp::Char8 Smp::ISimulator::SMP_SimulatorServices[];
-constexpr Smp::Char8 Smp::ISimulator::SMP_SimulatorModels[];
-
-std::ostream& operator << (std::ostream& os, 
-                                const Smp::SimulatorStateKind& obj) {
-    os << (Smp::Int32)obj;
-    switch (obj) {
-        case Smp::SimulatorStateKind::SSK_Building:
-            os << "(SSK_Building)";
-            break;
-        case Smp::SimulatorStateKind::SSK_Connecting:
-            os << "(SSK_Connecting)";
-            break;
-        case Smp::SimulatorStateKind::SSK_Initialising:
-            os << "(SSK_Initialising)";
-            break;
-        case Smp::SimulatorStateKind::SSK_Standby:
-            os << "(SSK_Standby)";
-            break;
-        case Smp::SimulatorStateKind::SSK_Executing:
-            os << "(SSK_Executing)";
-            break;
-        case Smp::SimulatorStateKind::SSK_Storing:
-            os << "(SSK_Storing)";
-            break;
-        case Smp::SimulatorStateKind::SSK_Restoring:
-            os << "(SSK_Restoring)";
-            break;
-        case Smp::SimulatorStateKind::SSK_Reconnecting:
-            os << "(SSK_Reconnecting)";
-            break;
-        case Smp::SimulatorStateKind::SSK_Exiting:
-            os << "(SSK_Exiting)";
-            break;
-        case Smp::SimulatorStateKind::SSK_Aborting:
-            os << "(SSK_Aborting)";
-            break;
-        default:
-            os << "()";
-            break;
-    }
-    return os;
-}
-}
 // ..........................................................
 namespace simph {
 	namespace kern {

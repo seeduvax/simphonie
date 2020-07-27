@@ -15,10 +15,6 @@
 #include <sstream>
 #include <iomanip>
 
-namespace Smp {
-constexpr Smp::Char8 Smp::Services::ITimeKeeper::SMP_TimeKeeper[];
-}
-
 namespace simph {
 	namespace kern {
 // ..........................................................

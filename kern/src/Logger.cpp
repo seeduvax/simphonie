@@ -10,20 +10,6 @@
 #include "simph/kern/Logger.hpp"
 #include <string.h>
 
-namespace Smp {
-    namespace Services {
-constexpr LogMessageKind ILogger::LMK_Debug;
-constexpr LogMessageKind ILogger::LMK_Error;
-constexpr LogMessageKind ILogger::LMK_Event;
-constexpr LogMessageKind ILogger::LMK_Information;
-constexpr LogMessageKind ILogger::LMK_Warning;
-constexpr Smp::Char8 ILogger::LMK_DebugName[];
-constexpr Smp::Char8 ILogger::LMK_ErrorName[];
-constexpr Smp::Char8 ILogger::LMK_EventName[];
-constexpr Smp::Char8 ILogger::LMK_InformationName[];
-constexpr Smp::Char8 ILogger::LMK_WarningName[];
-    }
-}
 namespace simph {
 	namespace kern {
 static Smp::String8 _LMK_NamesTable[]={
