@@ -33,8 +33,6 @@ public:
             _period(period),
             _repeat(repeat),
             _completed(false) {
-TRACE((void*)ep)
-TRACE(ep->GetName());
         static std::atomic<Smp::Services::EventId> _nextId(0);
         _id = _nextId++;
     }
@@ -58,8 +56,6 @@ TRACE(ep->GetName());
         return _completed;
     }
     void run() {
-TRACE("" <<  (void*)_ep);
-TRACE(_ep->GetName());
         _ep->Execute();
         // Push related data flow fields if any.
         if (_fields!=nullptr) {
