@@ -113,7 +113,7 @@ void Field::Unforce() {
 }
 // ..........................................................
 Smp::Bool Field::IsForced() {
-    return _forcedValue;
+    return _forced;
 }
 // ..........................................................
 void Field::Freeze() {
@@ -238,6 +238,11 @@ Smp::AnySimple TField<Smp::Float32>::GetValue() const {
 template<>
 Smp::AnySimple TField<Smp::Float64>::GetValue() const {
     return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float64,*_tData);
+}
+// ..........................................................
+template<>
+Smp::AnySimple TField<Smp::String8>::GetValue() const {
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_String8,*_tData);
 }
 
 // --------------------------------------------------------------------
