@@ -18,7 +18,7 @@ namespace simph {
 	namespace kern {
 using namespace simph::smpdk;
 
-class ObjectsRegistry;
+class Resolver;
 class Scheduler;
 /**
  *
@@ -102,7 +102,7 @@ private:
     Smp::Services::IEventManager* _eventMgr;
     Smp::Services::ILinkRegistry* _linkRegistry;
     Smp::Publication::ITypeRegistry* _typeRegistry;
-    ObjectsRegistry* _registry;
+    Resolver* _resolver;
     std::vector<simph::sys::DLib*> _libs;
 
     void publish(Smp::IComponent* comp);

@@ -13,12 +13,11 @@
 #include "simph/kern/ExDuplicateUuid.hpp"
 #include "simph/kern/Logger.hpp"
 #include "simph/kern/EventManager.hpp"
-#include "simph/kern/ObjectsRegistry.hpp"
+#include "simph/kern/Resolver.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/TimeKeeper.hpp"
 #include "simph/kern/LinkRegistry.hpp"
 #include "simph/kern/TypeRegistry.hpp"
-#include "Smp/IEntryPointPublisher.h"
 
 // ..........................................................
 namespace simph {
@@ -41,15 +40,16 @@ Simulator::Simulator(Smp::String8 name,Smp::String8 descr,
     _linkRegistry=new LinkRegistry("LinkRegistry","Link registry service",this);
     TypeRegistry* tr=new TypeRegistry("TypeRegistry","Type registry service",this);
     _typeRegistry=tr;
-    _registry=new ObjectsRegistry("Resolver","Objects registry and resolver",
-                                        this,tr);
+    _resolver=new Resolver("Resolver","Objects registry and resolver",
+                                        this);
     _services->AddComponent(_logger);
     _services->AddComponent(_scheduler);
     _services->AddComponent(_timeKeeper);
     _services->AddComponent(_eventMgr);
     _services->AddComponent(_linkRegistry);
-    _services->AddComponent(_registry);
-    _registry->add(this);
+    _services->AddComponent(_resolver);
+// TODO make the simulator appear in resolver itself ?
+//  _resolver->publish(this);
     setState(Smp::SimulatorStateKind::SSK_Building);
 }
 // ..........................................................
@@ -161,15 +161,7 @@ void Simulator::Initialise() {
 // ..........................................................
 void Simulator::publish(Smp::IComponent* comp) {
     if (comp->GetState()==Smp::ComponentStateKind::CSK_Created) {
-        _registry->add(comp);
-        comp->Publish(_registry);
-        Smp::IEntryPointPublisher* epp=
-                                dynamic_cast<Smp::IEntryPointPublisher*>(comp);
-        if (epp!=nullptr) {
-            for (auto ep: *(epp->GetEntryPoints())) {
-                _registry->add(ep);
-            }
-        }
+        comp->Publish(_resolver->publish(comp));
     }
 }
 // ..........................................................
@@ -321,7 +313,7 @@ Smp::Services::ILinkRegistry* Simulator::GetLinkRegistry() const {
 }
 // ..........................................................
 Smp::Services::IResolver* Simulator::GetResolver() const {
-    return _registry;
+    return _resolver;
 }
 // ..........................................................
 void Simulator::RegisterFactory(Smp::IFactory* componentFactory) {

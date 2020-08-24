@@ -44,13 +44,22 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
     const std::sregex_token_iterator end;
     for (std::sregex_token_iterator it{input.begin(), input.end(), re, -1};
                             it!=end && p!=nullptr;++it) {
-        std::string name=*it;
-        if (name=="..") {
-            auto it=_publications.find(p->GetParent());
-            p=it==_publications.end()?nullptr:it->second;
+        if (p!=nullptr) {
+            std::string name=*it;
+            if (name=="..") {
+                auto it=_publications.find(p->GetParent());
+                p=it==_publications.end()?nullptr:it->second;
+            }
+            else {
+                Smp::IObject* o=p->getChild(name.c_str());
+                p=dynamic_cast<Publication*>(o);
+                if (p==nullptr) {
+                    res=o;
+                }
+            }
         }
         else {
-            p=dynamic_cast<Publication*>(p->getChild(name.c_str()));
+            res=nullptr;
         }
     }
     if (p!=nullptr) {

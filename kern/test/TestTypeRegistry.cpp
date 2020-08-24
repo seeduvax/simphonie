@@ -9,7 +9,6 @@
  */
 #include <cppunit/extensions/HelperMacros.h>
 #include "simph/kern/TypeRegistry.hpp"
-#include "simph/kern/ObjectsRegistry.hpp"
 #include "simph/kern/StructureType.hpp"
 #include "Smp/IDataflowField.h"
 
@@ -68,6 +67,7 @@ public:
         CPPUNIT_ASSERT(t!=nullptr);
         CPPUNIT_ASSERT_EQUAL((Smp::UInt64)16,st->getSize());
 
+/* TODO restore similar test with registry
         ObjectsRegistry* oReg=new ObjectsRegistry("oreg","",nullptr,_reg);
         oReg->PublishField("sA","",&tFieldA, structUuid,Smp::ViewKind::VK_All,false,false,true);
         oReg->PublishField("sB","",&tFieldB, structUuid,Smp::ViewKind::VK_All,false,true,false);
@@ -85,7 +85,8 @@ oReg->dump();
         CPPUNIT_ASSERT_EQUAL(tFieldA.f1,tFieldB.f1);
         CPPUNIT_ASSERT_EQUAL(tFieldA.f2,tFieldB.f2);
         delete oReg;
-    }
+*/ 
+   }
 
 
 };

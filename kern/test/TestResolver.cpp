@@ -47,6 +47,8 @@ public:
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)obj2,resolver.ResolveAbsolute("to1/to2"));
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr,resolver.ResolveRelative("to1",obj2));
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)obj2,resolver.ResolveRelative("to2",obj1));
+        delete obj1;
+        delete obj2;
     }
 
 };

@@ -10,7 +10,6 @@
 #include "simph/kern/Scheduler.hpp"
 #include "Smp/ISimulator.h"
 #include "simph/kern/Logger.hpp"
-#include "simph/kern/ObjectsRegistry.hpp"
 #include "simph/kern/TimeKeeper.hpp"
 #include "Smp/IDataflowField.h"
 #include "assert.h"
@@ -142,11 +141,12 @@ Smp::Services::EventId Scheduler::schedule(
                                 Smp::Int64 repeat) {
     TRACE("[Scheduler::schedule] entryPoint='"<<entryPoint->GetName()<<"',absoluteSimTime="<<absoluteSimTime<<",cycleTime="<<cycleTime<<",repeat="<<repeat);
     const std::vector<Smp::IDataflowField*>* flowFields=nullptr;
+/** TODO retrieve list of field to push after EP call.
     auto reg=dynamic_cast<ObjectsRegistry*>(getSimulator()->GetResolver());
     if (reg!=nullptr) {
         flowFields=reg->getRelatedFlowFields(entryPoint);
     }
-
+*/
     auto mySchedule = new Schedule( entryPoint,
                                                   absoluteSimTime,
                                                   this,

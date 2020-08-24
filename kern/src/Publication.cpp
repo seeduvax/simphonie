@@ -14,6 +14,7 @@
 #include "simph/kern/ExInvalidPrimitiveType.hpp"
 #include "simph/smpdk/ExDuplicateName.hpp"
 #include "simph/sys/Logger.hpp"
+#include "Smp/IEntryPointPublisher.h"
 #include <string.h>
 
 namespace simph {
@@ -24,13 +25,22 @@ Publication::Publication(Smp::IObject* toPublish,
                     Smp::Publication::ITypeRegistry* typeRegistry):
             _pubObj(toPublish),
             _typeRegistry(typeRegistry) {
+    Smp::IEntryPointPublisher* epp=dynamic_cast<Smp::IEntryPointPublisher*>(toPublish);
+    if (epp!=nullptr) {
+        for (auto ep: *(epp->GetEntryPoints())) {
+            addChild(ep);
+        }
+    }
 }
 // ..........................................................
 Publication::~Publication() {
     for (auto ch: _childs) {
-        delete ch;
+        auto ep=dynamic_cast<Smp::IEntryPoint*>(ch);
+        if (ch==nullptr) {
+            delete ch;
+        }
     }
-    delete _pubObj;
+// TODO shall delete objects the publication create itself !
 }
 // --------------------------------------------------------------------
 // IObject implementation, mostly binding to the published object
