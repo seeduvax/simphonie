@@ -9,6 +9,7 @@
  */
 #include "simph/kern/Resolver.hpp"
 #include "simph/kern/Publication.hpp"
+#include "simph/sys/Logger.hpp"
 #include "Smp/IComposite.h"
 #include "Smp/ISimulator.h"
 #include <regex>
@@ -49,11 +50,7 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
             p=it==_publications.end()?nullptr:it->second;
         }
         else {
-            Smp::IObject* o=p->getChild(name.c_str());
-            p=dynamic_cast<Publication*>(o);
-            if (p==nullptr && o!=nullptr) {
-                res=o;
-            }
+            p=dynamic_cast<Publication*>(p->getChild(name.c_str()));
         }
     }
     if (p!=nullptr) {
@@ -77,7 +74,7 @@ Smp::IObject* Resolver::ResolveRelative(Smp::String8 relativePath,
 }
 // --------------------------------------------------------------------
 // ..........................................................
-Publication* Resolver::newPublication(Smp::IObject* toPublish) {
+Smp::IPublication* Resolver::publish(Smp::IObject* toPublish) {
     Publication* pub=nullptr;
     auto itPub=_publications.find(toPublish);
     if (itPub==_publications.end()) {
@@ -86,11 +83,16 @@ Publication* Resolver::newPublication(Smp::IObject* toPublish) {
         Publication* parentPub=_root;
         Smp::IObject* parent=toPublish->GetParent();
         if (parent!=nullptr) {
-            auto itParent=_publications.find(toPublish);
+            auto itParent=_publications.find(parent);
             if (itParent!=_publications.end()) {
-                itParent->second->addChild(pub);
+                parentPub=itParent->second;
+            }
+            else {
+                LOGW("Publication of "<<toPublish->GetName()
+                    <<"'s parent not found. Publishing object to root node.");
             }
         }
+        parentPub->addChild(pub);
     }
     else {
         pub=itPub->second;

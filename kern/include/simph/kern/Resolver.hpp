@@ -41,7 +41,7 @@ public:
     Smp::IObject* ResolveRelative(Smp::String8 relativePath,
                                 const Smp::IComponent* sender) override;
 
-    Publication* newPublication(Smp::IObject* toPublish);
+    Smp::IPublication* publish(Smp::IObject* toPublish);
 private:
     Publication* _root;
     std::map<const Smp::IObject*,Publication*> _publications;
