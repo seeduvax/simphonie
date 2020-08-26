@@ -40,7 +40,6 @@ Publication::~Publication() {
             delete ch;
         }
     }
-// TODO shall delete objects the publication create itself !
 }
 // --------------------------------------------------------------------
 // IObject implementation, mostly binding to the published object
@@ -245,17 +244,76 @@ void Publication::PublishField(
                         getPubObj()));
         }
         else {
-            // TODO should probably do a switch case of death to ensure
-            // proper field subclass is create. May be there is already
-            // one somewhere...
-            addChild(new Field(name,description,view,address,t->getSize(),t,
-                    state,input,output,getPubObj()));
+            if (typeUuid==Smp::Uuids::Uuid_Bool) {
+                addChild(new TField<Smp::Bool>(name,description,
+                        view,(Smp::Bool*)address,
+                        state,input,output,getPubObj()));
+            }
+            else if (typeUuid==Smp::Uuids::Uuid_Char8) {
+               addChild(new TField<Smp::Char8>(name,description,
+                        view,(Smp::Char8*)address,
+                        state,input,output,getPubObj()));
+            }
+            else if (typeUuid==Smp::Uuids::Uuid_Int8) {
+               addChild(new TField<Smp::Int8>(name,description,
+                        view,(Smp::Int8*)address,
+                        state,input,output,getPubObj()));
+            }
+            else if (typeUuid==Smp::Uuids::Uuid_Int16) {
+               addChild(new TField<Smp::Int16>(name,description,
+                        view,(Smp::Int16*)address,
+                        state,input,output,getPubObj()));
+            }
+            else if (typeUuid==Smp::Uuids::Uuid_Int32) {
+               addChild(new TField<Smp::Int32>(name,description,
+                        view,(Smp::Int32*)address,
+                        state,input,output,getPubObj()));
+            }
+            else if (typeUuid==Smp::Uuids::Uuid_Int64) {
+               addChild(new TField<Smp::Int64>(name,description,
+                        view,(Smp::Int64*)address,
+                        state,input,output,getPubObj()));
+            }
+            else if (typeUuid==Smp::Uuids::Uuid_UInt8) {
+               addChild(new TField<Smp::UInt8>(name,description,
+                        view,(Smp::UInt8*)address,
+                        state,input,output,getPubObj()));
+            }
+            else if (typeUuid==Smp::Uuids::Uuid_UInt16) {
+               addChild(new TField<Smp::UInt16>(name,description,
+                        view,(Smp::UInt16*)address,
+                        state,input,output,getPubObj()));
+            }
+            else if (typeUuid==Smp::Uuids::Uuid_UInt32) {
+               addChild(new TField<Smp::UInt32>(name,description,
+                        view,(Smp::UInt32*)address,
+                        state,input,output,getPubObj()));
+            }
+            else if (typeUuid==Smp::Uuids::Uuid_UInt64) {
+               addChild(new TField<Smp::UInt64>(name,description,
+                        view,(Smp::UInt64*)address,
+                        state,input,output,getPubObj()));
+            }
+            else if (typeUuid==Smp::Uuids::Uuid_Float32) {
+               addChild(new TField<Smp::Float32>(name,description,
+                        view,(Smp::Float32*)address,
+                        state,input,output,getPubObj()));
+            }
+            else if (typeUuid==Smp::Uuids::Uuid_Float64) {
+               addChild(new TField<Smp::Float64>(name,description,
+                        view,(Smp::Float64*)address,
+                        state,input,output,getPubObj()));
+            }
+            else {
+                addChild(new Field(name,description,view,address,t->getSize(),t,
+                            state,input,output,getPubObj()));
+            }
         }    
     }
     else {
 LOGE("No type found or bad type. Can't add field "<<name<<" to "
         <<GetName());
-        // TODO throw the right exception...
+        // TODO throw the right exception... InvalidFieldType could fit
     }
 }
 // ..........................................................

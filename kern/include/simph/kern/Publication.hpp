@@ -198,7 +198,7 @@ public:
 
 private:
     Smp::IObject* _pubObj;
-    std::vector<IObject*> _childs;
+    std::vector<Smp::IObject*> _childs;
     Smp::Publication::ITypeRegistry* _typeRegistry;
     Smp::Publication::IType* getArrayType(Smp::PrimitiveTypeKind ptk,Smp::Int64 count);
 };
