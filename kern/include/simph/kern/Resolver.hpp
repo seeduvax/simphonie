@@ -14,6 +14,7 @@
 #include "Smp/Publication/ITypeRegistry.h"
 #include "simph/smpdk/Component.hpp"
 #include "simph/kern/Publication.hpp"
+#include "simph/kern/IEntryPointPublisher.hpp"
 #include <map>
 
 namespace simph {
@@ -24,7 +25,8 @@ class Publication;
  *
  */
 class Resolver: public simph::smpdk::Component,
-            virtual public Smp::Services::IResolver {
+            virtual public Smp::Services::IResolver,
+            virtual public IEntryPointPublisher {
 public:
     /**
      * Default constructor.
@@ -42,6 +44,8 @@ public:
                                 const Smp::IComponent* sender) override;
 
     Smp::IPublication* publish(Smp::IObject* toPublish);
+
+    void dump();
 private:
     Publication* _root;
     std::map<const Smp::IObject*,Publication*> _publications;

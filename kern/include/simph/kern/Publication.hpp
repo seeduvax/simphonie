@@ -196,6 +196,8 @@ public:
     Smp::IRequest* CreateRequest(Smp::String8 operationName) override;
     void DeleteRequest(Smp::IRequest* request) override;
 
+    void dump(int level=0);
+
 private:
     Smp::IObject* _pubObj;
     std::vector<Smp::IObject*> _childs;

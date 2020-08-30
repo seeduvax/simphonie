@@ -10,6 +10,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "simph/umdl/SimTimeProvider.hpp"
 #include "simph/umdl/Logger1D.hpp"
+#include "simph/kern/Resolver.hpp"
 #include "simph/umdl/SysTimeSynchro.hpp"
 #include "simph/kern/Simulator.hpp"
 #include "simph/kern/Scheduler.hpp"
@@ -60,7 +61,7 @@ TRACE("");
 TRACE("");
         CPPUNIT_ASSERT(f1!=nullptr);
 TRACE("");
-//        dynamic_cast<simph::kern::ObjectsRegistry*>(sim.GetResolver())->dump();
+        dynamic_cast<simph::kern::Resolver*>(sim.GetResolver())->dump();
 TRACE("");
         simph::kern::Scheduler* sched=dynamic_cast<simph::kern::Scheduler*>(sim.GetScheduler());
 TRACE("");

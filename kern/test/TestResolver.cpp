@@ -32,12 +32,14 @@ public:
     }
 
     void testResolver() {
-        Resolver resolver("resolver", "test resolver",nullptr);
-        Smp::IComponent* obj1=new simph::smpdk::Component("to1","test obj 1",nullptr);
+        simph::smpdk::Component simu("simu","Resovler owner",nullptr);
+        Resolver resolver("resolver", "test resolver",&simu);
+        Smp::IComponent* obj1=new simph::smpdk::Component("to1","test obj 1",&simu);
         Smp::IComponent* obj2=new simph::smpdk::Component("to2","test obj 2",obj1);
         Smp::IPublication* p=resolver.publish(obj1);
         CPPUNIT_ASSERT(p!=nullptr);
         Smp::IPublication* q=resolver.publish(obj2);
+        resolver.dump();
         CPPUNIT_ASSERT(q!=nullptr);
         CPPUNIT_ASSERT(p!=q);
         CPPUNIT_ASSERT_EQUAL(p,resolver.publish(obj1));

@@ -9,6 +9,7 @@
  */
 #include "simph/kern/Resolver.hpp"
 #include "simph/kern/Publication.hpp"
+#include "simph/sys/Callback.hpp"
 #include "simph/sys/Logger.hpp"
 #include "Smp/IComposite.h"
 #include "Smp/ISimulator.h"
@@ -28,7 +29,16 @@ Resolver::Resolver(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent):
                 c->GetContainer(Smp::ISimulator::SMP_SimulatorServices)
                  ->GetComponent("TypeRegistry"));
     }
-    _root=new Publication(parent,_typeRegistry);
+    if (parent!=nullptr) {
+        _root=new Publication(parent,_typeRegistry);
+        _publications[parent]=_root;
+    }
+    else {
+        _root=new Publication(this,_typeRegistry);
+        _publications[this]=_root;
+    }
+    addEP(std::move(simph::sys::Callback::create(&Resolver::dump,this)),
+                    "dump","List published objects to stdout");
 }
 // ..........................................................
 Resolver::~Resolver() {
@@ -82,6 +92,10 @@ Smp::IObject* Resolver::ResolveRelative(Smp::String8 relativePath,
     return res;
 }
 // --------------------------------------------------------------------
+// ..........................................................
+void Resolver::dump() {
+    _root->dump();
+}
 // ..........................................................
 Smp::IPublication* Resolver::publish(Smp::IObject* toPublish) {
     Publication* pub=nullptr;

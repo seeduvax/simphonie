@@ -14,6 +14,7 @@
 #include "simph/kern/ExInvalidPrimitiveType.hpp"
 #include "simph/smpdk/ExDuplicateName.hpp"
 #include "simph/sys/Logger.hpp"
+#include "simph/sys/RttiUtil.hpp"
 #include "Smp/IEntryPointPublisher.h"
 #include <string.h>
 
@@ -490,5 +491,26 @@ void Publication::DeleteRequest(Smp::IRequest* request) {
 LOGE("Publication::DeleteRequest(...) not implemented yet!")
 }
 
+// ..........................................................
+void Publication::dump(int level) {
+    for (int i=0;i<level;++i) {
+        std::cout << "    ";
+    }
+    std::cout << GetName() << ": " 
+        << simph::sys::RttiUtil::getTypeName(_pubObj) << std::endl;
+    for (auto child: _childs) {
+        auto sp=dynamic_cast<Publication*>(child);
+        if (sp!=nullptr) {
+            sp->dump(level+1);
+        }
+        else {
+            for (int i=0;i<level;++i) {
+                std::cout << "    ";
+            }
+            std::cout << "  " << child->GetName() << ": " 
+                << simph::sys::RttiUtil::getTypeName(child) << std::endl;
+        }
+    }
+}
 
 }} // namespace simph::kern
