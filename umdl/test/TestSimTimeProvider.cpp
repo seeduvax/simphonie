@@ -44,27 +44,16 @@ public:
         CPPUNIT_ASSERT(mdl!=nullptr);
         auto log=sim.AddModel<Logger1D>("log");
         auto sync=sim.AddModel<SysTimeSynchro>("sync");
-TRACE("");
         sim.Publish();
-TRACE("");
         sim.Configure();
-TRACE("");
         sim.Connect();
-TRACE("");
         auto f1=dynamic_cast<Smp::IDataflowField*>(sim.GetResolver()->ResolveRelative("out",mdl));
-TRACE("");
         CPPUNIT_ASSERT(f1!=nullptr);
-TRACE("");
         auto f2=dynamic_cast<Smp::IDataflowField*>(sim.GetResolver()->ResolveRelative("in",log));
-TRACE("");
         f1->Connect(f2);
-TRACE("");
         CPPUNIT_ASSERT(f1!=nullptr);
-TRACE("");
         dynamic_cast<simph::kern::Resolver*>(sim.GetResolver())->dump();
-TRACE("");
         simph::kern::Scheduler* sched=dynamic_cast<simph::kern::Scheduler*>(sim.GetScheduler());
-TRACE("");
         sched->AddSimulationTimeEvent(
                 sync->GetEntryPoint("step"),
                 0, // 0ms offset
