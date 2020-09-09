@@ -25,7 +25,8 @@ namespace simph {
 Publication::Publication(Smp::IObject* toPublish,
                     Smp::Publication::ITypeRegistry* typeRegistry):
             _pubObj(toPublish),
-            _typeRegistry(typeRegistry) {
+            _typeRegistry(typeRegistry),
+            _fields("fields","",this) {
     Smp::IEntryPointPublisher* epp=dynamic_cast<Smp::IEntryPointPublisher*>(toPublish);
     if (epp!=nullptr) {
         for (auto ep: *(epp->GetEntryPoints())) {
@@ -91,7 +92,7 @@ void Publication::PublishField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-    addChild(new TField<Smp::Char8>(name,description,view,address,
+    addField(new TField<Smp::Char8>(name,description,view,address,
                     state,input,output,getPubObj()));
 }
 // ..........................................................
@@ -103,7 +104,7 @@ void Publication::PublishField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-    addChild(new TField<Smp::Bool>(name,description,view,address,
+    addField(new TField<Smp::Bool>(name,description,view,address,
                     state,input,output,getPubObj()));
 }
 // ..........................................................
@@ -115,7 +116,7 @@ void Publication::PublishField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-    addChild(new TField<Smp::Int8>(name,description,view,address,
+    addField(new TField<Smp::Int8>(name,description,view,address,
                     state,input,output,getPubObj()));
 }
 // ..........................................................
@@ -127,7 +128,7 @@ void Publication::PublishField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-    addChild(new TField<Smp::Int16>(name,description,view,address,
+    addField(new TField<Smp::Int16>(name,description,view,address,
                     state,input,output,getPubObj()));
 }
 // ..........................................................
@@ -139,7 +140,7 @@ void Publication::PublishField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-    addChild(new TField<Smp::Int32>(name,description,view,address,
+    addField(new TField<Smp::Int32>(name,description,view,address,
                     state,input,output,getPubObj()));
 }
 // ..........................................................
@@ -151,7 +152,7 @@ void Publication::PublishField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-    addChild(new TField<Smp::Int64>(name,description,view,address,
+    addField(new TField<Smp::Int64>(name,description,view,address,
                     state,input,output,getPubObj()));
 }
 // ..........................................................
@@ -163,7 +164,7 @@ void Publication::PublishField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-    addChild(new TField<Smp::UInt8>(name,description,view,address,
+    addField(new TField<Smp::UInt8>(name,description,view,address,
                     state,input,output,getPubObj()));
 }
 // ..........................................................
@@ -175,7 +176,7 @@ void Publication::PublishField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-    addChild(new TField<Smp::UInt16>(name,description,view,address,
+    addField(new TField<Smp::UInt16>(name,description,view,address,
                     state,input,output,getPubObj()));
 }
 // ..........................................................
@@ -187,7 +188,7 @@ void Publication::PublishField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-    addChild(new TField<Smp::UInt32>(name,description,view,address,
+    addField(new TField<Smp::UInt32>(name,description,view,address,
                     state,input,output,getPubObj()));
 }
 // ..........................................................
@@ -199,7 +200,7 @@ void Publication::PublishField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-    addChild(new TField<Smp::UInt64>(name,description,view,address,
+    addField(new TField<Smp::UInt64>(name,description,view,address,
                     state,input,output,getPubObj()));
 }
 // ..........................................................
@@ -211,7 +212,7 @@ void Publication::PublishField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-    addChild(new TField<Smp::Float32>(name,description,view,address,
+    addField(new TField<Smp::Float32>(name,description,view,address,
                     state,input,output,getPubObj()));
 }
 // ..........................................................
@@ -223,7 +224,7 @@ void Publication::PublishField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) {
-    addChild(new TField<Smp::Float64>(name,description,view,address,
+    addField(new TField<Smp::Float64>(name,description,view,address,
                     state,input,output,getPubObj()));
 }
 // ..........................................................
@@ -240,73 +241,73 @@ void Publication::PublishField(
     if (t!=nullptr) {
         StructureType* st=dynamic_cast<StructureType*>(t);
         if (st!=nullptr) {
-            addChild(new StructureField(name,description,view,
+            addField(new StructureField(name,description,view,
                         address, st,state, input, output,
                         getPubObj()));
         }
         else {
             if (typeUuid==Smp::Uuids::Uuid_Bool) {
-                addChild(new TField<Smp::Bool>(name,description,
+                addField(new TField<Smp::Bool>(name,description,
                         view,(Smp::Bool*)address,
                         state,input,output,getPubObj()));
             }
             else if (typeUuid==Smp::Uuids::Uuid_Char8) {
-               addChild(new TField<Smp::Char8>(name,description,
+               addField(new TField<Smp::Char8>(name,description,
                         view,(Smp::Char8*)address,
                         state,input,output,getPubObj()));
             }
             else if (typeUuid==Smp::Uuids::Uuid_Int8) {
-               addChild(new TField<Smp::Int8>(name,description,
+               addField(new TField<Smp::Int8>(name,description,
                         view,(Smp::Int8*)address,
                         state,input,output,getPubObj()));
             }
             else if (typeUuid==Smp::Uuids::Uuid_Int16) {
-               addChild(new TField<Smp::Int16>(name,description,
+               addField(new TField<Smp::Int16>(name,description,
                         view,(Smp::Int16*)address,
                         state,input,output,getPubObj()));
             }
             else if (typeUuid==Smp::Uuids::Uuid_Int32) {
-               addChild(new TField<Smp::Int32>(name,description,
+               addField(new TField<Smp::Int32>(name,description,
                         view,(Smp::Int32*)address,
                         state,input,output,getPubObj()));
             }
             else if (typeUuid==Smp::Uuids::Uuid_Int64) {
-               addChild(new TField<Smp::Int64>(name,description,
+               addField(new TField<Smp::Int64>(name,description,
                         view,(Smp::Int64*)address,
                         state,input,output,getPubObj()));
             }
             else if (typeUuid==Smp::Uuids::Uuid_UInt8) {
-               addChild(new TField<Smp::UInt8>(name,description,
+               addField(new TField<Smp::UInt8>(name,description,
                         view,(Smp::UInt8*)address,
                         state,input,output,getPubObj()));
             }
             else if (typeUuid==Smp::Uuids::Uuid_UInt16) {
-               addChild(new TField<Smp::UInt16>(name,description,
+               addField(new TField<Smp::UInt16>(name,description,
                         view,(Smp::UInt16*)address,
                         state,input,output,getPubObj()));
             }
             else if (typeUuid==Smp::Uuids::Uuid_UInt32) {
-               addChild(new TField<Smp::UInt32>(name,description,
+               addField(new TField<Smp::UInt32>(name,description,
                         view,(Smp::UInt32*)address,
                         state,input,output,getPubObj()));
             }
             else if (typeUuid==Smp::Uuids::Uuid_UInt64) {
-               addChild(new TField<Smp::UInt64>(name,description,
+               addField(new TField<Smp::UInt64>(name,description,
                         view,(Smp::UInt64*)address,
                         state,input,output,getPubObj()));
             }
             else if (typeUuid==Smp::Uuids::Uuid_Float32) {
-               addChild(new TField<Smp::Float32>(name,description,
+               addField(new TField<Smp::Float32>(name,description,
                         view,(Smp::Float32*)address,
                         state,input,output,getPubObj()));
             }
             else if (typeUuid==Smp::Uuids::Uuid_Float64) {
-               addChild(new TField<Smp::Float64>(name,description,
+               addField(new TField<Smp::Float64>(name,description,
                         view,(Smp::Float64*)address,
                         state,input,output,getPubObj()));
             }
             else {
-                addChild(new Field(name,description,view,address,t->getSize(),t,
+                addField(new Field(name,description,view,address,t->getSize(),t,
                             state,input,output,getPubObj()));
             }
         }    
@@ -359,62 +360,62 @@ void Publication::PublishArray(
     Smp::Publication::IType* t=getArrayType(type,count);
     switch (type) {
         case Smp::PrimitiveTypeKind::PTK_Bool:
-            addChild(new SimpleArrayField<Smp::Bool>(name,description,
+            addField(new SimpleArrayField<Smp::Bool>(name,description,
                     count,address,type,
                     view,t,state,input,output,getPubObj()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Char8:
-           addChild(new SimpleArrayField<Smp::Char8>(name,description,
+           addField(new SimpleArrayField<Smp::Char8>(name,description,
                     count,address,type,
                     view,t,state,input,output,getPubObj()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Int8:
-           addChild(new SimpleArrayField<Smp::Int8>(name,description,
+           addField(new SimpleArrayField<Smp::Int8>(name,description,
                     count,address,type,
                     view,t,state,input,output,getPubObj()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Int16:
-           addChild(new SimpleArrayField<Smp::Int16>(name,description,
+           addField(new SimpleArrayField<Smp::Int16>(name,description,
                     count,address,type,
                     view,t,state,input,output,getPubObj()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Int32:
-           addChild(new SimpleArrayField<Smp::Int32>(name,description,
+           addField(new SimpleArrayField<Smp::Int32>(name,description,
                     count,address,type,
                     view,t,state,input,output,getPubObj()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Int64:
-           addChild(new SimpleArrayField<Smp::Int64>(name,description,
+           addField(new SimpleArrayField<Smp::Int64>(name,description,
                     count,address,type,
                     view,t,state,input,output,getPubObj()));
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt8:
-           addChild(new SimpleArrayField<Smp::UInt8>(name,description,
+           addField(new SimpleArrayField<Smp::UInt8>(name,description,
                     count,address,type,
                     view,t,state,input,output,getPubObj()));
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt16:
-           addChild(new SimpleArrayField<Smp::UInt16>(name,description,
+           addField(new SimpleArrayField<Smp::UInt16>(name,description,
                     count,address,type,
                     view,t,state,input,output,getPubObj()));
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt32:
-           addChild(new SimpleArrayField<Smp::UInt32>(name,description,
+           addField(new SimpleArrayField<Smp::UInt32>(name,description,
                     count,address,type,
                     view,t,state,input,output,getPubObj()));
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt64:
-           addChild(new SimpleArrayField<Smp::UInt64>(name,description,
+           addField(new SimpleArrayField<Smp::UInt64>(name,description,
                     count,address,type,
                     view,t,state,input,output,getPubObj()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Float32:
-           addChild(new SimpleArrayField<Smp::Float32>(name,description,
+           addField(new SimpleArrayField<Smp::Float32>(name,description,
                     count,address,type,
                     view,t,state,input,output,getPubObj()));
             break;
         case Smp::PrimitiveTypeKind::PTK_Float64:
-           addChild(new SimpleArrayField<Smp::Float64>(name,description,
+           addField(new SimpleArrayField<Smp::Float64>(name,description,
                     count,address,type,
                     view,t,state,input,output,getPubObj()));
             break;
@@ -465,13 +466,11 @@ LOGE("Publication::Unpublish(...) not implemented yet!")
 }
 // ..........................................................
 Smp::IField* Publication::GetField(Smp::String8 fullName) const {
-// TODO
-return nullptr;
+    return _fields.at(fullName);
 }
 // ..........................................................
 const Smp::FieldCollection* Publication::GetFields() const {
-// TODO
-return nullptr;
+    return &_fields;
 }
 const Smp::PropertyCollection* Publication::GetProperties() const {
 // TODO

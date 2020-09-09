@@ -45,6 +45,7 @@ public:
         pub.PublishField("char","char8 test pub",&testChar);
         Smp::ISimpleField* f=dynamic_cast<Smp::ISimpleField*>(pub.getChild("char"));
         CPPUNIT_ASSERT(f!=nullptr);
+        CPPUNIT_ASSERT_EQUAL(f,dynamic_cast<Smp::ISimpleField*>(pub.GetField("char")));
         CPPUNIT_ASSERT(strcmp(f->GetName(),"char")==0);
         CPPUNIT_ASSERT_EQUAL('A',(char)f->GetValue());
 
@@ -52,15 +53,28 @@ public:
         pub.PublishField("int32","int32 test pub",&testInt32);
         f=dynamic_cast<Smp::ISimpleField*>(pub.getChild("int32"));
         CPPUNIT_ASSERT(f!=nullptr);
+        CPPUNIT_ASSERT_EQUAL(f,dynamic_cast<Smp::ISimpleField*>(pub.GetField("int32")));
         CPPUNIT_ASSERT(strcmp(f->GetName(),"int32")==0);
         CPPUNIT_ASSERT_EQUAL(-17042,(int32_t)f->GetValue());
 
         Smp::Float64 testDouble=42.042;
         pub.PublishField("double","float 64 test pub",&testDouble);
         f=dynamic_cast<Smp::ISimpleField*>(pub.getChild("double"));
+        CPPUNIT_ASSERT_EQUAL(f,dynamic_cast<Smp::ISimpleField*>(pub.GetField("double")));
         CPPUNIT_ASSERT(f!=nullptr);
         CPPUNIT_ASSERT(strcmp(f->GetName(),"double")==0);
         CPPUNIT_ASSERT_EQUAL(42.042,(double)f->GetValue());
+
+        const Smp::FieldCollection* fc=pub.GetFields();
+        CPPUNIT_ASSERT(fc!=nullptr);
+        CPPUNIT_ASSERT_EQUAL((size_t)3,fc->size());
+        CPPUNIT_ASSERT(fc->at("char")!=nullptr);
+        CPPUNIT_ASSERT(fc->at("int32")!=nullptr);
+        CPPUNIT_ASSERT(fc->at("double")!=nullptr);
+        CPPUNIT_ASSERT(fc->at("double64")==nullptr);
+        CPPUNIT_ASSERT_EQUAL(fc->at("char"),pub.GetField("char"));
+        CPPUNIT_ASSERT_EQUAL(fc->at("int32"),pub.GetField("int32"));
+        CPPUNIT_ASSERT_EQUAL(fc->at("double"),pub.GetField("double"));
     }
 
     void testPublishArrayField() {
