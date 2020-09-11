@@ -12,6 +12,7 @@
 #include "simph/kern/Type.hpp"
 #include "simph/kern/StructureType.hpp"
 #include "simph/kern/ExInvalidPrimitiveType.hpp"
+#include "simph/kern/ExInvalidFieldType.hpp"
 #include "simph/smpdk/ExDuplicateName.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/sys/RttiUtil.hpp"
@@ -313,9 +314,9 @@ void Publication::PublishField(
         }    
     }
     else {
-LOGE("No type found or bad type. Can't add field "<<name<<" to "
-        <<GetName());
-        // TODO throw the right exception... InvalidFieldType could fit
+        std::ostringstream d;
+        d << "Can't publish field "<<name;
+        throw ExInvalidFieldType(this,d.str().c_str());
     }
 }
 // ..........................................................
