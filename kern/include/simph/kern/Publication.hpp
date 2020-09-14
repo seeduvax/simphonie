@@ -13,6 +13,7 @@
 #include "Smp/IPublication.h"
 #include "Smp/DuplicateName.h"
 #include "Smp/Publication/ITypeRegistry.h"
+#include "simph/smpdk/Collection.hpp"
 #include <vector>
 
 namespace simph {
@@ -203,6 +204,13 @@ private:
     std::vector<Smp::IObject*> _childs;
     Smp::Publication::ITypeRegistry* _typeRegistry;
     Smp::Publication::IType* getArrayType(Smp::PrimitiveTypeKind ptk,Smp::Int64 count);
+    simph::smpdk::Collection<Smp::IField> _fields;
+    simph::smpdk::Collection<Smp::IProperty> _properties;
+
+    inline void addField(Smp::IField* field) {
+        addChild(field);
+        _fields.push_back(field);
+    }
 };
 
 }} // namespace simph::kern
