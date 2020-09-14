@@ -205,6 +205,7 @@ private:
     Smp::Publication::ITypeRegistry* _typeRegistry;
     Smp::Publication::IType* getArrayType(Smp::PrimitiveTypeKind ptk,Smp::Int64 count);
     simph::smpdk::Collection<Smp::IField> _fields;
+    simph::smpdk::Collection<Smp::IProperty> _properties;
 
     inline void addField(Smp::IField* field) {
         addChild(field);

@@ -9,10 +9,12 @@
  */
 #include "simph/kern/Publication.hpp"
 #include "simph/kern/Field.hpp"
+#include "simph/kern/Property.hpp"
 #include "simph/kern/Type.hpp"
 #include "simph/kern/StructureType.hpp"
 #include "simph/kern/ExInvalidPrimitiveType.hpp"
 #include "simph/kern/ExInvalidFieldType.hpp"
+#include "simph/kern/ExTypeNotRegistered.hpp"
 #include "simph/smpdk/ExDuplicateName.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/sys/RttiUtil.hpp"
@@ -27,7 +29,8 @@ Publication::Publication(Smp::IObject* toPublish,
                     Smp::Publication::ITypeRegistry* typeRegistry):
             _pubObj(toPublish),
             _typeRegistry(typeRegistry),
-            _fields("fields","",this) {
+            _fields("fields","",this), 
+            _properties("properties","",this) {
     Smp::IEntryPointPublisher* epp=dynamic_cast<Smp::IEntryPointPublisher*>(toPublish);
     if (epp!=nullptr) {
         for (auto ep: *(epp->GetEntryPoints())) {
@@ -458,7 +461,17 @@ void Publication::PublishProperty(
         Smp::Uuid typeUuid,
         Smp::AccessKind accessKind,
         Smp::ViewKind view) {
-LOGE("Publication::PublishProperty(...) not implemented yet!")
+    Smp::Publication::IType* type=_typeRegistry->GetType(typeUuid);
+    if (type!=nullptr) {
+        // TODO use this or wrapped obj as parent?
+        // TODO are only simple type OK for properties?
+        Property* p=new Property(name,description,this,type,accessKind,view);
+        _properties.push_back(p);
+        addChild(p);
+    }
+    else {
+        throw ExTypeNotRegistered(this, typeUuid);
+    }
 }
 // ..........................................................
 void Publication::Unpublish() {
@@ -474,8 +487,7 @@ const Smp::FieldCollection* Publication::GetFields() const {
     return &_fields;
 }
 const Smp::PropertyCollection* Publication::GetProperties() const {
-// TODO
-    return nullptr;
+    return &_properties;
 }
 const Smp::OperationCollection* Publication::GetOperations() const {
 // TODO
