@@ -22,6 +22,19 @@ namespace simph {
 	namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
+class StructurePublication: public Publication {
+public:
+    StructurePublication(Smp::IObject* toPublish, 
+                    Smp::Publication::ITypeRegistry* typeRegistry):
+                            Publication(toPublish,typeRegistry) {
+    }
+    virtual ~StructurePublication() {
+    }
+private:
+
+};
+// --------------------------------------------------------------------
+// ..........................................................
 Publication::Publication(Smp::IObject* toPublish,
                     Smp::Publication::ITypeRegistry* typeRegistry):
             _pubObj(toPublish),
