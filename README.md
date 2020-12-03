@@ -1,7 +1,6 @@
 # SiMPhonie: simulation kernel implementing SMP (ECSS-ST-E-40-07-C)
-<center>
 ![alt text](_doc/src/logoSimphonie.png?raw=true "Simphonie Logo")
-</center>
+
 ---
 
 ## SMP / ECSS-E-ST-40-07C
