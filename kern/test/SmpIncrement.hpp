@@ -26,6 +26,7 @@ public:
 
     inline void step() {
         _output = _input + 1;
+        std::cout << "output:" << _output << std::endl;
     }
 
     // set input value for tests
