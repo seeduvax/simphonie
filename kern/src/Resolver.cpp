@@ -122,5 +122,11 @@ Smp::IPublication* Resolver::publish(Smp::IObject* toPublish) {
     }
     return pub;
 }
+// ..........................................................
+const Smp::IPublication* Resolver::getPublication(const Smp::IObject* obj) const {
+    auto it = _publications.find(obj);
+    return it!=_publications.end()?it->second:nullptr;
+}
+
 
 }} // namespace simph::kern

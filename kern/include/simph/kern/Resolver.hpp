@@ -43,7 +43,10 @@ public:
     Smp::IObject* ResolveRelative(Smp::String8 relativePath,
                                 const Smp::IComponent* sender) override;
 
+
     Smp::IPublication* publish(Smp::IObject* toPublish);
+
+    const Smp::IPublication* getPublication(const Smp::IObject* obj) const;
 
     void dump();
 private:
