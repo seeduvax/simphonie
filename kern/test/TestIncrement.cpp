@@ -47,7 +47,6 @@ public:
         //auto increment=new SmpIncrement("increment","increment",&_sim);
         _sim->AddModel(increment);
 
-
         _sim->Publish();
         _sim->Configure();
         _sim->Connect();
@@ -62,7 +61,7 @@ public:
             increment->GetEntryPoint("step"),
             0, // 0ms offset
             1000000, // 1000000ns period
-            10); // 10 times
+            -1); // 10 times
         
         _sim->Run();
         _scheduler->step(10000000);
