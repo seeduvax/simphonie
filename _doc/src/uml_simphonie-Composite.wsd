@@ -1,0 +1,49 @@
+@startuml UML_Composite
+package simphonie::smpk
+{
+    '----------------Composite---------------
+    class Composite{
+        + Composite(name : String, descr : String, parent : IObject*)
+        + GetContainers() : ContainerCollection*
+        + GetContainer(name : String) : IContainer*
+        ~ addContainer(name : String, descr : String)
+        - _container : CollectionOwner<IContainer>
+    }
+
+    '----------------CollectionOwner---------------
+    class CollectionOwner{
+        + CollectionOwner(name : String, descr : String, parent : IObject*)
+        + const_iterator : Smp::CollectionIterator<T>
+        + iterator : CollectionIterator<T>
+        + begin() : const_iterator
+        + end() : const_iterator
+        + push_back() : void
+        + remove(t : T*) : bool
+        + contain(t : T*) : bool
+    }
+
+}
+
+package Smp
+{
+    '----------------IContainer---------------
+    interface IContainer{
+        + GetComponents() : ComponentCollection*
+        + GetComponent() : IComponent*
+        + AddComponents(component : IComponent) : void
+        + DeleteComponents(component : IComponent) : void
+        + GetCount() : Int
+        + GetUpper() : Int
+        + GetLower() : Int
+    }
+    
+    '----------------IComposite---------------
+    interface IComposite{
+        + GetContainer( name : Smp::String8) : Smp::IContainer*
+        + GetContainers() : Smp::ContainerCollection*
+    }
+}
+Composite --|> IComposite
+Composite --o IContainer : CollectionOwner<IContainer>
+Composite --o CollectionOwner
+@enduml
