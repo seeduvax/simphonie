@@ -7,6 +7,7 @@
  * $Id$
  * $Date$
  */
+
 #include "simph/kern/Scheduler.hpp"
 #include "Smp/ISimulator.h"
 #include "simph/kern/Logger.hpp"
@@ -152,7 +153,6 @@ Smp::Services::EventId Scheduler::schedule(
             }
         }
     }
-
     auto mySchedule = new Schedule( entryPoint,
                                                   absoluteSimTime,
                                                   this,
@@ -268,6 +268,7 @@ void Scheduler::SetEventCycleTime(Smp::Services::EventId event,
     if (s) {
         s->setPeriod(cycleTime);
     }
+    
 }
 // ..........................................................
 void Scheduler::SetEventRepeat(Smp::Services::EventId event,
@@ -306,7 +307,7 @@ Smp::Duration Scheduler::GetNextScheduledEventTime() const {
 void Scheduler::step() {
     Schedule* toRun=nullptr;
     {
-        Synchronized(_mutex)
+        Synchronized(_mutex);
         if (!_scheduled.empty()) {
             auto top=_scheduled.begin();
             _currentSchedule=*top;
@@ -333,7 +334,7 @@ void Scheduler::step() {
 // ..........................................................
 void Scheduler::step(Smp::Duration duration) {
     _stopSimTime=_timeKeeper->GetSimulationTime()+duration;
-    _autoStop=true;
+    _autoStop=true; 
     run();
     _autoStop=false;
 }
@@ -360,9 +361,7 @@ void Scheduler::run() {
         step();
         if (_autoStop) {
             Synchronized(_mutex);
-            _run&=!_scheduled.empty() &&
-                    (_stopSimTime==0 || 
-                        (*_scheduled.begin())->getTime()<=_stopSimTime);
+            _run&= !_scheduled.empty() && (_stopSimTime==0 || (*_scheduled.begin())->getTime()<=_stopSimTime);
         }
     }
 }
