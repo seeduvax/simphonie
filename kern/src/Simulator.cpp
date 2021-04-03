@@ -329,6 +329,34 @@ void Simulator::RegisterFactory(Smp::IFactory* componentFactory) {
     _logger->Log(this,msg.str().c_str(),Smp::Services::ILogger::LMK_Information);
 }
 // ..........................................................
+Smp::IComponent* Simulator::CreateInstance(Smp::String8 modelType,
+                            Smp::String8 name,
+                            Smp::String8 description,
+                            Smp::IComposite* parent) {
+    Smp::IComponent* res=nullptr;
+    for (auto fac: _compFactories) {
+        std::cout<< fac->GetName() << std::endl;
+        if (std::string(fac->GetName()) == std::string(modelType)) {
+            res=fac->CreateInstance(name,description,
+                        parent==nullptr?this:parent);
+            // TODO is it required to add new instance in a container when
+            // the parent is set?
+            if (dynamic_cast<Smp::IModel*>(res)) {
+                _models->AddComponent(res);
+            }
+            if (dynamic_cast<Smp::IService*>(res)) {
+                _services->AddComponent(res);
+            }
+            // TODO check it is needed to pulish/configure/connect immediately
+            // according to current simulator state.
+            break;
+        }
+    }
+    // When no factory is found, Smp header tels to return null. So nothing
+    // particular to do since res is initialized as nullptr.
+    return res;
+}
+// ..........................................................
 Smp::IComponent* Simulator::CreateInstance(Smp::Uuid uuid,
                             Smp::String8 name,
                             Smp::String8 description,

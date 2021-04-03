@@ -37,23 +37,28 @@ public:
     void testIncrement() {
         Simulator sim;
         
-        SmpIncrement* increment = new SmpIncrement("increment","increment",nullptr);
+        //SmpIncrement* increment = new SmpIncrement("increment","increment",nullptr);
+        sim.LoadLibrary("libsimph_T_kern.so");
+
+        auto increment = dynamic_cast<Smp::IEntryPointPublisher*>(sim.CreateInstance("simph_T_kern_SmpIncrement","increment","description Increment", &sim));
+        
         auto scheduler = dynamic_cast<Scheduler*>(sim.GetScheduler());
 
         //auto increment=new SmpIncrement("increment","increment",&_sim);
-        sim.AddModel(increment);
+        //sim.AddModel(increment);
 
         sim.Publish();
         sim.Configure();
         sim.Connect();
 
-        auto input = dynamic_cast<Field*>(sim.GetResolver()->ResolveRelative("input",increment));
-        auto output = dynamic_cast<Field*>(sim.GetResolver()->ResolveRelative("output",increment));
+        auto input = dynamic_cast<Field*>(sim.GetResolver()->ResolveAbsolute("increment/input"));
+        CPPUNIT_ASSERT(input!=nullptr);
+        auto output = dynamic_cast<Field*>(sim.GetResolver()->ResolveAbsolute("increment/output"));
+        CPPUNIT_ASSERT(output!=nullptr);
 
         output->Connect(input);
 
         scheduler->AddSimulationTimeEvent(
-            //increment->SmpIncrement(increment->GetEntryPoint("step")),
             increment->GetEntryPoint("step"),
             0, // 0ms offset
             1000000, // 1000000ns period

@@ -75,6 +75,7 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
     if (p!=nullptr) {
         res=p->getPubObj();
     }
+    
     return res;
 }
 // ..........................................................
