@@ -10,11 +10,12 @@
 #include "simph/umdl/SimTimeProvider.hpp"
 #include "simph/umdl/SysTimeSynchro.hpp"
 #include "simph/umdl/Logger1D.hpp"
+#include "simph/umdl/SmpIncrement.hpp"
 #include "simph/kern/Factory.hpp"
 #include "Smp/ISimulator.h"
 #include "simph/sys/DlDef.h"
 
-extern "C" {
+/*extern "C" {
     SHARED_FUNCTION bool Initialise(Smp::ISimulator* simulator, Smp::Publication::ITypeRegistry* tReg) {
         simulator->RegisterFactory(new simph::kern::Factory<simph::umdl::SimTimeProvider>(
                 "SimTimeProvider_Factory","",simulator,
@@ -30,4 +31,14 @@ extern "C" {
     SHARED_FUNCTION bool Finalise() {
         return true;
     }
-}
+}*/
+namespace simph {
+    namespace umdl {
+
+REGISTER_SMP_LIBINIT();
+ADD_SMP_FACTORY(SimTimeProvider);
+ADD_SMP_FACTORY(SysTimeSynchro);
+ADD_SMP_FACTORY(Logger1D);
+ADD_SMP_FACTORY(SmpIncrement);
+
+}}

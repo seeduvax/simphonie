@@ -72,7 +72,7 @@ public:
 
     void createSmpModel(const char* model, const char* model_name, const char* description)
     {
-        _sim.CreateInstance(model,model_name,description, &_sim);
+        _sim.CreateInstance(Smp::Uuid(model),model_name,description, &_sim);
     };
 
     void connect(std::string output, std::string input)
@@ -101,8 +101,7 @@ public:
         _sim.GetScheduler()->AddSimulationTimeEvent(model->GetEntryPoint(entryPoint.c_str()), 0, period, -1);
     };
 
-    void stepTime(uint32_t duration)
-    {
+    void stepTime(uint32_t duration) {
         auto scheduler = dynamic_cast<simph::kern::Scheduler*>(_sim.GetScheduler());
         scheduler->step(duration);
     };

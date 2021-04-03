@@ -64,11 +64,6 @@ public:
 		       Smp::String8 name,
 		       Smp::String8 description,
 		       Smp::IComposite* parent) override;
-               
-    Smp::IComponent* CreateInstance(Smp::String8 modelType,
-		       Smp::String8 name,
-		       Smp::String8 description,
-		       Smp::IComposite* parent);
     Smp::IFactory* GetFactory(Smp::Uuid uuid) const override;
     Smp::FactoryCollection* GetFactories() const override;
     Smp::Publication::ITypeRegistry* GetTypeRegistry() const override;
