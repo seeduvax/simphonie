@@ -7,10 +7,12 @@
  * $Id$
  * $Date$
  */
+
 #include "simph/kern/Scheduler.hpp"
 #include "Smp/ISimulator.h"
 #include "simph/kern/Logger.hpp"
 #include "simph/kern/TimeKeeper.hpp"
+#include "simph/kern/Resolver.hpp"
 #include "Smp/IDataflowField.h"
 #include "assert.h"
 #include <atomic>
@@ -23,7 +25,7 @@ namespace simph {
 class Scheduler::Schedule {
 public:
     Schedule(const Smp::IEntryPoint* ep, Smp::Duration simTime,
-            Scheduler* owner, const std::vector<Smp::IDataflowField*>* fields,
+            Scheduler* owner, const std::vector<Smp::IDataflowField*>& fields,
             Smp::Duration period=0,Smp::Int64 repeat=0):
             _ep(ep),
             _simTime(simTime),
@@ -56,11 +58,8 @@ public:
     }
     void run() {
         _ep->Execute();
-        // Push related data flow fields if any.
-        if (_fields!=nullptr) {
-            for (auto f: *_fields) {
-                f->Push();
-            }
+        for (auto f: _fields) {
+            f->Push();
         }
         if (_repeat!=0) {
             if (_repeat>0) {
@@ -80,7 +79,7 @@ private:
     const Smp::IEntryPoint* _ep;
     Smp::Duration _simTime;
     Scheduler* _owner;
-    const std::vector<Smp::IDataflowField*>* _fields;
+    std::vector<Smp::IDataflowField*> _fields;
     Smp::Duration _period;
     Smp::Int64 _repeat;
     Smp::Services::EventId _id;
@@ -139,13 +138,21 @@ Smp::Services::EventId Scheduler::schedule(
                                 Smp::Duration absoluteSimTime,
                                 Smp::Duration cycleTime,
                                 Smp::Int64 repeat) {
-    const std::vector<Smp::IDataflowField*>* flowFields=nullptr;
-/** TODO retrieve list of field to push after EP call.
-    auto reg=dynamic_cast<ObjectsRegistry*>(getSimulator()->GetResolver());
-    if (reg!=nullptr) {
-        flowFields=reg->getRelatedFlowFields(entryPoint);
+    std::vector<Smp::IDataflowField*> flowFields;
+    auto resolver = dynamic_cast<Resolver*>(getSimulator()->GetResolver());
+    Smp::IObject* obj = entryPoint->GetParent();
+    const Smp::IPublication* pub = resolver->getPublication(obj);
+    if (pub != nullptr) {
+        auto fields = pub->GetFields();
+        if (fields!=nullptr) {
+            for (auto itField = fields->begin(); itField != fields->end(); ++itField) {
+                Smp::IDataflowField* dfField = dynamic_cast<Smp::IDataflowField*>(*itField);
+                if (dfField!=nullptr && dfField->IsOutput()) {
+                    flowFields.push_back(dfField);
+                }
+            }
+        }
     }
-*/
     auto mySchedule = new Schedule( entryPoint,
                                                   absoluteSimTime,
                                                   this,
@@ -261,6 +268,7 @@ void Scheduler::SetEventCycleTime(Smp::Services::EventId event,
     if (s) {
         s->setPeriod(cycleTime);
     }
+    
 }
 // ..........................................................
 void Scheduler::SetEventRepeat(Smp::Services::EventId event,
@@ -299,7 +307,7 @@ Smp::Duration Scheduler::GetNextScheduledEventTime() const {
 void Scheduler::step() {
     Schedule* toRun=nullptr;
     {
-        Synchronized(_mutex)
+        Synchronized(_mutex);
         if (!_scheduled.empty()) {
             auto top=_scheduled.begin();
             _currentSchedule=*top;
@@ -326,7 +334,7 @@ void Scheduler::step() {
 // ..........................................................
 void Scheduler::step(Smp::Duration duration) {
     _stopSimTime=_timeKeeper->GetSimulationTime()+duration;
-    _autoStop=true;
+    _autoStop=true; 
     run();
     _autoStop=false;
 }
@@ -353,9 +361,7 @@ void Scheduler::run() {
         step();
         if (_autoStop) {
             Synchronized(_mutex);
-            _run&=!_scheduled.empty() &&
-                    (_stopSimTime==0 || 
-                        (*_scheduled.begin())->getTime()<=_stopSimTime);
+            _run&= !_scheduled.empty() && (_stopSimTime==0 || (*_scheduled.begin())->getTime()<=_stopSimTime);
         }
     }
 }

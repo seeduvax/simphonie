@@ -40,7 +40,7 @@ public:
     void testSimTime() {
         simph::kern::Simulator sim;
         sim.LoadLibrary("libsimph_umdl.so");
-        auto mdl=sim.CreateInstance({0x2adfaf7c,0x42ab,0x11e9,0x9feb,0x0f29cca3fa03},"clock","",nullptr);
+        auto mdl=sim.CreateInstance(Smp::Uuid("SimTimeProvider"),"clock","",nullptr);
         CPPUNIT_ASSERT(mdl!=nullptr);
         auto log=sim.AddModel<Logger1D>("log");
         auto sync=sim.AddModel<SysTimeSynchro>("sync");

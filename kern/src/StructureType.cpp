@@ -23,7 +23,6 @@ StructureType::StructureType(Smp::Uuid uuid, TypeRegistry* typeReg,
             Smp::IObject* parent):
         Type(uuid,Smp::PrimitiveTypeKind::PTK_None,0,name,description,parent),
         _typeRegistry(typeReg) {
-
 }
 // ..........................................................
 StructureType::~StructureType() {

@@ -1,0 +1,140 @@
+@startuml UML_Component
+package simphonie::smpdk
+{
+    '----------------Object----------------
+    class Object{
+        + Object(name : Smp::String8, descr="" : Smp::String8, parent : Smp::IObject*)
+        + checkName(String) : bool
+        - SetName(String Name) : void
+        - SetDescription(String Description) : void
+        - SetParent(Object* Parent) : void
+
+        - _name : string
+        - _description : string
+        - _parent : IObject*
+    }
+
+    '----------------CollectionOwner---------------
+    class CollectionOwner{
+        + CollectionOwner(name : String, descr : String, parent : IObject*)
+        + const_iterator : Smp::CollectionIterator<T>
+        + iterator : CollectionIterator<T>
+        + begin() : const_iterator
+        + end() : const_iterator
+        + push_back() : void
+        + remove(t : T*) : bool
+        + contain(t : T*) : bool
+    }
+    
+    '----------------Component---------------
+    class Component{
+        + Publish() : void
+        + Connect() : void
+        + Disconnect() : void
+        + Configure() : void
+
+        ~ Publish() : void
+        ~ connect() : void
+        ~ disconnect() : void
+        ~ configure() : void
+        ~ getSimulator() : Simulator*
+
+        ComponentCollection : Collection<Component>
+
+        - _state : ComponentStateKind
+        - _logger : Logger*
+        - _linkRegistry : LinkRegistry*
+        - _fileds : CollectionOwner<Field>
+        - _uuid : Uuid&
+        - _simulator : Simulator*
+    }
+}
+
+package Smp
+{
+    '----------------ISimulator----------------
+    interface ISimulator {
+        + Simulator(name : Smp::String8, descr : Smp::String8, parent : Smp::IObject*)
+        + Initialise() : void
+        + Publish() : void
+        + Configure() : void
+        + Connect() : void
+        + Run() : void
+        + Hold(immediate : Smp::Bool) : void
+        + Store(filename : Smp::String8) : void
+        + Restore(filename : Smp::String8) : void
+        + Reconnect(root : Smp::IComponent*) : void
+        + Exit() : void
+        + Abort() : void
+        + GetState() : Smp::SimulatorStateKind
+        + GetService(name : Smp::String8) :
+        + RegisterFactory(componentFactory : Smp::IFactory*) : void
+        + CreateInstance(uuid : Smp::Uuid, name : Smp::String8, description : Smp::String8; parent : Smp::IComposite*) : Smp::IComponent*
+        + LoadLibrary(libraryPath : Smp::String8) : void
+        + AddModel(name : Smp::String8, descr : Smp::String8) : T*
+
+        - _state : Smp::SimulatorStateKind
+        - _initEntryPoints : Collection<Smp::IFactory>
+        - _models : Smp::IContainer*
+        - _services : Smp::IContainer*
+        - _compFactories : Collection<Smp::IFactory>
+        - Smp::Services::ILogger* _logger
+        - _scheduler : Scheduler*
+        - _timeKeeper : Smp::Services::ITimeKeeper*
+        - _eventMgr : Smp::Services::IEventManager*
+        - _linkRegistry : Smp::Services::ILinkRegistry*
+        - _typeRegistry : Smp::Publication::ITypeRegistry*
+        - _resolver : Resolver*
+        - _libs : std::vector<simph::sys::DLib*>
+        - publish(Smp::IComponent* comp) : void
+        - configure(Smp::IComponent* comp) : void
+        - connect(Smp::IComponent* comp) : void
+        - setState(Smp::SimulatorStateKind newState) : void
+    }
+
+    '----------------IComponent---------------
+    interface IComponent{
+        + GetState() : ComponentStateKind
+        + Publish(receiver : IPublication*) : void
+        + GetField(fullName : String) : FieldCollection*
+        + GetUuid() : Uuid&
+        + Connect() : void
+        + Disconnect() : void
+        + Configure(logger : *ILogger, linkRegistry : ILinkRegistery) : void
+
+        ComponentCollection : ICollection<IComponent>
+    }
+
+    '----------------ILogger----------------
+    interface ILogger {
+        + Log(Object*, String, LogMessageKind) : void
+        + QueryLogMessageKind(String) : LogMessageKind
+    }
+
+    '----------------ILinkRegistry----------------
+    interface ILinkRegistry {
+        + AddLink(source : IComponent*, target : IComponent*) : void
+        + GetLinkCount(source : IComponent*, target : IComponent*) : void
+        + RemoveLink(source : IComponent*, target : IComponent*): Smp::bool
+        + GetLinkSources(target IComponent*) : ComponentCollection*
+        + CanRemove(target : IComponent*) : bool
+        + RemoveLinks(target : IComponent*) : void
+
+        + SMP_LinkRegistry[] : Char8
+    }
+    
+    '----------------ComponentStateKind----------------
+    class ComponentStateKind {
+        states : CSK_Created, CSK_Publishing, CSK_Configured, CSK_Connected, CSK_Disconnected
+    }
+}
+
+Component --|> Object
+Component --|> IComponent
+Component --o ILogger : _logger
+Component --o ComponentStateKind : _state
+Component --o CollectionOwner : Collection<IComponent>
+Component --o ISimulator : _simulator
+Component --o ILinkRegistry : _linkRegistry
+
+@enduml

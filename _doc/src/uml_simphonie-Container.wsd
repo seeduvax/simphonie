@@ -1,0 +1,61 @@
+@startuml UML_Container
+package simphonie::smpdk
+{
+    '----------------Container---------------
+    class Container{
+        + Container(name : String, descr : String, parent : IObject*)
+        + GetComponents() : ComponentCollection*
+        + GetComponent() : IComponent*
+        + AddComponents(component : IComponent) : void
+        + DeleteComponents(component : IComponent) : void
+        + GetCount() : Int
+        + GetUpper() : Int
+        + GetLower() : Int
+        ~ checkComponentType(comp : IComponent*)
+        - _content : Collection<IComponent>
+    }
+
+    '----------------Collection---------------
+    class Collection{
+        + Collection(name : String, descr : String, parent : IObject*)
+        + const_iterator : Smp::CollectionIterator<T>
+        + iterator : CollectionIterator<T>
+        + begin() : const_iterator
+        + end() : const_iterator
+        + push_back() : void
+        + remove(t : T*) : bool
+        + contain(t : T*) : bool
+    }
+
+}
+
+package Smp
+{
+    '----------------IContainer---------------
+    interface IContainer{
+        + GetComponents() : ComponentCollection*
+        + GetComponent() : IComponent*
+        + AddComponents(component : IComponent) : void
+        + DeleteComponents(component : IComponent) : void
+        + GetCount() : Int
+        + GetUpper() : Int
+        + GetLower() : Int
+    }
+
+    '----------------IComponent---------------
+    interface IComponent{
+        + GetState() : ComponentStateKind
+        + Publish(receiver : IPublication*) : void
+        + GetField(fullName : String) : FieldCollection*
+        + GetUuid() : Uuid&
+        + Connect() : void
+        + Disconnect() : void
+        + Configure(logger : *ILogger, linkRegistry : ILinkRegistery) : void
+
+        ComponentCollection : ICollection<IComponent>
+    }
+}
+Container --|> IContainer
+Container --o IComponent : Collection<IComponent>
+Container --o Collection
+@enduml

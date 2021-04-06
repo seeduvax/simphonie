@@ -102,6 +102,7 @@ void Component::Disconnect() {
     _logger=nullptr;
     _linkRegistry=nullptr;
 // TODO to be completed
+    disconnect();
 }
 // ..........................................................
 Smp::IField* Component::GetField(Smp::String8 fullName) const {

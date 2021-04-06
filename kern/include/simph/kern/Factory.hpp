@@ -12,6 +12,10 @@
 #include "simph/sys/RttiUtil.hpp"
 #include "simph/smpdk/Object.hpp"
 #include "Smp/IFactory.h"
+#include "simph/sys/DlDef.h"
+#include <memory>
+#include <functional>
+#include <iostream>
 
 namespace simph {
 	namespace kern {
@@ -22,18 +26,11 @@ using namespace simph::smpdk;
 template <typename T>
 class Factory: public Object, virtual public Smp::IFactory {
 public:
-    /**
-     * Default constructor.
-     */
-    Factory(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent,
-                Smp::Uuid uuid):
-                Object(name,descr,parent),
-                _uuid(uuid) {
-        _name=simph::sys::RttiUtil::demangle(typeid(T).name());
+    Factory(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, Smp::Uuid uuid):
+        Object(name,descr,parent),
+        _uuid(uuid),
+        _type(simph::sys::RttiUtil::demangle(typeid(T).name())) {
     }
-    /**
-     * Destructor.
-     */
     virtual ~Factory() {
     }
     // Smp::IFactory implementation
@@ -52,12 +49,56 @@ public:
         delete instance;
     }
     Smp::String8 GetTypeName() const override {
-        return _name.c_str();
+        return _type.c_str();
     }
 private:
     Smp::Uuid _uuid;
-    std::string _name;
+    std::string _type;
 };
+
+/**
+ * Macro to register model factories:
+ * Ex:
+ *      using namespace a::b;    
+ *      REGISTER_SMP_LIBINIT();
+ *      ADD_SMP_FACTORY(ModelA);
+ *      ADD_SMP_FACTORY(ModelB);
+ *      ADD_SMP_FACTORY(ModelC);
+ *      ...
+ */
+#define REGISTER_SMP_LIBINIT()\
+static std::vector< std::unique_ptr<Smp::IFactory> > _factories;\
+static std::vector< std::function<Smp::IFactory*(Smp::ISimulator*)> > _createFactoryFns;\
+extern "C" { \
+    SHARED_FUNCTION bool Initialise(Smp::ISimulator* simulator,\
+                    Smp::Publication::ITypeRegistry* reg) {\
+        if (simulator) { \
+            for (auto& createFactoryFn : _createFactoryFns) {\
+                auto f = createFactoryFn(simulator);\
+                simulator->RegisterFactory(f);\
+                _factories.push_back(std::unique_ptr<Smp::IFactory>(f));\
+            }\
+            return true;\
+        }\
+        else {\
+            return false;\
+        }\
+    }\
+    SHARED_FUNCTION bool Finalise() {\
+        _factories.clear();\
+        return true;\
+    }\
+}
+
+#define ADD_SMP_FACTORY(factoryType) \
+static int static_add_##factoryType { [&]{\
+    _createFactoryFns.push_back([&](Smp::ISimulator* simulator){\
+        return new simph::kern::Factory<factoryType>(\
+            "" #factoryType "_factory","",simulator,Smp::Uuid(#factoryType));\
+    });\
+    return 1;\
+}()};
+
 
 }} // namespace simph::kern
 #endif // __simph_kern_Factory_HPP__
