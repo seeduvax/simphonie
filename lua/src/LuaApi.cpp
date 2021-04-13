@@ -7,216 +7,93 @@
  * $Id$
  * $Date$
  */
-#include "simph/lua/LuaApi.hpp"
+#include "sol/sol.hpp"
+#include "Smp/ISimulator.h"
 #include "simph/kern/Simulator.hpp"
 
-#include "simph/kern/Field.hpp"
-#include "simph/kern/EntryPoint.hpp"
-#include "simph/kern/IEntryPointPublisher.hpp"
-#include "simph/kern/Scheduler.hpp"
-
-
-namespace simph {
-	namespace lua {
-    
-class SimProxy {
-public:
-    SimProxy(): _sim() {
-    };
-    ~SimProxy() {
-    };
-    void Initialise() {
-        _sim.Initialise();
-    };
-    void Publish() 
-    {
-        _sim.Publish();
+// exemple de meta index
+// On retourne toujours le même truc quelque soit la clé.
+// permet au passage de verifier que le type récupéré coté lua est OK
+// (c'est à dire ici, bien du type timekeeper)...
+sol::object myIndex(Smp::ISimulator& th, sol::stack_object k,sol::this_state L) {
+    std::cout<<"Debug myIndex: "<<th.GetName()<<std::endl;
+    auto o=th.GetTimeKeeper();
+    return sol::object(L,sol::in_place,o);
+}
+// exemple de meta new_index
+// On ne fait rien, on se content de regarder ce qu'on reçoit en paramètre.
+void myNewIndex(Smp::ISimulator& th, sol::stack_object k, sol::stack_object v, sol::this_state L) {
+    std::cout<<"Debug myNewIndex: "<<th.GetName()<<std::endl;
+    auto kIsString=k.as<sol::optional<std::string> >();
+    if (kIsString) {
+        std::string kstr=k.as<std::string>();
+        if (kstr == "testTK") {
+            std::cout<<"Debug myNewIndex: Test assign object"<<std::endl;
+            // just un truc debile pour verifier qu'on recup bien notre
+            // instance d'objet et qu'on peut jouer avec...
+            auto obj=v.as<Smp::Services::ITimeKeeper*>();
+            if (obj!=nullptr) {
+                std::cout<<"Debug myNewIndex: "<<obj->GetName()<<std::endl;
+                std::cout<<"Debug myNewIndex: "<<obj->GetSimulationTime()<<std::endl;
+            }
+        }
     }
-    void Configure()
-    {
-        _sim.Configure();
-    };
-    void Connect()
-    {
-        _sim.Connect();
-    };
-    void Run()
-    {
-        _sim.Run();
-    };
-    void Hold(const bool immediate)
-    {
-        _sim.Hold(immediate);
-    };
-    void Store(const char* filename)
-    {
-        _sim.Store(filename);
-    };
-    void Restore(const char* filename)
-    {
-        _sim.Restore(filename);
-    };
-    void Exit()
-    {
-        _sim.Exit();
-    };
-    void Abort()
-    {
-        _sim.Abort();
-    };
-
-    void loadSmpLib(const char* library)
-    {
-        _sim.LoadLibrary(library);
-    };
-
-    void createSmpModel(const char* model, const char* model_name, const char* description)
-    {
-        _sim.CreateInstance(Smp::Uuid(model),model_name,description, &_sim);
-    };
-
-    void connect(std::string output, std::string input)
-    {
-        auto output_field = dynamic_cast<Smp::IDataflowField*>(_sim.GetResolver()->ResolveAbsolute(output.c_str()));
-        auto input_field = dynamic_cast<Smp::IDataflowField*>(_sim.GetResolver()->ResolveAbsolute(input.c_str()));
-
-        if(input_field == nullptr)
-        {
-            std::stringstream ss;
-            ss<< "Input field not find (" << input << ")";
-            throw std::runtime_error(ss.str().c_str());
-        }
-        if(output_field == nullptr)
-        {
-            std::stringstream ss;
-            ss<< "Output field not find (" << output << ")";
-            throw std::runtime_error(ss.str().c_str());
-        }
-
-        output_field->Connect(input_field);
-    };
-
-    void schedule(std::string modelName, std::string entryPoint, uint32_t period) {
-        auto model = dynamic_cast<Smp::IEntryPointPublisher*>(_sim.GetResolver()->ResolveAbsolute(modelName.c_str()));
-        _sim.GetScheduler()->AddSimulationTimeEvent(model->GetEntryPoint(entryPoint.c_str()), 0, period, -1);
-    };
-
-    void stepTime(uint32_t duration) {
-        auto scheduler = dynamic_cast<simph::kern::Scheduler*>(_sim.GetScheduler());
-        scheduler->step(duration);
-    };
-
-    luabridge::LuaRef getData(const char * name, lua_State* L) {
-        luabridge::LuaRef res(L);
-        
-        Smp::ISimpleField* object = dynamic_cast<Smp::ISimpleField*>(_sim.GetResolver()->ResolveAbsolute(name));
-        if(object == nullptr)
-        {
-            return res;
-        }
-
-        // Associate corresponding primitive type
-        switch (object->GetPrimitiveTypeKind())
-        {
-        case Smp::PrimitiveTypeKind::PTK_Char8:
-            res = (Smp::Char8)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Bool:
-            res = (Smp::Bool)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Int8:
-            res = (Smp::Int8)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_UInt8:
-            res = (Smp::UInt8)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Int16:
-            res = (Smp::Int16)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_UInt16:
-            res = (Smp::UInt16)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Int32:
-            res = (Smp::Int32)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_UInt32:
-            res = (Smp::UInt32)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Int64:
-            res = (Smp::Int64)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_UInt64:
-            res = (Smp::UInt64)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Float32:
-            res = (Smp::Float32)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Float64:
-            res = (Smp::Float64)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Duration:
-            res = (Smp::Duration)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_DateTime:
-            res = (Smp::DateTime)(object->GetValue());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_String8:
-            res = (Smp::String8)(object->GetValue());
-            break;
-        default:
-            std::stringstream ss;
-            ss<< "Primitive type of" << name << "not found";
-            throw std::runtime_error(ss.str().c_str());
-            break;
-        }
-
-        return res;
-    };
-private:
-    simph::kern::Simulator _sim;
-};
-
-
+}
+// exemple de factory, par exemple pour poir faire un truc
+// specifique sur l'objet construit quand il l'est depuis lua.
+simph::kern::Simulator* myFactory(std::string name) {
+    return new simph::kern::Simulator(name.c_str());
+}
 
 // --------------------------------------------------------------------
 // ..........................................................
-LuaApi::LuaApi(lua_State* luaState) {
-    luabridge::getGlobalNamespace(luaState)
-       .beginClass<SimProxy>("Simulator")
-          .addConstructor<void(*) ()>()
-          .addFunction("Initialise", &SimProxy::Initialise)
-          .addFunction("Publish", &SimProxy::Publish)
-          .addFunction("Configure", &SimProxy::Configure)
-          .addFunction("Connect", &SimProxy::Connect)
-          .addFunction("Run", &SimProxy::Run)
-          .addFunction("Hold", &SimProxy::Hold)
-          .addFunction("Store", &SimProxy::Store)
-          .addFunction("Restore", &SimProxy::Restore)
-          .addFunction("Exit", &SimProxy::Exit)
-          .addFunction("Abort", &SimProxy::Abort)
-          .addFunction("connect", &SimProxy::connect)
-          .addFunction("stepTime", &SimProxy::stepTime)
-          .addFunction("schedule", &SimProxy::schedule)
-          .addFunction("loadSmpLib", &SimProxy::loadSmpLib)
-          .addFunction("createSmpModel", &SimProxy::createSmpModel)
-          .addFunction("getData", &SimProxy::getData)
-    .endClass(); 
-
-}
-// ..........................................................
-LuaApi::~LuaApi() {
-}
-// ..........................................................
-extern "C" { 
-   int luaopen_libsimph_lua(lua_State* L) {
-        static LuaApi api(L);
+extern "C" {
+    int luaopen_libsimph_lua(lua_State* L) {
+        sol::state_view lua=L;
+        lua.open_libraries(sol::lib::base);
+        auto t=lua.create_table();
+        auto nsSmp=t["Smp"].get_or_create<sol::table>();
+        nsSmp.new_usertype<Smp::IObject>("IObject",
+            "name",sol::property(&Smp::IObject::GetName),
+            "description",sol::property(&Smp::IObject::GetDescription),
+            "parent",sol::property(&Smp::IObject::GetParent)
+        );
+        nsSmp.new_usertype<Smp::IComponent>("IComponent",
+            "GetState",&Smp::IComponent::GetState, 
+            sol::base_classes,sol::bases<Smp::IObject>()
+        );
+        nsSmp.new_usertype<Smp::IComposite>("IComposite",
+            "GetContainer",&Smp::IComposite::GetContainer, 
+            sol::base_classes,sol::bases<Smp::IObject>()
+        );
+        nsSmp.new_usertype<Smp::ISimulator>("ISimulator",
+            "Publish",&Smp::ISimulator::Publish,
+            "Configure",&Smp::ISimulator::Configure,
+            "Connect",&Smp::ISimulator::Connect,
+            "Run",&Smp::ISimulator::Run,  
+            "Hold",&Smp::ISimulator::Hold,
+            "Store",&Smp::ISimulator::Store,
+            "Restore",&Smp::ISimulator::Restore,
+            "Exit",&Smp::ISimulator::Exit,
+            "Abort",&Smp::ISimulator::Abort,
+            "LoadLibrary",&Smp::ISimulator::LoadLibrary,
+            "CreateInstance",&Smp::ISimulator::CreateInstance,
+            "GetTimeKeeper",&Smp::ISimulator::GetTimeKeeper,
+            sol::base_classes,sol::bases<Smp::IObject,Smp::IComposite>()
+        );
+        nsSmp.new_usertype<Smp::Services::ITimeKeeper>("ITimeKeeper",
+            "GetSimulationTime",&Smp::Services::ITimeKeeper::GetSimulationTime,
+            sol::base_classes,sol::bases<Smp::IObject,Smp::IComponent>()
+        );
+        auto nsSimphonie=t["Simphonie"].get_or_create<sol::table>();
+        nsSimphonie.new_usertype<simph::kern::Simulator>("Simulator",
+             sol::constructors<simph::kern::Simulator()>(),
+             sol::meta_function::construct,myFactory,
+             sol::meta_function::index,myIndex,
+             sol::meta_function::new_index,myNewIndex,
+             sol::base_classes,sol::bases<Smp::IObject,Smp::IComposite,Smp::ISimulator>()
+        );
+        t.push();
         return 1;
-   }
-   int luaopen_lua(lua_State* L) {
-        return luaopen_libsimph_lua(L);
-   }
+    }
 }
-
-
-
-}} // namespace simph::lua
