@@ -10,18 +10,19 @@
 #ifndef __simph_umdl_SmpIncrement_HPP__
 #define __simph_umdl_SmpIncrement_HPP__
 
-#include "simph/umdl/AStepMdl.hpp"
 #include <Smp/IPublication.h>
+#include "simph/umdl/AStepMdl.hpp"
 
 namespace simph {
-    namespace umdl {
+namespace umdl {
 
-class SmpIncrement: public AStepMdl {
+class SmpIncrement : public AStepMdl {
 public:
     SmpIncrement(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent);
     virtual ~SmpIncrement();
 
     void step() override;
+
 private:
     void publish(Smp::IPublication* receiver);
 
@@ -29,5 +30,6 @@ private:
     Smp::Float64 _output;
 };
 
-}} // namespace simph::umdl
-#endif // __simph_umdl_SmpIncrement_HPP__
+}  // namespace umdl
+}  // namespace simph
+#endif  // __simph_umdl_SmpIncrement_HPP__

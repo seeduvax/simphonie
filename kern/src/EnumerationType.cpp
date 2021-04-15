@@ -8,42 +8,40 @@
  * $Date$
  */
 #include "simph/kern/EnumerationType.hpp"
-#include "simph/smpdk/ExInvalidObjectName.hpp"
-#include "simph/smpdk/ExDuplicateName.hpp"
-#include "simph/kern/ExDuplicateLiteral.hpp"
 #include <string.h>
+#include "simph/kern/ExDuplicateLiteral.hpp"
+#include "simph/smpdk/ExDuplicateName.hpp"
+#include "simph/smpdk/ExInvalidObjectName.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 // --------------------------------------------------------------------
 // ..........................................................
-EnumerationType::EnumerationType(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind,
-        Smp::String8 name, Smp::String8 descr, Smp::IObject* parent):
-        Type(uuid,kind,sizeof(Smp::Int32),name,descr,parent) {
-}
+EnumerationType::EnumerationType(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind, Smp::String8 name, Smp::String8 descr,
+                                 Smp::IObject* parent)
+    : Type(uuid, kind, sizeof(Smp::Int32), name, descr, parent) {}
 // ..........................................................
-EnumerationType::~EnumerationType() {
-}
+EnumerationType::~EnumerationType() {}
 // --------------------------------------------------------------------
 // ..........................................................
-void EnumerationType::AddLiteral(Smp::String8 name, Smp::String8 description,
-                                Smp::Int32 value) {
+void EnumerationType::AddLiteral(Smp::String8 name, Smp::String8 description, Smp::Int32 value) {
     if (!Object::checkName(name)) {
-        throw ExInvalidObjectName(this,name);
+        throw ExInvalidObjectName(this, name);
     }
-    for (auto l: _literals) {
-        if (strcmp(name,l.name)==0) {
-            throw ExDuplicateName(this,name);
+    for (auto l : _literals) {
+        if (strcmp(name, l.name) == 0) {
+            throw ExDuplicateName(this, name);
         }
-        if (value==l.value) {
-            throw ExDuplicateLiteral(this,l.name,l.value);
+        if (value == l.value) {
+            throw ExDuplicateLiteral(this, l.name, l.value);
         }
     }
     struct literal l;
-    l.name=name;
-    l.description=description;
-    l.value=value;
+    l.name = name;
+    l.description = description;
+    l.value = value;
     _literals.push_back(l);
 }
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

@@ -8,25 +8,23 @@
  * $Date$
  */
 #include "simph/kern/ExInvalidPrimitiveType.hpp"
-#include "simph/kern/TypeRegistry.hpp"
 #include <sstream>
+#include "simph/kern/TypeRegistry.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidPrimitiveType::ExInvalidPrimitiveType(Smp::IObject* sender, 
-                Smp::PrimitiveTypeKind type): _type(type) {
+ExInvalidPrimitiveType::ExInvalidPrimitiveType(Smp::IObject* sender, Smp::PrimitiveTypeKind type) : _type(type) {
     setName("InvalidPrimitiveType");
     setSender(sender);
     std::ostringstream d;
-    d << "Invalid primitive type: "<<_type;
+    d << "Invalid primitive type: " << _type;
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExInvalidPrimitiveType::~ExInvalidPrimitiveType() {
-}
+ExInvalidPrimitiveType::~ExInvalidPrimitiveType() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 ExInvalidPrimitiveType::GetTypeName() const noexcept {
@@ -36,4 +34,5 @@ Smp::String8 ExInvalidPrimitiveType::GetTypeName() const noexcept {
 Smp::PrimitiveTypeKind ExInvalidPrimitiveType::GetType() const noexcept {
     return _type;
 }
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

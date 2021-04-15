@@ -9,18 +9,17 @@
  */
 #ifndef __simph_kern_ExVoidOperation_HPP__
 #define __simph_kern_ExVoidOperation_HPP__
-#include "simph/smpdk/Exception.hpp"
 #include "Smp/VoidOperation.h"
+#include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 
 /**
  *
  */
-class ExVoidOperation: public Exception,
-            virtual public Smp::VoidOperation {
+class ExVoidOperation : public Exception, virtual public Smp::VoidOperation {
 public:
     /**
      * Default constructor.
@@ -37,5 +36,6 @@ private:
     Smp::String8 _opName;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_ExVoidOperation_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_ExVoidOperation_HPP__

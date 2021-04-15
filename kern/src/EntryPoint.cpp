@@ -10,18 +10,13 @@
 #include "simph/kern/EntryPoint.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-EntryPoint::EntryPoint( std::unique_ptr<Runnable> runnable,
-                        Smp::String8 name,
-                        Smp::String8 descr,
-                        Smp::IObject* parent):
-    Object(name,descr,parent),
-    _runnable(std::move(runnable)) {
-}
+EntryPoint::EntryPoint(std::unique_ptr<Runnable> runnable, Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
+    : Object(name, descr, parent), _runnable(std::move(runnable)) {}
 // ..........................................................
-EntryPoint::~EntryPoint() {
-}
+EntryPoint::~EntryPoint() {}
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

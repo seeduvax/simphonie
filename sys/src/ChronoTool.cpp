@@ -10,7 +10,5 @@
 #include "simph/sys/ChronoTool.hpp"
 
 namespace simph {
-	namespace sys {
-
-
-}} // namespace simph::sys
+namespace sys {}
+}  // namespace simph

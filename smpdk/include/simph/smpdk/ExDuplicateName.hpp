@@ -9,23 +9,22 @@
  */
 #ifndef __simph_smpdk_DuplicateName_HPP__
 #define __simph_smpdk_DuplicateName_HPP__
+#include <string>
 #include "Smp/DuplicateName.h"
 #include "simph/smpdk/Exception.hpp"
-#include <string>
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 
 /**
  *
  */
-class ExDuplicateName: public Exception, 
-                    public virtual Smp::DuplicateName {
+class ExDuplicateName : public Exception, public virtual Smp::DuplicateName {
 public:
     /**
      * Default constructor.
      */
-    ExDuplicateName(Smp::IObject* sender,Smp::String8 dName);
+    ExDuplicateName(Smp::IObject* sender, Smp::String8 dName);
     /**
      * Destructor.
      */
@@ -37,5 +36,6 @@ private:
     std::string _dName;
 };
 
-}} // namespace simph::smpdk
-#endif // __simph_smpdk_DuplicateName_HPP__
+}  // namespace smpdk
+}  // namespace simph
+#endif  // __simph_smpdk_DuplicateName_HPP__

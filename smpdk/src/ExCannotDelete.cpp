@@ -11,24 +11,21 @@
 #include <sstream>
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExCannotDelete::ExCannotDelete(Smp::IContainer* sender, Smp::IComponent* comp):
-                _comp(comp) {
-    _lower=sender->GetLower();
+ExCannotDelete::ExCannotDelete(Smp::IContainer* sender, Smp::IComponent* comp) : _comp(comp) {
+    _lower = sender->GetLower();
     setName("CannotDelete");
     setSender(sender);
     std::ostringstream d;
-    d << "From "<<sender->GetName()<<": can't remove component "
-      << comp->GetName() << ", min size "<<_lower
+    d << "From " << sender->GetName() << ": can't remove component " << comp->GetName() << ", min size " << _lower
       << " is reached.";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExCannotDelete::~ExCannotDelete() {
-}
+ExCannotDelete::~ExCannotDelete() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 ExCannotDelete::GetContainerName() const noexcept {
@@ -43,5 +40,5 @@ Smp::Int64 ExCannotDelete::GetLowerLimit() const noexcept {
     return _lower;
 }
 
-
-}} // namespace simph::smpdk
+}  // namespace smpdk
+}  // namespace simph

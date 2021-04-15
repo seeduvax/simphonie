@@ -11,18 +11,13 @@
 #include "simph/sys/Logger.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-Operation::Operation(Smp::String8 name, Smp::String8 description,
-                        Smp::IObject* parent):
-                simph::smpdk::Object(name,description,parent),
-                _params("params","",this) {
-        
-}
+Operation::Operation(Smp::String8 name, Smp::String8 description, Smp::IObject* parent)
+    : simph::smpdk::Object(name, description, parent), _params("params", "", this) {}
 // ..........................................................
-Operation::~Operation() {
-}
+Operation::~Operation() {}
 // --------------------------------------------------------------------
 // ..........................................................
 const Smp::ParameterCollection* Operation::GetParameters() const {
@@ -42,21 +37,22 @@ Smp::ViewKind Operation::GetView() const {
 }
 // ..........................................................
 Smp::IRequest* Operation::CreateRequest() {
-// TODO
-LOGE("Operation::CreateRequest() not implemented yet!")
-return nullptr;
+    // TODO
+    LOGE("Operation::CreateRequest() not implemented yet!")
+    return nullptr;
 }
 // ..........................................................
 void Operation::Invoke(Smp::IRequest* request) {
-LOGE("Operation::Invoke(Smp::IRequest*) not implemented yet!")
+    LOGE("Operation::Invoke(Smp::IRequest*) not implemented yet!")
 }
 // ..........................................................
 void Operation::DeleteRequest(Smp::IRequest* request) {
-    if (request!=nullptr) {
+    if (request != nullptr) {
         // TODO should be checked here the given request was created from
         // this operation instance...
         delete request;
     }
 }
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

@@ -9,17 +9,16 @@
  */
 #ifndef __simph_smpdk_ExInvalidObjectType_HPP__
 #define __simph_smpdk_ExInvalidObjectType_HPP__
-#include "simph/smpdk/Exception.hpp"
 #include "Smp/InvalidObjectType.h"
+#include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 
 /**
  *
  */
-class ExInvalidObjectType: public Exception,
-                virtual public Smp::InvalidObjectType {
+class ExInvalidObjectType : public Exception, virtual public Smp::InvalidObjectType {
 public:
     /**
      * Default constructor.
@@ -36,5 +35,6 @@ private:
     Smp::IObject* _invalidObject;
 };
 
-}} // namespace simph::smpdk
-#endif // __simph_smpdk_ExInvalidObjectType_HPP__
+}  // namespace smpdk
+}  // namespace simph
+#endif  // __simph_smpdk_ExInvalidObjectType_HPP__

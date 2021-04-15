@@ -9,23 +9,22 @@
  */
 #ifndef __simph_kern_ExInvalidTarget_HPP__
 #define __simph_kern_ExInvalidTarget_HPP__
-#include "simph/smpdk/Exception.hpp"
 #include "Smp/InvalidTarget.h"
+#include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 
 /**
  *
  */
-class ExInvalidTarget: public Exception,
-                    virtual public Smp::InvalidTarget{
+class ExInvalidTarget : public Exception, virtual public Smp::InvalidTarget {
 public:
     /**
      * Default constructor.
      */
-    ExInvalidTarget(Smp::IDataflowField *source, Smp::IField* target);
+    ExInvalidTarget(Smp::IDataflowField* source, Smp::IField* target);
     /**
      * Destructor.
      */
@@ -33,10 +32,12 @@ public:
     // Smp::InvalidTarget implmentation
     Smp::IDataflowField* GetSource() const noexcept override;
     Smp::IField* GetTarget() const noexcept override;
+
 private:
     Smp::IDataflowField* _source;
     Smp::IField* _target;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_ExInvalidTarget_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_ExInvalidTarget_HPP__

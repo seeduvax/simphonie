@@ -13,12 +13,12 @@
 #include "Smp/Exception.h"
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 
 /**
  *
  */
-class Exception: virtual public Smp::Exception {
+class Exception : virtual public Smp::Exception {
 public:
     /**
      * Default constructor.
@@ -34,18 +34,20 @@ public:
     Smp::String8 GetDescription() const noexcept override;
     const Smp::IObject* GetSender() const noexcept override;
     Smp::String8 GetMessage() const noexcept override;
+
 protected:
     void setName(Smp::String8 name);
     void setDescription(Smp::String8 description);
     void setSender(const Smp::IObject* sender);
-    void setMessage(Smp::String8 msg=nullptr);
+    void setMessage(Smp::String8 msg = nullptr);
+
 private:
     std::string _name;
     std::string _description;
     const Smp::IObject* _sender;
     std::string _msg;
-
 };
 
-}} // namespace simph::smpdk
-#endif // __simph_smpdk_Exception_HPP__
+}  // namespace smpdk
+}  // namespace simph
+#endif  // __simph_smpdk_Exception_HPP__

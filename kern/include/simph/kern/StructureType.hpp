@@ -9,40 +9,38 @@
  */
 #ifndef __simph_kern_StructureType_HPP__
 #define __simph_kern_StructureType_HPP__
-#include "simph/kern/Type.hpp"
-#include "Smp/Publication/IStructureType.h"
 #include <vector>
+#include "Smp/Publication/IStructureType.h"
+#include "simph/kern/Type.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 class TypeRegistry;
 class StructureField;
 /**
  *
  */
-class StructureType: public Type, 
-                virtual public Smp::Publication::IStructureType {
+class StructureType : public Type, virtual public Smp::Publication::IStructureType {
 public:
     /**
      * Default constructor.
      */
-    StructureType(Smp::Uuid uuid, TypeRegistry* typeReg, Smp::String8 name, 
-                Smp::String8 description="", Smp::IObject* parent=nullptr);
+    StructureType(Smp::Uuid uuid, TypeRegistry* typeReg, Smp::String8 name, Smp::String8 description = "",
+                  Smp::IObject* parent = nullptr);
     /**
      * Destructor.
      */
     virtual ~StructureType();
     // Smp::Publication::IStructureType implementation
-    void AddField(
-        Smp::String8 name, Smp::String8 description, Smp::Uuid uuid,
-        Smp::Int64 offset, Smp::ViewKind view = Smp::ViewKind::VK_All,
-        Smp::Bool state = true, Smp::Bool input = false,
-        Smp::Bool output = false) override;
+    void AddField(Smp::String8 name, Smp::String8 description, Smp::Uuid uuid, Smp::Int64 offset,
+                  Smp::ViewKind view = Smp::ViewKind::VK_All, Smp::Bool state = true, Smp::Bool input = false,
+                  Smp::Bool output = false) override;
     /**
      * Setup structure field according to this structure type definition.
      * @param sf StructureField to setup
-     */ 
+     */
     void setup(StructureField* sf);
+
 private:
     struct FieldDescr {
         Smp::String8 name;
@@ -59,5 +57,6 @@ private:
     TypeRegistry* _typeRegistry;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_StructureType_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_StructureType_HPP__

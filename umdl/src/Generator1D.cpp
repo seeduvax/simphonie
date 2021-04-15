@@ -10,25 +10,21 @@
 #include "simph/umdl/Generator1D.hpp"
 
 namespace simph {
-	namespace umdl {
+namespace umdl {
 // --------------------------------------------------------------------
 // ..........................................................
-Generator1D::Generator1D(Smp::String8 name, Smp::String8 descr,
-                        Smp::IObject* parent):
-                AStepMdl(name,descr,parent) {
-}
+Generator1D::Generator1D(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : AStepMdl(name, descr, parent) {}
 // ..........................................................
-Generator1D::~Generator1D() {
-}
+Generator1D::~Generator1D() {}
 // --------------------------------------------------------------------
 // ..........................................................
 void Generator1D::publish(Smp::IPublication* receiver) {
-    receiver->PublishField("out","Output",&_out,Smp::ViewKind::VK_All,
-                                                    false,false,true);
+    receiver->PublishField("out", "Output", &_out, Smp::ViewKind::VK_All, false, false, true);
 }
 // ..........................................................
 void Generator1D::step() {
-    _out=compute();
+    _out = compute();
 }
 
-}} // namespace simph::umdl
+}  // namespace umdl
+}  // namespace simph

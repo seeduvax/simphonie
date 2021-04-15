@@ -10,15 +10,14 @@
 #include "simph/sys/RttiUtil.hpp"
 
 namespace simph {
-	namespace sys {
+namespace sys {
 // --------------------------------------------------------------------
 // ..........................................................
-RttiUtil::RttiUtil() {
-}
+RttiUtil::RttiUtil() {}
 // ..........................................................
-RttiUtil::~RttiUtil() {
-}
+RttiUtil::~RttiUtil() {}
 // --------------------------------------------------------------------
 // ..........................................................
 
-}} // namespace simph::sys
+}  // namespace sys
+}  // namespace simph

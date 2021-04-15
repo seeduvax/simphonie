@@ -11,26 +11,24 @@
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidEventId::ExInvalidEventId(Smp::IObject* sender,
-                                Smp::Services::EventId invalidId):
-                        _invalidId(invalidId) {
+ExInvalidEventId::ExInvalidEventId(Smp::IObject* sender, Smp::Services::EventId invalidId) : _invalidId(invalidId) {
     setSender(sender);
     setName("IvalideventId");
     std::ostringstream d;
-    d << "event id "<<invalidId<<" is not valid.";
+    d << "event id " << invalidId << " is not valid.";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExInvalidEventId::~ExInvalidEventId() {
-}
+ExInvalidEventId::~ExInvalidEventId() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::Services::EventId ExInvalidEventId::GetInvalidEventId() const noexcept {
     return _invalidId;
 }
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

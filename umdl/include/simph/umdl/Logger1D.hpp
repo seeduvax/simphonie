@@ -12,11 +12,11 @@
 #include "simph/umdl/AStepMdl.hpp"
 
 namespace simph {
-	namespace umdl {
+namespace umdl {
 /**
  *
  */
-class Logger1D: public virtual simph::umdl::AStepMdl {
+class Logger1D : public virtual simph::umdl::AStepMdl {
 public:
     /**
      * Default constructor.
@@ -28,11 +28,14 @@ public:
     virtual ~Logger1D();
     // AStepMdl implementation
     void step();
+
 public:
     void publish(Smp::IPublication* receiver);
+
 private:
     Smp::Float64 _in;
 };
 
-}} // namespace simph::umdl
-#endif // __simph_umdl_Logger1D_HPP__
+}  // namespace umdl
+}  // namespace simph
+#endif  // __simph_umdl_Logger1D_HPP__

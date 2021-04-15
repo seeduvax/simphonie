@@ -10,24 +10,22 @@
 #ifndef __simph_kern_Operation_HPP__
 #define __simph_kern_Operation_HPP__
 
-#include "simph/smpdk/Object.hpp"
-#include "simph/smpdk/Collection.hpp"
 #include "Smp/IOperation.h"
+#include "simph/smpdk/Collection.hpp"
+#include "simph/smpdk/Object.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 
 /**
  *
  */
-class Operation: public simph::smpdk::Object,
-            virtual public Smp::IOperation {
+class Operation : public simph::smpdk::Object, virtual public Smp::IOperation {
 public:
     /**
      * Default constructor.
      */
-    Operation(Smp::String8 name, Smp::String8 description="",
-                Smp::IObject* parent=nullptr);
+    Operation(Smp::String8 name, Smp::String8 description = "", Smp::IObject* parent = nullptr);
     /**
      * Destructor.
      */
@@ -48,5 +46,6 @@ private:
     Smp::ViewKind _view;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_Operation_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_Operation_HPP__

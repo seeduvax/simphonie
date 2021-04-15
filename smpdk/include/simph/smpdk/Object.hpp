@@ -9,23 +9,21 @@
  */
 #ifndef __simph_smpdk_Object_HPP__
 #define __simph_smpdk_Object_HPP__
-#include "Smp/IObject.h"
 #include <string>
+#include "Smp/IObject.h"
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 
 /**
  *
  */
-class Object: public virtual Smp::IObject {
+class Object : public virtual Smp::IObject {
 public:
     /**
      * Default constructor.
      */
-    Object(Smp::String8 name, 
-            Smp::String8 descr="",
-            Smp::IObject* parent=nullptr);
+    Object(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
     /**
      * Destructor.
      */
@@ -36,8 +34,8 @@ public:
     Smp::IObject* GetParent() const override;
 
     static bool checkName(Smp::String8 name);
-protected:
 
+protected:
 private:
     std::string _name;
     std::string _description;
@@ -49,5 +47,6 @@ private:
     void setParent(Smp::IObject* parent);
 };
 
-}} // namespace simph::smpdk
-#endif // __simph_smpdk_Object_HPP__
+}  // namespace smpdk
+}  // namespace simph
+#endif  // __simph_smpdk_Object_HPP__

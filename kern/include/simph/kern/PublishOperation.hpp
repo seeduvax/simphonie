@@ -10,16 +10,15 @@
 #ifndef __simph_kern_PublishOperation_HPP__
 #define __simph_kern_PublishOperation_HPP__
 
-#include "Smp/Publication/IPublishOperation.h" 
+#include "Smp/Publication/IPublishOperation.h"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 
 /**
  *
  */
-class PublishOperation: 
-        virtual Smp::Publication::IPublishOperation {
+class PublishOperation : virtual Smp::Publication::IPublishOperation {
 public:
     /**
      * Default constructor.
@@ -32,15 +31,12 @@ public:
 
     // Smp::Publication::IPublishOperation
     void PublishParameter(
-                Smp::String8 name,
-                Smp::String8 description,
-                Smp::Uuid typeUuid,
-                Smp::Publication::ParameterDirectionKind direction = 
-                    Smp::Publication::ParameterDirectionKind::PDK_In) override;
+        Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
+        Smp::Publication::ParameterDirectionKind direction = Smp::Publication::ParameterDirectionKind::PDK_In) override;
 
 private:
-    
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_PublishOperation_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_PublishOperation_HPP__

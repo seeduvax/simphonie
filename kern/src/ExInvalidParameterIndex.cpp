@@ -11,27 +11,21 @@
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidParameterIndex::ExInvalidParameterIndex(Smp::IObject* sender,
-                        const Smp::String8 opName,
-                        Smp::Int32 index, Smp::Int32 count):
-        _opName(opName),
-        _index(index),
-        _count(count) {
+ExInvalidParameterIndex::ExInvalidParameterIndex(Smp::IObject* sender, const Smp::String8 opName, Smp::Int32 index,
+                                                 Smp::Int32 count)
+    : _opName(opName), _index(index), _count(count) {
     setName("InvalidParameterIndex");
     setSender(sender);
     std::ostringstream d;
-    d << "Can't find parameter #" << index 
-        << " for operation " << opName
-        << ". Operation parameter count is "<<count;
+    d << "Can't find parameter #" << index << " for operation " << opName << ". Operation parameter count is " << count;
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExInvalidParameterIndex::~ExInvalidParameterIndex() {
-}
+ExInvalidParameterIndex::~ExInvalidParameterIndex() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 ExInvalidParameterIndex::GetOperationName() const noexcept {
@@ -47,4 +41,5 @@ Smp::Int32 ExInvalidParameterIndex::GetParameterCount() const noexcept {
 }
 // ..........................................................
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

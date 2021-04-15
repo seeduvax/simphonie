@@ -11,25 +11,20 @@
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidArrayIndex::ExInvalidArrayIndex(const Smp::IObject* sender,
-                            Smp::Int64 invalid,
-                            Smp::Int64 size):
-                    _invalidSize(invalid),
-                    _arraySize(size) {
+ExInvalidArrayIndex::ExInvalidArrayIndex(const Smp::IObject* sender, Smp::Int64 invalid, Smp::Int64 size)
+    : _invalidSize(invalid), _arraySize(size) {
     setName("InvalidArraySize");
     setSender(sender);
     std::ostringstream d;
-    d << "Invalid array size "<<invalid
-        <<" out of array bounds [0.."<<size<<"[.";
+    d << "Invalid array size " << invalid << " out of array bounds [0.." << size << "[.";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExInvalidArrayIndex::~ExInvalidArrayIndex() {
-}
+ExInvalidArrayIndex::~ExInvalidArrayIndex() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::Int64 ExInvalidArrayIndex::GetInvalidIndex() const noexcept {
@@ -40,4 +35,5 @@ Smp::Int64 ExInvalidArrayIndex::GetArraySize() const noexcept {
     return _arraySize;
 }
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

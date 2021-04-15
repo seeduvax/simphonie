@@ -11,23 +11,21 @@
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidSimulationTime::ExInvalidSimulationTime(Smp::IObject* sender,
-            Smp::Duration cTime, Smp::Duration pTime, Smp::Duration mTime):
-            _cTime(cTime), _pTime(pTime), _mTime(mTime) {
+ExInvalidSimulationTime::ExInvalidSimulationTime(Smp::IObject* sender, Smp::Duration cTime, Smp::Duration pTime,
+                                                 Smp::Duration mTime)
+    : _cTime(cTime), _pTime(pTime), _mTime(mTime) {
     setSender(sender);
     setName("InvalidSimulationTime");
     std::ostringstream d;
-    d << "provided time "<<_pTime<<" not bounded in [ "
-        <<_cTime<<" ; "<<_mTime<<" ]";
+    d << "provided time " << _pTime << " not bounded in [ " << _cTime << " ; " << _mTime << " ]";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExInvalidSimulationTime::~ExInvalidSimulationTime() {
-}
+ExInvalidSimulationTime::~ExInvalidSimulationTime() {}
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -42,4 +40,5 @@ Smp::Duration ExInvalidSimulationTime::GetProvidedTime() const noexcept {
 Smp::Duration ExInvalidSimulationTime::GetMaximumTime() const noexcept {
     return _mTime;
 }
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

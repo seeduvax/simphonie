@@ -10,13 +10,12 @@
 #include "simph/sys/Runnable.hpp"
 
 namespace simph {
-	namespace sys {
+namespace sys {
 // --------------------------------------------------------------------
 // ..........................................................
-Runnable::Runnable() {
-}
+Runnable::Runnable() {}
 // ..........................................................
-Runnable::~Runnable() {
-}
+Runnable::~Runnable() {}
 
-}} // namespace simph::sys
+}  // namespace sys
+}  // namespace simph

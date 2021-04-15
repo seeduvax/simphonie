@@ -11,25 +11,24 @@
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExVoidOperation::ExVoidOperation(Smp::IObject* sender, Smp::String8 opName):
-                _opName(opName) {
+ExVoidOperation::ExVoidOperation(Smp::IObject* sender, Smp::String8 opName) : _opName(opName) {
     setName("VoidOperation");
     setSender(sender);
     std::ostringstream d;
-    d << "Operation "<<opName<<" return type is void.";
+    d << "Operation " << opName << " return type is void.";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExVoidOperation::~ExVoidOperation() {
-}
+ExVoidOperation::~ExVoidOperation() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 ExVoidOperation::GetOperationName() const noexcept {
     return _opName;
 }
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

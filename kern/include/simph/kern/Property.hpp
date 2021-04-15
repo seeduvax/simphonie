@@ -10,26 +10,22 @@
 #ifndef __simph_kern_Property_HPP__
 #define __simph_kern_Property_HPP__
 
-#include "simph/smpdk/Object.hpp"
 #include "Smp/IProperty.h"
+#include "simph/smpdk/Object.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 
 /**
  *
  */
-class Property: public simph::smpdk::Object,
-                virtual public Smp::IProperty {
+class Property : public simph::smpdk::Object, virtual public Smp::IProperty {
 public:
     /**
      * Default constructor.
      */
-    Property(Smp::String8 name, Smp::String8 descr, 
-            Smp::IObject* parent, 
-            Smp::Publication::IType* type,
-            Smp::AccessKind access,
-            Smp::ViewKind view);
+    Property(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, Smp::Publication::IType* type,
+             Smp::AccessKind access, Smp::ViewKind view);
     /**
      * Destructor.
      */
@@ -49,5 +45,6 @@ private:
     Smp::AnySimple _value;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_Property_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_Property_HPP__

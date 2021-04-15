@@ -1,8 +1,8 @@
 #include "Smp/ISimulator.h"
-#include "Smp/Uuid.h"
 #include "Smp/Services/IEventManager.h"
 #include "Smp/Services/ILogger.h"
 #include "Smp/Services/ITimeKeeper.h"
+#include "Smp/Uuid.h"
 
 namespace Smp {
 // --------------------------------------------------------------------
@@ -26,8 +26,7 @@ constexpr Smp::Char8 Smp::ISimulator::SMP_SimulatorServices[];
 constexpr Smp::Char8 Smp::ISimulator::SMP_SimulatorModels[];
 
 // ..........................................................
-std::ostream& operator << (std::ostream& os, 
-                                const Smp::SimulatorStateKind& obj) {
+std::ostream& operator<<(std::ostream& os, const Smp::SimulatorStateKind& obj) {
     os << (Smp::Int32)obj;
     switch (obj) {
         case Smp::SimulatorStateKind::SSK_Building:
@@ -67,10 +66,9 @@ std::ostream& operator << (std::ostream& os,
     return os;
 }
 
-
 // --------------------------------------------------------------------
 // ..........................................................
-    namespace Services {
+namespace Services {
 // ..........................................................
 constexpr Smp::Services::EventId IEventManager::SMP_LeaveConnectingId;
 constexpr Smp::Services::EventId IEventManager::SMP_EnterInitialisingId;
@@ -129,7 +127,6 @@ constexpr Smp::Char8 ILinkRegistry::SMP_LinkRegistry[];
 
 // ..........................................................
 constexpr Smp::Char8 ITimeKeeper::SMP_TimeKeeper[];
-    }
+}  // namespace Services
 
-
-} // namespace Smp
+}  // namespace Smp

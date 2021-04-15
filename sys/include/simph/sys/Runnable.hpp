@@ -11,7 +11,7 @@
 #define __simph_sys_Runnable_HPP__
 
 namespace simph {
-	namespace sys {
+namespace sys {
 
 /**
  *
@@ -27,10 +27,11 @@ public:
      */
     virtual ~Runnable();
 
-    virtual void run()=0;
-private:
+    virtual void run() = 0;
 
+private:
 };
 
-}} // namespace simph::sys
-#endif // __simph_sys_Runnable_HPP__
+}  // namespace sys
+}  // namespace simph
+#endif  // __simph_sys_Runnable_HPP__

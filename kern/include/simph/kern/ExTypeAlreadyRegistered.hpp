@@ -9,24 +9,22 @@
  */
 #ifndef __simph_kern_ExTypeAlreadyRegistered_HPP__
 #define __simph_kern_ExTypeAlreadyRegistered_HPP__
-#include "simph/smpdk/Exception.hpp"
 #include "Smp/Publication/TypeAlreadyRegistered.h"
+#include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 
 /**
  *
  */
-class ExTypeAlreadyRegistered: public Exception,
-        virtual public Smp::Publication::TypeAlreadyRegistered {
+class ExTypeAlreadyRegistered : public Exception, virtual public Smp::Publication::TypeAlreadyRegistered {
 public:
     /**
      * Default constructor.
      */
-    ExTypeAlreadyRegistered(Smp::IObject* sender, Smp::String8 name,
-                        Smp::Publication::IType* type);
+    ExTypeAlreadyRegistered(Smp::IObject* sender, Smp::String8 name, Smp::Publication::IType* type);
     /**
      * Destructor.
      */
@@ -34,10 +32,12 @@ public:
     // Smp::Publication::TypeAlreadyRegistered implementation
     Smp::String8 GetTypeName() const noexcept override;
     Smp::Publication::IType* GetType() const noexcept override;
+
 private:
     Smp::String8 _name;
     Smp::Publication::IType* _type;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_ExTypeAlreadyRegistered_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_ExTypeAlreadyRegistered_HPP__

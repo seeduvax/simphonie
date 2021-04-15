@@ -9,4 +9,4 @@
  */
 /*
  * No implementation kern/simph/Factory.hpp contains templates only.
- */ 
+ */

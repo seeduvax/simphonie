@@ -15,23 +15,20 @@ using namespace simph::sys;
 
 // ----------------------------------------------------------
 // test fixture implementation
-class TestLogger: public CppUnit::TestFixture {
-CPPUNIT_TEST_SUITE( TestLogger );
-CPPUNIT_TEST( testLogger );
-CPPUNIT_TEST_SUITE_END();
+class TestLogger : public CppUnit::TestFixture {
+    CPPUNIT_TEST_SUITE(TestLogger);
+    CPPUNIT_TEST(testLogger);
+    CPPUNIT_TEST_SUITE_END();
 
 private:
-
 public:
-    void setUp() {
-    }
+    void setUp() {}
 
-    void tearDown() {
-    }
+    void tearDown() {}
 
     void testLogger() {
         TRACE("Trace message")
-        LOGD("Debug message "<<42)
+        LOGD("Debug message " << 42)
         LOGI("Info message")
         LOGW("Warning message")
         LOGE("Error message")
@@ -39,4 +36,4 @@ public:
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestLogger);
-} // namespace test
+}  // namespace test

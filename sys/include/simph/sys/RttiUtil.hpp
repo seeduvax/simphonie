@@ -9,11 +9,11 @@
  */
 #ifndef __simph_sys_RttiUtil_HPP__
 #define __simph_sys_RttiUtil_HPP__
-#include <string>
 #include <cxxabi.h>
+#include <string>
 
 namespace simph {
-	namespace sys {
+namespace sys {
 
 /**
  *
@@ -34,18 +34,18 @@ public:
         return demangle(typeid(*ptr).name());
     }
     static inline std::string demangle(std::string name) {
-        int status=-1;
-        char* dn=abi::__cxa_demangle(name.c_str(),NULL,NULL,&status);
-        if (status==0) {
-            name=dn;
+        int status = -1;
+        char* dn = abi::__cxa_demangle(name.c_str(), NULL, NULL, &status);
+        if (status == 0) {
+            name = dn;
             std::free(dn);
         }
         return name;
     }
 
 private:
-
 };
 
-}} // namespace simph::sys
-#endif // __simph_sys_RttiUtil_HPP__
+}  // namespace sys
+}  // namespace simph
+#endif  // __simph_sys_RttiUtil_HPP__

@@ -10,23 +10,21 @@
 #ifndef __simph_kern_ExTypeNotRegistered_HPP__
 #define __simph_kern_ExTypeNotRegistered_HPP__
 
-#include "simph/smpdk/Exception.hpp"
 #include "Smp/Publication/TypeNotRegistered.h"
+#include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 
 /**
  *
  */
-class ExTypeNotRegistered: public simph::smpdk::Exception,
-        virtual public Smp::Publication::TypeNotRegistered {
+class ExTypeNotRegistered : public simph::smpdk::Exception, virtual public Smp::Publication::TypeNotRegistered {
 public:
     /**
      * Default constructor.
      */
-    ExTypeNotRegistered(Smp::IObject* sender, 
-                        Smp::Uuid typeUuid);
+    ExTypeNotRegistered(Smp::IObject* sender, Smp::Uuid typeUuid);
     /**
      * Destructor.
      */
@@ -38,5 +36,6 @@ private:
     Smp::Uuid _uuid;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_ExTypeNotRegistered_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_ExTypeNotRegistered_HPP__

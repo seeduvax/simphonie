@@ -10,18 +10,14 @@
 #include "simph/kern/ArrayType.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ArrayType::ArrayType(Smp::Uuid uuid, Smp::String8 name, Smp::String8 descr, 
-        Smp::IObject* parent, Smp::UInt64 elemSize, Smp::UInt64 size,
-        Smp::Publication::IType* type):
-        Type(uuid,type->GetPrimitiveTypeKind(),elemSize*size,name,descr,parent), 
-        _size(size), _itemType(type) {
-}
+ArrayType::ArrayType(Smp::Uuid uuid, Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, Smp::UInt64 elemSize,
+                     Smp::UInt64 size, Smp::Publication::IType* type)
+    : Type(uuid, type->GetPrimitiveTypeKind(), elemSize * size, name, descr, parent), _size(size), _itemType(type) {}
 // ..........................................................
-ArrayType::~ArrayType() {
-}
+ArrayType::~ArrayType() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::UInt64 ArrayType::GetSize() const {
@@ -31,4 +27,5 @@ Smp::UInt64 ArrayType::GetSize() const {
 const Smp::Publication::IType* ArrayType::GetItemType() const {
     return _itemType;
 }
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

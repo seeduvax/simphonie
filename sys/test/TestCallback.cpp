@@ -15,12 +15,12 @@ using namespace simph::sys;
 
 // ----------------------------------------------------------
 // test fixture implementation
-class TestCallback: public CppUnit::TestFixture {
-CPPUNIT_TEST_SUITE( TestCallback );
-// TODO for each test method:
- CPPUNIT_TEST( testSimpleCallback );
- CPPUNIT_TEST( testLambdaCallback );
-CPPUNIT_TEST_SUITE_END();
+class TestCallback : public CppUnit::TestFixture {
+    CPPUNIT_TEST_SUITE(TestCallback);
+    // TODO for each test method:
+    CPPUNIT_TEST(testSimpleCallback);
+    CPPUNIT_TEST(testLambdaCallback);
+    CPPUNIT_TEST_SUITE_END();
 
 private:
     bool _value;
@@ -30,11 +30,9 @@ private:
     }
 
 public:
-    void setUp() {
-    }
+    void setUp() {}
 
-    void tearDown() {
-    }
+    void tearDown() {}
 
     void testSimpleCallback() {
         _value = false;
@@ -45,12 +43,12 @@ public:
 
     void testLambdaCallback() {
         bool refValue = false;
-        auto cb = Callback::create( [&refValue] (bool newValue) { refValue=newValue; },
-                                    true); // newVal
+        auto cb = Callback::create([&refValue](bool newValue) { refValue = newValue; },
+                                   true);  // newVal
         cb->run();
         CPPUNIT_ASSERT(refValue);
     }
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestCallback);
-} // namespace test
+}  // namespace test

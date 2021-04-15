@@ -11,24 +11,21 @@
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidAnyType::ExInvalidAnyType(Smp::IObject* sender,
-                            Smp::PrimitiveTypeKind invalid,
-                            Smp::PrimitiveTypeKind expected):
-                    _invalid(invalid),
-                    _expected(expected) {
+ExInvalidAnyType::ExInvalidAnyType(Smp::IObject* sender, Smp::PrimitiveTypeKind invalid,
+                                   Smp::PrimitiveTypeKind expected)
+    : _invalid(invalid), _expected(expected) {
     setName("InvalidAnyType");
     setSender(sender);
     std::ostringstream d;
-    d << "Invalid type "<<invalid<<", "<<expected<<" expected.";
+    d << "Invalid type " << invalid << ", " << expected << " expected.";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExInvalidAnyType::~ExInvalidAnyType() {
-}
+ExInvalidAnyType::~ExInvalidAnyType() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::PrimitiveTypeKind ExInvalidAnyType::GetInvalidType() const noexcept {
@@ -39,4 +36,5 @@ Smp::PrimitiveTypeKind ExInvalidAnyType::GetExpectedType() const noexcept {
     return _expected;
 }
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

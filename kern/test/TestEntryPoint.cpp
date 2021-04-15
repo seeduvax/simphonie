@@ -17,11 +17,11 @@ using namespace simph::sys;
 
 // ----------------------------------------------------------
 // test fixture implementation
-class TestEntryPoint: public CppUnit::TestFixture {
-CPPUNIT_TEST_SUITE( TestEntryPoint );
-// TODO for each test method:
- CPPUNIT_TEST( testCreation);
-CPPUNIT_TEST_SUITE_END();
+class TestEntryPoint : public CppUnit::TestFixture {
+    CPPUNIT_TEST_SUITE(TestEntryPoint);
+    // TODO for each test method:
+    CPPUNIT_TEST(testCreation);
+    CPPUNIT_TEST_SUITE_END();
 
 private:
     bool _value;
@@ -31,19 +31,17 @@ private:
     }
 
 public:
-    void setUp() {
-    }
+    void setUp() {}
 
-    void tearDown() {
-    }
+    void tearDown() {}
 
     void testCreation() {
         auto cb = Callback::create(&TestEntryPoint::setValue, this, true);
-        EntryPoint ep(std::move(cb),"ep");
+        EntryPoint ep(std::move(cb), "ep");
         ep.Execute();
         CPPUNIT_ASSERT(_value);
     }
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestEntryPoint);
-} // namespace test
+}  // namespace test

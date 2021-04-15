@@ -7,26 +7,25 @@
  * $Id$
  * $Date$
  */
+#include "simph/sys/Logger.hpp"
 #include <time.h>
 #include <iomanip>
-#include "simph/sys/Logger.hpp"
 
 namespace simph {
-	namespace sys {
-Logger* _logger=new Logger();
+namespace sys {
+Logger* _logger = new Logger();
 // --------------------------------------------------------------------
 // ..........................................................
-Logger::Logger(std::ostream& out): _out(out) {
-}
+Logger::Logger(std::ostream& out) : _out(out) {}
 // ..........................................................
-Logger::~Logger() {
-}
+Logger::~Logger() {}
 // ..........................................................
 void Logger::log(std::string level, std::string msg) {
     struct timespec t;
-    clock_gettime(CLOCK_REALTIME,&t);
+    clock_gettime(CLOCK_REALTIME, &t);
     std::lock_guard<std::mutex> sync(_mutex);
-    _out << t.tv_sec << "."; 
-    _out << std::setfill('0') << std::setw(9) <<t.tv_nsec << "\t" << level << "\t" << msg << std::endl;
+    _out << t.tv_sec << ".";
+    _out << std::setfill('0') << std::setw(9) << t.tv_nsec << "\t" << level << "\t" << msg << std::endl;
 }
-}} // namespace simph::sys
+}  // namespace sys
+}  // namespace simph

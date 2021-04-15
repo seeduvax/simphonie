@@ -10,13 +10,12 @@
 #include "simph/kern/IEntryPointPublisher.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-IEntryPointPublisher::IEntryPointPublisher(): _epList("epList","",nullptr) {
-}
+IEntryPointPublisher::IEntryPointPublisher() : _epList("epList", "", nullptr) {}
 // ..........................................................
-IEntryPointPublisher::~IEntryPointPublisher() {
-}
+IEntryPointPublisher::~IEntryPointPublisher() {}
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

@@ -10,12 +10,12 @@
 #ifndef __simph_kern_Simulator_HPP__
 #define __simph_kern_Simulator_HPP__
 #include "Smp/ISimulator.h"
-#include "simph/smpdk/Composite.hpp"
 #include "Smp/Publication/ITypeRegistry.h"
+#include "simph/smpdk/Composite.hpp"
 #include "simph/sys/DLib.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 
 class Resolver;
@@ -23,15 +23,12 @@ class Scheduler;
 /**
  *
  */
-class Simulator: public Composite,
-		public virtual Smp::ISimulator {
+class Simulator : public Composite, public virtual Smp::ISimulator {
 public:
     /**
      * Default constructor.
      */
-    Simulator(Smp::String8 name="Simphonie",
-            Smp::String8 descr="",
-            Smp::IObject* parent=nullptr);
+    Simulator(Smp::String8 name = "Simphonie", Smp::String8 descr = "", Smp::IObject* parent = nullptr);
     /**
      * Destructor.
      */
@@ -60,10 +57,8 @@ public:
     Smp::Services::IResolver* GetResolver() const override;
     Smp::Services::ILinkRegistry* GetLinkRegistry() const override;
     void RegisterFactory(Smp::IFactory* componentFactory) override;
-    Smp::IComponent* CreateInstance(Smp::Uuid uuid,
-		       Smp::String8 name,
-		       Smp::String8 description,
-		       Smp::IComposite* parent) override;
+    Smp::IComponent* CreateInstance(Smp::Uuid uuid, Smp::String8 name, Smp::String8 description,
+                                    Smp::IComposite* parent) override;
     Smp::IFactory* GetFactory(Smp::Uuid uuid) const override;
     Smp::FactoryCollection* GetFactories() const override;
     Smp::Publication::ITypeRegistry* GetTypeRegistry() const override;
@@ -78,18 +73,31 @@ public:
      * not derive from Smp::IModel.
      */
     template <typename T>
-    T* AddModel(Smp::String8 name, Smp::String8 descr="") {
-        T* m=new T(name,descr,this);
-        auto mdl=dynamic_cast<Smp::IModel*>(m);
-        if (mdl!=nullptr) {
+    T* AddModel(Smp::String8 name, Smp::String8 descr = "") {
+        T* m = new T(name, descr, this);
+        auto mdl = dynamic_cast<Smp::IModel*>(m);
+        if (mdl != nullptr) {
             AddModel(mdl);
         }
         else {
             delete m;
-            m=nullptr;
+            m = nullptr;
         }
         return m;
     }
+
+    /**
+     * Connect 2 fields
+     *
+     * @param inputFieldPath
+     * @param outputFieldPath
+     */
+    void connect(std::string inputFieldPath, std::string outputFieldPath);
+
+    void schedule(std::string modelName, std::string entryPoint, uint32_t period);
+
+    Smp::IComponent* createSmpModel(Smp::String8 uuidStr, Smp::String8 name, Smp::String8 description);
+
 private:
     Smp::SimulatorStateKind _state;
     Collection<Smp::IEntryPoint> _initEntryPoints;
@@ -105,12 +113,13 @@ private:
     Resolver* _resolver;
     std::vector<simph::sys::DLib*> _libs;
 
-    void publish(Smp::IComponent* comp);
-    void configure(Smp::IComponent* comp);
-    void connect(Smp::IComponent* comp);
+    void doPublish(Smp::IComponent* comp);
+    void doConfigure(Smp::IComponent* comp);
+    void doConnect(Smp::IComponent* comp);
     void setState(Smp::SimulatorStateKind newState);
-    bool checkState(Smp::String8 opName,Smp::SimulatorStateKind expState);
+    bool checkState(Smp::String8 opName, Smp::SimulatorStateKind expState);
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_Simulator_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_Simulator_HPP__

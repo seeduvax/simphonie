@@ -16,35 +16,32 @@ using namespace simph::kern;
 
 // ----------------------------------------------------------
 // test fixture implementation
-class TestSimulator: public CppUnit::TestFixture {
-CPPUNIT_TEST_SUITE( TestSimulator );
-CPPUNIT_TEST( testStates );
-CPPUNIT_TEST_SUITE_END();
+class TestSimulator : public CppUnit::TestFixture {
+    CPPUNIT_TEST_SUITE(TestSimulator);
+    CPPUNIT_TEST(testStates);
+    CPPUNIT_TEST_SUITE_END();
 
 private:
-
 public:
-    void setUp() {
-    }
+    void setUp() {}
 
-    void tearDown() {
-    }
+    void tearDown() {}
 
     void testStates() {
         Simulator sim;
         sim.Publish();
         sim.Configure();
         sim.Connect();
-        TRACE(""<<sim.GetTimeKeeper()->GetSimulationTime());
+        TRACE("" << sim.GetTimeKeeper()->GetSimulationTime());
         // TODO schedule something, otherwise simulation time will
         // never change because of the way the scheduler is implemented !
         sim.Run();
         sleep(1);
         sim.Hold(true);
-        TRACE(""<<sim.GetTimeKeeper()->GetSimulationTime());
+        TRACE("" << sim.GetTimeKeeper()->GetSimulationTime());
         sim.Exit();
     }
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestSimulator);
-} // namespace test
+}  // namespace test

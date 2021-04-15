@@ -10,7 +10,8 @@
 #include "simph/sys/Callback.hpp"
 
 namespace simph {
-	namespace sys {
+namespace sys {
 // ..........................................................
 
-}} // namespace simph::sys
+}
+}  // namespace simph

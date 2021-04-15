@@ -11,18 +11,12 @@
 #include <sstream>
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-Exception::Exception():
-        _name(),
-        _description(),
-        _sender(nullptr),
-        _msg() {
-}
+Exception::Exception() : _name(), _description(), _sender(nullptr), _msg() {}
 // ..........................................................
-Exception::~Exception() {
-}
+Exception::~Exception() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 Exception::what() const noexcept {
@@ -38,25 +32,25 @@ Smp::String8 Exception::GetDescription() const noexcept {
 }
 // ..........................................................
 void Exception::setName(Smp::String8 name) {
-    _name=name;
+    _name = name;
 }
 // ..........................................................
 void Exception::setDescription(Smp::String8 description) {
-    _description=description;
+    _description = description;
 }
 // ..........................................................
 void Exception::setSender(const Smp::IObject* sender) {
-    _sender=sender;
+    _sender = sender;
 }
 // ..........................................................
 void Exception::setMessage(Smp::String8 msg) {
-    if (msg==nullptr && _sender!=nullptr) {
+    if (msg == nullptr && _sender != nullptr) {
         std::ostringstream s;
-        s<<"Exception "<<_name<<" from "<<_sender->GetName()<<": "<<_description<<std::ends;
-        _msg=s.str();
+        s << "Exception " << _name << " from " << _sender->GetName() << ": " << _description << std::ends;
+        _msg = s.str();
     }
     else {
-        _msg=msg;
+        _msg = msg;
     }
 }
 // ..........................................................
@@ -68,5 +62,5 @@ Smp::String8 Exception::GetMessage() const noexcept {
     return _msg.c_str();
 }
 
-
-}} // namespace simph::smpdk
+}  // namespace smpdk
+}  // namespace simph

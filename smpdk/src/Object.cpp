@@ -8,27 +8,22 @@
  * $Date$
  */
 #include "simph/smpdk/Object.hpp"
-#include "simph/smpdk/ExInvalidObjectName.hpp"
 #include <regex>
+#include "simph/smpdk/ExInvalidObjectName.hpp"
 
 namespace simph {
-    namespace smpdk {
+namespace smpdk {
 
 // --------------------------------------------------------------------
 // ..........................................................
-Object::Object(Smp::String8 name,
-                Smp::String8 descr,
-                Smp::IObject* parent):
-                    _name(name)
-                  , _description(descr)
-                  , _parent(parent) {
+Object::Object(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
+    : _name(name), _description(descr), _parent(parent) {
     if (!checkName(name)) {
-        throw ExInvalidObjectName(this,name);
+        throw ExInvalidObjectName(this, name);
     }
 }
 // ..........................................................
-Object::~Object() {
-}
+Object::~Object() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 Object::GetName() const {
@@ -45,40 +40,39 @@ Smp::IObject* Object::GetParent() const {
 // ..........................................................
 void Object::setName(Smp::String8 name) {
     if (!checkName(name)) {
-        throw ExInvalidObjectName(this,name);
+        throw ExInvalidObjectName(this, name);
     }
-    _name=name;
+    _name = name;
 }
 // ..........................................................
 void Object::setDescription(Smp::String8 description) {
-    _description=description;
+    _description = description;
 }
 // ..........................................................
 void Object::setParent(Smp::IObject* parent) {
-    _parent=parent;
+    _parent = parent;
 }
 // ..........................................................
 bool Object::checkName(Smp::String8 name) {
-    std::string n=name;
+    std::string n = name;
     // Check for non empty alphanumeric names.
     // '_', '[' and ']' are also valid in names
-    if (!std::regex_match(n,std::regex("[a-zA-Z][a-zA-Z0-9_\\[\\]]*"))) {
+    if (!std::regex_match(n, std::regex("[a-zA-Z][a-zA-Z0-9_\\[\\]]*"))) {
         return false;
     }
     // C++ keywords are not valid.
     // TODO S.Devaux: about C++ keywords I read this somewhere but is is not
     // in the Smp::IObject header. Is it really an issue to have an object
     // named 'while'?
-    static const std::vector<std::string> forbidden = {
-        "for","while","do","if","else","return","public","protected","private"
-    };
-    for (auto kw: forbidden) {
-        if (kw==n) {
+    static const std::vector<std::string> forbidden = {"for",    "while",  "do",        "if",     "else",
+                                                       "return", "public", "protected", "private"};
+    for (auto kw : forbidden) {
+        if (kw == n) {
             return false;
         }
     }
     return true;
 }
 
-
-}} // namespace simph::smpdk
+}  // namespace smpdk
+}  // namespace simph

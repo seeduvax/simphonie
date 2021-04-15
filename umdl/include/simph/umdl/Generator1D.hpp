@@ -9,34 +9,36 @@
  */
 #ifndef __simph_umdl_Generator1D_HPP__
 #define __simph_umdl_Generator1D_HPP__
-#include "simph/umdl/AStepMdl.hpp"
 #include "Smp/IPublication.h"
+#include "simph/umdl/AStepMdl.hpp"
 
 namespace simph {
-	namespace umdl {
+namespace umdl {
 
 /**
  *
  */
-class Generator1D: public simph::umdl::AStepMdl {
+class Generator1D : public simph::umdl::AStepMdl {
 public:
     /**
      * Default constructor.
      */
-    Generator1D(Smp::String8 name, Smp::String8 descr, 
-                Smp::IObject* parent);
+    Generator1D(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent);
     /**
      * Destructor.
      */
     virtual ~Generator1D();
     // AStepMdl implementation
     void step();
+
 protected:
     void publish(Smp::IPublication* receiver);
-    virtual Smp::Float64 compute()=0;
+    virtual Smp::Float64 compute() = 0;
+
 private:
     Smp::Float64 _out;
 };
 
-}} // namespace simph::umdl
-#endif // __simph_umdl_Generator1D_HPP__
+}  // namespace umdl
+}  // namespace simph
+#endif  // __simph_umdl_Generator1D_HPP__

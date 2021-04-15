@@ -10,22 +10,19 @@
 #ifndef __simph_kern_EntryPoint_HPP__
 #define __simph_kern_EntryPoint_HPP__
 
+#include "Smp/IEntryPoint.h"
 #include "simph/smpdk/Object.hpp"
 #include "simph/sys/Runnable.hpp"
-#include "Smp/IEntryPoint.h"
 
 namespace simph {
-    namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 using simph::sys::Runnable;
 
-class EntryPoint: public Object,
-                  virtual public Smp::IEntryPoint {
+class EntryPoint : public Object, virtual public Smp::IEntryPoint {
 public:
-    EntryPoint( std::unique_ptr<Runnable> runnable,
-                Smp::String8 name,
-                Smp::String8 descr="",
-                Smp::IObject* parent=nullptr );
+    EntryPoint(std::unique_ptr<Runnable> runnable, Smp::String8 name, Smp::String8 descr = "",
+               Smp::IObject* parent = nullptr);
 
     virtual ~EntryPoint();
 
@@ -37,5 +34,6 @@ private:
     std::unique_ptr<Runnable> _runnable;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_EntryPoint_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_EntryPoint_HPP__

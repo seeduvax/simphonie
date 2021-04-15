@@ -15,22 +15,18 @@ using namespace simph::lua;
 
 // ----------------------------------------------------------
 // test fixture implementation
-class TestLuaApi: public CppUnit::TestFixture {
-CPPUNIT_TEST_SUITE( TestLuaApi );
-// TODO for each test method:
-// CPPUNIT_TEST( test...);
-CPPUNIT_TEST_SUITE_END();
+class TestLuaApi : public CppUnit::TestFixture {
+    CPPUNIT_TEST_SUITE(TestLuaApi);
+    // TODO for each test method:
+    // CPPUNIT_TEST( test...);
+    CPPUNIT_TEST_SUITE_END();
 
 private:
-
 public:
-    void setUp() {
-    }
+    void setUp() {}
 
-    void tearDown() {
-    }
-
+    void tearDown() {}
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestLuaApi);
-} // namespace test
+}  // namespace test

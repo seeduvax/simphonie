@@ -11,25 +11,23 @@
 #include <sstream>
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidObjectType::ExInvalidObjectType(Smp::IObject* sender,
-                                Smp::IObject* invalid):
-        _invalidObject(invalid) {
+ExInvalidObjectType::ExInvalidObjectType(Smp::IObject* sender, Smp::IObject* invalid) : _invalidObject(invalid) {
     setName("InvalidObjectType");
     setSender(sender);
     std::ostringstream d;
-    d << "Object "<<invalid->GetName()<<" has invalid type.";
+    d << "Object " << invalid->GetName() << " has invalid type.";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExInvalidObjectType::~ExInvalidObjectType() {
-}
+ExInvalidObjectType::~ExInvalidObjectType() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::IObject* ExInvalidObjectType::GetInvalidObject() const noexcept {
     return _invalidObject;
 }
-}} // namespace simph::smpdk
+}  // namespace smpdk
+}  // namespace simph

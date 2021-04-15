@@ -13,18 +13,17 @@
 #include "Smp/IComposite.h"
 #include "simph/smpdk/Collection.hpp"
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 
 /**
  *
  */
-class Composite: public Object, public virtual Smp::IComposite {
+class Composite : public Object, public virtual Smp::IComposite {
 public:
     /**
      * Default constructor.
      */
-    Composite(Smp::String8 name, Smp::String8 descr="",
-            Smp::IObject* parent=nullptr);
+    Composite(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
     /**
      * Destructor.
      */
@@ -32,11 +31,14 @@ public:
 
     const Smp::ContainerCollection* GetContainers() const override;
     Smp::IContainer* GetContainer(Smp::String8 name) const override;
+
 protected:
-    void addContainer(Smp::String8 name, Smp::String8 descr="");
+    void addContainer(Smp::String8 name, Smp::String8 descr = "");
+
 private:
     CollectionOwner<Smp::IContainer> _containers;
 };
 
-}} // namespace simph::smpdk
-#endif // __simph_smpdk_Composite_HPP__
+}  // namespace smpdk
+}  // namespace simph
+#endif  // __simph_smpdk_Composite_HPP__

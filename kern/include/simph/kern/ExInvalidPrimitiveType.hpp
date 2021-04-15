@@ -9,18 +9,17 @@
  */
 #ifndef __simph_kern_ExInvalidPrimitiveType_HPP__
 #define __simph_kern_ExInvalidPrimitiveType_HPP__
-#include "simph/smpdk/Exception.hpp"
 #include "Smp/Publication/InvalidPrimitiveType.h"
+#include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 
 /**
  *
  */
-class ExInvalidPrimitiveType: public Exception,
-        virtual public Smp::Publication::InvalidPrimitiveType {
+class ExInvalidPrimitiveType : public Exception, virtual public Smp::Publication::InvalidPrimitiveType {
 public:
     /**
      * Default constructor.
@@ -33,9 +32,11 @@ public:
     // Smp::Publication::InvalidPrimitiveType implementation
     Smp::String8 GetTypeName() const noexcept override;
     Smp::PrimitiveTypeKind GetType() const noexcept override;
+
 private:
     Smp::PrimitiveTypeKind _type;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_ExInvalidPrimitiveType_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_ExInvalidPrimitiveType_HPP__

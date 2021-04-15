@@ -10,14 +10,13 @@
 #ifndef __simph_sys_ChronoTool_HPP__
 #define __simph_sys_ChronoTool_HPP__
 
-#include "simph/sys/Runnable.hpp"
-#include <iostream>
 #include <chrono>
+#include <iostream>
 #include <vector>
+#include "simph/sys/Runnable.hpp"
 
 namespace simph {
-	namespace sys {
-
+namespace sys {
 
 /**
  * Wrapper of std::chrono
@@ -27,18 +26,17 @@ namespace simph {
  * TODO Reuse/Adapt this to generate schedule statistics
  */
 struct ChronoTool {
-
     struct Record {
         std::chrono::steady_clock::time_point stopTime, startTime;
 
         inline void start() {
-            startTime=std::chrono::steady_clock::now();
+            startTime = std::chrono::steady_clock::now();
         }
         inline void stop() {
-            stopTime=std::chrono::steady_clock::now();
+            stopTime = std::chrono::steady_clock::now();
         }
 
-        template<typename ToTime = std::chrono::milliseconds>
+        template <typename ToTime = std::chrono::milliseconds>
         auto count() {
             auto duration = std::chrono::duration_cast<ToTime>(stopTime - startTime);
             return duration.count();
@@ -57,9 +55,10 @@ struct ChronoTool {
 
     struct Statistic {
         std::vector<Record> records;
-        //TODO
+        // TODO
     };
 };
 
-}} // namespace simph::sys
-#endif // __simph_sys_ChronoTool_HPP__
+}  // namespace sys
+}  // namespace simph
+#endif  // __simph_sys_ChronoTool_HPP__

@@ -9,17 +9,16 @@
  */
 #ifndef __simph_smpdk_ExInvalidObjectName_HPP__
 #define __simph_smpdk_ExInvalidObjectName_HPP__
-#include "simph/smpdk/Exception.hpp"
 #include "Smp/InvalidObjectName.h"
+#include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 
 /**
  *
  */
-class ExInvalidObjectName: public Exception,
-                        virtual public Smp::InvalidObjectName {
+class ExInvalidObjectName : public Exception, virtual public Smp::InvalidObjectName {
 public:
     /**
      * Default constructor.
@@ -31,9 +30,11 @@ public:
     virtual ~ExInvalidObjectName();
     // Smp::InvalidObjectName implementation
     Smp::String8 GetInvalidName() const noexcept override;
+
 private:
     Smp::String8 _invalidName;
 };
 
-}} // namespace simph::smpdk
-#endif // __simph_smpdk_ExInvalidObjectName_HPP__
+}  // namespace smpdk
+}  // namespace simph
+#endif  // __simph_smpdk_ExInvalidObjectName_HPP__

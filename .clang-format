@@ -1,0 +1,39 @@
+# general options
+BasedOnStyle : Google
+Language : Cpp
+Standard : Cpp03
+IndentWidth : 4
+TabWidth : 4
+ColumnLimit : 120
+AccessModifierOffset : -4
+
+# style options
+AlignTrailingComments : false
+AllowAllParametersOfDeclarationOnNextLine : false
+AllowShortBlocksOnASingleLine : true
+AllowShortFunctionsOnASingleLine : Empty
+AllowShortIfStatementsOnASingleLine : false
+AllowShortLoopsOnASingleLine : false
+BreakBeforeBinaryOperators : NonAssignment
+BreakBeforeTernaryOperators : true
+BreakBeforeBraces : Custom
+BraceWrapping:
+  AfterClass : false
+  AfterControlStatement : false
+  AfterEnum : false
+  AfterFunction : false
+  AfterNamespace : false 
+  AfterStruct : false
+  AfterUnion : false
+  BeforeCatch : true
+  BeforeElse : true
+  IndentBraces : false
+ConstructorInitializerAllOnOneLineOrOnePerLine : true
+ConstructorInitializerIndentWidth : 4
+DerivePointerAlignment : false
+ForEachMacros : [ foreach ]
+IndentCaseLabels : true
+
+---
+Language: JavaScript
+DisableFormat: true

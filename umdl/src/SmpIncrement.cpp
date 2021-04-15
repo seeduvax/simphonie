@@ -8,31 +8,26 @@
  * $Date$
  */
 #include "simph/umdl/SmpIncrement.hpp"
+#include "simph/sys/Logger.hpp"
 
 namespace simph {
-    namespace umdl {
+namespace umdl {
 // --------------------------------------------------------------------
 // ..........................................................
-SmpIncrement::SmpIncrement(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent):
-    AStepMdl(name,descr,parent),
-    _input(0),
-    _output(0) {
-}
+SmpIncrement::SmpIncrement(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
+    : AStepMdl(name, descr, parent), _input(0), _output(0) {}
 // ..........................................................
-SmpIncrement::~SmpIncrement() {
-}
+SmpIncrement::~SmpIncrement() {}
 // ..........................................................
 void SmpIncrement::step() {
-        _output = _input + 1;
+    LOGI("calling SmpIncrement::step")
+    _output = _input + 1;
 };
 // ..........................................................
 void SmpIncrement::publish(Smp::IPublication* receiver) {
-    receiver->PublishField("output","Output",
-                                &_output,Smp::ViewKind::VK_All,
-                                false,false,true);
-    receiver->PublishField("input","Output",
-                                &_input,Smp::ViewKind::VK_All,
-                                false,true,false);
+    receiver->PublishField("output", "Output", &_output, Smp::ViewKind::VK_All, false, false, true);
+    receiver->PublishField("input", "Output", &_input, Smp::ViewKind::VK_All, false, true, false);
 }
 
-}} // namespace simph::umdl
+}  // namespace umdl
+}  // namespace simph

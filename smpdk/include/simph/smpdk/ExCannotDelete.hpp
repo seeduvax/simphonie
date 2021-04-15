@@ -14,13 +14,12 @@
 #include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 
 /**
  *
  */
-class ExCannotDelete: public Exception,
-            public virtual Smp::CannotDelete {
+class ExCannotDelete : public Exception, public virtual Smp::CannotDelete {
 public:
     /**
      * Default constructor.
@@ -41,5 +40,6 @@ private:
     const Smp::IComponent* _comp;
 };
 
-}} // namespace simph::smpdk
-#endif // __simph_smpdk_ExCannotDelete_HPP__
+}  // namespace smpdk
+}  // namespace simph
+#endif  // __simph_smpdk_ExCannotDelete_HPP__

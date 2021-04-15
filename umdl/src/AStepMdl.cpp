@@ -11,19 +11,18 @@
 #include "simph/sys/Callback.hpp"
 
 namespace simph {
-	namespace umdl {
+namespace umdl {
 using simph::sys::Callback;
 
 // --------------------------------------------------------------------
 // ..........................................................
-AStepMdl::AStepMdl(Smp::String8 name, Smp::String8 descr,
-                        Smp::IObject* parent):
-                    simph::kern::Component(name,descr,parent) {
-    auto stepCallback = Callback::create(&AStepMdl::step,this);
-    addEP(std::move(stepCallback),"step","Main model entry point");
+AStepMdl::AStepMdl(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
+    : simph::kern::Component(name, descr, parent) {
+    auto stepCallback = Callback::create(&AStepMdl::step, this);
+    addEP(std::move(stepCallback), "step", "Main model entry point");
 }
 // ..........................................................
-AStepMdl::~AStepMdl() {
-}
+AStepMdl::~AStepMdl() {}
 // --------------------------------------------------------------------
-}} // namespace simph::umdl
+}  // namespace umdl
+}  // namespace simph

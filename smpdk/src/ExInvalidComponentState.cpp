@@ -7,27 +7,26 @@
  * $Id$
  * $Date$
  */
-#include <sstream>
 #include "simph/smpdk/ExInvalidComponentState.hpp"
+#include <sstream>
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidComponentState::ExInvalidComponentState(Smp::IObject* sender,
-            Smp::ComponentStateKind invalid,
-            Smp::ComponentStateKind expected): 
-                _invalid(invalid),_expected(expected) {
+ExInvalidComponentState::ExInvalidComponentState(Smp::IObject* sender, Smp::ComponentStateKind invalid,
+                                                 Smp::ComponentStateKind expected)
+    : _invalid(invalid), _expected(expected) {
     setName("InvalidComponentState");
     setSender(sender);
     std::ostringstream d;
-    d<<"current state is "<<invalid<<" while expected is "<<expected<<"."<<std::ends;;
+    d << "current state is " << invalid << " while expected is " << expected << "." << std::ends;
+    ;
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExInvalidComponentState::~ExInvalidComponentState() {
-}
+ExInvalidComponentState::~ExInvalidComponentState() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::ComponentStateKind ExInvalidComponentState::GetInvalidState() const noexcept {
@@ -38,4 +37,5 @@ Smp::ComponentStateKind ExInvalidComponentState::GetExpectedState() const noexce
     return _expected;
 }
 
-}} // namespace simph::smpdk
+}  // namespace smpdk
+}  // namespace simph

@@ -11,22 +11,19 @@
 #include <sstream>
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExNotContained::ExNotContained(Smp::IContainer* sender, Smp::IComponent* comp):
-            _comp(comp) {
+ExNotContained::ExNotContained(Smp::IContainer* sender, Smp::IComponent* comp) : _comp(comp) {
     setName("NotContained");
     setSender(sender);
     std::ostringstream d;
-    d << "From "<<sender->GetName()<<": can't remove "<<comp->GetName()
-        <<", not member.";
+    d << "From " << sender->GetName() << ": can't remove " << comp->GetName() << ", not member.";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExNotContained::~ExNotContained() {
-}
+ExNotContained::~ExNotContained() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 ExNotContained::GetContainerName() const noexcept {
@@ -37,4 +34,5 @@ const Smp::IComponent* ExNotContained::GetComponent() const noexcept {
     return _comp;
 }
 
-}} // namespace simph::smpdk
+}  // namespace smpdk
+}  // namespace simph

@@ -9,24 +9,22 @@
  */
 #ifndef __simph_kern_ExDuplicateUuid_HPP__
 #define __simph_kern_ExDuplicateUuid_HPP__
-#include "simph/smpdk/Exception.hpp"
 #include "Smp/DuplicateUuid.h"
+#include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 
 /**
  *
  */
-class ExDuplicateUuid: public Exception,
-                    virtual public Smp::DuplicateUuid {
+class ExDuplicateUuid : public Exception, virtual public Smp::DuplicateUuid {
 public:
     /**
      * Default constructor.
      */
-    ExDuplicateUuid(Smp::IObject* sender, Smp::String8 oldName,
-                            Smp::String8 newName);
+    ExDuplicateUuid(Smp::IObject* sender, Smp::String8 oldName, Smp::String8 newName);
     /**
      * Destructor.
      */
@@ -40,5 +38,6 @@ private:
     Smp::String8 _newName;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_ExDuplicateUuid_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_ExDuplicateUuid_HPP__

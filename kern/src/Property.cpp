@@ -10,21 +10,14 @@
 #include "simph/kern/Property.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-Property::Property(Smp::String8 name, Smp::String8 descr,
-                    Smp::IObject* parent, Smp::Publication::IType* type,
-                    Smp::AccessKind access,
-                    Smp::ViewKind view):
-            simph::smpdk::Object(name,descr,parent),
-            _type(type),
-            _access(access),
-            _view(view) {
-}
+Property::Property(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, Smp::Publication::IType* type,
+                   Smp::AccessKind access, Smp::ViewKind view)
+    : simph::smpdk::Object(name, descr, parent), _type(type), _access(access), _view(view) {}
 // ..........................................................
-Property::~Property() {
-}
+Property::~Property() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::Publication::IType* Property::GetType() const {
@@ -44,7 +37,8 @@ Smp::AnySimple Property::GetValue() const {
 }
 // ..........................................................
 void Property::SetValue(Smp::AnySimple value) {
-    _value=value;
+    _value = value;
 }
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

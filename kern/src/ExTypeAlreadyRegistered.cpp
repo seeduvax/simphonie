@@ -8,29 +8,27 @@
  * $Date$
  */
 #include "simph/kern/ExTypeAlreadyRegistered.hpp"
-#include "Smp/Publication/IType.h"
 #include <sstream>
+#include "Smp/Publication/IType.h"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExTypeAlreadyRegistered::ExTypeAlreadyRegistered(Smp::IObject* sender,
-                    Smp::String8 name, Smp::Publication::IType* type):
-                    _name(name),
-                    _type(type) {
+ExTypeAlreadyRegistered::ExTypeAlreadyRegistered(Smp::IObject* sender, Smp::String8 name, Smp::Publication::IType* type)
+    : _name(name), _type(type) {
     setName("TypeAlreadyRegistered");
     setSender(sender);
     std::ostringstream d;
-    d << "Can't register type " << name 
-        <<", type "<< type->GetName()<<" with same uuid "
-        /* TODO <<type->GetUuid()*/<<" already registered.";
+    d << "Can't register type " << name << ", type " << type->GetName()
+      << " with same uuid "
+      /* TODO <<type->GetUuid()*/
+      << " already registered.";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExTypeAlreadyRegistered::~ExTypeAlreadyRegistered() {
-}
+ExTypeAlreadyRegistered::~ExTypeAlreadyRegistered() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 ExTypeAlreadyRegistered::GetTypeName() const noexcept {
@@ -40,4 +38,5 @@ Smp::String8 ExTypeAlreadyRegistered::GetTypeName() const noexcept {
 Smp::Publication::IType* ExTypeAlreadyRegistered::GetType() const noexcept {
     return _type;
 }
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

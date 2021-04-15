@@ -11,28 +11,24 @@
 #define __simph_kern_IEntryPointPublisher_HPP__
 
 #include "Smp/IEntryPointPublisher.h"
-#include "simph/smpdk/Collection.hpp"
 #include "simph/kern/EntryPoint.hpp"
+#include "simph/smpdk/Collection.hpp"
 #include "simph/sys/Runnable.hpp"
 
 namespace simph {
-    namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 
 using simph::sys::Runnable;
 
-class IEntryPointPublisher: virtual public Smp::IEntryPointPublisher {
+class IEntryPointPublisher : virtual public Smp::IEntryPointPublisher {
 public:
     IEntryPointPublisher();
 
     virtual ~IEntryPointPublisher();
 
-    inline void addEP( std::unique_ptr<Runnable> runnable,
-                       Smp::String8 name,
-                       Smp::String8 descr="") {
-        _epList.push_back(
-                new EntryPoint(std::move(runnable), name, descr, this)
-        );
+    inline void addEP(std::unique_ptr<Runnable> runnable, Smp::String8 name, Smp::String8 descr = "") {
+        _epList.push_back(new EntryPoint(std::move(runnable), name, descr, this));
     }
 
     inline const Smp::EntryPointCollection* GetEntryPoints() const override {
@@ -47,5 +43,6 @@ private:
     CollectionOwner<Smp::IEntryPoint> _epList;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_IEntryPointPublisher_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_IEntryPointPublisher_HPP__

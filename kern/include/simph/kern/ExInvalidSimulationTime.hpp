@@ -9,24 +9,22 @@
  */
 #ifndef __simph_kern_ExInvalidSimulationTime_HPP__
 #define __simph_kern_ExInvalidSimulationTime_HPP__
-#include "simph/smpdk/Exception.hpp"
 #include "Smp/Services/InvalidSimulationTime.h"
+#include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 
 /**
  *
  */
-class ExInvalidSimulationTime: public Exception,
-            virtual public Smp::Services::InvalidSimulationTime {
+class ExInvalidSimulationTime : public Exception, virtual public Smp::Services::InvalidSimulationTime {
 public:
     /**
      * Default constructor.
      */
-    ExInvalidSimulationTime(Smp::IObject* sender,Smp::Duration cTime,
-                        Smp::Duration pTime, Smp::Duration mTime);
+    ExInvalidSimulationTime(Smp::IObject* sender, Smp::Duration cTime, Smp::Duration pTime, Smp::Duration mTime);
     /**
      * Destructor.
      */
@@ -42,5 +40,6 @@ private:
     Smp::Duration _mTime;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_ExInvalidSimulationTime_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_ExInvalidSimulationTime_HPP__

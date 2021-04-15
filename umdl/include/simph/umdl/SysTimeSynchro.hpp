@@ -9,30 +9,31 @@
  */
 #ifndef __simph_umdl_SysTimeSynchro_HPP__
 #define __simph_umdl_SysTimeSynchro_HPP__
-#include "simph/umdl/AStepMdl.hpp"
-#include "simph/sys/Synchro.hpp"
 #include <chrono>
+#include "simph/sys/Synchro.hpp"
+#include "simph/umdl/AStepMdl.hpp"
 namespace simph {
-	namespace umdl {
+namespace umdl {
 
 /**
  *
  */
-class SysTimeSynchro: public simph::umdl::AStepMdl {
+class SysTimeSynchro : public simph::umdl::AStepMdl {
 public:
     /**
      * Default constructor.
      */
-    SysTimeSynchro(Smp::String8 name, Smp::String8 descr,
-                                    Smp::IObject* parent );
+    SysTimeSynchro(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent);
     /**
      * Destructor.
      */
     virtual ~SysTimeSynchro();
     // AStepMdl implementation
     void step();
+
 protected:
     void publish(Smp::IPublication* receiver);
+
 private:
     Smp::Duration _period;
     std::chrono::time_point<std::chrono::system_clock> _nextTick;
@@ -40,5 +41,6 @@ private:
     std::condition_variable _monitor;
 };
 
-}} // namespace simph::umdl
-#endif // __simph_umdl_SysTimeSynchro_HPP__
+}  // namespace umdl
+}  // namespace simph
+#endif  // __simph_umdl_SysTimeSynchro_HPP__

@@ -13,7 +13,7 @@
 #include <thread>
 #include "simph/sys/Runnable.hpp"
 namespace simph {
-	namespace sys {
+namespace sys {
 
 /**
  *
@@ -40,7 +40,7 @@ public:
             _th->join();
         }
     }
-    
+
     inline std::string getName() {
         return _name;
     }
@@ -51,5 +51,6 @@ private:
     std::thread* _th;
 };
 
-}} // namespace simph::sys
-#endif // __simph_sys_Thread_HPP__
+}  // namespace sys
+}  // namespace simph
+#endif  // __simph_sys_Thread_HPP__

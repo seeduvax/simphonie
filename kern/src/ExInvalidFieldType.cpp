@@ -10,18 +10,17 @@
 #include "simph/kern/ExInvalidFieldType.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidFieldType::ExInvalidFieldType(Smp::IObject* sender, 
-                                        Smp::String8 descr) {
+ExInvalidFieldType::ExInvalidFieldType(Smp::IObject* sender, Smp::String8 descr) {
     setSender(sender);
     setName("InvalidFieldType");
     setDescription(descr);
     setMessage();
 }
 // ..........................................................
-ExInvalidFieldType::~ExInvalidFieldType() {
-}
+ExInvalidFieldType::~ExInvalidFieldType() {}
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

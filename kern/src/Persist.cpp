@@ -11,23 +11,21 @@
 #include "simph/sys/Logger.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-Persist::Persist(Smp::String8 name, Smp::String8 descr,
-                Smp::IObject* parent): Object(name,descr,parent) {
-}
+Persist::Persist(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Object(name, descr, parent) {}
 // ..........................................................
-Persist::~Persist() {
-}
+Persist::~Persist() {}
 // --------------------------------------------------------------------
 // ..........................................................
 void Persist::Restore(Smp::IStorageReader* reader) {
-LOGE("simph::kern::Persist::Restore not implemented yet!!!!")
+    LOGE("simph::kern::Persist::Restore not implemented yet!!!!")
 }
 // ..........................................................
 void Persist::Store(Smp::IStorageWriter* reader) {
-LOGE("simph::kern::Persist::Store not implemented yet!!!!")
+    LOGE("simph::kern::Persist::Store not implemented yet!!!!")
 }
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

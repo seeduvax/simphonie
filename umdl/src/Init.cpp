@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#include "simph/umdl/SimTimeProvider.hpp"
-#include "simph/umdl/SysTimeSynchro.hpp"
-#include "simph/umdl/Logger1D.hpp"
-#include "simph/umdl/SmpIncrement.hpp"
-#include "simph/kern/Factory.hpp"
 #include "Smp/ISimulator.h"
+#include "simph/kern/Factory.hpp"
 #include "simph/sys/DlDef.h"
+#include "simph/umdl/Logger1D.hpp"
+#include "simph/umdl/SimTimeProvider.hpp"
+#include "simph/umdl/SmpIncrement.hpp"
+#include "simph/umdl/SysTimeSynchro.hpp"
 
 /*extern "C" {
     SHARED_FUNCTION bool Initialise(Smp::ISimulator* simulator, Smp::Publication::ITypeRegistry* tReg) {
@@ -33,7 +33,7 @@
     }
 }*/
 namespace simph {
-    namespace umdl {
+namespace umdl {
 
 REGISTER_SMP_LIBINIT();
 ADD_SMP_FACTORY(SimTimeProvider);
@@ -41,4 +41,5 @@ ADD_SMP_FACTORY(SysTimeSynchro);
 ADD_SMP_FACTORY(Logger1D);
 ADD_SMP_FACTORY(SmpIncrement);
 
-}}
+}  // namespace umdl
+}  // namespace simph

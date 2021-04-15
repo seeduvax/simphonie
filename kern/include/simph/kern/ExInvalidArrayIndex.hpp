@@ -9,24 +9,22 @@
  */
 #ifndef __simph_kern_ExInvalidArrayIndex_HPP__
 #define __simph_kern_ExInvalidArrayIndex_HPP__
-#include "simph/smpdk/Exception.hpp"
 #include "Smp/InvalidArrayIndex.h"
+#include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 
 /**
  *
  */
-class ExInvalidArrayIndex: public Exception,
-                virtual public Smp::InvalidArrayIndex {
+class ExInvalidArrayIndex : public Exception, virtual public Smp::InvalidArrayIndex {
 public:
     /**
      * Default constructor.
      */
-    ExInvalidArrayIndex(const Smp::IObject* sender, Smp::Int64 invalid, 
-                                                Smp::Int64 size);
+    ExInvalidArrayIndex(const Smp::IObject* sender, Smp::Int64 invalid, Smp::Int64 size);
     /**
      * Destructor.
      */
@@ -40,5 +38,6 @@ private:
     Smp::Int64 _arraySize;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_ExInvalidArrayIndex_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_ExInvalidArrayIndex_HPP__

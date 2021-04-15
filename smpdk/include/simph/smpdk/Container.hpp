@@ -13,18 +13,17 @@
 #include "simph/smpdk/Collection.hpp"
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 
 /**
  *
  */
-class Container: virtual public Object, virtual public Smp::IContainer {
+class Container : virtual public Object, virtual public Smp::IContainer {
 public:
     /**
      * Default constructor.
      */
-    Container(Smp::String8 name,Smp::String8 descr="",
-                Smp::IObject* parent=nullptr);
+    Container(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
     /**
      * Destructor.
      */
@@ -46,5 +45,6 @@ private:
     Collection<Smp::IComponent> _content;
 };
 
-}} // namespace simph::smpdk
-#endif // __simph_smpdk_Container_HPP__
+}  // namespace smpdk
+}  // namespace simph
+#endif  // __simph_smpdk_Container_HPP__

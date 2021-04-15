@@ -11,23 +11,19 @@
 #include "simph/sys/Logger.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-PublishOperation::PublishOperation() {
-}
+PublishOperation::PublishOperation() {}
 // ..........................................................
-PublishOperation::~PublishOperation() {
-}
+PublishOperation::~PublishOperation() {}
 // --------------------------------------------------------------------
 // ..........................................................
-void PublishOperation::PublishParameter(
-            Smp::String8 name,
-            Smp::String8 description,
-            Smp::Uuid typeUuid,
-            Smp::Publication::ParameterDirectionKind direction) {
-// TODO 
-LOGE("PublishOperation::PublishParameter not implemented yet !!!");
-} 
+void PublishOperation::PublishParameter(Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
+                                        Smp::Publication::ParameterDirectionKind direction) {
+    // TODO
+    LOGE("PublishOperation::PublishParameter not implemented yet !!!");
+}
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

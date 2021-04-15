@@ -11,31 +11,29 @@
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExEntryPointNotSubscribed::ExEntryPointNotSubscribed(Smp::IObject* sender,
-                    const Smp::IEntryPoint* ep, Smp::String8 evName):
-                    _entryPoint(ep), _evName(evName) {
+ExEntryPointNotSubscribed::ExEntryPointNotSubscribed(Smp::IObject* sender, const Smp::IEntryPoint* ep,
+                                                     Smp::String8 evName)
+    : _entryPoint(ep), _evName(evName) {
     setSender(sender);
     setName("EntriyPointNotSubscribed");
     std::ostringstream d;
-    d << "Entry point "<<ep->GetName()<<" not subscribed to event " 
-        << evName;
+    d << "Entry point " << ep->GetName() << " not subscribed to event " << evName;
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExEntryPointNotSubscribed::~ExEntryPointNotSubscribed() {
-}
+ExEntryPointNotSubscribed::~ExEntryPointNotSubscribed() {}
 // --------------------------------------------------------------------
 // ..........................................................
-const Smp::IEntryPoint* ExEntryPointNotSubscribed::GetEntryPoint() 
-                                                    const noexcept {
+const Smp::IEntryPoint* ExEntryPointNotSubscribed::GetEntryPoint() const noexcept {
     return _entryPoint;
 }
 // ..........................................................
 Smp::String8 ExEntryPointNotSubscribed::GetEventName() const noexcept {
     return _evName;
 }
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

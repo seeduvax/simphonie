@@ -10,17 +10,17 @@
 #include "simph/sys/DLib.hpp"
 
 namespace simph {
-	namespace sys {
+namespace sys {
 // --------------------------------------------------------------------
 // ..........................................................
-DLib::DLib(const char* libName): _name(libName) {
+DLib::DLib(const char* libName) : _name(libName) {
 #ifdef WIN32
-    _lib=LoadLibrary(libName);
+    _lib = LoadLibrary(libName);
 #else
-    _lib=dlopen(libName,RTLD_NOW | RTLD_LAZY);
-    if (_lib==nullptr) {
+    _lib = dlopen(libName, RTLD_NOW | RTLD_LAZY);
+    if (_lib == nullptr) {
         std::ostringstream msg;
-        msg << "Can't load library "<<libName<<": "<<dlerror();
+        msg << "Can't load library " << libName << ": " << dlerror();
         LOGE(msg.str());
         throw std::runtime_error(msg.str());
     }
@@ -35,4 +35,5 @@ DLib::~DLib() {
 #endif
 }
 
-}} // namespace simph::sys
+}  // namespace sys
+}  // namespace simph

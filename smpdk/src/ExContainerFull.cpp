@@ -11,22 +11,20 @@
 #include <sstream>
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ExContainerFull::ExContainerFull(Smp::IContainer* sender) {
-    _size=sender->GetCount();
+    _size = sender->GetCount();
     setName("ContainerFull");
     setSender(sender);
     std::ostringstream d;
-    d << "From "<<sender->GetName()<<": max size "
-        <<sender->GetUpper()<<" is reached, can't add more content.";
+    d << "From " << sender->GetName() << ": max size " << sender->GetUpper() << " is reached, can't add more content.";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExContainerFull::~ExContainerFull() {
-}
+ExContainerFull::~ExContainerFull() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 ExContainerFull::GetContainerName() const noexcept {
@@ -37,4 +35,5 @@ Smp::Int64 ExContainerFull::GetContainerSize() const noexcept {
     return _size;
 }
 
-}} // namespace simph::smpdk
+}  // namespace smpdk
+}  // namespace simph

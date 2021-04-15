@@ -11,25 +11,20 @@
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExDuplicateUuid::ExDuplicateUuid(Smp::IObject* sender, Smp::String8 oldName,
-                                        Smp::String8 newName):
-                    _oldName(oldName),
-                    _newName(newName) {
+ExDuplicateUuid::ExDuplicateUuid(Smp::IObject* sender, Smp::String8 oldName, Smp::String8 newName)
+    : _oldName(oldName), _newName(newName) {
     setName("DuplicateUuid");
     setSender(sender);
     std::ostringstream d;
-    d << "Object named "<<oldName
-        <<" already registered same uuid than object "
-        <<newName;
+    d << "Object named " << oldName << " already registered same uuid than object " << newName;
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExDuplicateUuid::~ExDuplicateUuid() {
-}
+ExDuplicateUuid::~ExDuplicateUuid() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 ExDuplicateUuid::GetOldName() const noexcept {
@@ -40,4 +35,5 @@ Smp::String8 ExDuplicateUuid::GetNewName() const noexcept {
     return _newName;
 }
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

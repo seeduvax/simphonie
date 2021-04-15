@@ -14,13 +14,12 @@
 #include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 
 /**
  *
  */
-class ExContainerFull: public Exception,
-            public virtual Smp::ContainerFull {
+class ExContainerFull : public Exception, public virtual Smp::ContainerFull {
 public:
     /**
      * Default constructor.
@@ -33,9 +32,12 @@ public:
     // Smp::ContainerFull implementation
     Smp::String8 GetContainerName() const noexcept override;
     Smp::Int64 GetContainerSize() const noexcept override;
+
 private:
-    Smp::Int64 _size;;
+    Smp::Int64 _size;
+    ;
 };
 
-}} // namespace simph::smpdk
-#endif // __simph_smpdk_ExContainerFull_HPP__
+}  // namespace smpdk
+}  // namespace simph
+#endif  // __simph_smpdk_ExContainerFull_HPP__

@@ -9,26 +9,24 @@
  */
 #ifndef __simph_kern_TimeKeeper_HPP__
 #define __simph_kern_TimeKeeper_HPP__
-#include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Services/IEventManager.h"
+#include "Smp/Services/ITimeKeeper.h"
 #include "simph/smpdk/Component.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 
 /**
  *
  */
-class TimeKeeper: virtual public Component,
-                  virtual public Smp::Services::ITimeKeeper {
+class TimeKeeper : virtual public Component, virtual public Smp::Services::ITimeKeeper {
 public:
     /**
      * Default constructor.
      */
-    TimeKeeper(Smp::String8 name=Smp::Services::ITimeKeeper::SMP_TimeKeeper,
-                     Smp::String8 descr="",
-                     Smp::IObject* parent=nullptr);
+    TimeKeeper(Smp::String8 name = Smp::Services::ITimeKeeper::SMP_TimeKeeper, Smp::String8 descr = "",
+               Smp::IObject* parent = nullptr);
     /**
      * Destructor.
      */
@@ -47,13 +45,15 @@ public:
     // from SMP header: MissionTime=EpochTime - MissionStart;
     // => SimTime = EpochTime - EpochOffset, where EpochOffset is EpochTime at
     //    simulation start.
-    
+
     // TODO should not be public but binded to some simulation start even handling
     void reset();
     void setNextEventTime(Smp::Duration eventTime);
+
 protected:
     void connect();
     void publish(Smp::IPublication* receiver);
+
 private:
     Smp::Duration _simTime;
     Smp::Duration _nextEventTime;
@@ -63,5 +63,6 @@ private:
     static Smp::DateTime _y2kJan1Offset;
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_TimeKeeper_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_TimeKeeper_HPP__

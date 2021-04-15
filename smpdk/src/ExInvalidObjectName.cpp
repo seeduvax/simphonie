@@ -11,26 +11,23 @@
 #include <sstream>
 
 namespace simph {
-	namespace smpdk {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidObjectName::ExInvalidObjectName(Smp::IObject* sender,
-                                Smp::String8 invalidName):
-                        _invalidName(invalidName) {
+ExInvalidObjectName::ExInvalidObjectName(Smp::IObject* sender, Smp::String8 invalidName) : _invalidName(invalidName) {
     setName("InvalidObjectName");
     setSender(sender);
     std::ostringstream d;
-    d << "'" << _invalidName 
-        << "' include char(s) not useable in a Smp object name.";
+    d << "'" << _invalidName << "' include char(s) not useable in a Smp object name.";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExInvalidObjectName::~ExInvalidObjectName() {
-}
+ExInvalidObjectName::~ExInvalidObjectName() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 ExInvalidObjectName::GetInvalidName() const noexcept {
     return _invalidName;
 }
-}} // namespace simph::smpdk
+}  // namespace smpdk
+}  // namespace simph

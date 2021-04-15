@@ -12,19 +12,18 @@
 #include "Smp/IPersist.h"
 #include "simph/smpdk/Object.hpp"
 namespace simph {
-	namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 
 /**
  *
  */
-class Persist: public Object, virtual public Smp::IPersist {
+class Persist : public Object, virtual public Smp::IPersist {
 public:
     /**
      * Default constructor.
      */
-    Persist(Smp::String8 name, Smp::String8 descr="",
-            Smp::IObject* parent=nullptr);
+    Persist(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
     /**
      * Destructor.
      */
@@ -32,9 +31,10 @@ public:
     // Smp::IPersist implementation
     void Restore(Smp::IStorageReader* reader) override;
     void Store(Smp::IStorageWriter* writer) override;
-private:
 
+private:
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_Persist_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_Persist_HPP__

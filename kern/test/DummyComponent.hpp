@@ -4,10 +4,9 @@
 
 namespace test {
 
-class DummyComponent: public virtual simph::smpdk::Component {
+class DummyComponent : public virtual simph::smpdk::Component {
 public:
-    DummyComponent(Smp::String8 name, Smp::String8 descr="",
-                        Smp::IObject* parent=nullptr);
+    DummyComponent(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
 };
-}
+}  // namespace test
 #endif

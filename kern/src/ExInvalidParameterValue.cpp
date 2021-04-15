@@ -11,25 +11,22 @@
 #include <sstream>
 
 namespace simph {
-	namespace kern {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidParameterValue::ExInvalidParameterValue(Smp::IObject* sender,
-                    Smp::String8 pName, Smp::AnySimple value):
-            _pName(pName),
-            _value(value) {
+ExInvalidParameterValue::ExInvalidParameterValue(Smp::IObject* sender, Smp::String8 pName, Smp::AnySimple value)
+    : _pName(pName), _value(value) {
     setName("InvalidParameterValue");
     setSender(sender);
     std::ostringstream d;
-    d << "In valid value for parameter "<<pName<<".";
+    d << "In valid value for parameter " << pName << ".";
     // TODO add value in message. (big switch case needed for each type,
     // should be implemented once for all in a toString method somewhere.)
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExInvalidParameterValue::~ExInvalidParameterValue() {
-}
+ExInvalidParameterValue::~ExInvalidParameterValue() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 ExInvalidParameterValue::GetParameterName() const noexcept {
@@ -40,4 +37,5 @@ Smp::AnySimple ExInvalidParameterValue::GetValue() const noexcept {
     return _value;
 }
 
-}} // namespace simph::kern
+}  // namespace kern
+}  // namespace simph

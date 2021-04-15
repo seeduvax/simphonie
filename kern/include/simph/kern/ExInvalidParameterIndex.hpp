@@ -9,24 +9,22 @@
  */
 #ifndef __simph_kern_ExInvalidParameterIndex_HPP__
 #define __simph_kern_ExInvalidParameterIndex_HPP__
-#include "simph/smpdk/Exception.hpp"
 #include "Smp/InvalidParameterIndex.h"
+#include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 
 /**
  *
  */
-class ExInvalidParameterIndex: public Exception,
-                    virtual public Smp::InvalidParameterIndex {
+class ExInvalidParameterIndex : public Exception, virtual public Smp::InvalidParameterIndex {
 public:
     /**
      * Default constructor.
      */
-    ExInvalidParameterIndex(Smp::IObject* sender, const Smp::String8 opName,
-                        Smp::Int32 index, Smp::Int32 count);
+    ExInvalidParameterIndex(Smp::IObject* sender, const Smp::String8 opName, Smp::Int32 index, Smp::Int32 count);
     /**
      * Destructor.
      */
@@ -35,12 +33,13 @@ public:
     Smp::String8 GetOperationName() const noexcept override;
     Smp::Int32 GetParameterIndex() const noexcept override;
     Smp::Int32 GetParameterCount() const noexcept override;
+
 private:
     const Smp::String8 _opName;
     Smp::Int32 _index;
     Smp::Int32 _count;
-
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_ExInvalidParameterIndex_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_ExInvalidParameterIndex_HPP__

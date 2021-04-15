@@ -9,18 +9,17 @@
  */
 #ifndef __simph_kern_ExInvalidFieldType_HPP__
 #define __simph_kern_ExInvalidFieldType_HPP__
-#include "simph/smpdk/Exception.hpp"
 #include "Smp/InvalidFieldType.h"
+#include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-	namespace kern {
+namespace kern {
 using namespace simph::smpdk;
 
 /**
  *
  */
-class ExInvalidFieldType: public Exception,
-            virtual public Smp::InvalidFieldType {
+class ExInvalidFieldType : public Exception, virtual public Smp::InvalidFieldType {
 public:
     /**
      * Default constructor.
@@ -32,8 +31,8 @@ public:
     virtual ~ExInvalidFieldType();
 
 private:
-
 };
 
-}} // namespace simph::kern
-#endif // __simph_kern_ExInvalidFieldType_HPP__
+}  // namespace kern
+}  // namespace simph
+#endif  // __simph_kern_ExInvalidFieldType_HPP__

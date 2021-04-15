@@ -18,7 +18,7 @@
 #include "simph/sys/Logger.hpp"
 
 namespace simph {
-	namespace sys {
+namespace sys {
 
 /**
  *
@@ -34,15 +34,14 @@ public:
      */
     virtual ~DLib();
 
-    template<typename FT>
+    template <typename FT>
     FT getEntry(const char* symbol) {
 #ifdef WIN32
-        return reinterpret_cast<FT>(GetProcAddress(_lib,symbol));
+        return reinterpret_cast<FT>(GetProcAddress(_lib, symbol));
 #else
-        FT fptr=reinterpret_cast<FT>(dlsym(_lib,symbol));
-        if (fptr==nullptr) {
-            LOGW("Can't find Symbol "<<symbol<<" from lib "
-                <<_name<<": "<<dlerror());
+        FT fptr = reinterpret_cast<FT>(dlsym(_lib, symbol));
+        if (fptr == nullptr) {
+            LOGW("Can't find Symbol " << symbol << " from lib " << _name << ": " << dlerror());
         }
         return fptr;
 #endif
@@ -50,6 +49,7 @@ public:
     inline std::string getName() {
         return _name;
     }
+
 private:
 #ifdef WIN32
     HMODULE _lib;
@@ -59,5 +59,6 @@ private:
     std::string _name;
 };
 
-}} // namespace simph::sys
-#endif // __simph_sys_DLib_HPP__
+}  // namespace sys
+}  // namespace simph
+#endif  // __simph_sys_DLib_HPP__

@@ -12,27 +12,28 @@
 #include "simph/umdl/Generator1D.hpp"
 
 namespace simph {
-	namespace umdl {
+namespace umdl {
 
 /**
  *
  */
-class SimTimeProvider: public Generator1D {
+class SimTimeProvider : public Generator1D {
 public:
     /**
      * Default constructor.
      */
-    SimTimeProvider(Smp::String8 name, Smp::String8 descr,
-                    Smp::IObject* parent=nullptr);
+    SimTimeProvider(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent = nullptr);
     /**
      * Destructor.
      */
     virtual ~SimTimeProvider();
+
 protected:
     Smp::Float64 compute();
-private:
 
+private:
 };
 
-}} // namespace simph::umdl
-#endif // __simph_umdl_SimTimeProvider_HPP__
+}  // namespace umdl
+}  // namespace simph
+#endif  // __simph_umdl_SimTimeProvider_HPP__
