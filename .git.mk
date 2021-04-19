@@ -1,6 +1,7 @@
 ifeq ($(__GIT_MK),)
 __GIT_MK:=defined
 
+ifneq ($(USER),$(JENKINS_USER))
 ifneq ($(wildcard $(PRJROOT)/.git/hooks),)
 # enabled along with the commit message hook,
 # it installs a pre-commit hook to check coding style format 
@@ -36,5 +37,6 @@ format-cached:
 # insert the hook as an early dependency to trigger its installation as soon as possible
 $(PRJROOT)/app.cfg: $(PRJROOT)/.git/hooks/pre-commit $(PRJROOT)/.git/hooks/apply-format
 
+endif
 endif
 endif
