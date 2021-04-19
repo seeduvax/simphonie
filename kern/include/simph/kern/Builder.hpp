@@ -10,13 +10,15 @@
 #include <sstream>
 #include <string>
 
+// clang-format off
 #include "Smp/AnySimple.h"
-#include "Smp/IDataflowField.h"
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/IService.h"
 #include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
+#include "Smp/IDataflowField.h"
 #include "simph/smpdk/Component.hpp"
+// clang-format on
 
 namespace simph {
 namespace kern {
