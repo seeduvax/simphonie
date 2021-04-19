@@ -28,6 +28,7 @@ class TestSmpIncrement : public CppUnit::TestFixture {
     CPPUNIT_TEST(testLifeCycle);
     CPPUNIT_TEST(testLifeCycleWithDynamicLoad);
     CPPUNIT_TEST(testLifeCycleFromLua);
+    CPPUNIT_TEST(testLifeCycleFromHighLevelLua);
     CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -43,6 +44,12 @@ public:
         // sol::load_result r = lua.script("test/lua/sim_runner.lua");
         // sol::protected_function_result exec_r = r();
         // CPPUNIT_ASSERT(exec_r.valid());
+    }
+
+    void testLifeCycleFromHighLevelLua() {
+        sol::state lua;
+        lua.open_libraries(sol::lib::base, sol::lib::package);
+        lua.script_file("test/lua/sim_runner_high_level.lua");
     }
 
     void testLifeCycle() {

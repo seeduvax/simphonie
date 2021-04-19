@@ -20,6 +20,8 @@
 
 #include "Smp/IDataflowField.h"
 
+#include "simph/kern/Builder.hpp"
+
 // ..........................................................
 namespace simph {
 namespace kern {
@@ -156,7 +158,11 @@ void Simulator::Initialise() {
 // ..........................................................
 void Simulator::doPublish(Smp::IComponent* comp) {
     if (comp->GetState() == Smp::ComponentStateKind::CSK_Created) {
+        LOGI("Publishing component : " << comp->GetName());
         comp->Publish(_resolver->publish(comp));
+    }
+    else {
+        // TODO add Smpc expcetion ExInvalidComponentState
     }
 }
 // ..........................................................
@@ -173,8 +179,12 @@ void Simulator::Publish() {
 // ..........................................................
 void Simulator::doConfigure(Smp::IComponent* comp) {
     if (comp->GetState() == Smp::ComponentStateKind::CSK_Publishing) {
+        LOGI("Configuring component : " << comp->GetName());
         comp->Configure(_logger);
         // TODO recursive call on childs.
+    }
+    else {
+        // TODO add Smpc expcetion ExInvalidComponentState
     }
 }
 // ..........................................................
@@ -191,8 +201,12 @@ void Simulator::Configure() {
 // ..........................................................
 void Simulator::doConnect(Smp::IComponent* comp) {
     if (comp->GetState() == Smp::ComponentStateKind::CSK_Configured) {
+        LOGI("Connecting component : " << comp->GetName());
         comp->Connect(this);
         // TODO recursive call on childs.
+    }
+    else {
+        // TODO add Smpc expcetion ExInvalidComponentState
     }
 }
 // ..........................................................
@@ -341,6 +355,7 @@ Smp::IComponent* Simulator::CreateInstance(Smp::Uuid uuid, Smp::String8 name, Sm
             break;
         }
     }
+
     // When no factory is found, Smp header tels to return null. So nothing
     // particular to do since res is initialized as nullptr.
     return res;

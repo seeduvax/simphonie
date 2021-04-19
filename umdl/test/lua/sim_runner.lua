@@ -21,9 +21,7 @@ a = sim.mySmpIncrementMdl
 a:GetFields()
 
 ---- step 10s
-a=sim:GetScheduler()
-print(a)
-a:step(10000000)
+sim:GetScheduler():step(10000000)
 --
 ---- check
 --print("====2")

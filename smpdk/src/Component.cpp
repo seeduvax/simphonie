@@ -8,7 +8,9 @@
  * $Date$
  */
 #include "simph/smpdk/Component.hpp"
+#include <iostream>
 #include <sstream>
+#include "Smp/ISimulator.h"
 #include "simph/smpdk/ExInvalidComponentState.hpp"
 
 // --------------------------------------------------------------------
@@ -76,10 +78,28 @@ void Component::Configure(Smp::Services::ILogger* logger, Smp::Services::ILinkRe
     _state = Smp::ComponentStateKind::CSK_Configured;
 }
 // ..........................................................
+Smp::ISimulator* Component::getSimulator() {
+    if (_simulator != nullptr) {
+        return _simulator;
+    }
+    Smp::IObject* obj = this;
+    while (obj->GetParent() != nullptr) {
+        obj = obj->GetParent();
+    }
+    _simulator = dynamic_cast<Smp::ISimulator*>(obj);
+    if (_simulator == nullptr) {
+        throw std::runtime_error("Cannot construct builder, root parent is not a Smp::ISimulator ");
+    }
+    return _simulator;
+}
+// ..........................................................
 void Component::connect() {}
 void Component::Connect(Smp::ISimulator* simulator) {
     if (_state != Smp::ComponentStateKind::CSK_Configured) {
         throw ExInvalidComponentState(this, _state, Smp::ComponentStateKind::CSK_Configured);
+    }
+    if (_simulator != nullptr && _simulator != simulator) {
+        // TODO raise exception, there seems to be 2 simulator instances
     }
     _simulator = simulator;
     connect();

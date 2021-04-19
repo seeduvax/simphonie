@@ -48,31 +48,34 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
     Smp::IObject* res = nullptr;
     Publication* p = from;
     std::string input = path;
-    std::regex re("/");
+    std::regex re("/");  // re("\b(?:([.])(?!\1))+\b|[/]") / single . or /
     const std::sregex_token_iterator end;
     for (std::sregex_token_iterator it{input.begin(), input.end(), re, -1}; it != end && p != nullptr; ++it) {
+        res = nullptr;
         if (p != nullptr) {
             std::string name = *it;
+            Smp::IObject* o = nullptr;  // object published by current publication 'p'
             if (name == "..") {
                 auto it = _publications.find(p->GetParent());
                 p = it == _publications.end() ? nullptr : it->second;
+                res = p->getPubObj();
             }
             else {
-                Smp::IObject* o = p->getChild(name.c_str());
-                p = dynamic_cast<Publication*>(o);
-                if (p == nullptr) {
-                    res = o;
+                o = p->getChild(name.c_str());
+                if (o != nullptr) {
+                    p = dynamic_cast<Publication*>(o);
+                    // a field has a dedicated publication
+                    // an entryppoint has no dedicated publication
+                    res = p != nullptr ? p->getPubObj() : o;
+                }
+                else {
+                    p = nullptr;
+                    res = nullptr;
                 }
             }
-        }
-        else {
-            res = nullptr;
+            // TODO support '[]' operator on structure field
         }
     }
-    if (p != nullptr) {
-        res = p->getPubObj();
-    }
-
     return res;
 }
 // ..........................................................

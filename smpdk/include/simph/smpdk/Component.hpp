@@ -43,9 +43,8 @@ public:
     const Smp::Uuid& GetUuid() const override;
 
 protected:
-    inline Smp::ISimulator* getSimulator() const {
-        return _simulator;
-    }
+    Smp::ISimulator* getSimulator();
+
     virtual void publish(Smp::IPublication* receiver);
     virtual void configure();
     virtual void connect();
