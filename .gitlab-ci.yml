@@ -25,7 +25,7 @@ stages:
     extends: .task
     stage: test
     variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=8"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=1"
     script: 
         - echo make docker.cint $DOCKER_IMAGE MAKEARGS="$TASK_OPTVAR"
         - make docker.cint $DOCKER_IMAGE MAKEARGS="$TASK_OPTVAR"
@@ -59,7 +59,7 @@ test_raspberry:
        GIT_CLEAN_FLAGS: -ffdx -e cache/
        GIT_DEPTH: "3"
        GIT_CLONE_PATH: $CI_BUILDS_DIR
-       TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=8 WORKSPACE_IS_TAG=true"
+       TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=1 WORKSPACE_IS_TAG=true"
     before_script:
       - echo "before_script (deploy shell)"
     script:
@@ -75,7 +75,7 @@ test_raspberry:
     only:
         - tags
     variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=8 WORKSPACE_IS_TAG=true"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=1 WORKSPACE_IS_TAG=true"
     script:
         - echo make docker.pubdist $DOCKER_IMAGE MAKEARGS="$TASK_OPTVAR"
         - make docker.pubdist $DOCKER_IMAGE MAKEARGS="$TASK_OPTVAR";
@@ -100,7 +100,7 @@ deploy_raspberry:
        GIT_CLEAN_FLAGS: -ffdx -e cache/
        GIT_DEPTH: "3"
        GIT_CLONE_PATH: $CI_BUILDS_DIR
-       TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=8 WORKSPACE_IS_TAG=true"
+       TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=1 WORKSPACE_IS_TAG=true"
     before_script:
       - echo "before_script (deploy shell)"
     script:
