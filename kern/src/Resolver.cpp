@@ -58,7 +58,7 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
             if (name == "..") {
                 auto it = _publications.find(p->GetParent());
                 p = it == _publications.end() ? nullptr : it->second;
-                res = p->getPubObj();
+                res = p != nullptr ? p->getPubObj() : nullptr;
             }
             else {
                 o = p->getChild(name.c_str());
