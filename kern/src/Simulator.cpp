@@ -10,6 +10,7 @@
 #include "simph/kern/Simulator.hpp"
 #include "simph/kern/EventManager.hpp"
 #include "simph/kern/ExDuplicateUuid.hpp"
+#include "simph/kern/ExLibraryNotFound.hpp"
 #include "simph/kern/LinkRegistry.hpp"
 #include "simph/kern/Logger.hpp"
 #include "simph/kern/Resolver.hpp"
@@ -332,7 +333,7 @@ void Simulator::RegisterFactory(Smp::IFactory* componentFactory) {
     }
     _compFactories.push_back(componentFactory);
     std::ostringstream msg;
-    msg << "Registered component factory: " << componentFactory->GetName();
+    msg << "Registered component factory: " << componentFactory->GetName() << " Uuid: " << componentFactory->GetUuid();
     _logger->Log(this, msg.str().c_str(), Smp::Services::ILogger::LMK_Information);
 }
 // ..........................................................
@@ -379,12 +380,19 @@ void Simulator::LoadLibrary(Smp::String8 name) {
         }
     }
     if (fLib == nullptr) {
-        fLib = new simph::sys::DLib(name);
-        auto init = fLib->getEntry<bool (*)(Smp::ISimulator*, Smp::Publication::ITypeRegistry * tReg)>("Initialise");
-        if (init != nullptr) {
-            init(this, _typeRegistry);
+        try {
+            fLib = new simph::sys::DLib(name);
+            auto init =
+                fLib->getEntry<bool (*)(Smp::ISimulator*, Smp::Publication::ITypeRegistry * tReg)>("Initialise");
+            if (init != nullptr) {
+                init(this, _typeRegistry);
+            }
+            _libs.push_back(fLib);
         }
-        _libs.push_back(fLib);
+        catch (std::runtime_error ex) {
+            throw simph::kern::ExLibraryNotFound(this, name);
+            // std::cout << ex.GetMessage() << std::endl;
+        }
     }
 }
 // ..........................................................
@@ -427,8 +435,29 @@ void Simulator::schedule(std::string modelName, std::string entryPoint, uint32_t
     GetScheduler()->AddSimulationTimeEvent(model->GetEntryPoint(entryPoint.c_str()), 0, period, -1);
 };
 // ..........................................................
-Smp::IComponent* Simulator::createSmpModel(Smp::String8 uuidStr, Smp::String8 name, Smp::String8 description) {
-    return CreateInstance(Smp::Uuid(uuidStr), name, description, this);
+Smp::IComponent* Simulator::createSmpModel(Smp::String8 typeName, Smp::String8 name, Smp::String8 description) {
+    Smp::IComponent* res = nullptr;
+    for (auto fac : _compFactories) {
+        if (std::string(fac->GetTypeName()) == std::string(typeName)
+            || std::string(fac->GetName()) == std::string(typeName)) {
+            res = fac->CreateInstance(name, description, this);
+            // TODO is it required to add new instance in a container when
+            // the parent is set?
+            if (dynamic_cast<Smp::IModel*>(res)) {
+                _models->AddComponent(res);
+            }
+            if (dynamic_cast<Smp::IService*>(res)) {
+                _services->AddComponent(res);
+            }
+            // TODO check it is needed to pulish/configure/connect immediately
+            // according to current simulator state.
+            break;
+        }
+    }
+
+    // When no factory is found, Smp header tels to return null. So nothing
+    // particular to do since res is initialized as nullptr.
+    return res;
 }
 
 }  // namespace kern
