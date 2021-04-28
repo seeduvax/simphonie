@@ -8,7 +8,6 @@
  * $Date$
  */
 #include "simph/kern/Resolver.hpp"
-#include <regex>
 #include "Smp/IComposite.h"
 #include "Smp/ISimulator.h"
 #include "simph/kern/Publication.hpp"
@@ -43,6 +42,46 @@ Resolver::~Resolver() {
     delete _root;
 }
 // --------------------------------------------------------------------
+
+// ..........................................................
+Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
+    Smp::IObject* res = nullptr;
+    Publication* p = from;
+    std::string input = path;
+
+    std::vector<std::string> SlashPath = HashString(input, "/");
+    // Hash slash delimiters
+    for (std::string itr : SlashPath) {
+        Smp::IObject* o = nullptr;
+        // Exclude double dot delimiter (get parent)
+        if (itr == "..") {
+            auto it = _publications.find(p->GetParent());
+            p = it == _publications.end() ? nullptr : it->second;
+            res = p != nullptr ? p->getPubObj() : nullptr;
+        }
+        else {
+            // Hash dot delimiters
+            std::vector<std::string> DotPath = HashString(itr, "[.]");
+            for (std::string itr2 : DotPath) {
+                o = p->getChild(itr2.c_str());
+                if (o != nullptr) {
+                    p = dynamic_cast<Publication*>(o);
+                    // a field has a dedicated publication
+                    // an entryppoint has no dedicated publication
+                    res = p != nullptr ? p->getPubObj() : o;
+                }
+                else {
+                    p = nullptr;
+                    res = nullptr;
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
+/*
 // ..........................................................
 Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
     Smp::IObject* res = nullptr;
@@ -78,6 +117,8 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
     }
     return res;
 }
+*/
+
 // ..........................................................
 Smp::IObject* Resolver::ResolveAbsolute(Smp::String8 absolutePath) {
     return resolve(absolutePath, _root);

@@ -11,6 +11,7 @@
 #define __simph_kern_Resolver_HPP__
 
 #include <map>
+#include <regex>
 #include "Smp/Publication/ITypeRegistry.h"
 #include "Smp/Services/IResolver.h"
 #include "simph/kern/IEntryPointPublisher.hpp"
@@ -46,6 +47,18 @@ public:
     const Smp::IPublication* getPublication(const Smp::IObject* obj) const;
 
     void dump();
+
+    // TODO : Why call don't works in cpp?
+    inline std::vector<std::string> HashString(std::string path, std::string delimiter) {
+        std::vector<std::string> composedPath;
+        std::regex rgx(delimiter);
+        std::sregex_token_iterator iter(path.begin(), path.end(), rgx, -1);
+        std::sregex_token_iterator end;
+        for (; iter != end; ++iter) {
+            composedPath.push_back(*iter);
+        }
+        return composedPath;
+    }
 
 private:
     Publication* _root;
