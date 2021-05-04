@@ -27,11 +27,11 @@ void Failure::Fail() {
     else {
         // TODO
         doFail();
+        _failed = true;
     }
 }
 // ..........................................................
 void Failure::doFail() {
-    _failed = true;
 }
 // ..........................................................
 void Failure::Unfail() {
@@ -41,11 +41,11 @@ void Failure::Unfail() {
     else {
         // TODO
         doUnfail();
+        _failed = false;
     }
 }
 // ..........................................................
 void Failure::doUnfail() {
-    _failed = false;
 }
 
 Smp::Bool Failure::IsFailed() const {
