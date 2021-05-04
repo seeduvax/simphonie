@@ -32,7 +32,6 @@ public:
     // Smp::InvalidParameterValue implementation
     Smp::String8 GetParameterName() const noexcept override;
     Smp::AnySimple GetValue() const noexcept override;
-
 private:
     const Smp::String8 _pName;
     Smp::AnySimple _value;
