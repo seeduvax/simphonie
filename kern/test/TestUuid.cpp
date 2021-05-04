@@ -31,6 +31,7 @@ public:
 #define TUUID "90854492-4254-11e9-94be-7b7bf5d77665"
         TRACE("" << TUUID);
         Smp::Uuid uuid(TUUID);
+        TRACE("" << uuid);
         TRACE("" << std::hex << uuid.Data1);
         TRACE("" << std::hex << uuid.Data2[0]);
         TRACE("" << std::hex << uuid.Data2[1]);

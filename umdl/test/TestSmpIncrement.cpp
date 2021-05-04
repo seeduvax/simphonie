@@ -8,9 +8,10 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "Smp/IField.h"
 #include "Smp/IDataflowField.h"
+#include "Smp/IField.h"
 #include "simph/kern/Field.hpp"
+#include "simph/kern/Resolver.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/Simulator.hpp"
 #include "simph/sys/Logger.hpp"
@@ -90,7 +91,6 @@ public:
         CPPUNIT_ASSERT(step != nullptr);
 
         output->Connect(input);
-
         scheduler->AddSimulationTimeEvent(step,
                                           0,  // 0ms offset
                                           1000000,  // 1000000ns period
