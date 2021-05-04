@@ -18,7 +18,7 @@ ExLibraryNotFound::ExLibraryNotFound(const Smp::IObject* sender, Smp::String8 li
     setName("LibraryNotFound");
     setSender(sender);
     std::ostringstream d;
-    d << "Library " << libraryname << " can't be find";
+    d << "Library " << libraryname << " wasn't found";
     setDescription(d.str().c_str());
     setMessage();
 }
