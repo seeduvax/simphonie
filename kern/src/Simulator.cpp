@@ -159,11 +159,11 @@ void Simulator::Initialise() {
 // ..........................................................
 void Simulator::doPublish(Smp::IComponent* comp) {
     if (comp->GetState() == Smp::ComponentStateKind::CSK_Created) {
-        LOGI("Publishing component : " << comp->GetName());
+        LOGI("Publishing component : " << comp->GetName() << " " << comp->GetState());
         comp->Publish(_resolver->publish(comp));
     }
     else {
-        // TODO add Smpc expcetion ExInvalidComponentState
+        // TODO add Smpc exception ExInvalidComponentState
     }
 }
 // ..........................................................
@@ -185,7 +185,7 @@ void Simulator::doConfigure(Smp::IComponent* comp) {
         // TODO recursive call on childs.
     }
     else {
-        // TODO add Smpc expcetion ExInvalidComponentState
+        // TODO add Smpc exception ExInvalidComponentState
     }
 }
 // ..........................................................
@@ -262,6 +262,8 @@ void Simulator::Restore(Smp::String8 filename) {
 void Simulator::Reconnect(Smp::IComponent* root) {
     if (checkState("Reconnect", Smp::SimulatorStateKind::SSK_Standby)) {
         // TODO is it needed to change state while running this?
+        // Page 89 : After returning from the SMP_LeavingStandby global event, the simulation state is changed to
+        // “Reconnecting” state.
         doConnect(root);
     }
 }
@@ -391,7 +393,6 @@ void Simulator::LoadLibrary(Smp::String8 name) {
         }
         catch (std::runtime_error ex) {
             throw simph::kern::ExLibraryNotFound(this, name);
-            // std::cout << ex.GetMessage() << std::endl;
         }
     }
 }

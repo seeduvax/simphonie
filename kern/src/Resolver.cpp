@@ -8,7 +8,9 @@
  * $Date$
  */
 #include "simph/kern/Resolver.hpp"
+#include "Smp/IArrayField.h"
 #include "Smp/IComposite.h"
+#include "Smp/IPublication.h"
 #include "Smp/ISimulator.h"
 #include "simph/kern/Publication.hpp"
 #include "simph/sys/Callback.hpp"
@@ -21,6 +23,7 @@ namespace kern {
 Resolver::Resolver(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : simph::smpdk::Component(name, descr, parent) {
     // Parent should be a Simulator holong already a TypeRegistry...
+    std::cout << parent->GetName() << std::endl;
     _typeRegistry = nullptr;
     auto c = dynamic_cast<Smp::IComposite*>(parent);
     if (c != nullptr) {
@@ -48,7 +51,6 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
     Smp::IObject* res = nullptr;
     Publication* p = from;
     std::string input = path;
-
     std::vector<std::string> SlashPath = HashString(input, "/");
     // Hash slash delimiters
     for (std::string itr : SlashPath) {
@@ -63,16 +65,37 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
             // Hash dot delimiters
             std::vector<std::string> DotPath = HashString(itr, "[.]");
             for (std::string itr2 : DotPath) {
-                o = p->getChild(itr2.c_str());
-                if (o != nullptr) {
-                    p = dynamic_cast<Publication*>(o);
-                    // a field has a dedicated publication
-                    // an entryppoint has no dedicated publication
-                    res = p != nullptr ? p->getPubObj() : o;
-                }
-                else {
-                    p = nullptr;
-                    res = nullptr;
+                std::vector<std::string> BracketPath = HashString(itr2, "[[]");
+                // detect if we're between brackets
+                bool open = false;
+                for (std::string itr3 : BracketPath) {
+                    if (open == true) {
+                        // clean useless ] at the end
+                        itr3.erase(remove(itr3.begin(), itr3.end(), ']'), itr3.end());
+                        // get field
+                        auto field = dynamic_cast<Smp::IArrayField*>(p);
+                        if (field != nullptr) {
+                            o = field->GetItem(std::stoi(itr3));
+                        }
+
+                        // int simph::kern::ArrayField
+                    }
+                    else {
+                        // get child object;
+                        o = p->getChild(itr3.c_str());
+                        if (o != nullptr) {
+                            p = dynamic_cast<Publication*>(o);
+                            // a field has a dedicated publication
+                            // an entryppoint has no dedicated publication
+                            res = p != nullptr ? p->getPubObj() : o;
+                        }
+                        else {
+                            p = nullptr;
+                            res = nullptr;
+                        }
+
+                        open = true;
+                    }
                 }
             }
         }
@@ -80,44 +103,6 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
 
     return res;
 }
-
-/*
-// ..........................................................
-Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
-    Smp::IObject* res = nullptr;
-    Publication* p = from;
-    std::string input = path;
-    std::regex re("/");  // re("\b(?:([.])(?!\1))+\b|[/]") / single . or /
-    const std::sregex_token_iterator end;
-    for (std::sregex_token_iterator it{input.begin(), input.end(), re, -1}; it != end && p != nullptr; ++it) {
-        res = nullptr;
-        if (p != nullptr) {
-            std::string name = *it;
-            Smp::IObject* o = nullptr;  // object published by current publication 'p'
-            if (name == "..") {
-                auto it = _publications.find(p->GetParent());
-                p = it == _publications.end() ? nullptr : it->second;
-                res = p != nullptr ? p->getPubObj() : nullptr;
-            }
-            else {
-                o = p->getChild(name.c_str());
-                if (o != nullptr) {
-                    p = dynamic_cast<Publication*>(o);
-                    // a field has a dedicated publication
-                    // an entryppoint has no dedicated publication
-                    res = p != nullptr ? p->getPubObj() : o;
-                }
-                else {
-                    p = nullptr;
-                    res = nullptr;
-                }
-            }
-            // TODO support '[]' operator on structure field
-        }
-    }
-    return res;
-}
-*/
 
 // ..........................................................
 Smp::IObject* Resolver::ResolveAbsolute(Smp::String8 absolutePath) {

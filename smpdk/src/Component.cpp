@@ -108,6 +108,9 @@ void Component::Connect(Smp::ISimulator* simulator) {
 // ..........................................................
 void Component::disconnect() {}
 void Component::Disconnect() {
+    if (_state != Smp::ComponentStateKind::CSK_Connected) {
+        throw ExInvalidComponentState(this, _state, Smp::ComponentStateKind::CSK_Connected);
+    }
     _simulator = nullptr;
     _logger = nullptr;
     _linkRegistry = nullptr;

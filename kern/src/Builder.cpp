@@ -52,7 +52,16 @@ void Builder::publish(Smp::IPublication* receiver) {
     auto sim = getSimulator();
     for (auto cfg : _loadSmpModelCfgs) {
         sim->LoadLibrary(cfg.library.c_str());
-        sim->CreateInstance(Smp::Uuid(cfg.type.c_str()), cfg.name.c_str(), cfg.description.c_str(), sim);
+        auto simk = dynamic_cast<kern::Simulator*>(sim);
+        auto c = sim->CreateInstance(Smp::Uuid(cfg.type.c_str()), cfg.name.c_str(), cfg.description.c_str(), sim);
+        if (c == nullptr) {
+            c = simk->createSmpModel(cfg.type.c_str(), cfg.name.c_str(), cfg.description.c_str());
+            if (c == nullptr) {
+                std::stringstream ss;
+                ss << "Can't create instance " << cfg.library << " " << cfg.name << " " << cfg.type;
+                throw std::runtime_error(ss.str());
+            }
+        }
     }
 }
 
