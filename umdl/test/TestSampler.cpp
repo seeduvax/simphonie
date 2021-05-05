@@ -37,7 +37,7 @@ public:
 
         auto increment = new SmpIncrement("increment", "increment", &sim);
         sim.AddModel(increment);
-        auto sampler = new Sampler("sampler", "description sampler", &sim, "sampler");
+        auto sampler = new Sampler("sampler", "description sampler", &sim);
         sim.AddModel(sampler);
 
         sim.Publish();

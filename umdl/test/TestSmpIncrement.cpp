@@ -8,7 +8,6 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "Smp/IDataflowField.h"
 #include "Smp/IField.h"
 #include "simph/kern/Field.hpp"
 #include "simph/kern/Resolver.hpp"
