@@ -21,6 +21,16 @@ Sampler::Sampler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     std::string filename = name;
     filename += ".csv";
     _file.open(filename, std::ofstream::out);
+/*
+{comment %id=SDE-001
+Creating the file at that moment on model construction with such naming 
+convention without knowing what is the current directory can be an issue. I
+suggest adding a String8 input to this model to receive the file path to
+use. Then the file creation and 1st line output shall be delayed in
+connect method, that is at a time when the simulator (and its configuration)
+shall have set the value for this input.
+}
+ */ 
 }
 // ..........................................................
 Sampler::~Sampler() {
@@ -29,9 +39,22 @@ Sampler::~Sampler() {
 // ..........................................................
 void Sampler::AddField(simph::kern::Field* field) {
     _fields.push_back(field);
+/*
+{comment %id=SDE-003
+OK for now, will need rework when starting to think about multi-threaded 
+simulation. Only fields from the same scheduling context (written by the same
+thread than the one calling this sampler's step entry point) shall be allowed
+here.
+}
+ */ 
 }
 // ..........................................................
 void Sampler::publish(Smp::IPublication* receiver) {
+/*
+{comment %id=SDE-002
+Too early, write the first line in connect() or in a init entry point.
+}
+ */ 
     _file << "SimulationTime";
     for (kern::Field* field : _fields) {
         _file << ";" << field->GetParent()->GetName() << "." << field->GetName();
