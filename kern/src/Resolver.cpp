@@ -23,12 +23,14 @@ namespace kern {
 Resolver::Resolver(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : simph::smpdk::Component(name, descr, parent) {
     // Parent should be a Simulator holong already a TypeRegistry...
-    std::cout << parent->GetName() << std::endl;
     _typeRegistry = nullptr;
     auto c = dynamic_cast<Smp::IComposite*>(parent);
     if (c != nullptr) {
         _typeRegistry = dynamic_cast<Smp::Publication::ITypeRegistry*>(
             c->GetContainer(Smp::ISimulator::SMP_SimulatorServices)->GetComponent("TypeRegistry"));
+    }
+    if (_typeRegistry == nullptr) {
+        throw std::runtime_error("Cannot find 'TypeRegistry'");
     }
     if (parent != nullptr) {
         _root = new Publication(parent, _typeRegistry);
@@ -69,13 +71,16 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
                 // detect if we're between brackets
                 bool open = false;
                 for (std::string itr3 : BracketPath) {
+                    // clean useless ] at the end
+                    itr3.erase(remove(itr3.begin(), itr3.end(), ']'), itr3.end());
+
                     if (open == true) {
-                        // clean useless ] at the end
-                        itr3.erase(remove(itr3.begin(), itr3.end(), ']'), itr3.end());
                         // get field
-                        auto field = dynamic_cast<Smp::IArrayField*>(p);
+                        auto field = dynamic_cast<Smp::IArrayField*>(o);
+
                         if (field != nullptr) {
                             o = field->GetItem(std::stoi(itr3));
+                            res = o;
                         }
 
                         // int simph::kern::ArrayField
