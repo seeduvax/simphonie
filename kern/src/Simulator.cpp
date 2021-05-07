@@ -43,6 +43,8 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
     _linkRegistry = new LinkRegistry("LinkRegistry", "Link registry service", this);
     TypeRegistry* tr = new TypeRegistry("TypeRegistry", "Type registry service", this);
     _typeRegistry = tr;
+
+    _services->AddComponent(tr);
     _resolver = new Resolver("Resolver", "Objects registry and resolver", this);
     _services->AddComponent(_logger);
     _services->AddComponent(_scheduler);
@@ -56,7 +58,6 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
 }
 // ..........................................................
 Simulator::~Simulator() {
-    delete _typeRegistry;
     for (auto model : *(_models->GetComponents())) {
         delete model;
     }
