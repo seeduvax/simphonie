@@ -37,7 +37,7 @@ public:
 
 private:
     // TODO use configure instead. expose a filename parameter ?
-    void publish(Smp::IPublication* receiver) override;
+    void configure() override;
 
     std::vector<simph::kern::Field*> _fields;
     std::ofstream _file;

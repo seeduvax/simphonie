@@ -31,7 +31,7 @@ void Sampler::AddField(simph::kern::Field* field) {
     _fields.push_back(field);
 }
 // ..........................................................
-void Sampler::publish(Smp::IPublication* receiver) {
+void Sampler::configure() {
     _file << "SimulationTime";
     for (kern::Field* field : _fields) {
         _file << ";" << field->GetParent()->GetName() << "." << field->GetName();
