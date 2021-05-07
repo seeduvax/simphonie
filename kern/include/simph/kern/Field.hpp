@@ -137,7 +137,7 @@ public:
         _itemFields = new TField<T>*[_count];
         for (int i = 0; i < _count; i++) {
             std::ostringstream s;
-            s << "e" << i;
+            s << name << "[" << i << "]";
             _itemFields[i] =
                 new TField<T>(s.str().c_str(), "", viewKind, &(_tData[i]), isState, isInput, isOutput, this);
         }
