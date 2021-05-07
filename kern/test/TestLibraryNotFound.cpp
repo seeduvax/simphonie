@@ -32,7 +32,7 @@ public:
 
     void testLoadableLibrary() {
         std::vector<std::string> lib;
-        lib.push_back("libsimph_umdl.so");
+        lib.push_back("libsimph_sys.so");
         lib.push_back("libsimph_smpdk.so");
         CPPUNIT_ASSERT(testLoadLibraries(lib) == true);
     }
