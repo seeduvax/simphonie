@@ -53,6 +53,89 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
     Smp::IObject* res = nullptr;
     Publication* p = from;
     std::string input = path;
+
+    std::string slashInput = input.substr(0, input.find("/"));
+
+    int dotIdx = slashInput.find(".");
+    std::string dotInput = slashInput.substr(0, dotIdx);
+
+    std::string bracketInput1 = dotInput.substr(0, dotInput.find("["));
+
+    int bracketIdx2 = bracketInput1.find("]");
+    std::string bracketInput2 = bracketInput1.substr(0, bracketIdx2);
+
+    // .. case
+    if (dotIdx == 0 && char(input[1]) == '.') {
+        std::cout << input[0] << input[1] << input[2] << std::endl;
+
+        auto it = _publications.find(p->GetParent());
+        p = it == _publications.end() ? nullptr : it->second;
+        res = p != nullptr ? p->getPubObj() : nullptr;
+
+        // ... or more dot case delete only first dot
+        if (char(input[2]) == '.') {
+            input = input.substr(1, -1);
+        }
+        // ../ case
+        else if (char(input[2]) == '/') {
+            input = input.substr(3, -1);
+        }
+        // .. case
+        else {
+            input = input.substr(2, -1);
+        }
+    }
+    // Bracket case
+    else if (bracketIdx2 != -1) {
+        std::cout << "Bracket : " << bracketInput2 << " " << dotIdx << std::endl;
+        // delete first character ( suppose to be '[' )
+        bracketInput2.erase(0, 1);
+
+        // get field
+        auto field = dynamic_cast<Smp::IArrayField*>(from);
+
+        if (field != nullptr) {
+            res = field->GetItem(std::stoi(bracketInput2));
+        }
+
+        // input = input.substr(bracketIdx2, -1);
+        // delete [XX].   +2 for []. characters
+        // input = bracketIdx2 != -1 ? input.substr(bracketIdx2, -1) : input.substr(bracketInput.size()+3,-1);
+        input = input.substr(input.find_first_not_of(bracketInput2) + 1);
+        // TODO to rework delete potential serparator after bracket
+        if (char(input[0] == '.') || char(input[0] == '/')) {
+            input = input.substr(2);
+        }
+    }
+    // Publication case
+    else {
+        std::cout << "Publication : " << dotInput << " " << dotIdx << " " << &p << std::endl;
+        // get child object;
+        Smp::IObject* o = p->getChild(dotInput.c_str());
+        if (o != nullptr) {
+            p = dynamic_cast<Publication*>(o);
+            // a field has a dedicated publication
+            // an entryppoint has no dedicated publication
+            res = p != nullptr ? p->getPubObj() : o;
+        }
+        else {
+            p = nullptr;
+            res = nullptr;
+        }
+
+        // input = bracketIdx2 != -1 ? input.substr(bracketIdx2, -1) : input.substr(dotInput.size(),-1);
+        input = input.substr(dotInput.size());
+        // TODO to rework delete potential serparator after bracket
+        if (char(input[0] == '.') || char(input[0] == '/')) {
+            input = input.substr(1);
+        }
+    }
+
+    if (input.size() > 0) {
+        simph::kern::Publication* child = dynamic_cast<simph::kern::Publication*>(res);
+        res = resolve(input.c_str(), child);
+    }
+    /*
     std::vector<std::string> SlashPath = HashString(input, "/");
     // Hash slash delimiters
     for (std::string itr : SlashPath) {
@@ -105,6 +188,7 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
             }
         }
     }
+    */
 
     return res;
 }
