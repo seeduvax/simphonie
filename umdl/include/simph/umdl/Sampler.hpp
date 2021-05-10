@@ -35,10 +35,10 @@ public:
 
     void step() override;
 
-private:
-    // TODO use configure instead. expose a filename parameter ?
-    void configure() override;
+protected:
+    void initColumn();
 
+private:
     std::vector<simph::kern::Field*> _fields;
     std::ofstream _file;
 };

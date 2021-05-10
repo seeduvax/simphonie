@@ -11,6 +11,7 @@
 #include <fstream>
 #include <iostream>
 #include "Smp/ISimulator.h"
+#include "simph/sys/Callback.hpp"
 
 namespace simph {
 namespace umdl {
@@ -31,6 +32,9 @@ Sampler::Sampler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     shall have set the value for this input.
     }
      */
+    auto initColumnEP = simph::sys::Callback::create(&Sampler::initColumn, this);
+    addEP(std::move(initColumnEP), "initColumn", "Init Entry point that Initialize column headers");
+    getSimulator()->AddInitEntryPoint(this->GetEntryPoint("initColumn"));
 }
 // ..........................................................
 Sampler::~Sampler() {
@@ -49,12 +53,7 @@ void Sampler::AddField(simph::kern::Field* field) {
      */
 }
 // ..........................................................
-void Sampler::configure() {
-    /*
-    {comment %id=SDE-002
-    Too early, write the first line in connect() or in a init entry point.
-    }
-     */
+void Sampler::initColumn() {
     _file << "SimulationTime";
     for (kern::Field* field : _fields) {
         _file << ";" << field->GetParent()->GetName() << "." << field->GetName();
