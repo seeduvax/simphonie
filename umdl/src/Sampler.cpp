@@ -42,7 +42,15 @@ Sampler::~Sampler() {
 }
 // ..........................................................
 void Sampler::AddField(simph::kern::Field* field) {
-    _fields.push_back(field);
+    if (dynamic_cast<Smp::IArrayField*>(field) != nullptr) {
+        Smp::IArrayField* fieldArray = dynamic_cast<Smp::IArrayField*>(field);
+        for (int idx = 0; idx < fieldArray->GetSize(); idx++) {
+            _fields.push_back(dynamic_cast<simph::kern::Field*>(fieldArray->GetItem(idx)));
+        }
+    }
+    else {
+        _fields.push_back(field);
+    }
     /*
     {comment %id=SDE-003
     OK for now, will need rework when starting to think about multi-threaded

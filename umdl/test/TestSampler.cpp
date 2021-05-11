@@ -8,6 +8,7 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
+#include "simph/kern/Resolver.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/Simulator.hpp"
 #include "simph/sys/Logger.hpp"
@@ -34,6 +35,14 @@ public:
     void testSampler() {
         Simulator sim;
         auto scheduler = dynamic_cast<Scheduler*>(sim.GetScheduler());
+        auto resolver = dynamic_cast<Resolver*>(sim.GetResolver());
+
+        simph::smpdk::Component obj1("obj1", "test obj 1", &sim);
+        Smp::IPublication* q = resolver->publish(&obj1);
+        CPPUNIT_ASSERT(q != nullptr);
+
+        Smp::Int32 iArray[] = {12, 17, 42};
+        q->PublishArray("iArray", "test int array", 3, iArray, Smp::PrimitiveTypeKind::PTK_Int32);
 
         auto increment = new SmpIncrement("increment", "increment", &sim);
         sim.AddModel(increment);
@@ -47,6 +56,8 @@ public:
         CPPUNIT_ASSERT(input != nullptr);
         auto output = dynamic_cast<Field*>(sim.GetResolver()->ResolveAbsolute("increment.output"));
         CPPUNIT_ASSERT(output != nullptr);
+        auto arrayfield = dynamic_cast<Field*>(sim.GetResolver()->ResolveAbsolute("obj1.iArray"));
+        CPPUNIT_ASSERT(arrayfield != nullptr);
         auto stepIncrement = dynamic_cast<EntryPoint*>(sim.GetResolver()->ResolveAbsolute("increment.step"));
         CPPUNIT_ASSERT(stepIncrement != nullptr);
         output->Connect(input);
@@ -55,6 +66,7 @@ public:
         CPPUNIT_ASSERT(stepSampler != nullptr);
         sampler->AddField(input);
         sampler->AddField(output);
+        sampler->AddField(arrayfield);
         sim.Connect();
 
         scheduler->AddSimulationTimeEvent(stepIncrement,
