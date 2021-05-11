@@ -161,7 +161,14 @@ void Simulator::Initialise() {
 void Simulator::doPublish(Smp::IComponent* comp) {
     if (comp->GetState() == Smp::ComponentStateKind::CSK_Created) {
         LOGI("Publishing component : " << comp->GetName() << " " << comp->GetState());
-        comp->Publish(_resolver->publish(comp));
+        auto pub = dynamic_cast<Publication*>(_resolver->publish(comp));
+        comp->Publish(pub);
+        Smp::IEntryPointPublisher* epp = dynamic_cast<Smp::IEntryPointPublisher*>(comp);
+        if (epp != nullptr) {
+            for (auto ep : *(epp->GetEntryPoints())) {
+                pub->addChild(ep);
+            }
+        }
     }
     else {
         // TODO add Smpc exception ExInvalidComponentState

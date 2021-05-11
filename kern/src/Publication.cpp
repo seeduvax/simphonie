@@ -40,12 +40,12 @@ Publication::Publication(Smp::IObject* toPublish, Smp::Publication::ITypeRegistr
       _typeRegistry(typeRegistry),
       _fields("fields", "", this),
       _properties("properties", "", this) {
-    Smp::IEntryPointPublisher* epp = dynamic_cast<Smp::IEntryPointPublisher*>(toPublish);
-    if (epp != nullptr) {
-        for (auto ep : *(epp->GetEntryPoints())) {
-            addChild(ep);
-        }
-    }
+    // Smp::IEntryPointPublisher* epp = dynamic_cast<Smp::IEntryPointPublisher*>(toPublish);
+    // if (epp != nullptr) {
+    //    for (auto ep : *(epp->GetEntryPoints())) {
+    //        addChild(ep);
+    //    }
+    //}
 }
 // ..........................................................
 Publication::~Publication() {
