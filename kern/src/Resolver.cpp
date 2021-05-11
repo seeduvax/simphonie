@@ -11,6 +11,7 @@
 #include "Smp/IArrayField.h"
 #include "Smp/IComposite.h"
 #include "Smp/IPublication.h"
+#include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
 #include "simph/kern/Publication.hpp"
 #include "simph/sys/Callback.hpp"
@@ -49,9 +50,9 @@ Resolver::~Resolver() {
 // --------------------------------------------------------------------
 
 // ..........................................................
-Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
+Smp::IObject* Resolver::resolve(Smp::String8 path, Smp::IObject* from) {
     Smp::IObject* res = nullptr;
-    Publication* p = from;
+    Smp::IObject* obj = from;
     std::string input = path;
 
     std::string slashInput = input.substr(0, input.find("/"));
@@ -66,11 +67,12 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
 
     // .. case
     if (dotIdx == 0 && char(input[1]) == '.') {
-        std::cout << input[0] << input[1] << input[2] << std::endl;
+        Publication* p = dynamic_cast<Publication*>(obj);
 
         auto it = _publications.find(p->GetParent());
         p = it == _publications.end() ? nullptr : it->second;
         res = p != nullptr ? p->getPubObj() : nullptr;
+        obj = dynamic_cast<Smp::IObject*>(p);
 
         // ... or more dot case delete only first dot
         if (char(input[2]) == '.') {
@@ -87,108 +89,42 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Publication* from) {
     }
     // Bracket case
     else if (bracketIdx2 != -1) {
-        std::cout << "Bracket : " << bracketInput2 << " " << dotIdx << std::endl;
-        // delete first character ( suppose to be '[' )
-        bracketInput2.erase(0, 1);
-
         // get field
         auto field = dynamic_cast<Smp::IArrayField*>(from);
-
         if (field != nullptr) {
-            res = field->GetItem(std::stoi(bracketInput2));
+            obj = field->GetItem(std::stoi(bracketInput2));
         }
+        res = obj;
 
-        // input = input.substr(bracketIdx2, -1);
-        // delete [XX].   +2 for []. characters
-        // input = bracketIdx2 != -1 ? input.substr(bracketIdx2, -1) : input.substr(bracketInput.size()+3,-1);
-        input = input.substr(input.find_first_not_of(bracketInput2) + 1);
-        // TODO to rework delete potential serparator after bracket
-        if (char(input[0] == '.') || char(input[0] == '/')) {
-            input = input.substr(2);
-        }
+        // delete next delimiter if it's not the last element of the path
+        input = input.size() > bracketInput2.size() ? input.substr(bracketInput2.size() + 1) : "";
     }
     // Publication case
     else {
-        std::cout << "Publication : " << dotInput << " " << dotIdx << " " << &p << std::endl;
+        Publication* p = dynamic_cast<Publication*>(obj);
         // get child object;
-        Smp::IObject* o = p->getChild(dotInput.c_str());
-        if (o != nullptr) {
-            p = dynamic_cast<Publication*>(o);
+        obj = p->getChild(bracketInput1.c_str());
+        if (obj != nullptr) {
+            p = dynamic_cast<Publication*>(obj);
             // a field has a dedicated publication
             // an entryppoint has no dedicated publication
-            res = p != nullptr ? p->getPubObj() : o;
+            res = p != nullptr ? p->getPubObj() : obj;
         }
         else {
-            p = nullptr;
             res = nullptr;
         }
 
-        // input = bracketIdx2 != -1 ? input.substr(bracketIdx2, -1) : input.substr(dotInput.size(),-1);
-        input = input.substr(dotInput.size());
-        // TODO to rework delete potential serparator after bracket
-        if (char(input[0] == '.') || char(input[0] == '/')) {
-            input = input.substr(1);
-        }
+        // delete next delimiter if it's not the last element of the path
+        input = input.size() > bracketInput1.size() ? input.substr(bracketInput1.size() + 1) : "";
     }
 
-    if (input.size() > 0) {
-        simph::kern::Publication* child = dynamic_cast<simph::kern::Publication*>(res);
-        res = resolve(input.c_str(), child);
+    if (input.size() > 0 && obj != nullptr) {
+        res = resolve(input.c_str(), obj);
     }
-    /*
-    std::vector<std::string> SlashPath = HashString(input, "/");
-    // Hash slash delimiters
-    for (std::string itr : SlashPath) {
-        Smp::IObject* o = nullptr;
-        // Exclude double dot delimiter (get parent)
-        if (itr == "..") {
-            auto it = _publications.find(p->GetParent());
-            p = it == _publications.end() ? nullptr : it->second;
-            res = p != nullptr ? p->getPubObj() : nullptr;
-        }
-        else {
-            // Hash dot delimiters
-            std::vector<std::string> DotPath = HashString(itr, "[.]");
-            for (std::string itr2 : DotPath) {
-                std::vector<std::string> BracketPath = HashString(itr2, "[[]");
-                // detect if we're between brackets
-                bool open = false;
-                for (std::string itr3 : BracketPath) {
-                    // clean useless ] at the end
-                    itr3.erase(remove(itr3.begin(), itr3.end(), ']'), itr3.end());
-
-                    if (open == true) {
-                        // get field
-                        auto field = dynamic_cast<Smp::IArrayField*>(o);
-
-                        if (field != nullptr) {
-                            o = field->GetItem(std::stoi(itr3));
-                            res = o;
-                        }
-
-                        // int simph::kern::ArrayField
-                    }
-                    else {
-                        // get child object;
-                        o = p->getChild(itr3.c_str());
-                        if (o != nullptr) {
-                            p = dynamic_cast<Publication*>(o);
-                            // a field has a dedicated publication
-                            // an entryppoint has no dedicated publication
-                            res = p != nullptr ? p->getPubObj() : o;
-                        }
-                        else {
-                            p = nullptr;
-                            res = nullptr;
-                        }
-
-                        open = true;
-                    }
-                }
-            }
-        }
+    // stop if the path is incorrect
+    else if (input.size() > 0) {
+        res = nullptr;
     }
-    */
 
     return res;
 }

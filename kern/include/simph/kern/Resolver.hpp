@@ -47,24 +47,11 @@ public:
     const Smp::IPublication* getPublication(const Smp::IObject* obj) const;
 
     void dump();
-
-    // TODO : Why call don't works in cpp?
-    inline std::vector<std::string> HashString(std::string path, std::string delimiter) {
-        std::vector<std::string> composedPath;
-        std::regex rgx(delimiter);
-        std::sregex_token_iterator iter(path.begin(), path.end(), rgx, -1);
-        std::sregex_token_iterator end;
-        for (; iter != end; ++iter) {
-            composedPath.push_back(*iter);
-        }
-        return composedPath;
-    }
-
 private:
     Publication* _root;
     std::map<const Smp::IObject*, Publication*> _publications;
     Smp::Publication::ITypeRegistry* _typeRegistry;
-    Smp::IObject* resolve(Smp::String8 path, Publication* from);
+    Smp::IObject* resolve(Smp::String8 path, Smp::IObject* from);
 };
 
 }  // namespace kern

@@ -41,24 +41,27 @@ public:
         CPPUNIT_ASSERT(p != nullptr);
         Smp::IPublication* q = resolver.publish(&obj2);
         CPPUNIT_ASSERT(q != nullptr);
-        std::cout << obj1.GetField("to2")->GetName() << std::endl;
+        // FIXME publish fields should be accessible by the component itself   (not nullptr)
+        // CPPUNIT_ASSERT(obj1.GetField("to2") != nullptr);
 
         // publish an array field called 'iArray', size  3
         // that belongs to component 'to2'
-        // Smp::Int32 iArray[] = {12, 17, 42};
-        // q->PublishArray("iArray", "test int array", 3, iArray, Smp::PrimitiveTypeKind::PTK_Int32);
+        Smp::Int32 iArray[] = {12, 17, 42};
+        q->PublishArray("iArray", "test int array", 3, iArray, Smp::PrimitiveTypeKind::PTK_Int32);
 
         // resolver.dump();
-        // CPPUNIT_ASSERT(p != q);
-        // CPPUNIT_ASSERT_EQUAL(p, resolver.publish(&obj1));
-        // CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveAbsolute("plop"));
-        // CPPUNIT_ASSERT_EQUAL((Smp::IObject*)&obj1, resolver.ResolveAbsolute("to1"));
-        // CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveAbsolute("to2"));
+        CPPUNIT_ASSERT(p != q);
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveAbsolute("plop"));
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)&obj1, resolver.ResolveAbsolute("to1"));
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveAbsolute("to2"));
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)&obj1, resolver.ResolveAbsolute("to1/to2/.."));
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)&obj2, resolver.ResolveAbsolute("to1/../to1/to2"));
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)&simu, resolver.ResolveAbsolute("to1/to2/..."));
 
-        // CPPUNIT_ASSERT_EQUAL((Smp::IObject*)&obj2, resolver.ResolveAbsolute("to1/to2"));
-        // CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveRelative("to1", &obj2));
-        // CPPUNIT_ASSERT_EQUAL((Smp::IObject*)&obj2, resolver.ResolveRelative("to2", &obj1));
-        // auto arrField = resolver.ResolveAbsolute("to1.to2.iArray");
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)&obj2, resolver.ResolveAbsolute("to1/to2"));
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveRelative("to1", &obj2));
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)&obj2, resolver.ResolveRelative("to2", &obj1));
+        auto arrField = resolver.ResolveAbsolute("to1.to2.iArray");
 
         // TODO: question why our array fields are a simpleField or forcible field
         // (that exposes 'Force' and 'Setvalue' methods which take an AnySimple as argument )
@@ -66,17 +69,17 @@ public:
         // are the only ones to be considered fallible/forcible ?
         // CPPUNIT_ASSERT(dynamic_cast<Smp::ISimpleField*>(arrField)==nullptr);
 
-        // CPPUNIT_ASSERT(dynamic_cast<Smp::IArrayField*>(arrField) != nullptr);
-        // CPPUNIT_ASSERT_EQUAL((size_t)3, dynamic_cast<Smp::IArrayField*>(arrField)->GetSize());
+        CPPUNIT_ASSERT(dynamic_cast<Smp::IArrayField*>(arrField) != nullptr);
+        CPPUNIT_ASSERT_EQUAL((size_t)3, dynamic_cast<Smp::IArrayField*>(arrField)->GetSize());
 
-        // auto simpleField = resolver.ResolveAbsolute("to1.to2.iArray[2]");
-        // std::cout << "==" << simpleField->GetName() << std::endl;
-        // CPPUNIT_ASSERT(dynamic_cast<Smp::IArrayField*>(simpleField) == nullptr);
-        // CPPUNIT_ASSERT(dynamic_cast<Smp::ISimpleField*>(simpleField) != nullptr);
+        auto simpleField = resolver.ResolveAbsolute("to1.to2.iArray[2]");
+        std::cout << "ptr : " << &simpleField << std::endl;
+        CPPUNIT_ASSERT(dynamic_cast<Smp::IArrayField*>(simpleField) == nullptr);
+        CPPUNIT_ASSERT(dynamic_cast<Smp::ISimpleField*>(simpleField) != nullptr);
 
-        // auto simpleFieldSimple = dynamic_cast<Smp::ISimpleField*>(simpleField)->GetValue();
-        // CPPUNIT_ASSERT_EQUAL(Smp::PrimitiveTypeKind::PTK_Int32, simpleFieldSimple.GetType());
-        // CPPUNIT_ASSERT_EQUAL(42, (int32_t)simpleFieldSimple);
+        auto simpleFieldSimple = dynamic_cast<Smp::ISimpleField*>(simpleField)->GetValue();
+        CPPUNIT_ASSERT_EQUAL(Smp::PrimitiveTypeKind::PTK_Int32, simpleFieldSimple.GetType());
+        CPPUNIT_ASSERT_EQUAL(42, (int32_t)simpleFieldSimple);
     }
 };
 
