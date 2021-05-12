@@ -64,7 +64,14 @@ void Sampler::AddField(simph::kern::Field* field) {
 void Sampler::initColumn() {
     _file << "SimulationTime";
     for (kern::Field* field : _fields) {
-        _file << ";" << field->GetParent()->GetName() << "." << field->GetName();
+        Smp::IObject* parent = field->GetParent();
+        std::string path = field->GetName();
+        // Simulator isn't added to the path
+        while (parent->GetParent() != nullptr) {
+            path = parent->GetName() + ("." + path);
+            parent = parent->GetParent();
+        }
+        _file << ";" << path;
     }
     _file << std::endl;
 }
