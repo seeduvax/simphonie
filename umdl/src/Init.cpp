@@ -15,31 +15,14 @@
 #include "simph/umdl/SmpIncrement.hpp"
 #include "simph/umdl/SysTimeSynchro.hpp"
 
-/*extern "C" {
-    SHARED_FUNCTION bool Initialise(Smp::ISimulator* simulator, Smp::Publication::ITypeRegistry* tReg) {
-        simulator->RegisterFactory(new simph::kern::Factory<simph::umdl::SimTimeProvider>(
-                "SimTimeProvider_Factory","",simulator,
-                            {0x2adfaf7c,0x42ab,0x11e9,0x9feb,0x0f29cca3fa03}));
-        simulator->RegisterFactory(new simph::kern::Factory<simph::umdl::SysTimeSynchro>(
-                "SysTimeSynchro_Factory","",simulator,
-                            {0x969a960a,0x42ab,0x11e9,0x8aa2,0x270a7d28d960}));
-        simulator->RegisterFactory(new simph::kern::Factory<simph::umdl::Logger1D>(
-                "Logger1D_Factory","",simulator,
-                            {0xd9e94d0c,0x42ab,0x11e9,0x8b8e,0x4bc383f9f8bc}));
-        return true;
-    }
-    SHARED_FUNCTION bool Finalise() {
-        return true;
-    }
-}*/
 namespace simph {
 namespace umdl {
 
 REGISTER_SMP_LIBINIT();
-ADD_SMP_FACTORY(SimTimeProvider);
-ADD_SMP_FACTORY(SysTimeSynchro);
-ADD_SMP_FACTORY(Logger1D);
-ADD_SMP_FACTORY(SmpIncrement);
+ADD_SMP_FACTORY("SimTimeProvider", SimTimeProvider);
+ADD_SMP_FACTORY("SysTimeSynchro", SysTimeSynchro);
+ADD_SMP_FACTORY("Logger1D", Logger1D);
+ADD_SMP_FACTORY("SmpIncrement", SmpIncrement);
 
 }  // namespace umdl
 }  // namespace simph

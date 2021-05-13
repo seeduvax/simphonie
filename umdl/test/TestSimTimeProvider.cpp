@@ -17,6 +17,7 @@
 #include "simph/umdl/SimTimeProvider.hpp"
 #include "simph/umdl/SysTimeSynchro.hpp"
 
+#include "simph/smpdk/Utils.hpp"
 #include "simph/sys/Logger.hpp"
 
 namespace test {
@@ -38,8 +39,7 @@ public:
     void testSimTime() {
         simph::kern::Simulator sim;
         sim.LoadLibrary("libsimph_umdl.so");
-        auto mdl = sim.CreateInstance(Smp::Uuid("SimTimeProvider"), "clock", "", nullptr);
-        TRACE("" << Smp::Uuid("SimTimeProvider"))
+        auto mdl = sim.CreateInstance(simph::smpdk::Utils::generateUuid("SimTimeProvider"), "clock", "", nullptr);
         CPPUNIT_ASSERT(mdl != nullptr);
         auto log = sim.AddModel<Logger1D>("log");
         auto sync = sim.AddModel<SysTimeSynchro>("sync");

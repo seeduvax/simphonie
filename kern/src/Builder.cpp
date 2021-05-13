@@ -11,6 +11,7 @@
 #include "simph/kern/Builder.hpp"
 #include <iostream>
 #include "simph/kern/Simulator.hpp"
+#include "simph/smpdk/Utils.hpp"
 #include "simph/sys/Logger.hpp"
 
 namespace simph {
@@ -53,7 +54,8 @@ void Builder::publish(Smp::IPublication* receiver) {
     for (auto cfg : _loadSmpModelCfgs) {
         sim->LoadLibrary(cfg.library.c_str());
         auto simk = dynamic_cast<kern::Simulator*>(sim);
-        auto c = sim->CreateInstance(Smp::Uuid(cfg.type.c_str()), cfg.name.c_str(), cfg.description.c_str(), sim);
+        auto c = sim->CreateInstance(simph::smpdk::Utils::generateUuid(cfg.type.c_str()), cfg.name.c_str(),
+                                     cfg.description.c_str(), sim);
         if (c == nullptr) {
             c = simk->createSmpModel(cfg.type.c_str(), cfg.name.c_str(), cfg.description.c_str());
             if (c == nullptr) {
