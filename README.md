@@ -60,7 +60,6 @@ build features.
 
 - [AcrobatomaticBuildSystem][5]: compilation script, packaging and dependencies 
 management.
-- [git-bug][6]: Distributed bug tracker embedded in Git (may be removed in a near 
 future since a similar feature is developed in AcrobatomaticBuildSystem)
 
 [0]:http://ecss.nl
@@ -68,4 +67,3 @@ future since a similar feature is developed in AcrobatomaticBuildSystem)
 [2]:https://ecss.nl/standards/license-agreement-disclaimer/
 [4]:LICENSE
 [5]:https://github.com/seeduvax/AcrobatomaticBuildSystem
-[6]:https://github.com/MichaelMure/git-bug
