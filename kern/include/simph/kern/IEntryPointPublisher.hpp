@@ -13,6 +13,7 @@
 #include "Smp/IEntryPointPublisher.h"
 #include "simph/kern/EntryPoint.hpp"
 #include "simph/smpdk/Collection.hpp"
+#include "simph/sys/Callback.hpp"
 #include "simph/sys/Runnable.hpp"
 
 namespace simph {
@@ -30,6 +31,12 @@ public:
     inline void addEP(std::unique_ptr<Runnable> runnable, Smp::String8 name, Smp::String8 descr = "") {
         _epList.push_back(new EntryPoint(std::move(runnable), name, descr, this));
     }
+
+    template <typename _Callable, typename... _Args>
+    inline void addEP(Smp::String8 name, Smp::String8 descr, _Callable&& func, _Args&&... args) {
+        return addEP(simph::sys::Callback::create(std::forward<_Callable>(func), std::forward<_Args>(args)...), name,
+                     descr);
+    };
 
     inline const Smp::EntryPointCollection* GetEntryPoints() const override {
         return &_epList;

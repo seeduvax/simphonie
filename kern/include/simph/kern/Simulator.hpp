@@ -98,6 +98,11 @@ public:
 
     Smp::IComponent* createSmpModel(Smp::String8 uuidStr, Smp::String8 name, Smp::String8 description);
 
+    template <class T>
+    T* find(Smp::String8 path) const {
+        return dynamic_cast<T*>(GetResolver()->ResolveAbsolute(path));
+    }
+
 private:
     Smp::SimulatorStateKind _state;
     Collection<Smp::IEntryPoint> _initEntryPoints;

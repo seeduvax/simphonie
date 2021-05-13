@@ -41,7 +41,7 @@ Resolver::Resolver(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
         _root = new Publication(this, _typeRegistry);
         _publications[this] = _root;
     }
-    addEP(std::move(simph::sys::Callback::create(&Resolver::dump, this)), "dump", "List published objects to stdout");
+    addEP("dump", "List published objects to stdout", &Resolver::dump, this);
 }
 // ..........................................................
 Resolver::~Resolver() {
