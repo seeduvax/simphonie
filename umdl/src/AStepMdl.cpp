@@ -18,8 +18,7 @@ using simph::sys::Callback;
 // ..........................................................
 AStepMdl::AStepMdl(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : simph::kern::Component(name, descr, parent) {
-    auto stepCallback = Callback::create(&AStepMdl::step, this);
-    addEP(std::move(stepCallback), "step", "Main model entry point");
+    addEP("step", "Main model entry point", &AStepMdl::step, this);
 }
 // ..........................................................
 AStepMdl::~AStepMdl() {}

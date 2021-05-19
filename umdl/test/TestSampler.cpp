@@ -78,6 +78,8 @@ public:
                                           1000000,  // 1000000ns period
                                           -1);  //
         scheduler->step(10000000);
+
+        sim.find<Smp::IEntryPoint>("sampler.debugPrintFile")->Execute();
     }
 };
 

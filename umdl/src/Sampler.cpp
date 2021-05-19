@@ -12,16 +12,14 @@
 #include <iostream>
 #include "Smp/ISimulator.h"
 #include "simph/sys/Callback.hpp"
+#include "simph/sys/Logger.hpp"
 
 namespace simph {
 namespace umdl {
 // --------------------------------------------------------------------
 // ..........................................................
 Sampler::Sampler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : AStepMdl(name, descr, parent), _fields(), _file() {
-    std::string filename = name;
-    filename += ".csv";
-    _file.open(filename, std::ofstream::out);
+    : AStepMdl(name, descr, parent), _fields(), _file(), _fileName(std::string(GetName()) + ".csv") {
     /*
     {comment %id=SDE-001
     Creating the file at that moment on model construction with such naming
@@ -32,9 +30,12 @@ Sampler::Sampler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     shall have set the value for this input.
     }
      */
-    auto initColumnEP = simph::sys::Callback::create(&Sampler::initColumn, this);
-    addEP(std::move(initColumnEP), "initColumn", "Init Entry point that Initialize column headers");
+    addEP("initColumn", "Init Entry point that Initialize column headers", &Sampler::initColumn, this);
     getSimulator()->AddInitEntryPoint(this->GetEntryPoint("initColumn"));
+
+    addEP("debugPrintFile", "", [=]() {
+        TRACE("Sampler::debugPrintFile: " << _fileName << "\n" << std::ifstream(_fileName).rdbuf());
+    });
 }
 // ..........................................................
 Sampler::~Sampler() {
@@ -58,13 +59,27 @@ void Sampler::AddField(simph::kern::Field* field) {
     thread than the one calling this sampler's step entry point) shall be allowed
     here.
     }
+    {comment %id=AA-001
+    No SDE, it should remain simple.
+    Sampler shouldn't read fields that are refreshed by another sequencer than the one that calls its step entrypoint.
+    Consider using several samplers, one for each sequencer (single threaded context), and may merge results at reset.
+    }
      */
 }
 // ..........................................................
 void Sampler::initColumn() {
-    _file << "SimulationTime";
+    _file.open(_fileName, std::ofstream::out);
+    _file << "#SimulationTime";
     for (kern::Field* field : _fields) {
-        _file << ";" << field->GetParent()->GetName() << "." << field->GetName();
+        Smp::IObject* parent = field->GetParent();
+        std::string path = field->GetName();
+        // TODO  (AA to Mael) please consider developping an helper to compute iobject's fullpath
+        // Simulator isn't added to the path
+        while (parent->GetParent() != nullptr) {
+            path = parent->GetName() + ("." + path);
+            parent = parent->GetParent();
+        }
+        _file << ";" << path;
     }
     _file << std::endl;
 }

@@ -14,6 +14,7 @@
 #include <memory>
 #include "Smp/IFactory.h"
 #include "simph/smpdk/Object.hpp"
+#include "simph/smpdk/Utils.hpp"
 #include "simph/sys/DlDef.h"
 #include "simph/sys/RttiUtil.hpp"
 
@@ -28,7 +29,12 @@ class Factory : public Object, virtual public Smp::IFactory {
 public:
     Factory(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, Smp::Uuid uuid)
         : Object(name, descr, parent), _uuid(uuid), _type(simph::sys::RttiUtil::demangle(typeid(T).name())) {}
+
+    Factory(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
+        : Factory(name, descr, parent, smpdk::Utils::generateUuid(name)) {}
+
     virtual ~Factory() {}
+
     // Smp::IFactory implementation
     Smp::Uuid GetUuid() const {
         return _uuid;
@@ -85,13 +91,11 @@ private:
     }                                                                                                   \
     }
 
-#define ADD_SMP_FACTORY(factoryType)                                                                \
-    static int static_add_##factoryType{[&] {                                                       \
-        _createFactoryFns.push_back([&](Smp::ISimulator* simulator) {                               \
-            return new simph::kern::Factory<factoryType>("" #factoryType "_factory", "", simulator, \
-                                                         Smp::Uuid(#factoryType));                  \
-        });                                                                                         \
-        return 1;                                                                                   \
+#define ADD_SMP_FACTORY(name, factoryType)                                                                             \
+    static int static_add_##factoryType{[&] {                                                                          \
+        _createFactoryFns.push_back(                                                                                   \
+            [&](Smp::ISimulator* simulator) { return new simph::kern::Factory<factoryType>(name, name, simulator); }); \
+        return 1;                                                                                                      \
     }()};
 
 }  // namespace kern

@@ -13,6 +13,7 @@
 #include "simph/kern/Resolver.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/Simulator.hpp"
+#include "simph/smpdk/Utils.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/umdl/SmpIncrement.hpp"
 #include "sol/sol.hpp"
@@ -73,8 +74,8 @@ public:
         }
         else {
             sim.LoadLibrary("libsimph_umdl.so");
-            increment = dynamic_cast<Smp::IEntryPointPublisher*>(
-                sim.CreateInstance(Smp::Uuid("SmpIncrement"), "increment", "description Increment", &sim));
+            increment = dynamic_cast<Smp::IEntryPointPublisher*>(sim.CreateInstance(
+                simph::smpdk::Utils::generateUuid("SmpIncrement"), "increment", "description Increment", &sim));
         }
         CPPUNIT_ASSERT(increment != nullptr);
 

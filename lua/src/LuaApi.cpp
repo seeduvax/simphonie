@@ -12,6 +12,7 @@
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/Simulator.hpp"
 #include "simph/lua/LuaBuilder.hpp"
+#include "simph/smpdk/Utils.hpp"
 #include "sol/sol.hpp"
 
 // exemple de meta new_index
@@ -110,6 +111,7 @@ int luaopen_libsimph_lua(lua_State* L) {
     lua.open_libraries(sol::lib::base);
     auto t = lua.create_table();
     t["Uuid"] = [](std::string c) { return Smp::Uuid(c.c_str()); };
+    t["GenerateUuid"] = [](std::string c) { return simph::smpdk::Utils::generateUuid(c.c_str()); };
     auto nsSmp = t["Smp"].get_or_create<sol::table>();
 
     // clang-format off

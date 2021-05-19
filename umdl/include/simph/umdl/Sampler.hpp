@@ -41,6 +41,7 @@ protected:
 private:
     std::vector<simph::kern::Field*> _fields;
     std::ofstream _file;
+    std::string _fileName;
 };
 
 }  // namespace umdl

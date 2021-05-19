@@ -49,7 +49,9 @@ public:
         Smp::Int32 iArray[] = {12, 17, 42};
         q->PublishArray("iArray", "test int array", 3, iArray, Smp::PrimitiveTypeKind::PTK_Int32);
 
-        // resolver.dump();
+        TRACE("==>")
+        resolver.GetEntryPoint("dump")->Execute();
+
         CPPUNIT_ASSERT(p != q);
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveAbsolute("plop"));
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)&obj1, resolver.ResolveAbsolute("to1"));
