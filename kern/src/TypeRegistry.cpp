@@ -19,13 +19,6 @@
 #include "simph/kern/Type.hpp"
 #include "simph/sys/Logger.hpp"
 
-namespace Smp {
-std::ostream& operator<<(std::ostream& os, const PrimitiveTypeKind& obj) {
-    os << (Smp::Int32)obj << "(" << simph::kern::TypeRegistry::getPrimitiveTypeName(obj) << ")";
-    return os;
-}
-}  // namespace Smp
-
 namespace simph {
 namespace kern {
 // --------------------------------------------------------------------

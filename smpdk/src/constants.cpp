@@ -1,10 +1,51 @@
 #include "Smp/ISimulator.h"
+#include "Smp/PrimitiveTypes.h"
 #include "Smp/Services/IEventManager.h"
 #include "Smp/Services/ILogger.h"
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Uuid.h"
 
 namespace Smp {
+
+std::ostream& operator<<(std::ostream& os, const PrimitiveTypeKind& obj) {
+    switch (obj) {
+        case Smp::PrimitiveTypeKind::PTK_None:
+            os << "PTK_None";
+        case Smp::PrimitiveTypeKind::PTK_Char8:
+            os << "PTK_Char8";
+        case Smp::PrimitiveTypeKind::PTK_Bool:
+            os << "PTK_Bool";
+        case Smp::PrimitiveTypeKind::PTK_Int8:
+            os << "PTK_Int8";
+        case Smp::PrimitiveTypeKind::PTK_Int16:
+            os << "PTK_Int16";
+        case Smp::PrimitiveTypeKind::PTK_Int32:
+            os << "PTK_Int32";
+        case Smp::PrimitiveTypeKind::PTK_Int64:
+            os << "PTK_Int64";
+        case Smp::PrimitiveTypeKind::PTK_UInt8:
+            os << "PTK_UInt8";
+        case Smp::PrimitiveTypeKind::PTK_UInt16:
+            os << "PTK_UInt16";
+        case Smp::PrimitiveTypeKind::PTK_UInt32:
+            os << "PTK_UInt32";
+        case Smp::PrimitiveTypeKind::PTK_UInt64:
+            os << "PTK_UInt64";
+        case Smp::PrimitiveTypeKind::PTK_Float32:
+            os << "PTK_Float32";
+        case Smp::PrimitiveTypeKind::PTK_Float64:
+            os << "PTK_Float64";
+        case Smp::PrimitiveTypeKind::PTK_Duration:
+            os << "PTK_Duration";
+        case Smp::PrimitiveTypeKind::PTK_DateTime:
+            os << "PTK_DateTime";
+        case Smp::PrimitiveTypeKind::PTK_String8:
+            os << "PTK_String8";
+        default:
+            os << "InvalidType";
+    }
+    return os;
+}
 // --------------------------------------------------------------------
 // ..........................................................
 constexpr Uuid Smp::Uuids::Uuid_Char8;
