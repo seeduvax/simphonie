@@ -8,6 +8,10 @@ test_debian10:
 # Deployment jobs triggered only at new tag push
 deploy_debian10:
     extends: .deploy_debian10
+    after_script:
+      - make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
 
 deploy_raspberry:
     extends: .deploy_raspberry
+    after_script:
+      - make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
