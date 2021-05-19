@@ -1,110 +1,13 @@
-stages:
-    - test
-    - deploy
+include:
+    - remote: "http://ftfdsvp245.fr.st.space.corp/astre/astre-components/-/raw/absplus-1.3/git/template_astre_runner.yml"
 
-.task:
-    variables:
-       GIT_STRATEGY: clone
-       GIT_CHECKOUT: "true"
-       GIT_CLEAN_FLAGS: -ffdx -e cache/
-       GIT_DEPTH: "3"
-       GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_JOB_ID/$CI_JOB_STAGE
-    before_script:
-      - echo "before_script"
-      # following is necessary in docker agent
-      #        - eval $(ssh-agent -s)
-      #        - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-      #        - mkdir -p ~/.ssh
-      #        - chmod 700 ~/.ssh
-      #        - git config --global user.email "$GITLAB_USER_EMAIL"
-      #        - git config --global user.name "$GITLAB_USER_NAME"
-      #        - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-
-# TEST JOBS
-.test:
-    extends: .task
-    stage: test
-    variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=1"
-    script: 
-        - echo make docker.cint $DOCKER_IMAGE MAKEARGS="$TASK_OPTVAR"
-        - make docker.cint $DOCKER_IMAGE MAKEARGS="$TASK_OPTVAR"
-        - egrep -ri 'errors="[1-9]+' build/unit_test_results && exit 1 || echo "ok"
-        - egrep -ri 'failures="[1-9]+' build/unit_test_results && exit 1 || echo "ok"
-    only:
-        - branches
-    artifacts:
-        paths:
-            - build/unit_test_results/*.xml
-        reports:
-          junit: build/unit_test_results/*.xml
-
+# Test jobs triggered only at branch push
 test_debian10:
-    extends: .test
-    variables:
-        DOCKER_IMAGE: "astre/debian_10"
+    extends: .test_debian10
 
-test_opensuse15:
-    extends: .test
-    variables:
-        DOCKER_IMAGE: "astre/opensuse_15"
-
-test_raspberry:
-    stage: test
-    only:
-        - branches
-    variables:
-       GIT_STRATEGY: clone
-       GIT_CHECKOUT: "true"
-       GIT_CLEAN_FLAGS: -ffdx -e cache/
-       GIT_DEPTH: "3"
-       GIT_CLONE_PATH: $CI_BUILDS_DIR
-       TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=1 WORKSPACE_IS_TAG=true"
-    before_script:
-      - echo "before_script (deploy shell)"
-    script:
-        - echo make cint $TASK_OPTVAR;
-        - make cint $TASK_OPTVAR;
-    tags:
-        - raspberry
-
-# DEPLOY JOBS
-.deploy:
-    extends: .task
-    stage: deploy
-    only:
-        - tags
-    variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=1 WORKSPACE_IS_TAG=true"
-    script:
-        - echo make docker.pubdist $DOCKER_IMAGE MAKEARGS="$TASK_OPTVAR"
-        - make docker.pubdist $DOCKER_IMAGE MAKEARGS="$TASK_OPTVAR";
-
-deploy_opensuse15:
-    extends: .deploy
-    variables:
-        DOCKER_IMAGE: "astre/opensuse_15"
-
+# Deployment jobs triggered only at new tag push
 deploy_debian10:
-    extends: .deploy
-    variables:
-        DOCKER_IMAGE: "astre/debian_10"
+    extends: .deploy_debian10
 
 deploy_raspberry:
-    stage: deploy
-    only:
-        - tags
-    variables:
-       GIT_STRATEGY: clone
-       GIT_CHECKOUT: "true"
-       GIT_CLEAN_FLAGS: -ffdx -e cache/
-       GIT_DEPTH: "3"
-       GIT_CLONE_PATH: $CI_BUILDS_DIR
-       TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=1 WORKSPACE_IS_TAG=true"
-    before_script:
-      - echo "before_script (deploy shell)"
-    script:
-        - echo make pubdist MAKEARGS="$TASK_OPTVAR";
-        - make pubdist MAKEARGS="$TASK_OPTVAR";
-    tags:
-        - raspberry
+    extends: .deploy_raspberry
