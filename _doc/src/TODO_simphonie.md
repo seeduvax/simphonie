@@ -13,10 +13,10 @@ Module|Simphonie|Méthode vides|Implémentation à revoir|Priorité
 |kern|Scheduler||schedule : questionning entrypoint change its own simulation time<br />• CreateInstance : Gérer les noms invalid, Smp::InvalidObjectName<br />• dépendance Scheduler - TimeKeeper|2|
 |kern|LinkRegistry|ILinkingComponent à appeler pour supprimer les links||4|
 |kern|Persist|• Store<br />• Restore||4|
-|kern|Resolver|• GetEntryPoint appelé par  getasbolute<br />• gestion data ou tableau||1|
+|kern|Resolver|• GetEntryPoint appelé par  getasbolute<br />• gestion data ou tableau||<span style="color:green">OK</span>|
 |kern|Factory||CreateInstance : Gérer les noms invalid, Smp::InvalidObjectName|<span style="color:green">OK</span>|
 |kern|TimeKeeper||time management in public should be manage by a simulation|2|
-|smpdk|Uuid||check if uuid decryption is not breakable<br />• faciliter création à partir string|1|
+|smpdk|Uuid||check if uuid decryption is not breakable<br />• faciliter création à partir string|<span style="color:green">OK</span>|
 |smpdk|Component||Disconnect() : not complete (deallocation)|1|
 |smpdk|AnySimple||Opérateur ostream|<span style="color:green">OK</span>|
 |smpdk|Object||checkName (questioning forbidden words)<br />questionning private/protected functions|4|
