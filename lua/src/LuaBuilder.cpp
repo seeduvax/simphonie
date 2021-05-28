@@ -31,6 +31,8 @@ void LuaBuilder::setConfiguration(sol::table config) {
     loadConnections(config["connections"]);
     LOGI("loading schedules")
     loadSchedules(config["schedules"]);
+    LOGI("loading samplers")
+    loadSamplers(config["samplers"]);
 }
 // ..........................................................
 void LuaBuilder::loadParameters(sol::table parameters) {
@@ -59,6 +61,26 @@ void LuaBuilder::loadInitializations(sol::table initializations) {
         // TODO identify value type : bool, float, int, string, uint32...
         auto val = Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float64, (double)value["value"]);
         _builder.AddLoadInitCfg({path, val});
+    }
+}
+// ..........................................................
+void LuaBuilder::loadSamplers(sol::table samplers) {
+    std::cout << "<-------------------------------------------------------------------------------->" << std::endl;
+    for (const auto& obj : samplers) {
+        sol::table value = obj.second;
+        std::string name = value["name"];
+        std::string description = value["description"];
+        sol::table tabfields = value["field"];
+        std::vector<std::string> fields;
+        for (const auto& f : tabfields) {
+            sol::table value = f.second;
+            std::string itr = value[0];
+            fields.push_back(itr);
+            std::cout << "--------------------------------------------------------------------------------"
+                      << std::endl;
+            std::cout << itr << std::endl;
+        }
+        _builder.AddLoadSamplerCfg({name, description, fields});
     }
 }
 // ..........................................................

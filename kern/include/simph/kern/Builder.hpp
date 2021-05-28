@@ -43,6 +43,11 @@ public:
         std::string path;
         Smp::AnySimple value;
     };
+    struct LoadSamplerCfg {
+        std::string name;
+        std::string description;
+        std::vector<std::string> fields;
+    };
     struct LoadScheduleCfg {
         std::string path;
         uint32_t period;
@@ -55,6 +60,7 @@ public:
     void AddLoadSmpModelCfg(LoadSmpModelCfg cfg);
     void AddLoadConnectionCfg(LoadConnectionCfg cfg);
     void AddLoadInitCfg(LoadInitCfg cfg);
+    void AddLoadSamplerCfg(LoadSamplerCfg cfg);
     void AddLoadScheduleCfg(LoadScheduleCfg cfg);
     void AddLoadParamCfg(LoadParamCfg cfg);
     void publish(Smp::IPublication* receiver) override;
@@ -65,6 +71,7 @@ private:
     std::vector<LoadSmpModelCfg> _loadSmpModelCfgs;
     std::vector<LoadConnectionCfg> _loadConnectionCfg;
     std::vector<LoadInitCfg> _loadInitCfg;
+    std::vector<LoadSamplerCfg> _loadSamplerCfg;
     std::vector<LoadScheduleCfg> _loadScheduleCfg;
     std::vector<LoadParamCfg> _loadParamCfg;
 };

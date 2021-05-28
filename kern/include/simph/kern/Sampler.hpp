@@ -12,11 +12,11 @@
 #include <fstream>
 #include <ostream>
 #include <sstream>
+#include "simph/kern/AStepMdl.hpp"
 #include "simph/kern/Field.hpp"
-#include "simph/umdl/AStepMdl.hpp"
 
 namespace simph {
-namespace umdl {
+namespace kern {
 /**
  *
  */
@@ -44,6 +44,6 @@ private:
     std::string _fileName;
 };
 
-}  // namespace umdl
+}  // namespace kern
 }  // namespace simph
 #endif  // __simph_kern_Sampler_HPP__

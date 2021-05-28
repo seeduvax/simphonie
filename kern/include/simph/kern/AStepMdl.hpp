@@ -7,15 +7,15 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_umdl_AStepMdl_HPP__
-#define __simph_umdl_AStepMdl_HPP__
+#ifndef __simph_kern_ArrayType_HPP__
+#define __simph_kern_ArrayType_HPP__
 #include "Smp/IEntryPoint.h"
 #include "Smp/IModel.h"
 #include "simph/kern/IEntryPointPublisher.hpp"
 #include "simph/smpdk/Component.hpp"
 
 namespace simph {
-namespace umdl {
+namespace kern {
 
 /**
  *
@@ -38,6 +38,6 @@ public:
     virtual void step() = 0;
 };
 
-}  // namespace umdl
+}  // namespace kern
 }  // namespace simph
 #endif  // __simph_umdl_AStepMdl_HPP__

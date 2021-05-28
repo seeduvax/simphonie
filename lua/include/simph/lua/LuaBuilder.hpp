@@ -30,6 +30,7 @@ private:
     void loadSmpModels(sol::table models);
     void loadParameters(sol::table parameters);
     void loadInitializations(sol::table initializations);
+    void loadSamplers(sol::table initializations);
     void loadConnections(sol::table connections);
     void loadSchedules(sol::table schedules);
 };

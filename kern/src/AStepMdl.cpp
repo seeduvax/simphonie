@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/umdl/AStepMdl.hpp"
+#include "simph/kern/AStepMdl.hpp"
 #include "simph/sys/Callback.hpp"
 
 namespace simph {
-namespace umdl {
+namespace kern {
 using simph::sys::Callback;
 
 // --------------------------------------------------------------------
@@ -23,5 +23,5 @@ AStepMdl::AStepMdl(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
 // ..........................................................
 AStepMdl::~AStepMdl() {}
 // --------------------------------------------------------------------
-}  // namespace umdl
+}  // namespace kern
 }  // namespace simph

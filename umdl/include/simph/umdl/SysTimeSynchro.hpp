@@ -10,15 +10,15 @@
 #ifndef __simph_umdl_SysTimeSynchro_HPP__
 #define __simph_umdl_SysTimeSynchro_HPP__
 #include <chrono>
+#include "simph/kern/AStepMdl.hpp"
 #include "simph/sys/Synchro.hpp"
-#include "simph/umdl/AStepMdl.hpp"
 namespace simph {
 namespace umdl {
 
 /**
  *
  */
-class SysTimeSynchro : public simph::umdl::AStepMdl {
+class SysTimeSynchro : public simph::kern::AStepMdl {
 public:
     /**
      * Default constructor.

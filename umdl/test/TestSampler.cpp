@@ -9,10 +9,10 @@
  */
 #include <cppunit/extensions/HelperMacros.h>
 #include "simph/kern/Resolver.hpp"
+#include "simph/kern/Sampler.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/Simulator.hpp"
 #include "simph/sys/Logger.hpp"
-#include "simph/umdl/Sampler.hpp"
 #include "simph/umdl/SmpIncrement.hpp"
 
 namespace test {

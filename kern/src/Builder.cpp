@@ -10,6 +10,7 @@
  */
 #include "simph/kern/Builder.hpp"
 #include <iostream>
+#include "simph/kern/Sampler.hpp"
 #include "simph/kern/Simulator.hpp"
 #include "simph/smpdk/Utils.hpp"
 #include "simph/sys/Logger.hpp"
@@ -39,6 +40,11 @@ void Builder::AddLoadInitCfg(LoadInitCfg cfg) {
 }
 
 // ..........................................................
+void Builder::AddLoadSamplerCfg(LoadSamplerCfg cfg) {
+    _loadSamplerCfg.push_back(cfg);
+}
+
+// ..........................................................
 void Builder::AddLoadScheduleCfg(LoadScheduleCfg cfg) {
     _loadScheduleCfg.push_back(cfg);
 }
@@ -51,6 +57,12 @@ void Builder::AddLoadParamCfg(LoadParamCfg cfg) {
 // ..........................................................
 void Builder::publish(Smp::IPublication* receiver) {
     auto sim = getSimulator();
+    // publish samplers
+    for (auto cfg : _loadSamplerCfg) {
+        simph::kern::Sampler sampler(simph::kern::Sampler(cfg.name.c_str(), cfg.description.c_str(), sim));
+        sim->AddModel(&sampler);
+    }
+    // publish models
     for (auto cfg : _loadSmpModelCfgs) {
         sim->LoadLibrary(cfg.library.c_str());
         auto simk = dynamic_cast<kern::Simulator*>(sim);
@@ -69,6 +81,15 @@ void Builder::publish(Smp::IPublication* receiver) {
 
 // ..........................................................
 void Builder::connect() {
+    // load EP sampler
+    for (auto cfg : _loadSamplerCfg) {
+        auto sampler =
+            dynamic_cast<simph::kern::Sampler*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.name.c_str()));
+        for (auto ep : cfg.fields) {
+            sampler->AddField(
+                dynamic_cast<simph::kern::Field*>(getSimulator()->GetResolver()->ResolveAbsolute(ep.c_str())));
+        }
+    }
     // loadInit
     for (auto cfg : _loadInitCfg) {
         auto field = dynamic_cast<Smp::ISimpleField*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.path.c_str()));

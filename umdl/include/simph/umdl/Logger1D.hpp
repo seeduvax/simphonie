@@ -9,14 +9,14 @@
  */
 #ifndef __simph_umdl_Logger1D_HPP__
 #define __simph_umdl_Logger1D_HPP__
-#include "simph/umdl/AStepMdl.hpp"
+#include "simph/kern/AStepMdl.hpp"
 
 namespace simph {
 namespace umdl {
 /**
  *
  */
-class Logger1D : public virtual simph::umdl::AStepMdl {
+class Logger1D : public virtual simph::kern::AStepMdl {
 public:
     /**
      * Default constructor.

@@ -7,7 +7,7 @@
  * $Id$
  * $Date$
  */
-#include "simph/umdl/Sampler.hpp"
+#include "simph/kern/Sampler.hpp"
 #include <fstream>
 #include <iostream>
 #include "Smp/ISimulator.h"
@@ -15,7 +15,7 @@
 #include "simph/sys/Logger.hpp"
 
 namespace simph {
-namespace umdl {
+namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
 Sampler::Sampler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
@@ -66,6 +66,7 @@ void Sampler::AddField(simph::kern::Field* field) {
     }
      */
 }
+
 // ..........................................................
 void Sampler::initColumn() {
     _file.open(_fileName, std::ofstream::out);
@@ -92,5 +93,5 @@ void Sampler::step() {
     _file << std::endl;
 };
 
-}  // namespace umdl
+}  // namespace kern
 }  // namespace simph
