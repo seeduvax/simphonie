@@ -59,8 +59,9 @@ void Builder::publish(Smp::IPublication* receiver) {
     auto sim = getSimulator();
     // publish samplers
     for (auto cfg : _loadSamplerCfg) {
-        simph::kern::Sampler sampler(simph::kern::Sampler(cfg.name.c_str(), cfg.description.c_str(), sim));
-        sim->AddModel(&sampler);
+        sim->LoadLibrary("libsimph_kern.so");
+        sim->CreateInstance(simph::smpdk::Utils::generateUuid("Sampler"), cfg.name.c_str(), cfg.description.c_str(),
+                            sim);
     }
     // publish models
     for (auto cfg : _loadSmpModelCfgs) {

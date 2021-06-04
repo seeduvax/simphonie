@@ -67,6 +67,7 @@ void Sampler::AddField(simph::kern::Field* field) {
      */
 }
 
+// TODO : Sauvergarde en fichier Binaire
 // ..........................................................
 void Sampler::initColumn() {
     _file.open(_fileName, std::ofstream::out);

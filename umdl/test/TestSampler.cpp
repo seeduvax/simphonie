@@ -12,6 +12,7 @@
 #include "simph/kern/Sampler.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/Simulator.hpp"
+#include "simph/smpdk/Utils.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/umdl/SmpIncrement.hpp"
 
@@ -46,8 +47,12 @@ public:
 
         auto increment = new SmpIncrement("increment", "increment", &sim);
         sim.AddModel(increment);
-        auto sampler = new Sampler("sampler", "description sampler", &sim);
-        sim.AddModel(sampler);
+        // auto sampler = new Sampler("sampler", "description sampler", &sim);
+        // sim.AddModel(sampler);
+
+        sim.LoadLibrary("libsimph_kern.so");
+        auto sampler = dynamic_cast<simph::kern::Sampler*>(
+            sim.CreateInstance(simph::smpdk::Utils::generateUuid("Sampler"), "sampler", "description sampler", &sim));
 
         sim.Publish();
         sim.Configure();
