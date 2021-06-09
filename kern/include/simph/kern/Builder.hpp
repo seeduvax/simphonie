@@ -47,6 +47,7 @@ public:
         std::string name;
         std::string description;
         std::vector<std::string> fields;
+        uint32_t period;
     };
     struct LoadScheduleCfg {
         std::string path;

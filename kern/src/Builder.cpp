@@ -57,16 +57,10 @@ void Builder::AddLoadParamCfg(LoadParamCfg cfg) {
 // ..........................................................
 void Builder::publish(Smp::IPublication* receiver) {
     auto sim = getSimulator();
-    // publish samplers
-    for (auto cfg : _loadSamplerCfg) {
-        sim->LoadLibrary("libsimph_kern.so");
-        sim->CreateInstance(simph::smpdk::Utils::generateUuid("Sampler"), cfg.name.c_str(), cfg.description.c_str(),
-                            sim);
-    }
     // publish models
     for (auto cfg : _loadSmpModelCfgs) {
         sim->LoadLibrary(cfg.library.c_str());
-        auto simk = dynamic_cast<kern::Simulator*>(sim);
+        auto simk = dynamic_cast<simph::kern::Simulator*>(sim);
         auto c = sim->CreateInstance(simph::smpdk::Utils::generateUuid(cfg.type.c_str()), cfg.name.c_str(),
                                      cfg.description.c_str(), sim);
         if (c == nullptr) {
@@ -78,6 +72,13 @@ void Builder::publish(Smp::IPublication* receiver) {
             }
         }
     }
+    // publish samplers
+    for (auto cfg : _loadSamplerCfg) {
+        sim->LoadLibrary("libsimph_kern.so");
+        auto simk = dynamic_cast<simph::kern::Simulator*>(sim);
+        auto sampler = dynamic_cast<simph::kern::Sampler*>(simk->CreateInstance(
+            simph::smpdk::Utils::generateUuid("Sampler"), cfg.name.c_str(), cfg.description.c_str(), sim));
+    }
 }
 
 // ..........................................................
@@ -87,9 +88,14 @@ void Builder::connect() {
         auto sampler =
             dynamic_cast<simph::kern::Sampler*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.name.c_str()));
         for (auto ep : cfg.fields) {
-            sampler->AddField(
-                dynamic_cast<simph::kern::Field*>(getSimulator()->GetResolver()->ResolveAbsolute(ep.c_str())));
+            auto field = dynamic_cast<simph::kern::Field*>(getSimulator()->GetResolver()->ResolveAbsolute(ep.c_str()));
+            sampler->AddField(field);
         }
+        // getSimulator()->GetScheduler()->AddSimulationTimeEvent(dynamic_cast<Smp::IEntryPoint*>(getSimulator()->GetResolver()->ResolveRelative("step",
+        // sampler)), 0, cfg.period, -1);
+        auto entryPoint =
+            dynamic_cast<Smp::IEntryPoint*>(getSimulator()->GetResolver()->ResolveRelative("step", sampler));
+        getSimulator()->GetScheduler()->AddSimulationTimeEvent(entryPoint, 0, 5000000, -1);
     }
     // loadInit
     for (auto cfg : _loadInitCfg) {
