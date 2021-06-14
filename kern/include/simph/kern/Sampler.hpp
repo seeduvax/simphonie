@@ -31,7 +31,7 @@ public:
      */
     virtual ~Sampler();
 
-    void AddField(simph::kern::Field* field);
+    void recordField(simph::kern::Field* field);
 
     void step() override;
 
@@ -42,6 +42,8 @@ private:
     std::vector<simph::kern::Field*> _fields;
     std::ofstream _file;
     std::string _fileName;
+
+    Smp::Bool _modeValue;
 };
 
 }  // namespace kern

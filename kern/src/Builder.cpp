@@ -89,7 +89,7 @@ void Builder::connect() {
             dynamic_cast<simph::kern::Sampler*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.name.c_str()));
         for (auto ep : cfg.fields) {
             auto field = dynamic_cast<simph::kern::Field*>(getSimulator()->GetResolver()->ResolveAbsolute(ep.c_str()));
-            sampler->AddField(field);
+            sampler->recordField(field);
         }
         // getSimulator()->GetScheduler()->AddSimulationTimeEvent(dynamic_cast<Smp::IEntryPoint*>(getSimulator()->GetResolver()->ResolveRelative("step",
         // sampler)), 0, cfg.period, -1);
@@ -152,6 +152,7 @@ void Builder::connect() {
 // ..........................................................
 void Builder::configure() {
     for (auto cfg : _loadParamCfg) {
+        TRACE(getSimulator()->GetResolver()->ResolveAbsolute("sampler")->GetName());
         auto field = dynamic_cast<Smp::ISimpleField*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.path.c_str()));
         field->SetValue(cfg.value);
     }

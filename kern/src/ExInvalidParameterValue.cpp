@@ -20,10 +20,8 @@ ExInvalidParameterValue::ExInvalidParameterValue(Smp::IObject* sender, Smp::Stri
     setSender(sender);
     std::ostringstream d;
     d << "Invalid value for parameter " << pName << " = " << value;
-    // TODO add value in message. (big switch case needed for each type,
-    // should be implemented once for all in a toString method somewhere.)
     setDescription(d.str().c_str());
-    // TODO Pourquoi ne fonctionne pas sans argument?
+    // TODO Pourquoi setMessage() ne fonctionne pas sans argument?
     setMessage("");
 }
 // ..........................................................

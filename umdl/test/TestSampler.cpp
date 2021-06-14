@@ -69,9 +69,9 @@ public:
 
         auto stepSampler = dynamic_cast<EntryPoint*>(sim.GetResolver()->ResolveAbsolute("sampler.step"));
         CPPUNIT_ASSERT(stepSampler != nullptr);
-        sampler->AddField(input);
-        sampler->AddField(output);
-        sampler->AddField(arrayfield);
+        sampler->recordField(input);
+        sampler->recordField(output);
+        sampler->recordField(arrayfield);
         sim.Connect();
 
         scheduler->AddSimulationTimeEvent(stepIncrement,
@@ -84,7 +84,7 @@ public:
                                           -1);  //
         scheduler->step(10000000);
 
-        sim.find<Smp::IEntryPoint>("sampler.debugPrintFile")->Execute();
+        // sim.find<Smp::IEntryPoint>("sampler.debugPrintFile")->Execute();
     }
 };
 

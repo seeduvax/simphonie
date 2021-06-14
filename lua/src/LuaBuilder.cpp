@@ -39,9 +39,16 @@ void LuaBuilder::loadParameters(sol::table parameters) {
     for (const auto& obj : parameters) {
         sol::table value = obj.second;
         std::string path = value["path"];
-        // TODO identify value type : bool, float, int, string, uint32...
-        auto val = Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float64, (double)value["value"]);
-        _builder.AddLoadScheduleCfg({path, val});
+        // FIXME identify value type : bool, float, int, string, uint32...
+        Smp::AnySimple val;
+        // if(value["value"] == false || value["value"] == true){
+        //    val = Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Bool, (bool)value["value"]);
+        //}
+        // else{
+        val = Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float64, (double)value["value"]);
+        //}
+
+        _builder.AddLoadParamCfg({path, val});
     }
 }
 // ..........................................................
