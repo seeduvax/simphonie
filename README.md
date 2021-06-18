@@ -60,7 +60,10 @@ build features.
 
 - [AcrobatomaticBuildSystem][5]: compilation script, packaging and dependencies 
 management.
-future since a similar feature is developed in AcrobatomaticBuildSystem)
+
+Issues and tasks are managed with ABS itself. Once cloned or export a workspace 
+run `make crls` from the project root directory to get the issues list 
+related to the current branch.
 
 [0]:http://ecss.nl
 [1]:https://ecss.nl/standard/ecss-e-st-40-07c-simulation-modelling-platform-2-march-2020/
