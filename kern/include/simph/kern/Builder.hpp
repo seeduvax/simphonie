@@ -18,6 +18,7 @@
 #include "Smp/ISimulator.h"
 #include "Smp/IDataflowField.h"
 #include "simph/smpdk/Component.hpp"
+#include "simph/kern/Sampler.hpp"
 // clang-format on
 
 namespace simph {
@@ -46,6 +47,7 @@ public:
     struct LoadSamplerCfg {
         std::string name;
         std::string description;
+        Smp::AnySimple mode;
         std::vector<std::string> fields;
         uint32_t period;
     };
@@ -75,6 +77,7 @@ private:
     std::vector<LoadSamplerCfg> _loadSamplerCfg;
     std::vector<LoadScheduleCfg> _loadScheduleCfg;
     std::vector<LoadParamCfg> _loadParamCfg;
+    std::vector<Sampler*> _samplers;
 };
 
 }  // namespace kern

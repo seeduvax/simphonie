@@ -10,7 +10,6 @@
  */
 #include "simph/kern/Builder.hpp"
 #include <iostream>
-#include "simph/kern/Sampler.hpp"
 #include "simph/kern/Simulator.hpp"
 #include "simph/smpdk/Utils.hpp"
 #include "simph/sys/Logger.hpp"
@@ -78,6 +77,7 @@ void Builder::publish(Smp::IPublication* receiver) {
         auto simk = dynamic_cast<simph::kern::Simulator*>(sim);
         auto sampler = dynamic_cast<simph::kern::Sampler*>(simk->CreateInstance(
             simph::smpdk::Utils::generateUuid("Sampler"), cfg.name.c_str(), cfg.description.c_str(), sim));
+        _samplers.push_back(sampler);
     }
 }
 
@@ -151,8 +151,18 @@ void Builder::connect() {
 
 // ..........................................................
 void Builder::configure() {
+    uint16_t k = 0;
+    for (auto cfg : _loadSamplerCfg) {
+        auto mode = dynamic_cast<kern::Field*>(_samplers[k]->GetField("mode"));
+        mode->SetValue(cfg.mode);
+        for (auto fieldPath : cfg.fields) {
+            auto field = dynamic_cast<kern::Field*>(getSimulator()->GetResolver()->ResolveAbsolute(fieldPath.c_str()));
+            if (field != nullptr)
+                _samplers[k]->recordField(field);
+        }
+        k += 1;
+    }
     for (auto cfg : _loadParamCfg) {
-        TRACE(getSimulator()->GetResolver()->ResolveAbsolute("sampler")->GetName());
         auto field = dynamic_cast<Smp::ISimpleField*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.path.c_str()));
         field->SetValue(cfg.value);
     }
