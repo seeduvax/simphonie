@@ -76,12 +76,15 @@ void LuaBuilder::loadSamplers(sol::table samplers) {
         sol::table value = obj.second;
         std::string name = value["name"];
         std::string description = value["description"];
+        std::string strMode = value["mode"];
+        Smp::AnySimple mode;
+        mode.SetValue(Smp::PrimitiveTypeKind::PTK_Bool, strMode == "csv" ? true : false);
         std::vector<std::string> fields;
         sol::table valueFields = value["fields"];
         for (int field = 1; field <= valueFields.size(); field++) {
             fields.push_back(valueFields[field]);
         }
-        _builder.AddLoadSamplerCfg({name, description, fields});
+        _builder.AddLoadSamplerCfg({name, description, mode, fields});
     }
 }
 // ..........................................................

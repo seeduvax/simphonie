@@ -108,7 +108,6 @@ void Sampler::initColumn() {
                 path = parent->GetName() + ("." + path);
                 parent = parent->GetParent();
             }
-            TRACE(path)
             _file.write(reinterpret_cast<const char*>(path.c_str()), path.size());
             _file << '\x00';
         }

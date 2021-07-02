@@ -42,6 +42,7 @@ class Field:
 
     def addValue(self, value):
         self.data.append(value)
+        print("data :", value)
 
     def addBinaryValue(self, dbytes):
         self.addValue(struct.unpack(self.codeUnpack,dbytes)[0])

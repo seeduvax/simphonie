@@ -137,29 +137,79 @@ def discoverFieldData(fd, fields):
         else:
             assert False, "Unexpected byte separator"
 
+def getDataFromBinSimTG(fd, fields): 
+    byte=fd.read(1)
+    name=""
+    mode=0
+    unit=0
+    while byte and mode<2:
+        if mode==0:
+            if byte=='\x01':
+                mode=1
+        elif mode==1:
+            if byte=='\x01':
+                mode=2
+            elif byte=='\x00':
+                if unit==0:
+                    field = Field()
+                    column = name.decode()
+                    if column == "time":
+                        column = "SimulationTime"
+                    field.setName(column)
+                    fields.append(field)
+                    unit=1
+                else:
+                    unit=0
+                name=""
+            else:
+                name=name+byte
+        if mode<2:
+            byte=fd.read(1)
+    d=fd.read(8)
+    col_count=0
+    nbc=len(files)
+    while d:
+        try:
+            val = struct.unpack('>d',d)
+            fields[col_count].data.append(val)
+        except:
+            pass
+        col_count+=1
+        if (col_count>=nbc):
+            col_count=0
+        d=fd.read(8)
+
 def getDataFromBin(binaryFilePath):
     print("Opening binary file %s" % binaryFilePath)
     fields=[]
-    fd=open(binaryFilePath,"rb")
-    byte=fd.read(1)
-    assert byte==b'\x01', "Expecting 'x01' as beginning separator"
+    try :
+        fd=open(binaryFilePath,"rb")
+        print("Try to open file with binary Simphonie format")
+        byte=fd.read(1)
+        assert byte==b'\x01', "Expecting 'x01' as beginning separator"
 
-    print("discovering field names")
-    discoverFieldNames(fd, fields)
+        print("discovering field names")
+        discoverFieldNames(fd, fields)
 
-    print("discovering field types")
-    discoverFieldTypes(fd, fields)
+        print("discovering field types")
+        discoverFieldTypes(fd, fields)
 
-    print("discovering field data")
-    while True:
-        byte=fd.peek(1)[:1]
-        if len(byte)==0:
-            break
-        else:
-            discoverFieldData(fd, fields)
+        print("discovering field data")
+        while True:
+            byte=fd.peek(1)[:1]
+            if len(byte)==0:
+                break
+            else:
+                discoverFieldData(fd, fields)
 
-    return fields
-    fd.close()
+        return fields
+        fd.close()
+    except:
+        fd=open(binaryFilePath,"rb")
+        print("Open file as Simphonie format failed")
+        print("Try to open file with SimTG format")
+        getDataFromBinSimTG(fd, fields)
+        fd.close()
 
 def getDataFromCSV(CSVFilePath):
     fields = []
@@ -183,7 +233,6 @@ def getDataFromCSV(CSVFilePath):
                     val =  float(column)
                     if col_idx == 0:
                         val /= 1e9
-                    data["data"][fields[col_count]].append(val)
                     fields[col_idx].data.append(val)
     return fields
 
@@ -191,7 +240,7 @@ def plotFields(files, displayFields, title, nbGraphs, graphIdx):
     global plt
     plt.subplot(nbGraphs,1,graphIdx)
     for file in files:
-        plt.plot(file.getField("SimulationTime"), file.getField(displayFields), label=file.name)
+        plt.plot(file.getField("SimulationTime").data, file.getField(displayFields).data, label=file.name)
     plt.title(title)
 
 def compareData(files, precision=0):
