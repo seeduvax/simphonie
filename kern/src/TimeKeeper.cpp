@@ -13,6 +13,7 @@
 #include <sstream>
 #include "Smp/IPublication.h"
 #include "Smp/ISimulator.h"
+#include "abs/profiler.h"
 #include "simph/kern/ExInvalidSimulationTime.hpp"
 
 namespace simph {
@@ -69,6 +70,8 @@ void TimeKeeper::setNextEventTime(Smp::Duration simulationTime) {
             _eventMgr->Emit(Smp::Services::IEventManager::SMP_PreSimTimeChangeId);
         }
         _simTime = _nextEventTime;
+        PROFILER_FRAME("simTime");
+        PROFILER_PLOT("simTime", _simTime);
         if (_eventMgr != nullptr) {
             _eventMgr->Emit(Smp::Services::IEventManager::SMP_PostSimTimeChangeId);
         }
