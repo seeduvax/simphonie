@@ -236,10 +236,12 @@ def getDataFromCSV(CSVFilePath):
                     fields[col_idx].data.append(val)
     return fields
 
-def plotFields(files, displayFields, title, nbGraphs, graphIdx):
+def plotFields(files, displayFields, title, nbGraphs, graphIdx, x_name, y_name):
     global plt
     plt.subplot(nbGraphs,1,graphIdx)
     for file in files:
+        plt.xlabel(x_name)
+        plt.ylabel(y_name)
         plt.plot(file.getField("SimulationTime").data, file.getField(displayFields).data, label=file.name)
     plt.title(title)
 
@@ -275,11 +277,12 @@ for f in files:
     print(" •",f)
 
 #compareData(0)
-plotFields(files, ["dyn_intg.a[2]", "dyn_intg.a.a[2]"], "Acceleration", 5, 1)
-plotFields(files, ["dyn_intg.p[2]", "dyn_intg.p.p[2]"], "SimPosition", 5, 2)
-plotFields(files, ["ocs.p[2]", "av_tm.pos[2]", "ocs.p.p[2]"], "FswPosition", 5, 3)
-plotFields(files, ["tank.flow"], "Flow", 5, 4)
-plotFields(files, ["tank.totalMass"], "Mass", 5, 5)
-plt.tight_layout()
+# plotFields(files, ["dyn_intg.a[2]", "dyn_intg.a.a[2]"], "Acceleration", 5, 1, "time (s)", "acceleration (m/s^2)")
+# plotFields(files, ["dyn_intg.p[2]", "dyn_intg.p.p[2]"], "SimPosition", 5, 2, "time (s)", "altitude (m)")
+# plotFields(files, ["ocs.p[2]", "av_tm.pos[2]", "ocs.p.p[2]"], "FswPosition", 5, 3, "time (s)", "altitude (m)")
+# plotFields(files, ["tank.flow"], "Flow", 5, 4, "time (s)", "flow (kg/s)")
+# plotFields(files, ["tank.totalMass"], "Mass", 5, 5, "time (s)", "mass (kg)")
+plotFields(files, ["increment.input"], "field1", 2, 1, "time (s)", "field1.output")
+plotFields(files, ["obj1.iArray.iArray[0]"], "field2", 2, 2, "time (s)", "field2.output")
 plt.legend()
 plt.show()

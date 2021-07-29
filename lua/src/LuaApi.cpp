@@ -10,7 +10,9 @@
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/ISimulator.h"
 #include "simph/kern/Scheduler.hpp"
+#include "simph/kern/Resolver.hpp"
 #include "simph/kern/Simulator.hpp"
+#include "simph/kern/Sampler.hpp"
 #include "simph/lua/LuaBuilder.hpp"
 #include "simph/smpdk/Utils.hpp"
 #include "sol/sol.hpp"
@@ -169,6 +171,9 @@ int luaopen_libsimph_lua(lua_State* L) {
     nsSmp.new_usertype<Smp::Services::IScheduler>("IScheduler",
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService>()
     );
+    nsSmp.new_usertype<Smp::Services::IResolver>("IResolver",
+        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService>()
+    );
     nsSmp.new_usertype<Smp::ISimulator>("ISimulator",
         "Publish", &Smp::ISimulator::Publish,
         "Configure", &Smp::ISimulator::Configure,
@@ -185,6 +190,9 @@ int luaopen_libsimph_lua(lua_State* L) {
         "GetScheduler", [](Smp::ISimulator& sim) {
             return dynamic_cast<simph::kern::Scheduler*>(sim.GetScheduler());
         },
+        "GetResolver", [](Smp::ISimulator& sim) {
+            return dynamic_cast<simph::kern::Resolver*>(sim.GetResolver());
+        },
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite>()
     );
     nsSmp.new_usertype<Smp::Services::ITimeKeeper>("ITimeKeeper",
@@ -196,7 +204,7 @@ int luaopen_libsimph_lua(lua_State* L) {
     nsSimphonie.new_usertype<simph::kern::Simulator>("Simulator",
         sol::constructors<simph::kern::Simulator()>(),
         sol::meta_function::construct, [](std::string name) {
-          return new simph::kern::Simulator(name.c_str());
+            return new simph::kern::Simulator(name.c_str());
         },
         sol::meta_function::index, [](Smp::ISimulator& th, std::string k, sol::this_state L) {
             auto o = th.GetResolver()->ResolveAbsolute(k.c_str());
@@ -213,11 +221,22 @@ int luaopen_libsimph_lua(lua_State* L) {
         sol::meta_function::new_index, myNewIndex,
         "connect", &simph::kern::Simulator::connect,
         "schedule", &simph::kern::Simulator::schedule,
+        "setValue", &simph::kern::Simulator::setValue,
         "createSmpModel", &simph::kern::Simulator::createSmpModel,
         "setConfiguration",[](Smp::ISimulator* s, sol::object o) {
             auto b = new simph::lua::LuaBuilder(s);
             b->setConfiguration(o);
             return b;
+        },
+        "getSampler",[](Smp::ISimulator* s, std::string name) {
+            auto sampler =  dynamic_cast<simph::kern::Sampler*>(s->GetResolver()->ResolveAbsolute(name.c_str()));
+            return sampler;
+        },
+        "dump",[](Smp::ISimulator* s) {
+            dynamic_cast<simph::kern::Resolver*>(s->GetResolver())->dump();
+        },
+        "AddService",[](Smp::ISimulator* s, Smp::Uuid uuid, std::string name, std::string description, Smp::IComposite* parent) {
+            // s->AddService(service)
         },
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite, Smp::ISimulator>()
     );
@@ -225,6 +244,27 @@ int luaopen_libsimph_lua(lua_State* L) {
         "step", &simph::kern::Scheduler::step,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService, Smp::Services::IScheduler>()
     );
+    nsSimphonie.new_usertype<simph::kern::Resolver>("Resolver",
+        "ResolveAbsolute", &simph::kern::Resolver::ResolveAbsolute,
+        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService, Smp::Services::IResolver>()
+    );
+    nsSimphonie.new_usertype<simph::kern::Sampler>("Sampler",        
+        "addData",[](simph::kern::Sampler* s, Smp::IObject* field) {
+            //TODO manage nullptr field
+            auto field_ = dynamic_cast<simph::kern::Field*>(field);
+            if(field_ == nullptr){
+                std::stringstream ss;
+                ss << field->GetName() << " can't be convert to simphonie field";
+                throw std::runtime_error(ss.str().c_str());
+            }
+            s->recordField(field_);
+        },
+        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IModel>()
+    );
+
+    // nsSimphonie.new_usertype<last::smputil::LogiesProxy>("LogiesProxy",
+    //     sol::base_classes, sol::bases<Smp::Management::IManagedObject, Smp::IModel, Smp::IComposite, Smp::Management::IEntryPointPublisher, simba::SmpConcreteModel, simba::ASmpModel>()
+    // );
     // clang-format on
     t.push();
     return 1;
