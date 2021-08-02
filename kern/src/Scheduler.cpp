@@ -12,6 +12,7 @@
 #include <atomic>
 #include "Smp/IDataflowField.h"
 #include "Smp/ISimulator.h"
+#include "abs/profiler.h"
 #include "assert.h"
 #include "simph/kern/Logger.hpp"
 #include "simph/kern/Resolver.hpp"
@@ -56,21 +57,31 @@ public:
         return _completed;
     }
     void run() {
-        _ep->Execute();
-        for (auto f : _fields) {
-            f->Push();
+        PROFILER_REGION("Schedule::run");
+        {
+            std::string epName = _ep->GetParent() != nullptr ? _ep->GetParent()->GetName() : "";
+            epName = epName + ".";
+            epName = epName + _ep->GetName();
+            PROFILER_REGION(epName.c_str());
+            _ep->Execute();
         }
-        if (_repeat != 0) {
-            if (_repeat > 0) {
-                _repeat -= 1;
+        {
+            PROFILER_REGION("Propagate data");
+            for (auto f : _fields) {
+                f->Push();
             }
-            if (_period > 0) {
-                setTime(getTime() + _period);
-                _owner->schedule(this);
+            if (_repeat != 0) {
+                if (_repeat > 0) {
+                    _repeat -= 1;
+                }
+                if (_period > 0) {
+                    setTime(getTime() + _period);
+                    _owner->schedule(this);
+                }
             }
-        }
-        else {
-            _completed = true;
+            else {
+                _completed = true;
+            }
         }
     }
 

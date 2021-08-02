@@ -1,0 +1,41 @@
+@startuml UML_SmpIncrement
+package simph::smpdk
+{
+    object LinkRegistry{
+        - AddLink(Smp::IComponent* source, const Smp::IComponent* target) : void
+        - LinkMap : std::unordered_map<Smp::IComponent*, Collection<Smp::IComponent>>
+    }
+}
+
+object SmpIncrement{
+    + step() : void
+    - publish() : void
+
+    - _input : Smp::Float64
+    - _output : Smp::Float64
+}
+
+'----------------InputField---------------
+object InputField{
+    + Connect(Smp::IField) : void
+    + SetValue(Smp::AnySimple) : void
+    + GetValue() : Smp::AnySimple
+
+    - _value : Smp::AnySimple
+}
+
+'----------------OutputField---------------
+object OutputField{
+    + Connect(Smp::IField) : void
+    + SetValue(Smp::AnySimple) : void
+    + GetValue() : Smp::AnySimple
+
+    - _value : Smp::AnySimple
+}
+
+SmpIncrement *-- InputField
+SmpIncrement *-- OutputField
+InputField . OutputField : (connected)
+OutputField --* LinkRegistry : AddLink(InputField)
+InputField --* LinkRegistry : AddLink(OutputField)
+@enduml

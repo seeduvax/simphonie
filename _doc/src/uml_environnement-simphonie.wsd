@@ -1,0 +1,22 @@
+@startuml UML_envrionnementSimphonie
+
+rectangle "Rasta (Produit sous Test)" {
+    rectangle "Application Simulateur" as appSim
+}
+
+rectangle "Logiciel de Simulation" {
+    rectangle "Noyau de simulation" as noyau
+    rectangle "Abstraction couche matérielle" as coucheMat
+}
+
+rectangle "Standard ECSS" {
+    rectangle "SMP" as Smp
+}
+
+appSim --> coucheMat
+appSim --> noyau
+appSim --> Smp
+noyau --> Smp
+
+@enduml
+

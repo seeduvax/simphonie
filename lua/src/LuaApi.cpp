@@ -38,62 +38,60 @@ void myNewIndex(Smp::ISimulator& th, sol::stack_object k, sol::stack_object v, s
 }
 
 /*
-luabridge::LuaRef getData(const char * name, lua_State* L) {
-    luabridge::LuaRef res(L);
-
-    Smp::ISimpleField* object = dynamic_cast<Smp::ISimpleField*>(_sim.GetResolver()->ResolveAbsolute(name));
-    if(object == nullptr)
+ getData(simph::kern::Field* field) {
+     res;
+    if(field == nullptr)
     {
         return res;
     }
 
     // Associate corresponding primitive type
-    switch (object->GetPrimitiveTypeKind())
+    switch (field->GetPrimitiveTypeKind())
     {
     case Smp::PrimitiveTypeKind::PTK_Char8:
-        res = (Smp::Char8)(object->GetValue());
+        res = (Smp::Char8)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_Bool:
-        res = (Smp::Bool)(object->GetValue());
+        res = (Smp::Bool)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_Int8:
-        res = (Smp::Int8)(object->GetValue());
+        res = (Smp::Int8)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_UInt8:
-        res = (Smp::UInt8)(object->GetValue());
+        res = (Smp::UInt8)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_Int16:
-        res = (Smp::Int16)(object->GetValue());
+        res = (Smp::Int16)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_UInt16:
-        res = (Smp::UInt16)(object->GetValue());
+        res = (Smp::UInt16)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_Int32:
-        res = (Smp::Int32)(object->GetValue());
+        res = (Smp::Int32)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_UInt32:
-        res = (Smp::UInt32)(object->GetValue());
+        res = (Smp::UInt32)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_Int64:
-        res = (Smp::Int64)(object->GetValue());
+        res = (Smp::Int64)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_UInt64:
-        res = (Smp::UInt64)(object->GetValue());
+        res = (Smp::UInt64)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_Float32:
-        res = (Smp::Float32)(object->GetValue());
+        res = (Smp::Float32)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_Float64:
-        res = (Smp::Float64)(object->GetValue());
+        res = (Smp::Float64)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_Duration:
-        res = (Smp::Duration)(object->GetValue());
+        res = (Smp::Duration)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_DateTime:
-        res = (Smp::DateTime)(object->GetValue());
+        res = (Smp::DateTime)(field->GetValue());
         break;
     case Smp::PrimitiveTypeKind::PTK_String8:
-        res = (Smp::String8)(object->GetValue());
+        res = (Smp::String8)(field->GetValue());
         break;
     default:
         std::stringstream ss;
@@ -105,6 +103,7 @@ luabridge::LuaRef getData(const char * name, lua_State* L) {
     return res;
 };
 */
+
 // --------------------------------------------------------------------
 // ..........................................................
 extern "C" {
@@ -187,11 +186,20 @@ int luaopen_libsimph_lua(lua_State* L) {
         "LoadLibrary", &Smp::ISimulator::LoadLibrary,
         "CreateInstance", &Smp::ISimulator::CreateInstance,
         "GetTimeKeeper", &Smp::ISimulator::GetTimeKeeper,
+        "AddService", &Smp::ISimulator::AddService,
         "GetScheduler", [](Smp::ISimulator& sim) {
             return dynamic_cast<simph::kern::Scheduler*>(sim.GetScheduler());
         },
         "GetResolver", [](Smp::ISimulator& sim) {
             return dynamic_cast<simph::kern::Resolver*>(sim.GetResolver());
+        },
+        "getData", [](Smp::ISimulator& sim, std::string fieldName) {
+            auto field = dynamic_cast<simph::kern::Field*>(sim.GetResolver()->ResolveAbsolute(fieldName.c_str()));
+            //FIXME
+            std::cout << "Field Name : " << field->GetName() << std::endl;
+            std::ostringstream data;
+            data << field->GetValue();
+            return data.str();
         },
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite>()
     );
@@ -234,9 +242,6 @@ int luaopen_libsimph_lua(lua_State* L) {
         },
         "dump",[](Smp::ISimulator* s) {
             dynamic_cast<simph::kern::Resolver*>(s->GetResolver())->dump();
-        },
-        "AddService",[](Smp::ISimulator* s, Smp::Uuid uuid, std::string name, std::string description, Smp::IComposite* parent) {
-            // s->AddService(service)
         },
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite, Smp::ISimulator>()
     );

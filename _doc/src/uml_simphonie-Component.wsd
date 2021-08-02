@@ -1,5 +1,5 @@
 @startuml UML_Component
-package simphonie::smpdk
+package simph::smpdk
 {
     '----------------Object----------------
     class Object{
