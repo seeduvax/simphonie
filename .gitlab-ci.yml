@@ -12,9 +12,9 @@ test_debian10:
 deploy_debian10:
     extends: .deploy_debian10
     after_script:
-      - make pubdist.sdk MAKEARGS="$TASK_OPTVAR" WORKSPACE_IS_TAG=yes
+      - make pubdist.sdk MAKEARGS="$TASK_OPTVAR ABS_REPO=$ABS_REPO" WORKSPACE_IS_TAG=yes
 
 deploy_raspberry:
     extends: .deploy_raspberry
     after_script:
-      - make pubdist.sdk MAKEARGS="$TASK_OPTVAR" WORKSPACE_IS_TAG=yes
+      - make pubdist.sdk MAKEARGS="$TASK_OPTVAR ABS_REPO=$ABS_REPO" WORKSPACE_IS_TAG=yes
