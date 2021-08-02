@@ -2,7 +2,7 @@ include:
     - remote: "http://ftfdsvp245.fr.st.space.corp/astre/astre-components/-/raw/absplus-1.3/git/template_astre_runner.yml"
 
 variables:
-  - ABS_REPO: https://mspc6269.fr.st.space.corp/dist
+  - ABS_REPO: "https://mspc6269.fr.st.space.corp/dist"
 
 # Test jobs triggered only at branch push
 test_debian10:
