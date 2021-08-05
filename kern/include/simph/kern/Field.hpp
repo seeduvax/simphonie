@@ -183,6 +183,10 @@ private:
     TField<T>** _itemFields;
 };
 
+std::ostream& operator<<(std::ostream& os, const Smp::IArrayField& obj);
+std::ostream& operator<<(std::ostream& os, const Smp::ISimpleArrayField& obj);
+std::ostream& operator<<(std::ostream& os, const Smp::ISimpleField& obj);
+
 }  // namespace kern
 }  // namespace simph
 #endif  // __simph_kern_Field_HPP__
