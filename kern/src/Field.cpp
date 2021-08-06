@@ -345,9 +345,8 @@ Smp::AnySimple SimpleArrayField<Smp::Float64>::GetValue(Smp::UInt64 index) const
 // ..........................................................
 // ostream Smp::IArrayField
 std::ostream& operator<<(std::ostream& os, const Smp::IArrayField& obj) {
-    os << "[";
+    os << "[ ";
     for (int i = 0; i < obj.GetSize(); i++) {
-        os << " ";
         if (dynamic_cast<Smp::IArrayField*>(obj.GetItem(i)) != nullptr) {
             os << *(dynamic_cast<Smp::IArrayField*>(obj.GetItem(i)));
         }
@@ -358,21 +357,24 @@ std::ostream& operator<<(std::ostream& os, const Smp::IArrayField& obj) {
             auto field = dynamic_cast<Smp::ISimpleField*>(obj.GetItem(i));
             os << *field;
         }
-        os << " ;";
+
+        if (i < obj.GetSize() - 1) {
+            os << " ; ";
+        }
+        else {
+            os << " ]";
+        }
     }
-    os << "\b\b"
-       << " ]";
     return os;
 }
 
 // ostream Smp::ISimpleArrayField
 std::ostream& operator<<(std::ostream& os, const Smp::ISimpleArrayField& obj) {
     os << "[";
-    for (int i = 0; i < obj.GetSize(); i++) {
+    for (int i = 0; i < obj.GetSize() - 1; i++) {
         os << " " << obj.GetValue(i) << " ;";
     }
-    os << "\b\b"
-       << " ]";
+    os << " " << obj.GetValue(obj.GetSize() - 1) << " ]";
     return os;
 }
 
