@@ -340,5 +340,47 @@ Smp::AnySimple SimpleArrayField<Smp::Float64>::GetValue(Smp::UInt64 index) const
     return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float64, _tData[index]);
 }
 
+// --------------------------------------------------------------------
+// ostream operator
+// ..........................................................
+// ostream Smp::IArrayField
+std::ostream& operator<<(std::ostream& os, const Smp::IArrayField& obj) {
+    os << "[";
+    for (int i = 0; i < obj.GetSize(); i++) {
+        os << " ";
+        if (dynamic_cast<Smp::IArrayField*>(obj.GetItem(i)) != nullptr) {
+            os << *(dynamic_cast<Smp::IArrayField*>(obj.GetItem(i)));
+        }
+        else if (dynamic_cast<Smp::ISimpleArrayField*>(obj.GetItem(i)) != nullptr) {
+            os << *(dynamic_cast<Smp::ISimpleArrayField*>(obj.GetItem(i)));
+        }
+        else {
+            auto field = dynamic_cast<Smp::ISimpleField*>(obj.GetItem(i));
+            os << *field;
+        }
+        os << " ;";
+    }
+    os << "\b\b"
+       << " ]";
+    return os;
+}
+
+// ostream Smp::ISimpleArrayField
+std::ostream& operator<<(std::ostream& os, const Smp::ISimpleArrayField& obj) {
+    os << "[";
+    for (int i = 0; i < obj.GetSize(); i++) {
+        os << " " << obj.GetValue(i) << " ;";
+    }
+    os << "\b\b"
+       << " ]";
+    return os;
+}
+
+// ostream Smp::ISimpleField
+std::ostream& operator<<(std::ostream& os, const Smp::ISimpleField& obj) {
+    os << obj.GetValue();
+    return os;
+}
+
 }  // namespace kern
 }  // namespace simph

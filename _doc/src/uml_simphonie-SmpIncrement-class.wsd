@@ -1,0 +1,51 @@
+@startuml UML_SmpIncrement
+package simph::smpdk
+{
+    class Component
+    {
+        + Publish(Smp::IPublication* receiver) : void
+        + Configure(Smp::Services::ILogger* logger, Smp::Services::ILinkRegistry* linkRegistry) : void
+        + Connect(Smp::ISimulator* simulator) : void
+        + GetField(Smp::String8 fullName) : Smp::IField*
+
+        - Smp::ISimulator* _simulator
+        - Smp::Services::ILinkRegistry* _linkRegistry
+        - Smp::ComponentStateKind _state
+        - CollectionOwner<Smp::IField> _fields
+    }
+
+    '----------------OutputField---------------
+    class Field{
+        + Connect(Smp::IField) : void
+        + SetValue(Smp::AnySimple) : void
+        + GetValue() : Smp::AnySimple
+
+        - _value : Smp::AnySimple
+    }
+}
+
+class SmpIncrement{
+    + step() : void
+    - publish() : void
+
+    - _input : Smp::Float64
+    - _output : Smp::Float64
+}
+
+'----------------InputField---------------
+object InputField{
+    - _value : Smp::AnySimple
+}
+
+'----------------OutputField---------------
+object OutputField{
+    - _value : Smp::AnySimple
+}
+
+InputField --|> Field
+OutputField --|> Field
+InputField -* SmpIncrement
+OutputField -* SmpIncrement
+SmpIncrement --|> Component
+
+@enduml

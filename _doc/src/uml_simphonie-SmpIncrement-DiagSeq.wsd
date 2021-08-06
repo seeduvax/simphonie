@@ -1,0 +1,16 @@
+@startuml UML_SmpIncrement_DiagSeq
+entity user as user
+
+user -> Simulator : Ajout du simulateur
+user -> Simulator : Ajout des modèles
+user -> Simulator : Publish()
+Simulator -> Model : Publish des modèles
+Model -> InputField : création du champs d'entrée
+Model -> OutputField : création du champs de sortie
+user -> Simulator : Configure()
+user -> Simulator : Connect()
+Simulator -> OutputField : Connexion au champ InputField
+user -> Scheduler : Programmation de la séquence d'activation des points d'entrées
+user -> Simulator : Run()
+
+@enduml

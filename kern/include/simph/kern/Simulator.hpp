@@ -96,6 +96,8 @@ public:
 
     void schedule(std::string modelName, std::string entryPoint, uint32_t period);
 
+    void setValue(std::string field, float value);
+
     Smp::IComponent* createSmpModel(Smp::String8 uuidStr, Smp::String8 name, Smp::String8 description);
 
     template <class T>

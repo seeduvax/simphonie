@@ -441,7 +441,26 @@ void Simulator::connect(std::string inputFieldPath, std::string outputFieldPath)
 void Simulator::schedule(std::string modelName, std::string entryPoint, uint32_t period) {
     // TODO handle errors
     auto model = dynamic_cast<Smp::IEntryPointPublisher*>(GetResolver()->ResolveAbsolute(modelName.c_str()));
-    GetScheduler()->AddSimulationTimeEvent(model->GetEntryPoint(entryPoint.c_str()), 0, period, -1);
+    if (model == nullptr) {
+        std::stringstream ss;
+        ss << "Model " << modelName << " not found";
+        throw std::runtime_error(ss.str().c_str());
+    }
+    auto ep = model->GetEntryPoint(entryPoint.c_str());
+    if (ep == nullptr) {
+        std::stringstream ss;
+        ss << "EntryPoint " << entryPoint << " not found";
+        throw std::runtime_error(ss.str().c_str());
+    }
+    GetScheduler()->AddSimulationTimeEvent(ep, 0, period, -1);
+};
+// ..........................................................
+void Simulator::setValue(std::string fieldPath, float value) {
+    // TODO handle errors
+    auto field = dynamic_cast<simph::kern::Field*>(GetResolver()->ResolveAbsolute(fieldPath.c_str()));
+    Smp::AnySimple SmpVal;
+    SmpVal.SetValue(Smp::PrimitiveTypeKind::PTK_Float64, value);
+    field->SetValue(SmpVal);
 };
 // ..........................................................
 Smp::IComponent* Simulator::createSmpModel(Smp::String8 typeName, Smp::String8 name, Smp::String8 description) {
