@@ -9,6 +9,7 @@
  */
 #include "simph/umdl/SysTimeSynchro.hpp"
 #include "Smp/IPublication.h"
+#include "abs/profiler.h"
 
 static const std::chrono::time_point<std::chrono::system_clock> _nullTimePoint;
 
@@ -39,6 +40,7 @@ void SysTimeSynchro::step() {
         ;  //+std::chrono::nanoseconds(_period);
     }
     else {
+        PROFILER_REGION_COL("SysTimeSynchro", Grey);
         // Wait here until tick time is elapsed.
         Synchronized(_mutex);
         MonitorWaitUntil(_monitor, _nextTick);
