@@ -92,7 +92,7 @@ private:
     }
 
 #define ADD_SMP_FACTORY(name, factoryType)                                                                             \
-    static int static_add_##factoryType{[&] {                                                                          \
+    static int static_add_##factoryType{[] {                                                                          \
         _createFactoryFns.push_back(                                                                                   \
             [&](Smp::ISimulator* simulator) { return new simph::kern::Factory<factoryType>(name, name, simulator); }); \
         return 1;                                                                                                      \
