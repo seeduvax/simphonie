@@ -183,9 +183,9 @@ private:
     TField<T>** _itemFields;
 };
 
-std::ostream& operator<<(std::ostream& os, const Smp::IArrayField& obj);
-std::ostream& operator<<(std::ostream& os, const Smp::ISimpleArrayField& obj);
-std::ostream& operator<<(std::ostream& os, const Smp::ISimpleField& obj);
+std::ostream& toprint(std::ostream& os, const Smp::IArrayField& obj);
+std::ostream& toprint(std::ostream& os, const Smp::ISimpleArrayField& obj);
+std::ostream& toprint(std::ostream& os, const Smp::ISimpleField& obj);
 
 }  // namespace kern
 }  // namespace simph

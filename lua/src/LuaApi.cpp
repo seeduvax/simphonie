@@ -9,6 +9,7 @@
  */
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/ISimulator.h"
+#include "simph/kern/Field.hpp"
 #include "simph/kern/Resolver.hpp"
 #include "simph/kern/Sampler.hpp"
 #include "simph/kern/Scheduler.hpp"
@@ -194,11 +195,19 @@ int luaopen_libsimph_lua(lua_State* L) {
             return dynamic_cast<simph::kern::Resolver*>(sim.GetResolver());
         },
         "getData", [](Smp::ISimulator& sim, std::string fieldName) {
-            auto field = dynamic_cast<simph::kern::Field*>(sim.GetResolver()->ResolveAbsolute(fieldName.c_str()));
+            auto obj = sim.GetResolver()->ResolveAbsolute(fieldName.c_str());
             //FIXME
-            std::cout << "Field Name : " << field->GetName() << std::endl;
-            std::ostringstream data;
-            data << field->GetValue();
+            std::stringstream data;
+           if(dynamic_cast<Smp::ISimpleField*>(obj)){
+             simph::kern::toprint( data, *(dynamic_cast<Smp::ISimpleField*>(obj)));
+           }
+           else if(dynamic_cast<Smp::ISimpleArrayField*>(obj)){
+               simph::kern::toprint( data, *(dynamic_cast<Smp::ISimpleArrayField*>(obj)));
+           }
+           else if(dynamic_cast<Smp::IArrayField*>(obj)){
+               simph::kern::toprint( data, *(dynamic_cast<Smp::IArrayField*>(obj)));
+           }
+            
             return data.str();
         },
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite>()

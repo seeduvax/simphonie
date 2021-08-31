@@ -341,21 +341,21 @@ Smp::AnySimple SimpleArrayField<Smp::Float64>::GetValue(Smp::UInt64 index) const
 }
 
 // --------------------------------------------------------------------
-// ostream operator
+// toprint operator
 // ..........................................................
-// ostream Smp::IArrayField
-std::ostream& operator<<(std::ostream& os, const Smp::IArrayField& obj) {
+// toprint Smp::IArrayField
+std::ostream& toprint(std::ostream& os, const Smp::IArrayField& obj) {
     os << "[ ";
     for (int i = 0; i < obj.GetSize(); i++) {
         if (dynamic_cast<Smp::IArrayField*>(obj.GetItem(i)) != nullptr) {
-            os << *(dynamic_cast<Smp::IArrayField*>(obj.GetItem(i)));
+            toprint(os, *(dynamic_cast<Smp::IArrayField*>(obj.GetItem(i))));
         }
         else if (dynamic_cast<Smp::ISimpleArrayField*>(obj.GetItem(i)) != nullptr) {
-            os << *(dynamic_cast<Smp::ISimpleArrayField*>(obj.GetItem(i)));
+            toprint(os, *(dynamic_cast<Smp::ISimpleArrayField*>(obj.GetItem(i))));
         }
         else {
             auto field = dynamic_cast<Smp::ISimpleField*>(obj.GetItem(i));
-            os << *field;
+            toprint(os, *field);
         }
 
         if (i < obj.GetSize() - 1) {
@@ -368,8 +368,8 @@ std::ostream& operator<<(std::ostream& os, const Smp::IArrayField& obj) {
     return os;
 }
 
-// ostream Smp::ISimpleArrayField
-std::ostream& operator<<(std::ostream& os, const Smp::ISimpleArrayField& obj) {
+// toprint Smp::ISimpleArrayField
+std::ostream& toprint(std::ostream& os, const Smp::ISimpleArrayField& obj) {
     os << "[";
     for (int i = 0; i < obj.GetSize() - 1; i++) {
         os << " " << obj.GetValue(i) << " ;";
@@ -378,8 +378,8 @@ std::ostream& operator<<(std::ostream& os, const Smp::ISimpleArrayField& obj) {
     return os;
 }
 
-// ostream Smp::ISimpleField
-std::ostream& operator<<(std::ostream& os, const Smp::ISimpleField& obj) {
+// toprint Smp::ISimpleField
+std::ostream& toprint(std::ostream& os, const Smp::ISimpleField& obj) {
     os << obj.GetValue();
     return os;
 }
