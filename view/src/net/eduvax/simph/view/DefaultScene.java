@@ -51,7 +51,7 @@ public class DefaultScene implements ISceneComposition {
         parent.attachChild(geom);
         parent.attachChild(SkyFactory.createSky(assetManager,
                           "res/textures/sky/skysphere1.jpg", 
-                           SkyFactory.EnvMapType.SphereMap));
+                           SkyFactory.EnvMapType.EquirectMap));
 
         final int SHADOWMAP_SIZE=1024;
         DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, SHADOWMAP_SIZE, 3);

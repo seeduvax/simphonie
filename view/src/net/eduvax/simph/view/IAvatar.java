@@ -8,10 +8,12 @@
  * $Date$
  */
 package net.eduvax.simph.view;
+import com.jme3.input.ChaseCamera;
 
 /**
  *
  */
 public interface IAvatar extends ISceneComposition {
     public void update();
+    public void setChaseCamera(ChaseCamera cam);
 }

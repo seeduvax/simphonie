@@ -10,8 +10,8 @@
 package net.eduvax.simph.view;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.ChaseCamera;
 import com.jme3.system.AppSettings;
-
 import java.util.Vector;
 
 /**
@@ -26,6 +26,8 @@ public class Main extends SimpleApplication {
     public static void main(String[] args) {
         Main app = new Main();
         app.setShowSettings(false);
+        app.setDisplayFps(false);
+        app.setDisplayStatView(false);
         AppSettings settings = new AppSettings(true);
         settings.setTitle("Simphonie Viewer");
         settings.setResizable(true);
@@ -36,6 +38,12 @@ public class Main extends SimpleApplication {
         _globalScene.build(rootNode,assetManager,viewPort);
         for (IAvatar avatar: _avatars) {
             avatar.build(rootNode,assetManager,viewPort);
+        }
+        if (_avatars.size()>0) {
+            flyCam.setEnabled(false);
+            ChaseCamera chaseCam=new ChaseCamera(cam,inputManager);
+            chaseCam.setMinVerticalRotation(-3f);
+            _avatars.elementAt(0).setChaseCamera(chaseCam);
         }
     }
     @Override public void simpleUpdate(float tpf) {

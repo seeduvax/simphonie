@@ -37,3 +37,6 @@ IndentCaseLabels : true
 ---
 Language: JavaScript
 DisableFormat: true
+---
+Language: Java
+DisableFormat: true

@@ -23,24 +23,24 @@ import com.jme3.renderer.ViewPort;
 /**
  *
  */
-public class DummyAvatar implements IAvatar {
-    private Geometry _geom;
+public class DummyAvatar extends Avatar {
     private float _y=0;
     @Override public void build(Node parent, AssetManager assetManager, ViewPort viewPort) {
         Box b=new Box(1,1,1);
-        _geom = new Geometry("DummyAvatar", b);
+        Geometry geom = new Geometry("DummyAvatar", b);
         Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
         mat.setBoolean("UseMaterialColors",true);
         mat.setColor("Ambient",ColorRGBA.Gray);
         mat.setColor("Diffuse",ColorRGBA.Gray);
         mat.setColor("Specular",ColorRGBA.White);
         mat.setFloat("Shininess", 32f);
-        _geom.setMaterial(mat);
-        _geom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-        parent.attachChild(_geom);
+        geom.setMaterial(mat);
+        geom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+        parent.attachChild(geom);
+        setSpatial(geom);
     }
     @Override public void update() {
         _y+=0.01;
-        _geom.setLocalTranslation(0,_y,0);
+        getSpatial().setLocalTranslation(0,_y,0);
     }
 }
