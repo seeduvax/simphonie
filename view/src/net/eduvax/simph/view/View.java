@@ -32,6 +32,7 @@ public class View extends SimpleApplication {
         for (ISceneComposition obj: _sceneElements) {
             obj.build(this);
         }
+setChase("dummy");
     }
 
     public void setChase(String name) {
@@ -50,17 +51,6 @@ public class View extends SimpleApplication {
     public Node getRootNode() {
         return rootNode;
     }
-/*
-    public AssetManager getAssetManager() {
-        return assetManager;
-    }
-    ViewPort getViewPort() {
-        return viewPort;
-    }
-    Renderer getRenderer() {
-        return renderer;
-    }
-*/
     @Override public void simpleUpdate(float tpf) {
         for (ISceneComposition c: _sceneElements) {
             c.update();

@@ -29,7 +29,7 @@ public class Main {
         app.add(new DummyScene());
         app.add(new DefaultLight());
         app.add(new ToonStyle());
-        
+
         app.start();
     }
 }
