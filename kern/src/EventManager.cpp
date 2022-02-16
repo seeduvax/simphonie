@@ -47,11 +47,21 @@ Smp::Services::EventId EventManager::QueryEventId(Smp::String8 eventName) {
             return i;
         }
     }
+    // TODO This function shall also act as a kind of event (name) registration.
+    // This shall always return:
+    // - the same value for each specific enventName
+    // - distinct value for distinc entries, of course according limits of IEventId
+    // that is an UInt64 than not able to give more events than int64 range.
+    // Consequences: actual _evRegistry management should be reconsidered. A new
+    // entry shall be inserted here the first time a specific eventName is submitted.
+    // Defining Id according a hash of the eventName could be a reliable way to
+    // handle Event Ids.
     return 0;
 }
 // ..........................................................
 void EventManager::Subscribe(Smp::Services::EventId event, const Smp::IEntryPoint* entryPoint) {
     // TODO make it thread safe.
+    // Or restrict use from a single scheduler...
     if (!entryPoint) {
         auto itEps = _evRegistry.find(event);
         if (itEps != _evRegistry.end()) {
@@ -68,6 +78,7 @@ void EventManager::Subscribe(Smp::Services::EventId event, const Smp::IEntryPoin
 // ..........................................................
 void EventManager::Unsubscribe(Smp::Services::EventId event, const Smp::IEntryPoint* entryPoint) {
     // TODO make it thread safe.
+    // Or restrict use from a single scheduler...
     auto itEps = _evRegistry.find(event);
     if (itEps != _evRegistry.end()) {
         bool res = itEps->second.remove(entryPoint);
