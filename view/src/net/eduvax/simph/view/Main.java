@@ -9,22 +9,14 @@
  */
 package net.eduvax.simph.view;
 
-import com.jme3.app.SimpleApplication;
-import com.jme3.input.ChaseCamera;
 import com.jme3.system.AppSettings;
-import java.util.Vector;
 
 /**
  *
  */
-public class Main extends SimpleApplication {
-
-    public Main() {
-        _avatars.add(new DummyAvatar());
-    }
-
+public class Main {
     public static void main(String[] args) {
-        Main app = new Main();
+        View app = new View();
         app.setShowSettings(false);
         app.setDisplayFps(false);
         app.setDisplayStatView(false);
@@ -32,26 +24,12 @@ public class Main extends SimpleApplication {
         settings.setTitle("Simphonie Viewer");
         settings.setResizable(true);
         app.setSettings(settings);
+
+        app.add(new DummyAvatar());
+        app.add(new DummyScene());
+        app.add(new DefaultLight());
+        app.add(new ToonStyle());
+        
         app.start();
     }
-    @Override public void simpleInitApp() {
-        _globalScene.build(rootNode,assetManager,viewPort);
-        for (IAvatar avatar: _avatars) {
-            avatar.build(rootNode,assetManager,viewPort);
-        }
-        if (_avatars.size()>0) {
-            flyCam.setEnabled(false);
-            ChaseCamera chaseCam=new ChaseCamera(cam,inputManager);
-            chaseCam.setMinVerticalRotation(-3f);
-            _avatars.elementAt(0).setChaseCamera(chaseCam);
-        }
-    }
-    @Override public void simpleUpdate(float tpf) {
-        for (IAvatar avatar: _avatars) {
-            avatar.update();
-        }
-    }
-
-    private ISceneComposition _globalScene=new DefaultScene();
-    private Vector<IAvatar> _avatars=new Vector<IAvatar>();
 }
