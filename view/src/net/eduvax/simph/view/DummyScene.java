@@ -20,6 +20,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
 import com.jme3.util.SkyFactory;
 
+import com.jme3.renderer.queue.RenderQueue;
 /**
  *
  */
@@ -43,8 +44,6 @@ public class DummyScene implements ISceneComposition {
         parent.attachChild(SkyFactory.createSky(assetManager,
                           "res/textures/sky/skysphere1.jpg", 
                            SkyFactory.EnvMapType.EquirectMap));
-
-
     }
     @Override public void update() {
     }

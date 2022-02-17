@@ -28,7 +28,9 @@ public class DefaultLight implements ISceneComposition {
     @Override public void build(View view) {
         Node parent=view.getRootNode();
         for (Spatial child : parent.getChildren()) {
-            child.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+            if (!"Sky".equals(child.getName())) {
+                child.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+            }
         }
 
         AssetManager assetManager=view.getAssetManager();
@@ -45,7 +47,7 @@ public class DefaultLight implements ISceneComposition {
         viewPort.addProcessor(dlsr);
 
         AmbientLight al = new AmbientLight();
-        al.setColor(ColorRGBA.White.mult(0.8f));
+        al.setColor(ColorRGBA.White.mult(0.4f));
         parent.addLight(al);
 
         DirectionalLightShadowFilter dlsf = new DirectionalLightShadowFilter(assetManager, SHADOWMAP_SIZE, 3);

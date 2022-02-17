@@ -55,9 +55,8 @@ public class DummyAvatar implements ISceneComposition {
         mat.setColor("Specular",ColorRGBA.Yellow);
         mat.setFloat("Shininess", 96f);
         _geom.setMaterial(mat);
- mat= new Material(assetManager,"Common/MatDefs/Misc/Particle.j3md");
- exhaust.setMaterial(mat);
-        _geom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+mat= new Material(assetManager,"Common/MatDefs/Misc/Particle.j3md");
+exhaust.setMaterial(mat);
         view.getRootNode().attachChild(_geom);
     }
     @Override public void update() {
