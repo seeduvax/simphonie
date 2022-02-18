@@ -15,12 +15,12 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.ViewPort; 
+import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
+import com.jme3.texture.Texture;
 import com.jme3.util.SkyFactory;
-
-import com.jme3.renderer.queue.RenderQueue;
 /**
  *
  */
@@ -30,7 +30,7 @@ public class DummyScene implements ISceneComposition {
         AssetManager assetManager=view.getAssetManager();
         ViewPort viewPort=view.getViewPort();
 
-        Geometry ground = new Geometry("Ground", new Box(10000, 0.5f, 10000));
+        Geometry ground = new Geometry("Ground", new Box(100, 0.5f, 100));
         Transform t=new Transform(new Vector3f(0,-0.5f,0));
         ground.setLocalTransform(t);
         Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
@@ -39,6 +39,8 @@ public class DummyScene implements ISceneComposition {
         mat.setColor("Diffuse",ColorRGBA.Green);
         mat.setColor("Specular",ColorRGBA.Yellow);
         mat.setFloat("Shininess", 64f);
+        Texture tex=assetManager.loadTexture("res/textures/grass.jpg");
+        mat.setTexture("DiffuseMap",tex);
         ground.setMaterial(mat);
         parent.attachChild(ground);
         parent.attachChild(SkyFactory.createSky(assetManager,

@@ -42,8 +42,9 @@ public class DummyAvatar implements ISceneComposition {
         float f[]={(float)Math.PI/2,0,0};
         Quaternion q=new Quaternion(f);
         tail.setLocalRotation(q);
-        ParticleEmitter exhaust=new ParticleEmitter("exhaust",Type.Triangle,30);
+        ParticleEmitter exhaust=new ParticleEmitter("exhaust",Type.Triangle,100);
         exhaust.setLocalTranslation(0,-1,0);
+        exhaust.getParticleInfluencer().setVelocityVariation(1);
         _geom = new Node(_name);
         _geom.attachChild(head);
         _geom.attachChild(tail);
@@ -55,8 +56,10 @@ public class DummyAvatar implements ISceneComposition {
         mat.setColor("Specular",ColorRGBA.Yellow);
         mat.setFloat("Shininess", 96f);
         _geom.setMaterial(mat);
-mat= new Material(assetManager,"Common/MatDefs/Misc/Particle.j3md");
-exhaust.setMaterial(mat);
+        mat=new Material(assetManager,"Common/MatDefs/Misc/Particle.j3md");
+        exhaust.setImagesX(15);
+        mat.setTexture("Texture", assetManager.loadTexture("res/textures/smoke.png"));
+        exhaust.setMaterial(mat);
         view.getRootNode().attachChild(_geom);
     }
     @Override public void update() {

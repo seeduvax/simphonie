@@ -40,6 +40,7 @@ setChase("dummy");
         if (s!=null) {
             flyCam.setEnabled(false);
             ChaseCamera chaseCam=new ChaseCamera(cam,inputManager);
+            chaseCam.setMinVerticalRotation((float)-Math.PI);
             s.removeControl(ChaseCamera.class);
             s.addControl(chaseCam);
         }
