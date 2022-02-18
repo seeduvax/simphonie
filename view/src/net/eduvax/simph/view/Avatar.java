@@ -34,7 +34,7 @@ public abstract class Avatar implements IAvatar {
     }
 
     @Override public void setAttitude(double w,double x, double y, double z) {
-        _attitude=new Quaternion((float)w,(float)x,(float)y,(float)z);
+        _attitude=new Quaternion((float)x,(float)y,(float)z,(float)w);
     }
 
     @Override public synchronized void setAttribute(String attrName,double value) {

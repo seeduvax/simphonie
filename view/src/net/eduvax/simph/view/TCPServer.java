@@ -16,6 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import com.jme3.math.Quaternion;
 
 /**
  *
@@ -91,8 +92,15 @@ ex.printStackTrace();
                         double w=Double.parseDouble(st.nextToken());
                         double x=Double.parseDouble(st.nextToken());
                         double y=Double.parseDouble(st.nextToken());
-                        double z=Double.parseDouble(st.nextToken());
-                        _avatar.setAttitude(w,x,y,z); 
+                        if (st.hasMoreTokens()) {
+                            double z=Double.parseDouble(st.nextToken());
+                            _avatar.setAttitude(w,x,y,z);
+                        }
+                        else {
+                            float f[]={(float)w,(float)x,(float)y};
+                            Quaternion q=new Quaternion(f);
+                            _avatar.setAttitude(q.getW(),q.getX(),q.getY(),q.getZ());
+                        } 
                     }
                     if ("attribute".equals(cmd)) {
                         String name=st.nextToken();
