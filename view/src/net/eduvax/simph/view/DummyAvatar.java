@@ -29,10 +29,8 @@ import com.jme3.scene.shape.Sphere;
 /**
  *
  */
-public class DummyAvatar implements ISceneComposition {
-    private float _y=0;
-    private String _name="dummy";
-    private Node _geom;
+public class DummyAvatar extends Avatar implements ISceneComposition {
+    private Node _node;
     @Override public void build(View view) {
         AssetManager assetManager=view.getAssetManager();
 
@@ -45,25 +43,25 @@ public class DummyAvatar implements ISceneComposition {
         ParticleEmitter exhaust=new ParticleEmitter("exhaust",Type.Triangle,100);
         exhaust.setLocalTranslation(0,-1,0);
         exhaust.getParticleInfluencer().setVelocityVariation(1);
-        _geom = new Node(_name);
-        _geom.attachChild(head);
-        _geom.attachChild(tail);
-        _geom.attachChild(exhaust);
+        _node = new Node("dummy");
+        _node.attachChild(head);
+        _node.attachChild(tail);
+        _node.attachChild(exhaust);
         Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
         mat.setBoolean("UseMaterialColors",true);
         mat.setColor("Ambient",new ColorRGBA(1,1,1,0.5f));
         mat.setColor("Diffuse",new ColorRGBA(1,1,1,0.5f));
         mat.setColor("Specular",ColorRGBA.Yellow);
         mat.setFloat("Shininess", 96f);
-        _geom.setMaterial(mat);
+        _node.setMaterial(mat);
         mat=new Material(assetManager,"Common/MatDefs/Misc/Particle.j3md");
         exhaust.setImagesX(15);
         mat.setTexture("Texture", assetManager.loadTexture("res/textures/smoke.png"));
         exhaust.setMaterial(mat);
-        view.getRootNode().attachChild(_geom);
+        view.getRootNode().attachChild(_node);
     }
     @Override public void update() {
-        _y+=0.01;
-        _geom.setLocalTranslation(0,_y,0);
+        _node.setLocalTranslation(getLocation());
+        _node.setLocalRotation(getAttitude());
     }
 }

@@ -13,7 +13,9 @@ import com.jme3.input.ChaseCamera;
 /**
  *
  */
-public interface IAvatar extends ISceneComposition {
-    public void update();
-    public void setChaseCamera(ChaseCamera cam);
+public interface IAvatar {
+    void setTime(double time);
+    void setLocation(double x, double y, double z);
+    void setAttitude(double w,double x,double y, double z);
+    void setAttribute(String attrName,double value);
 }

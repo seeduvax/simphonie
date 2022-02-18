@@ -26,11 +26,21 @@ public class View extends SimpleApplication {
 
     public void add(ISceneComposition comp) {
         _sceneElements.add(comp);
+        if (comp instanceof IAvatar) {
+            _avatars.add((IAvatar)comp);
+        }
+    }
+
+    public void add(IAvatarsHandler handler) {
+        _avatarsHandlers.add(handler);
     }
     
     @Override public void simpleInitApp() {
         for (ISceneComposition obj: _sceneElements) {
             obj.build(this);
+        }
+        for (IAvatarsHandler handler: _avatarsHandlers) {
+            handler.setAvatars(_avatars);
         }
 setChase("dummy");
     }
@@ -60,4 +70,6 @@ setChase("dummy");
     
     private Vector<ISceneComposition> _sceneElements=
                                            new Vector<ISceneComposition>();
+    private Vector<IAvatar> _avatars=new Vector<IAvatar>();
+    private Vector<IAvatarsHandler> _avatarsHandlers=new Vector<IAvatarsHandler>();
 }
