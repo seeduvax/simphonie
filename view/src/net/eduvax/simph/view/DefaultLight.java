@@ -60,6 +60,6 @@ public class DefaultLight implements ISceneComposition {
         viewPort.addProcessor(fpp);
 
     }
-    @Override public void update() {
+    @Override public void update(float tpf) {
     }
 }

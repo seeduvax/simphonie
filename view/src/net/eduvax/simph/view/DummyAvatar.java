@@ -30,23 +30,22 @@ import com.jme3.scene.shape.Sphere;
  *
  */
 public class DummyAvatar extends Avatar implements ISceneComposition {
-    private Node _node;
     @Override public void build(View view) {
         AssetManager assetManager=view.getAssetManager();
 
         Geometry head=new Geometry("head",new Sphere(20,20,0.5f));
         head.setLocalTranslation(0,1,0);
-        Geometry tail=new Geometry("tail",new Cylinder(20,20,0.5f,2,true));
+        _tail=new Geometry("tail",new Cylinder(20,20,0.5f,2,true));
         float f[]={(float)Math.PI/2,0,0};
         Quaternion q=new Quaternion(f);
-        tail.setLocalRotation(q);
-        ParticleEmitter exhaust=new ParticleEmitter("exhaust",Type.Triangle,100);
-        exhaust.setLocalTranslation(0,-1,0);
-        exhaust.getParticleInfluencer().setVelocityVariation(1);
+        _tail.setLocalRotation(q);
+        _exhaust=new ParticleEmitter("exhaust",Type.Triangle,100);
+        _exhaust.setLocalTranslation(0,-1,0);
+        _exhaust.getParticleInfluencer().setVelocityVariation(1);
         _node = new Node("dummy");
         _node.attachChild(head);
-        _node.attachChild(tail);
-        _node.attachChild(exhaust);
+        _node.attachChild(_tail);
+        _node.attachChild(_exhaust);
         Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
         mat.setBoolean("UseMaterialColors",true);
         mat.setColor("Ambient",new ColorRGBA(1,1,1,0.5f));
@@ -55,13 +54,32 @@ public class DummyAvatar extends Avatar implements ISceneComposition {
         mat.setFloat("Shininess", 96f);
         _node.setMaterial(mat);
         mat=new Material(assetManager,"Common/MatDefs/Misc/Particle.j3md");
-        exhaust.setImagesX(15);
+        _exhaust.setImagesX(15);
         mat.setTexture("Texture", assetManager.loadTexture("res/textures/smoke.png"));
-        exhaust.setMaterial(mat);
+        _exhaust.setMaterial(mat);
         view.getRootNode().attachChild(_node);
     }
-    @Override public void update() {
+    @Override public void update(float tpf) {
         _node.setLocalTranslation(getLocation());
         _node.setLocalRotation(getAttitude());
+
+        Avatar.AttrChange ac=pollAttrChange();
+        while (ac!=null) {
+            if ("smoke".equals(ac._name)) {
+                _exhaust.setParticlesPerSec((float)ac._value*10f);
+            }
+            else if ("split".equals(ac._name)) {
+                _split=true;
+            }
+            ac=pollAttrChange();
+        }
+        if (_split) {
+            Vector3f l=_tail.getLocalTranslation();
+            l.setY(l.getY()-0.1f);
+        }
     }
+    private Node _node;
+    private ParticleEmitter _exhaust;
+    private Geometry _tail;
+    private boolean _split=false;
 }

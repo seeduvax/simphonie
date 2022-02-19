@@ -14,5 +14,5 @@ package net.eduvax.simph.view;
  */
 public interface ISceneComposition {
     void build(View view);
-    void update();
+    void update(float tpf);
 }

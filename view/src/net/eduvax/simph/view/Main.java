@@ -10,6 +10,9 @@
 package net.eduvax.simph.view;
 
 import com.jme3.system.AppSettings;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.util.StringTokenizer;
 
 /**
  *
@@ -17,21 +20,39 @@ import com.jme3.system.AppSettings;
 public class Main {
     public static void main(String[] args) {
         View app = new View();
-        app.setShowSettings(false);
-        app.setDisplayFps(false);
-        app.setDisplayStatView(false);
-        app.setPauseOnLostFocus(false);
-        AppSettings settings = new AppSettings(true);
+        AppSettings settings = app.getSettings();
+        boolean toon=false;
+        int tcpPort=0;
+        for(String arg: args) {
+            if ("-f".equals(arg)) {
+                Toolkit tk=Toolkit.getDefaultToolkit();
+                Dimension d=tk.getScreenSize();
+                settings.setResolution(d.width,d.height);
+                settings.setFullscreen(true);
+            }
+            else if ("-ts".equals(arg)) {
+                toon=true;
+            }
+            else if (arg.startsWith("-tcp")) {
+                tcpPort=10001;
+                StringTokenizer st=new StringTokenizer(arg,"=");
+                st.nextToken();
+                if (st.hasMoreTokens()) {
+                    tcpPort=Integer.parseInt(st.nextToken());
+                }
+            }
+        }
 
-        settings.setTitle("Simphonie Viewer");
-        settings.setVSync(true);
-        app.setSettings(settings);
-
+        app.add(new DummyAvatar());
         app.add(new DummyAvatar());
         app.add(new DummyScene());
         app.add(new DefaultLight());
-        app.add(new ToonStyle());
-        app.add(new TCPServer(17001));
+        if (toon) {
+            app.add(new ToonStyle());
+        }
+        if (tcpPort>0) {
+            app.add(new TCPServer(tcpPort));
+        }
 
         app.start();
     }

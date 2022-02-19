@@ -47,6 +47,6 @@ public class DummyScene implements ISceneComposition {
                           "res/textures/sky/skysphere1.jpg", 
                            SkyFactory.EnvMapType.EquirectMap));
     }
-    @Override public void update() {
+    @Override public void update(float tpf) {
     }
 }
