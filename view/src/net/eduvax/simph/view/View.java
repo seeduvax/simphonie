@@ -73,12 +73,11 @@ public class View extends SimpleApplication {
                 if (pressed) prevCam();
             }
         },"prevCam");
-        
     }
 
     public void nextCam() {
         _selAvatar++;
-        if (_selAvatar>_sceneElements.size()) {
+        if (_selAvatar>rootNode.getChildren().size()) {
             _selAvatar=0;
         }
         setChase(_selAvatar);
@@ -93,16 +92,21 @@ public class View extends SimpleApplication {
     }
 
     
-
+    private ChaseCamera _chaseCam=null;
     public void setChase(Spatial s) {
         if (s!=null) {
             flyCam.setEnabled(false);
-            ChaseCamera chaseCam=new ChaseCamera(cam,inputManager);
-            chaseCam.setMinVerticalRotation((float)-Math.PI);
+            if (_chaseCam!=null) {
+                _chaseCam.setEnabled(false);
+            }
+            _chaseCam=new ChaseCamera(cam,s);
+            _chaseCam.setMinVerticalRotation((float)-Math.PI);
             s.removeControl(ChaseCamera.class);
-            s.addControl(chaseCam);
+            s.addControl(_chaseCam);
+            _chaseCam.setEnabled(true);
         }
         else {
+            _chaseCam.setEnabled(true);
             flyCam.setEnabled(true);
         }
     }
