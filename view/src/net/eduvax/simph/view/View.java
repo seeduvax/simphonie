@@ -98,8 +98,9 @@ public class View extends SimpleApplication {
             flyCam.setEnabled(false);
             if (_chaseCam!=null) {
                 _chaseCam.setEnabled(false);
+                _chaseCam.cleanupWithInput(inputManager);
             }
-            _chaseCam=new ChaseCamera(cam,s);
+            _chaseCam=new ChaseCamera(cam,s,inputManager);
             _chaseCam.setMinVerticalRotation((float)-Math.PI);
             s.removeControl(ChaseCamera.class);
             s.addControl(_chaseCam);
