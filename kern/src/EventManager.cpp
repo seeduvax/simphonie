@@ -30,11 +30,9 @@ const Smp::String8 _SMP_EventNamesTable[] = {
 // ..........................................................
 EventManager::EventManager(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : Component(name[0] == '\0' ? Smp::Services::IEventManager::SMP_EventManager : name, descr, parent) {
-    for (int evtIdx = 0; evtIdx <= Smp::Services::IEventManager::SMP_PostSimTimeChangeId; ++evtIdx) {
-        std::ostringstream cname;
-        cname << "events" << evtIdx;
+    for (int evtIdx = 1; evtIdx <= Smp::Services::IEventManager::SMP_PostSimTimeChangeId; ++evtIdx) {
         _evRegistry.emplace(std::piecewise_construct, std::forward_as_tuple(evtIdx),
-                            std::forward_as_tuple(cname.str().c_str(), "", this));
+                            std::forward_as_tuple(_SMP_EventNamesTable[evtIdx - 1], "", this));
     }
 }
 // ..........................................................
@@ -47,22 +45,29 @@ Smp::Services::EventId EventManager::QueryEventId(Smp::String8 eventName) {
             return i;
         }
     }
-    // TODO This function shall also act as a kind of event (name) registration.
-    // This shall always return:
-    // - the same value for each specific enventName
-    // - distinct value for distinc entries, of course according limits of IEventId
-    // that is an UInt64 than not able to give more events than int64 range.
-    // Consequences: actual _evRegistry management should be reconsidered. A new
-    // entry shall be inserted here the first time a specific eventName is submitted.
-    // Defining Id according a hash of the eventName could be a reliable way to
-    // handle Event Ids.
-    return 0;
+    const char* c = eventName;
+    Smp::Services::EventId id = 32;
+    while (*c != '\0') {
+        id = id * 31 + (int)(*c);
+        c++;
+    }
+    auto itEps = _evRegistry.find(id);
+    if (itEps == _evRegistry.end()) {
+        // Create new slot in registry for the queried event if not yet
+        // existing.
+        _evRegistry.emplace(std::piecewise_construct, std::forward_as_tuple(id),
+                            std::forward_as_tuple(eventName, "", this));
+    }
+    // TODO may be it is possible to check for collisition by checking
+    // collection's name against provided event name when there is already
+    // something in the registry with the same id.
+    return id;
 }
 // ..........................................................
 void EventManager::Subscribe(Smp::Services::EventId event, const Smp::IEntryPoint* entryPoint) {
     // TODO make it thread safe.
     // Or restrict use from a single scheduler...
-    if (!entryPoint) {
+    if (entryPoint != nullptr) {
         auto itEps = _evRegistry.find(event);
         if (itEps != _evRegistry.end()) {
             if (itEps->second.contain(entryPoint)) {

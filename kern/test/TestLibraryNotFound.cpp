@@ -47,6 +47,7 @@ public:
     bool testLoadLibraries(std::vector<std::string> libraries) {
         try {
             for (auto itr : libraries) {
+                TRACE("" << itr);
                 _sim.LoadLibrary(itr.c_str());
             }
         }
@@ -58,4 +59,5 @@ public:
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestLibraryNotFound);
+
 }  // namespace test

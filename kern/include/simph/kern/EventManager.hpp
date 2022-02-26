@@ -40,8 +40,8 @@ public:
     void Emit(Smp::Services::EventId event, Smp::Bool syncrhonous = true);
 
 private:
-    typedef std::unordered_map<Smp::Services::EventId, Collection<const Smp::IEntryPoint> > EventRegisteryMap;
-    EventRegisteryMap _evRegistry;
+    typedef std::unordered_map<Smp::Services::EventId, Collection<const Smp::IEntryPoint> > EventRegistryMap;
+    EventRegistryMap _evRegistry;
 };
 
 }  // namespace kern
