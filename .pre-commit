@@ -129,7 +129,7 @@ readonly me_relative_to_hook
 my_dir=$(dirname "$me") || exit 1
 readonly my_dir
 
-apply_format="$my_dir/apply-format"
+apply_format="$my_dir/../simph/apply-format"
 readonly apply_format
 
 apply_format_relative_to_top_dir=$(rel_realpath "$apply_format" "$top_dir") || exit 1
