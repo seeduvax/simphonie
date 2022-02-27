@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="c50c03b8852bc43a3c8f4c45e8b09c59c3d5aa773440129285a149ccb4bfc8b2" state="open">
+<cr id="c50c03b8852bc43a3c8f4c45e8b09c59c3d5aa773440129285a149ccb4bfc8b2" state="closed" delivered="simph-0.1.17">
 <title>Fix seg fault with nullptr on TypeRegistry by adding it in services components</title>
 <reporter>f001864</reporter>
 <creation>2021-05-07 17:17:28+02:00</creation>

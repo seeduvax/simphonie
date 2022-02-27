@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="4e6cf8b2ccc387bbebf42e4fcbaf7b686737c6bc238ed8af10849d5f6852edb1" state="open">
+<cr id="4e6cf8b2ccc387bbebf42e4fcbaf7b686737c6bc238ed8af10849d5f6852edb1" state="closed" delivered="simph-0.1.17">
 <title>update Resolver : recursive call(KO segfault)</title>
 <reporter>f001864</reporter>
 <creation>2021-05-10 17:00:36+02:00</creation>

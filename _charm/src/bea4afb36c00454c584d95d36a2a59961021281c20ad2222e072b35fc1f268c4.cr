@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="bea4afb36c00454c584d95d36a2a59961021281c20ad2222e072b35fc1f268c4" state="open">
+<cr id="bea4afb36c00454c584d95d36a2a59961021281c20ad2222e072b35fc1f268c4" state="closed" delivered="simph-0.1.17">
 <title>update documentation: todo tasks</title>
 <reporter>f001864</reporter>
 <creation>2021-05-28 12:14:26+02:00</creation>

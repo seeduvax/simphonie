@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="5f1bf2d4116c6121a33d3d889b7b9b103e818e83138f82e4e6bc061d80c6601f" state="open">
+<cr id="5f1bf2d4116c6121a33d3d889b7b9b103e818e83138f82e4e6bc061d80c6601f" state="closed" delivered="simph-0.1.17">
 <title>Divers tests updates</title>
 <reporter>f001864</reporter>
 <creation>2021-05-04 16:45:34+02:00</creation>

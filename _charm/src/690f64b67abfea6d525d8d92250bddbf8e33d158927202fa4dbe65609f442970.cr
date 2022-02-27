@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="690f64b67abfea6d525d8d92250bddbf8e33d158927202fa4dbe65609f442970" state="open">
+<cr id="690f64b67abfea6d525d8d92250bddbf8e33d158927202fa4dbe65609f442970" state="closed" delivered="simph-0.1.17">
 <title>Improve Sampler: 1 column for 1 Field, 1 row for each time step</title>
 <reporter>f001864</reporter>
 <creation>2021-05-07 17:19:42+02:00</creation>

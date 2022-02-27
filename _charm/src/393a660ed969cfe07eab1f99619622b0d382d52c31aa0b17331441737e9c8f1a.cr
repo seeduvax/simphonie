@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="393a660ed969cfe07eab1f99619622b0d382d52c31aa0b17331441737e9c8f1a" state="open">
+<cr id="393a660ed969cfe07eab1f99619622b0d382d52c31aa0b17331441737e9c8f1a" state="closed" delivered="simph-0.1.17">
 <title>add sampler support in lua scripts</title>
 <reporter>f001864</reporter>
 <creation>2021-05-28 15:16:04+02:00</creation>
