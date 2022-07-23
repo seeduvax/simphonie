@@ -11,7 +11,6 @@
 #define __simph_mt_SyncSubSim_HPP__
 
 #include <pthread.h>
-#include "Smp/IComposite.h"
 #include "Smp/IService.h"
 #include "Smp/ISimulator.h"
 #include "simph/smpdk/Collection.hpp"
@@ -24,7 +23,8 @@ namespace mt {
 /**
  *
  */
-class SyncSubSim : public simph::smpdk::Component, public virtual Smp::IComposite, public virtual Smp::IService {
+class SyncSubSim : public simph::smpdk::Component,
+                    public virtual Smp::IService {
 public:
     /**
      * Default constructor.
@@ -39,9 +39,9 @@ public:
     void syncInitEP();
     void syncReleaseEP();
 
-    // IComposite implementation
-    const Smp::ContainerCollection* GetContainers() const override;
-    Smp::IContainer* GetContainer(Smp::String8 name) const override;
+    inline Smp::ISimulator* getSubSim() {
+        return _subSim;
+    }
 
 protected:
     void publish(Smp::IPublication* receiver) override;
@@ -51,12 +51,13 @@ protected:
 private:
     Smp::ISimulator* _subSim;
     Smp::Duration _syncRate;
-    simph::smpdk::CollectionOwner<Smp::IContainer> _containers;
     pthread_barrier_t _barrier;
+    void onSync() noexcept;
 
     Smp::Services::EventId _evSyncMaster;
     Smp::Services::EventId _evSyncSub;
-    Smp::IEntryPoint* _epSync;
+    Smp::IEntryPoint* _initEP;
+    Smp::IEntryPoint* _syncEP;
 };
 
 }  // namespace mt

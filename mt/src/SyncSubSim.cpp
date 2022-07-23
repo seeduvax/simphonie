@@ -10,16 +10,19 @@
 #include "simph/mt/SyncSubSim.hpp"
 #include "Smp/IPublication.h"
 #include "simph/kern/Simulator.hpp"
+#include "simph/kern/EntryPoint.hpp"
 #include "simph/smpdk/Container.hpp"
+#include "simph/sys/Callback.hpp"
 
 namespace simph {
 namespace mt {
 // --------------------------------------------------------------------
 // ..........................................................
 SyncSubSim::SyncSubSim(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : simph::smpdk::Component(name, descr, parent), _containers("Containers", "", this) {
+        : simph::smpdk::Component(name, descr, parent) {
+    _initEP=new simph::kern::EntryPoint(std::move(simph::sys::Callback::create(&SyncSubSim::syncInitEP,this)),"init","",this);
+    _syncEP=new simph::kern::EntryPoint(std::move(simph::sys::Callback::create(&SyncSubSim::syncEP,this)),"sync","",this);
     _subSim = new simph::kern::Simulator("sim", "Sub simulator", this);
-    _containers.push_back(new simph::smpdk::Container("sub", "", this));
     pthread_barrier_init(&_barrier, nullptr, 0);
     // TODO Simulator is not a component. Find another way
     // to contain it, in Smp Composite meaning.
@@ -27,23 +30,16 @@ SyncSubSim::SyncSubSim(Smp::String8 name, Smp::String8 descr, Smp::IObject* pare
 }
 // ..........................................................
 SyncSubSim::~SyncSubSim() {
-    delete _subSim;
     pthread_barrier_destroy(&_barrier);
+    delete _subSim;
+    delete _syncEP;
+    delete _initEP;
 }
-// --------------------------------------------------------------------
-// ..........................................................
-const Smp::ContainerCollection* SyncSubSim::GetContainers() const {
-    return &_containers;
-}
-// ..........................................................
-Smp::IContainer* SyncSubSim::GetContainer(Smp::String8 name) const {
-    return _containers.at(name);
-}
-
 // --------------------------------------------------------------------
 // ..........................................................
 void SyncSubSim::publish(Smp::IPublication* receiver) {
-    receiver->PublishField("SyncRate", "Simulators Synchronisation rate", &_syncRate, Smp::ViewKind::VK_All, true, true,
+    receiver->PublishField("SyncRate", "Simulators Synchronisation rate",
+                           &_syncRate, Smp::ViewKind::VK_All, true, true,
                            false);
     _subSim->Publish();
 }
@@ -54,6 +50,7 @@ void SyncSubSim::configure() {
 // ..........................................................
 void SyncSubSim::connect() {
     _subSim->Connect();
+    getSimulator()->AddInitEntryPoint(_initEP);
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -64,17 +61,16 @@ void SyncSubSim::syncEP() {
 void SyncSubSim::syncInitEP() {
     pthread_barrier_destroy(&_barrier);
     pthread_barrier_init(&_barrier, nullptr, 2);
-    _evSyncMaster = getSimulator()->GetScheduler()->AddSimulationTimeEvent(_epSync, 0, _syncRate);
-    _evSyncSub = _subSim->GetScheduler()->AddSimulationTimeEvent(_epSync, 0, _syncRate);
-    _subSim->Run();
+    _evSyncMaster = getSimulator()->GetScheduler()->AddSimulationTimeEvent(_syncEP, 0, _syncRate);
+    _evSyncSub = _subSim->GetScheduler()->AddSimulationTimeEvent(_syncEP, 0, _syncRate);
 }
 // ..........................................................
 void SyncSubSim::syncReleaseEP() {
+    pthread_barrier_destroy(&_barrier);
+    pthread_barrier_init(&_barrier, nullptr, 0);
     _subSim->Hold(true);
     getSimulator()->GetScheduler()->RemoveEvent(_evSyncMaster);
     _subSim->GetScheduler()->RemoveEvent(_evSyncSub);
-    pthread_barrier_destroy(&_barrier);
-    pthread_barrier_init(&_barrier, nullptr, 0);
 }
 
 }  // namespace mt
