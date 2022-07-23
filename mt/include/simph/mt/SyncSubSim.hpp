@@ -13,6 +13,7 @@
 #include <pthread.h>
 #include "Smp/IService.h"
 #include "Smp/ISimulator.h"
+#include "Smp/IModel.h"
 #include "simph/smpdk/Collection.hpp"
 #include "simph/smpdk/Component.hpp"
 #include "simph/smpdk/Composite.hpp"
@@ -24,6 +25,7 @@ namespace mt {
  *
  */
 class SyncSubSim : public simph::smpdk::Component,
+                    public virtual Smp::IModel,
                     public virtual Smp::IService {
 public:
     /**
