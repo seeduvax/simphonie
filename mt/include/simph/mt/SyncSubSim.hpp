@@ -37,9 +37,6 @@ public:
      */
     virtual ~SyncSubSim();
 
-    void syncEP();
-    void syncInitEP();
-    void syncReleaseEP();
 
     inline Smp::ISimulator* getSubSim() {
         return _subSim;
@@ -54,12 +51,17 @@ private:
     Smp::ISimulator* _subSim;
     Smp::Duration _syncRate;
     pthread_barrier_t _barrier;
-    void onSync() noexcept;
+    void syncEP();
+    void syncInitEP();
+    void enterExecutingEP();
+    void leaveExecutingEP();
 
     Smp::Services::EventId _evSyncMaster;
     Smp::Services::EventId _evSyncSub;
     Smp::IEntryPoint* _initEP;
     Smp::IEntryPoint* _syncEP;
+    Smp::IEntryPoint* _enterExecutingEP;
+    Smp::IEntryPoint* _leaveExecutingEP;
 };
 
 }  // namespace mt
