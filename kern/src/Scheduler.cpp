@@ -129,7 +129,15 @@ bool Scheduler::compareSchedule(const Schedule* a, const Schedule* b) {
 }
 // ..........................................................
 void Scheduler::schedule(Schedule* s) {
-    Synchronized(_mutex) _scheduled.insert(s);
+    Synchronized(_mutex)
+    _scheduled.insert(s);
+    if (s->getTime()==0) {
+        // 0 schedule time is a marker of schedule through AddImmediateEvent,
+        // restore the "now" schedule time to ensure next AddImmediateEvent
+        // will also be insert front in schedule queue, and finally leave the
+        // schedule in a consistent state before its execution.
+        s->setTime(_timeKeeper->GetSimulationTime());
+    }
 }
 // ..........................................................
 void Scheduler::connect() {
@@ -137,7 +145,8 @@ void Scheduler::connect() {
 }
 // ..........................................................
 Smp::Services::EventId Scheduler::AddImmediateEvent(const Smp::IEntryPoint* entryPoint) {
-    return schedule(entryPoint, _timeKeeper->GetSimulationTime(), 0, 0);
+    // Use 0 as schedule time to "force" insert in front of the schedule queue.
+    return schedule(entryPoint, 0, 0, 0);
 }
 // ..........................................................
 Smp::Services::EventId Scheduler::schedule(const Smp::IEntryPoint* entryPoint, Smp::Duration absoluteSimTime,
