@@ -169,6 +169,15 @@ void Simulator::doPublish(Smp::IComponent* comp) {
                 pub->addChild(ep);
             }
         }
+        // forward publication to children if component is a composite.
+        auto composite=dynamic_cast<Smp::IComposite*>(comp);
+        if (composite!=nullptr) {
+            for (auto container: *(composite->GetContainers())) {
+                for (auto subcomp: *(container->GetComponents())) {
+                    doPublish(subcomp);
+                }
+            }
+        }
     }
     else {
         // TODO add Smpc exception ExInvalidComponentState
@@ -177,6 +186,12 @@ void Simulator::doPublish(Smp::IComponent* comp) {
 // ..........................................................
 void Simulator::Publish() {
     if (checkState("Publish", Smp::SimulatorStateKind::SSK_Building)) {
+        // TODO: shall also check SMP_LeavingBuilding event handling is not in progress.
+        // TODO: ECSS-E-ST-40-07C document requests in §5.3.7 to switch into
+        // SMP_Publishing state from here until it is completed with related
+        // enter/leave event emission, but:
+        // - related state/event identifiers are missing from the SMP header files.
+        // - at this step, the event manager itself may not be ready yet (itself published).
         for (auto service : *(_services->GetComponents())) {
             doPublish(service);
         }
@@ -187,10 +202,21 @@ void Simulator::Publish() {
 }
 // ..........................................................
 void Simulator::doConfigure(Smp::IComponent* comp) {
+    if (comp->GetState() == Smp::ComponentStateKind::CSK_Created) {
+        doPublish(comp);
+    }
     if (comp->GetState() == Smp::ComponentStateKind::CSK_Publishing) {
         LOGI("Configuring component : " << comp->GetName());
         comp->Configure(_logger);
-        // TODO recursive call on childs.
+        // forward configuration to children if component is a composite.
+        auto composite=dynamic_cast<Smp::IComposite*>(comp);
+        if (composite!=nullptr) {
+            for (auto container: *(composite->GetContainers())) {
+                for (auto subcomp: *(container->GetComponents())) {
+                    doConfigure(subcomp);
+                }
+            }
+        }
     }
     else {
         // TODO add Smpc exception ExInvalidComponentState
@@ -209,10 +235,22 @@ void Simulator::Configure() {
 }
 // ..........................................................
 void Simulator::doConnect(Smp::IComponent* comp) {
+    if (    comp->GetState() == Smp::ComponentStateKind::CSK_Created ||
+            comp->GetState() == Smp::ComponentStateKind::CSK_Publishing) {
+        doConfigure(comp);
+    }
     if (comp->GetState() == Smp::ComponentStateKind::CSK_Configured) {
         LOGI("Connecting component : " << comp->GetName());
         comp->Connect(this);
-        // TODO recursive call on childs.
+        // forward connect to children if component is a composite.
+        auto composite=dynamic_cast<Smp::IComposite*>(comp);
+        if (composite!=nullptr) {
+            for (auto container: *(composite->GetContainers())) {
+                for (auto subcomp: *(container->GetComponents())) {
+                    doConnect(subcomp);
+                }
+            }
+        }
     }
     else {
         // TODO add Smpc expcetion ExInvalidComponentState
