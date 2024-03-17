@@ -336,8 +336,10 @@ void Scheduler::start() {
 void Scheduler::stop() {
     _run = false;
     if (_th != nullptr) {
-        _th->join();
-        _th.reset();
+        if (!_th->isCurrentThread()) {
+            _th->join();
+            _th.reset();
+        }
     }
 }
 // ..........................................................

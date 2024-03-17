@@ -66,11 +66,12 @@ private:
     std::condition_variable _monitor;
     Smp::IEntryPoint* _checkEndSim;
     Smp::IEntryPoint* _notifyEndSim;
+    bool _endReached=false;
 
 public:
     void setUp() {
         _checkEndSim=new simph::smpdk::EntryPoint(this,&TestSimulator::checkEndSim,"checkEndSim");
-        _notifyEndSim=new simph::smpdk::EntryPoint(this,&TestSimulator::checkEndSim,"notifyEndSim");
+        _notifyEndSim=new simph::smpdk::EntryPoint(this,&TestSimulator::notifyEndSim,"notifyEndSim");
     }
 
     void tearDown() {
@@ -80,7 +81,10 @@ public:
 
     void checkEndSim() {
         if (_sim->GetTimeKeeper()->GetSimulationTime()>=_endSimTime) {
-            _sim->Hold(true);
+            if (!_endReached) {
+               _sim->Hold(true);
+            }
+            _endReached=true;
         }
     }
 
