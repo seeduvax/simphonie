@@ -8,13 +8,13 @@ ifneq ($(wildcard $(PRJROOT)/.git/hooks),)
 # It applies a coding style with clang-format 
 # only to new code added and only with developper agreement
 $(PRJROOT)/.git/hooks/pre-commit.d/code-style: $(PRJROOT)/.pre-commit
-	@$(ABS_PRINT_info) "Installing pre-commit git hook"
+	@echo "Installing pre-commit git hook"
 	@mkdir -p $(@D)
 	@cp $^ $@
 	@chmod +x $@
 
 $(PRJROOT)/.git/hooks/$(APPNAME)/apply-format: $(PRJROOT)/.apply-format
-	@$(ABS_PRINT_info) "Installing coding style apply-format script"
+	@echo "Installing coding style apply-format script"
 	@mkdir -p $(@D)
 	@cp $^ $@
 	@chmod +x $@

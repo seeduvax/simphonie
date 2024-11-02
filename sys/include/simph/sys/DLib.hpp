@@ -9,7 +9,7 @@
  */
 #ifndef __simph_sys_DLib_HPP__
 #define __simph_sys_DLib_HPP__
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(__NT__) || defined(_WIN64)
 #include <Windows.h>
 #else
 #include <dlfcn.h>
