@@ -8,18 +8,18 @@
  * $Date$
  */
 #include "simph/smpdk/Utils.hpp"
-#include <openssl/md5.h>
 #include <stdio.h>
 #include <cstring>
+#include "simph/smpdk/MD5.hpp"
 
 namespace simph {
 namespace smpdk {
 // ..........................................................
 void Utils::CalcMD5(const void* pBuf, size_t bufSize, uint8_t dest[UTILS_MD5_DIGEST_LENGTH]) {
-    MD5_CTX ctx;
-    ::MD5_Init(&ctx);
-    ::MD5_Update(&ctx, pBuf, bufSize);
-    ::MD5_Final(dest, &ctx);
+    MD5 md5;
+    md5.update((const uint8_t*)pBuf, bufSize);
+    md5.finalize();
+    memcpy(dest,md5.getDigest(),UTILS_MD5_DIGEST_LENGTH);
 }
 // ..........................................................
 std::string Utils::Hex(uint8_t* pBuf, size_t bufSize) {
