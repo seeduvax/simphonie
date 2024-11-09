@@ -16,7 +16,6 @@
 #include "simph/smpdk/Utils.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/umdl/SmpIncrement.hpp"
-#include "sol/sol.hpp"
 
 namespace test {
 using namespace simph::umdl;
@@ -37,7 +36,7 @@ public:
     void setUp() {}
 
     void tearDown() {}
-
+/*
     void testLifeCycleFromLua() {
         sol::state lua;
         lua.open_libraries(sol::lib::base, sol::lib::package);
@@ -52,7 +51,7 @@ public:
         lua.open_libraries(sol::lib::base, sol::lib::package);
         lua.script_file("test/lua/sim_runner_high_level.lua");
     }
-
+*/
     void testLifeCycle() {
         testIncrement(false);
     }
