@@ -32,14 +32,14 @@ public:
 
     void testLoadableLibrary() {
         std::vector<std::string> lib;
-        lib.push_back("libsimph_sys.so");
-        lib.push_back("libsimph_smpdk.so");
+        lib.push_back("simph_sys");
+        lib.push_back("simph_smpdk");
         CPPUNIT_ASSERT(testLoadLibraries(lib) == true);
     }
 
     void testNotLoadableLibrary() {
         std::vector<std::string> lib;
-        lib.push_back("libsimph_NotExistingLibrary.so");
+        lib.push_back("simph_NotExistingLibrary");
         testLoadLibraries(lib);
         CPPUNIT_ASSERT(testLoadLibraries(lib) == false);
     }

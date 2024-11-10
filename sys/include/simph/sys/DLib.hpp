@@ -9,11 +9,6 @@
  */
 #ifndef __simph_sys_DLib_HPP__
 #define __simph_sys_DLib_HPP__
-#if defined(WIN32) || defined(_WIN32) || defined(__NT__) || defined(_WIN64)
-#include <Windows.h>
-#else
-#include <dlfcn.h>
-#endif
 #include <string>
 #include "simph/sys/Logger.hpp"
 
@@ -36,27 +31,16 @@ public:
 
     template <typename FT>
     FT getEntry(const char* symbol) {
-#ifdef WIN32
-        return reinterpret_cast<FT>(GetProcAddress(_lib, symbol));
-#else
-        FT fptr = reinterpret_cast<FT>(dlsym(_lib, symbol));
-        if (fptr == nullptr) {
-            LOGW("Can't find Symbol " << symbol << " from lib " << _name << ": " << dlerror());
-        }
-        return fptr;
-#endif
+        return reinterpret_cast<FT>(getEntryHandle(symbol));
     }
     inline std::string getName() {
         return _name;
     }
 
 private:
-#ifdef WIN32
-    HMODULE _lib;
-#else
-    void* _lib;
-#endif
+    void* getEntryHandle(const char* symbol);
     std::string _name;
+    void* _lib;
 };
 
 }  // namespace sys

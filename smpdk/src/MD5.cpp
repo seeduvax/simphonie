@@ -4,6 +4,8 @@
  * Copyright 2024 Sebastien Devaux. All rights reserved.
  * Use is subject to license terms.
  *
+ * Inspired by https://github.com/Zunawe/md5-c
+ *
  * $Id$
  * $Date$
  */
@@ -71,24 +73,19 @@ void MD5::update(const uint8_t* inBuf, size_t inputLen) {
     unsigned int offset = _size % 64;
     _size += inputLen;
 
-    // Copy each byte in input_buffer into the next space in our context input
     for(unsigned int i = 0; i < inputLen; ++i){
         _input[offset] = inBuf[i];
         offset++;
 
-        // If we've filled our context input, copy it into our local array input
-        // then reset the offset to 0 and fill in a new buffer.
-        // Every time we fill out a chunk, we run it through the algorithm
-        // to enable some back and forth between cpu and i/o
         if(offset % 64 == 0){
             for(unsigned int j = 0; j < 16; ++j){
-                // Convert to little-endian
-                // The local variable `input` our 512-bit chunk separated into 32-bit words
-                // we can use in calculations
-                input[j] = (uint32_t)(_input[(j * 4) + 3]) << 24 |
-                           (uint32_t)(_input[(j * 4) + 2]) << 16 |
-                           (uint32_t)(_input[(j * 4) + 1]) <<  8 |
-                           (uint32_t)(_input[(j * 4)]);
+                /* Convert to little-endian 
+                 * TODO: shall take care of host endianness.
+                 */ 
+                input[j] = (_input[(j * 4) + 3]) << 24 |
+                           (_input[(j * 4) + 2]) << 16 |
+                           (_input[(j * 4) + 1]) <<  8 |
+                           (_input[(j * 4)]);
             }
             step(input);
             offset = 0;
@@ -101,12 +98,12 @@ void MD5::finalize() {
     unsigned int offset = _size % 64;
     unsigned int paddingLen = offset < 56 ? 56 - offset : (56 + 64) - offset;
 
-    // Fill in the padding and undo the changes to size that resulted from the update
     update(PADDING, paddingLen);
     _size -= (uint64_t)paddingLen;
 
-    // Do a final update (internal to this function)
-    // Last two 32-bit words are the two halves of the size (converted from bytes to bits)
+    /* Do a final update (internal to this function)
+     * Last two 32-bit words are the two halves of the size (converted from bytes to bits)
+     */ 
     for(unsigned int j = 0; j < 14; ++j){
         input[j] = _input[(j * 4) + 3] << 24 |
                    _input[(j * 4) + 2] << 16 |
@@ -118,7 +115,9 @@ void MD5::finalize() {
 
     step(input);
 
-    // Move the result into digest (convert from little-endian)
+    /* convert result from little-endian)
+     * TODO: should take care of host endianness.
+     */ 
     for(unsigned int i = 0; i < 4; ++i){
         _digest[(i * 4) + 0] = (_buf[i] & 0x000000FF);
         _digest[(i * 4) + 1] = (_buf[i] & 0x0000FF00) >>  8;
