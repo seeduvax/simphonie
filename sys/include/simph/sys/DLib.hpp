@@ -10,11 +10,12 @@
 #ifndef __simph_sys_DLib_HPP__
 #define __simph_sys_DLib_HPP__
 #include <string>
-#include "simph/sys/Logger.hpp"
+#include <memory>
 
 namespace simph {
 namespace sys {
 
+class NativeLib;
 /**
  *
  */
@@ -31,16 +32,20 @@ public:
 
     template <typename FT>
     FT getEntry(const char* symbol) {
-        return reinterpret_cast<FT>(getEntryHandle(symbol));
+        return reinterpret_cast<FT>(_libH->getEntry(symbol));
     }
-    inline std::string getName() {
-        return _name;
+    inline const std::string& getName() const {
+        return _libH->getName();
     }
 
+    class IHandler {
+    public:
+        virtual const std::string& getName() const =0;
+        virtual void* getEntry(const char* symbol) const=0;
+    };
+
 private:
-    void* getEntryHandle(const char* symbol);
-    std::string _name;
-    void* _lib;
+    std::unique_ptr<IHandler> _libH;
 };
 
 }  // namespace sys
