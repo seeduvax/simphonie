@@ -50,7 +50,7 @@ public:
         // auto sampler = new Sampler("sampler", "description sampler", &sim);
         // sim.AddModel(sampler);
 
-        sim.LoadLibrary("libsimph_kern.so");
+        sim.LoadLibrary("simph_kern");
         auto sampler = dynamic_cast<simph::kern::Sampler*>(
             sim.CreateInstance(simph::smpdk::Utils::generateUuid("Sampler"), "sampler", "description sampler", &sim));
 
