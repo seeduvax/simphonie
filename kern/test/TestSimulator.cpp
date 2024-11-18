@@ -68,10 +68,12 @@ private:
     Smp::IEntryPoint* _notifyEndSim;
     bool _endReached=false;
 
+    typedef simph::smpdk::EntryPoint<TestSimulator*, void (TestSimulator::*)()> EP;
+
 public:
     void setUp() {
-        _checkEndSim=new simph::smpdk::EntryPoint(this,&TestSimulator::checkEndSim,"checkEndSim");
-        _notifyEndSim=new simph::smpdk::EntryPoint(this,&TestSimulator::notifyEndSim,"notifyEndSim");
+        _checkEndSim = new EP(this, &TestSimulator::checkEndSim, "checkEndSim");
+        _notifyEndSim = new EP(this, &TestSimulator::notifyEndSim, "notifyEndSim");
     }
 
     void tearDown() {
