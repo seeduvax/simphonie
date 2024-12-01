@@ -283,4 +283,8 @@ int luaopen_libsimph_lua(lua_State* L) {
     t.push();
     return 1;
 }
+// according to lib name resolution policy, let short lib name works.
+int luaopen_simph_lua(lua_State* L) {
+    return luaopen_libsimph_lua(L);
+}
 }
