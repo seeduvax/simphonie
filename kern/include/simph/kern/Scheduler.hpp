@@ -12,9 +12,12 @@
 
 #include <set>
 #include "Smp/Services/IScheduler.h"
+#include "Smp/Services/ITimeKeeper.h"
+#include "Smp/Services/IEventManager.h"
 #include "simph/smpdk/Component.hpp"
 #include "simph/sys/Synchro.hpp"
 #include "simph/sys/Thread.hpp"
+#include "simph/kern/IEntryPointPublisher.hpp"
 
 namespace simph {
 namespace kern {
@@ -23,7 +26,10 @@ class TimeKeeper;
 /**
  *
  */
-class Scheduler : public Component, virtual public simph::sys::Runnable, virtual public Smp::Services::IScheduler {
+class Scheduler : public Component, 
+                virtual public simph::sys::Runnable, 
+                virtual public IEntryPointPublisher,
+                virtual public Smp::Services::IScheduler {
 public:
     /**
      * Default constructor.
@@ -54,16 +60,29 @@ public:
     void RemoveEvent(Smp::Services::EventId event) override;
     Smp::Services::EventId GetCurrentEventId() const override;
     Smp::Duration GetNextScheduledEventTime() const override;
+
+    /**
+     * SMP Enter Executing event entry point.
+     * Starts the scheduler threads if not yet running.
+     */ 
+    void epEnterExecuting();
+    /**
+     * SMP Leave Executing event entry point.
+     * If running, request stop, and join the scheduler thread.
+     */
+    void epLeaveExecuting();
+
     /**
      * Run next schedule event.
      * @warning partly thread safe. Can be called concurrently from other
      * scheduler methods, but shall the step method itself is not fully
      * reentrant.
      */
-    void step(Smp::Duration duration = 0);
+    void step();
+
+    // Runnable implementation.
+    // TODO consider rework sys/thread to use entry point.
     void run() override;
-    void start();
-    void stop();
 
 protected:
     void autostep(Smp::Duration);
@@ -76,9 +95,10 @@ protected:
     void schedule(Smp::Services::EventId event, Smp::Duration absoluteSimTime);
 
 private:
-    TimeKeeper* _timeKeeper;
-    bool _autoStop;
-    Smp::Duration _stopSimTime;
+    Smp::Services::ITimeKeeper* _timeKeeper;
+    Smp::Services::IEventManager* _eventMgr;
+    Smp::Services::EventId _preEventExecuteId;
+    Smp::Services::EventId _postEventExecuteId;
     bool _run;
     // TODO check mutable here
     mutable std::mutex _mutex;

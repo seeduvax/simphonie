@@ -16,6 +16,14 @@
 #include "abs/profiler.h"
 #include "simph/kern/ExInvalidSimulationTime.hpp"
 
+#define EP_NAME_UPDATE_SIM_TIME "updateSimTime"
+
+// only shared contract with the scheduler, 
+//   what event to change simulation time
+//   what tim value meaning no more event
+#define EV_NAME_PRE_EVENT_EXECUTE "Scheduler_PreEventExecute"
+#define DURATION_MAX INT64_MAX
+
 namespace simph {
 namespace kern {
 // ..........................................................
@@ -30,7 +38,10 @@ Smp::DateTime TimeKeeper::_y2kJan1Offset = __GetY2KOffset();
 // --------------------------------------------------------------------
 // ..........................................................
 TimeKeeper::TimeKeeper(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : Component(name, descr, parent), _simTime(0), _nextEventTime(0), _eventMgr(nullptr) {}
+    : Component(name, descr, parent) {
+    addEP(EP_NAME_UPDATE_SIM_TIME,"simulation time update entry point", 
+                                &TimeKeeper::epUpdateSimulationTime,this);
+}
 // ..........................................................
 TimeKeeper::~TimeKeeper() {}
 // --------------------------------------------------------------------
@@ -63,11 +74,14 @@ void TimeKeeper::publish(Smp::IPublication* receiver) {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-void TimeKeeper::setNextEventTime(Smp::Duration simulationTime) {
-    if (simulationTime > _simTime) {
+void TimeKeeper::epUpdateSimulationTime() {
+    auto simulationTime=_scheduler->GetNextScheduledEventTime();
+    if (simulationTime > _simTime && simulationTime != DURATION_MAX) {
         _nextEventTime = simulationTime;
         if (_eventMgr != nullptr) {
+            _inPreSimTimeChange=true;
             _eventMgr->Emit(Smp::Services::IEventManager::SMP_PreSimTimeChangeId);
+            _inPreSimTimeChange=false;
         }
         _simTime = _nextEventTime;
         PROFILER_FRAME("simTime");
@@ -84,11 +98,13 @@ void TimeKeeper::setNextEventTime(Smp::Duration simulationTime) {
 }
 // ..........................................................
 void TimeKeeper::SetSimulationTime(Smp::Duration simulationTime) {
-    if (simulationTime >= _simTime && simulationTime <= _nextEventTime) {
-        _simTime = simulationTime;
-    }
-    else {
-        throw ExInvalidSimulationTime(this, _simTime, simulationTime, _nextEventTime);
+    if (_inPreSimTimeChange) {
+        if (simulationTime >= _simTime && simulationTime <= _nextEventTime) {
+            _simTime = simulationTime;
+        }
+        else {
+            throw ExInvalidSimulationTime(this, _simTime, simulationTime, _nextEventTime);
+        }
     }
 }
 // ..........................................................
@@ -115,7 +131,10 @@ void TimeKeeper::SetMissionTime(Smp::Duration missionTime) {
 // --------------------------------------------------------------------
 // ..........................................................
 void TimeKeeper::connect() {
+    _scheduler = getSimulator()->GetScheduler();
     _eventMgr = getSimulator()->GetEventManager();
+    auto preEventExecuteId = _eventMgr->QueryEventId(EV_NAME_PRE_EVENT_EXECUTE);
+    _eventMgr->Subscribe(preEventExecuteId,GetEntryPoint(EP_NAME_UPDATE_SIM_TIME));
 }
 // ..........................................................
 void TimeKeeper::reset() {
@@ -123,7 +142,9 @@ void TimeKeeper::reset() {
     // set simTime to 0
     // set missionTime to 0 too.
     if (_eventMgr != nullptr) {
+        _inPreSimTimeChange=true;
         _eventMgr->Emit(Smp::Services::IEventManager::SMP_PreSimTimeChangeId);
+        _inPreSimTimeChange=false;
     }
     _simTime = 0;
     _epochOffset = GetZuluTime();

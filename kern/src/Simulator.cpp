@@ -273,7 +273,6 @@ void Simulator::Connect() {
 // ..........................................................
 void Simulator::Run() {
     if (checkState("Run", Smp::SimulatorStateKind::SSK_Standby)) {
-        _scheduler->start();
         setState(Smp::SimulatorStateKind::SSK_Executing);
     }
 }
@@ -282,7 +281,6 @@ void Simulator::Hold(Smp::Bool immediate) {
     // TODO manage immediate...
     // But not sure it will be so easy for a multi-threaded scheduler...
     if (checkState("Hold", Smp::SimulatorStateKind::SSK_Executing)) {
-        _scheduler->stop();
         setState(Smp::SimulatorStateKind::SSK_Standby);
     }
 }

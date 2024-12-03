@@ -11,7 +11,9 @@
 #define __simph_kern_TimeKeeper_HPP__
 #include "Smp/Services/IEventManager.h"
 #include "Smp/Services/ITimeKeeper.h"
+#include "Smp/Services/IScheduler.h"
 #include "simph/smpdk/Component.hpp"
+#include "simph/kern/IEntryPointPublisher.hpp"
 
 namespace simph {
 namespace kern {
@@ -20,7 +22,9 @@ using namespace simph::smpdk;
 /**
  *
  */
-class TimeKeeper : virtual public Component, virtual public Smp::Services::ITimeKeeper {
+class TimeKeeper : virtual public Component, 
+                   virtual public IEntryPointPublisher,
+                   virtual public Smp::Services::ITimeKeeper {
 public:
     /**
      * Default constructor.
@@ -47,19 +51,22 @@ public:
     //    simulation start.
 
     // TODO should not be public but binded to some simulation start even handling
+    // to be changed as entry point subscribed to the right event
     void reset();
-    void setNextEventTime(Smp::Duration eventTime);
+    void epUpdateSimulationTime();
 
 protected:
     void connect();
     void publish(Smp::IPublication* receiver);
 
 private:
-    Smp::Duration _simTime;
-    Smp::Duration _nextEventTime;
-    Smp::Duration _epochOffset;
-    Smp::DateTime _missionStart;
-    Smp::Services::IEventManager* _eventMgr;
+    Smp::Duration _simTime=0;
+    Smp::Duration _nextEventTime=0;
+    Smp::Duration _epochOffset=0;
+    Smp::DateTime _missionStart=0;
+    Smp::Services::IEventManager* _eventMgr=nullptr;
+    Smp::Services::IScheduler* _scheduler=nullptr;
+    bool _inPreSimTimeChange=false;
     static Smp::DateTime _y2kJan1Offset;
 };
 

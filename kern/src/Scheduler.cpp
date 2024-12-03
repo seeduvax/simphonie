@@ -14,9 +14,14 @@
 #include "Smp/ISimulator.h"
 #include "abs/profiler.h"
 #include "assert.h"
-#include "simph/kern/Logger.hpp"
 #include "simph/kern/Resolver.hpp"
-#include "simph/kern/TimeKeeper.hpp"
+#include "simph/sys/Logger.hpp"
+
+#define EP_NAME_ENTER_EXECUTE "enterExecute"
+#define EP_NAME_LEAVE_EXECUTE "leaveExecute"
+#define EV_NAME_PRE_EVENT_EXECUTE "Scheduler_PreEventExecute"
+#define EV_NAME_POST_EVENT_EXECUTE "Scheduler_PostEventExecute"
+#define DURATION_MAX INT64_MAX
 
 namespace simph {
 namespace kern {
@@ -99,18 +104,21 @@ private:
 // ..........................................................
 Scheduler::Scheduler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : Component(name, descr, parent),
-      _timeKeeper(nullptr),
-      _autoStop(false),
-      _stopSimTime(0),
+      _eventMgr(nullptr),
       _run(false),
       _mutex(),
       _th(),
       _currentSchedule(nullptr),
-      _scheduled(compareSchedule) {}
+      _scheduled(compareSchedule) {
+    addEP(EP_NAME_ENTER_EXECUTE,"simulation enter execute event entry point", 
+                                &Scheduler::epEnterExecuting,this);
+    addEP(EP_NAME_LEAVE_EXECUTE,"simulation leave execute event entry point",
+                                &Scheduler::epLeaveExecuting,this);
+}
 // ..........................................................
 Scheduler::~Scheduler() {
     // Ensure it is no more running
-    stop();
+    epLeaveExecuting();
     // delete all remaining schedules.
     for (auto s : _scheduled) {
         delete s;
@@ -141,7 +149,14 @@ void Scheduler::schedule(Schedule* s) {
 }
 // ..........................................................
 void Scheduler::connect() {
-    _timeKeeper = dynamic_cast<TimeKeeper*>(getSimulator()->GetTimeKeeper());
+    _timeKeeper = getSimulator()->GetTimeKeeper();
+    _eventMgr = getSimulator()->GetEventManager();
+    _eventMgr->Subscribe(Smp::Services::IEventManager::SMP_EnterExecutingId,
+            GetEntryPoint(EP_NAME_ENTER_EXECUTE));
+    _eventMgr->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId,
+            GetEntryPoint(EP_NAME_LEAVE_EXECUTE));
+    _preEventExecuteId=_eventMgr->QueryEventId(EV_NAME_PRE_EVENT_EXECUTE);
+    _postEventExecuteId=_eventMgr->QueryEventId(EV_NAME_POST_EVENT_EXECUTE);
 }
 // ..........................................................
 Smp::Services::EventId Scheduler::AddImmediateEvent(const Smp::IEntryPoint* entryPoint) {
@@ -224,7 +239,7 @@ Smp::Services::EventId Scheduler::AddZuluTimeEvent(const Smp::IEntryPoint* entry
                                                    Smp::Duration cycleTime, Smp::Int64 repeat) {
     LOGE(
         "Scheduler::AddZuluTimeEvent not implemented!!! (unsure of what shall be really done and what are the use "
-        "case.")
+        "cases.")
     return -1;
 }
 // ..........................................................
@@ -283,62 +298,43 @@ Smp::Duration Scheduler::GetNextScheduledEventTime() const {
     if (!_scheduled.empty()) {
         return (*_scheduled.begin())->getTime();
     }
-    return 0;
+    return DURATION_MAX;
 }
 // ..........................................................
-void Scheduler::step(Smp::Duration duration) {
-    if (duration != 0) {
-        autostep(duration);
-        return;
-    }
+void Scheduler::step() {
     Schedule* toRun = nullptr;
     {
         Synchronized(_mutex);
-        if (!_scheduled.empty()) {
-            auto top = _scheduled.begin();
-            _currentSchedule = *top;
-            _scheduled.erase(top);
+        while (_run && GetNextScheduledEventTime() >= DURATION_MAX) {
+            // TODO wait there is something to exectue or run cancelled
+        }
+        if (!_run) {
+            // wait state exited because stop was requested
+            return;
+        }
+        // TODO check if event emission shall remain inside the critical section
+        _eventMgr->Emit(_preEventExecuteId);
+        // after event emit, timekeeper should have updated current time,
+        // run next event only if its scheduled time is not ahead the new
+        // current simulation time.
+        if (GetNextScheduledEventTime()<=_timeKeeper->GetSimulationTime()) {
+            _currentSchedule = *_scheduled.begin();
+            _scheduled.erase(_scheduled.begin());
             toRun = _currentSchedule;
         }
     }
     if (toRun != nullptr) {
-        // advance simulation time to event time.
-        // Exception and event handling is done by time keeper itself.
-        _timeKeeper->setNextEventTime(toRun->getTime());
         toRun->run();
-        Synchronized(_mutex) if (toRun->isCompleted()) {
-            delete toRun;
-        }
+        _eventMgr->Emit(_postEventExecuteId);
+        Synchronized(_mutex);
         if (toRun != _currentSchedule) {
             logWarning(
                 "Scheduler state changed while running an entry point. "
                 " Next scheduling may be corrupted.");
         }
         _currentSchedule = nullptr;
-    }
-}
-// ..........................................................
-void Scheduler::autostep(Smp::Duration duration) {
-    _stopSimTime = _timeKeeper->GetSimulationTime() + duration;
-    _autoStop = true;
-    run();
-    _autoStop = false;
-}
-// ..........................................................
-void Scheduler::start() {
-    Synchronized(_mutex);
-    if (!_run) {
-        _th.reset(new simph::sys::Thread(GetName(), this));
-        _th->start();
-    }
-}
-// ..........................................................
-void Scheduler::stop() {
-    _run = false;
-    if (_th != nullptr) {
-        if (!_th->isCurrentThread()) {
-            _th->join();
-            _th.reset();
+        if (toRun->isCompleted()) {
+            delete toRun;
         }
     }
 }
@@ -347,9 +343,31 @@ void Scheduler::run() {
     _run = true;
     while (_run) {
         step();
-        if (_autoStop) {
-            Synchronized(_mutex);
-            _run &= !_scheduled.empty() && (_stopSimTime == 0 || (*_scheduled.begin())->getTime() <= _stopSimTime);
+    }
+}
+// --------------------------------------------------------------------
+// ..........................................................
+void Scheduler::epEnterExecuting() {
+    Synchronized(_mutex);
+    if (!_run) {
+        _th.reset(new simph::sys::Thread(GetName(), this));
+        _th->start();
+    }
+}
+// ..........................................................
+void Scheduler::epLeaveExecuting() {
+    {
+        Synchronized(_mutex)
+        if (_run==false) {
+            return;
+        }
+        _run=false;
+        // TODO may be pulse something if sched thread is waiting for something.
+    }
+    if (_th != nullptr) {
+        if (!_th->isCurrentThread()) {
+            _th->join();
+            _th.reset();
         }
     }
 }
