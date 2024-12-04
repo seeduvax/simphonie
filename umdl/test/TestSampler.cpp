@@ -15,10 +15,12 @@
 #include "simph/smpdk/Utils.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/umdl/SmpIncrement.hpp"
+#include "SimControlHelper.hpp"
 
 namespace test {
 using namespace simph::umdl;
 using namespace simph::kern;
+using namespace simph::sys;
 
 // ----------------------------------------------------------
 // test fixture implementation
@@ -32,6 +34,13 @@ public:
     void setUp() {}
 
     void tearDown() {}
+
+    void endSimuCtrl(Smp::ISimulator* sim, Smp::Duration simTime) {
+        if (sim->GetTimeKeeper()->GetSimulationTime()>simTime) {
+            TRACE("Requesting simulation end");
+            sim->Hold(true);
+        }
+    }
 
     void testSampler() {
         Simulator sim;
@@ -82,7 +91,11 @@ public:
                                           0,  // 0ms offset
                                           1000000,  // 1000000ns period
                                           -1);  //
-        scheduler->step(10000000);
+        SetSimulationEnd(sim,10000000);
+        scheduler->run();
+
+        // TODO some asserts are defintely needed here to check everything
+        // is OK.
 
         // sim.find<Smp::IEntryPoint>("sampler.debugPrintFile")->Execute();
     }
