@@ -51,6 +51,10 @@ public:
         auto st = _sim->GetTimeKeeper()->GetSimulationTime();
         vv->push_back(st);
         TRACE("" << st);
+        if (vv->size()>=4) {
+            // emulate simulator stop after 4 iterations
+            _scheduler->epLeaveExecuting();
+        }
     }
 
     void testSchedule() {
@@ -62,29 +66,39 @@ public:
         _scheduler->AddSimulationTimeEvent(ep.get(), 30);
         _scheduler->AddSimulationTimeEvent(ep.get(), 20);
         _scheduler->AddSimulationTimeEvent(ep.get(), 20);
-        _scheduler->step();
-        _scheduler->step();
-        _scheduler->step();
-        _scheduler->step();
-
+        _scheduler->run();
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)10, scheduledTime[0]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)20, scheduledTime[1]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)20, scheduledTime[2]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)30, scheduledTime[3]);
     }
 
+    void endSimuCtrl(Smp::Duration simTime) {
+        if (_sim->GetTimeKeeper()->GetSimulationTime()>simTime) {
+            TRACE("Requesting simulation end");
+            _sim->Hold(true);
+        }
+    }
     void testSchedule2() {
         std::vector<Smp::Duration> scheduledTime;
         auto cb = Callback::create(&TestScheduler::callback, this, &scheduledTime);
-        auto ep = std::make_unique<EntryPoint>(std::move(cb), "callback");
+        auto epcb = std::make_unique<EntryPoint>(std::move(cb), "callback");
 
-        _scheduler->AddSimulationTimeEvent(ep.get(), 10);
-        _scheduler->AddSimulationTimeEvent(ep.get(), 10);
-        _scheduler->AddSimulationTimeEvent(ep.get(), 10);
-        _scheduler->AddSimulationTimeEvent(ep.get(), 10);
+        _scheduler->AddSimulationTimeEvent(epcb.get(), 10);
+        _scheduler->AddSimulationTimeEvent(epcb.get(), 10);
+        _scheduler->AddSimulationTimeEvent(epcb.get(), 10);
+        _scheduler->AddSimulationTimeEvent(epcb.get(), 10);
+        _scheduler->AddSimulationTimeEvent(epcb.get(), 20);
 
-        _scheduler->step(10);
+        Smp::Duration stopTime=10;
+        auto f = Callback::create(&TestScheduler::endSimuCtrl, this, stopTime);
+        auto epf=std::make_unique<EntryPoint>(std::move(f),"endSimuCtrl");
+        _sim->GetEventManager()->Subscribe(
+                Smp::Services::IEventManager::SMP_PostSimTimeChangeId,
+                epf.get());
+        _scheduler->run();
 
+        CPPUNIT_ASSERT_EQUAL(4,(int)scheduledTime.size());
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)10, scheduledTime[0]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)10, scheduledTime[1]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)10, scheduledTime[2]);

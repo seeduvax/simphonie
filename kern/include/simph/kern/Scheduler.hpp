@@ -135,6 +135,8 @@ private:
      */
     Schedule* findSchedule(Smp::Services::EventId event, bool remove = false);
     void schedule(Schedule* s);
+    // For internal use when mutex is already owned.
+    inline Smp::Duration getNextScheduledEventTime() const;
 };
 
 }  // namespace kern

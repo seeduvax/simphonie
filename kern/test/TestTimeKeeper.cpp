@@ -35,7 +35,9 @@ public:
         CPPUNIT_ASSERT_EQUAL((Smp::DateTime)0, tp.GetMissionTime());
         CPPUNIT_ASSERT(zulu < tp.GetZuluTime());
         tp.SetMissionTime(100);
-        tp.setNextEventTime(10000);
+// TODO find a new way to test time keeper.
+// How to inject fake scheduler in it to let it receive the next event time?
+//        tp.setNextEventTime(10000);
         TRACE("epoch=" << (int64_t)tp.GetEpochTime());
         TRACE("mission=" << (int64_t)tp.GetMissionTime());
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)10000, tp.GetSimulationTime());

@@ -293,19 +293,23 @@ Smp::Services::EventId Scheduler::GetCurrentEventId() const {
     return -1;
 }
 // ..........................................................
-Smp::Duration Scheduler::GetNextScheduledEventTime() const {
-    Synchronized(_mutex);
+inline Smp::Duration Scheduler::getNextScheduledEventTime() const {
     if (!_scheduled.empty()) {
         return (*_scheduled.begin())->getTime();
     }
     return DURATION_MAX;
 }
 // ..........................................................
+Smp::Duration Scheduler::GetNextScheduledEventTime() const {
+    Synchronized(_mutex);
+    return getNextScheduledEventTime();
+}
+// ..........................................................
 void Scheduler::step() {
     Schedule* toRun = nullptr;
     {
         Synchronized(_mutex);
-        while (_run && GetNextScheduledEventTime() >= DURATION_MAX) {
+        while (_run && getNextScheduledEventTime() >= DURATION_MAX) {
             // TODO wait there is something to exectue or run cancelled
         }
         if (!_run) {
@@ -313,11 +317,14 @@ void Scheduler::step() {
             return;
         }
         // TODO check if event emission shall remain inside the critical section
-        _eventMgr->Emit(_preEventExecuteId);
+    }
+    _eventMgr->Emit(_preEventExecuteId);
+    {
+        Synchronized(_mutex);
         // after event emit, timekeeper should have updated current time,
         // run next event only if its scheduled time is not ahead the new
         // current simulation time.
-        if (GetNextScheduledEventTime()<=_timeKeeper->GetSimulationTime()) {
+        if (getNextScheduledEventTime()<=_timeKeeper->GetSimulationTime()) {
             _currentSchedule = *_scheduled.begin();
             _scheduled.erase(_scheduled.begin());
             toRun = _currentSchedule;
