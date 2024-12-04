@@ -45,6 +45,7 @@ private:
         _simph_sys_logger_stream_ << __FILE__ << ":" << __LINE__ << "\t" << msg; \
         simph::sys::_logger->log("TRACE", _simph_sys_logger_stream_.str());      \
     }
+#define LTRACE(expr) TRACE(#expr << " = " << expr)
 #define LOGD(msg)                                                           \
     {                                                                       \
         std::ostringstream _simph_sys_logger_stream_;                       \

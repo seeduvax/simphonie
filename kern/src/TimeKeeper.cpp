@@ -15,6 +15,7 @@
 #include "Smp/ISimulator.h"
 #include "abs/profiler.h"
 #include "simph/kern/ExInvalidSimulationTime.hpp"
+#include "simph/sys/Logger.hpp"
 
 #define EP_NAME_UPDATE_SIM_TIME "updateSimTime"
 
