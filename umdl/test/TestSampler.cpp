@@ -15,7 +15,7 @@
 #include "simph/smpdk/Utils.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/umdl/SmpIncrement.hpp"
-#include "SimControlHelper.hpp"
+#include "SimControlEnd.hpp"
 
 namespace test {
 using namespace simph::umdl;
@@ -91,8 +91,9 @@ public:
                                           0,  // 0ms offset
                                           1000000,  // 1000000ns period
                                           -1);  //
-        SetSimulationEnd(sim,10000000);
-        scheduler->run();
+        SimControlEnd simCtl(&sim,10000000);
+        sim.Run();
+        simCtl.wait();
 
         // TODO some asserts are defintely needed here to check everything
         // is OK.

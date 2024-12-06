@@ -16,6 +16,7 @@
 #include "simph/smpdk/Utils.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/umdl/SmpIncrement.hpp"
+#include "SimControlEnd.hpp"
 
 namespace test {
 using namespace simph::umdl;
@@ -94,7 +95,10 @@ public:
                                           0,  // 0ms offset
                                           1000000,  // 1000000ns period
                                           -1);  //
-        scheduler->step(10000000);
+        
+        SimControlEnd simCtl(&sim,10000000);
+        sim.Run();
+        simCtl.wait();
 
         CPPUNIT_ASSERT_EQUAL((double)11, input->GetValue().value.float64Value);
         CPPUNIT_ASSERT_EQUAL((double)11, output->GetValue().value.float64Value);

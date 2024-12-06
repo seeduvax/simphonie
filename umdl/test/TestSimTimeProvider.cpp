@@ -16,6 +16,7 @@
 #include "simph/umdl/Logger1D.hpp"
 #include "simph/umdl/SimTimeProvider.hpp"
 #include "simph/umdl/SysTimeSynchro.hpp"
+#include "SimControlEnd.hpp"
 
 #include "simph/smpdk/Utils.hpp"
 #include "simph/sys/Logger.hpp"
@@ -65,7 +66,10 @@ public:
                                       0,  // 0ms offset
                                       40000000,  // 400ms period
                                       -1);  // for ever
-        sched->step(1000000000);  // 1sec simulation
+        SimControlEnd simCtl(&sim,1000000000);  // 1sec simulation
+        sim.Run();
+        simCtl.wait();
+        // TODO some asserts here.
     }
 };
 
