@@ -137,15 +137,17 @@ bool Scheduler::compareSchedule(const Schedule* a, const Schedule* b) {
 }
 // ..........................................................
 void Scheduler::schedule(Schedule* s) {
-    Synchronized(_mutex)
-    _scheduled.insert(s);
-    if (s->getTime()==0) {
-        // 0 schedule time is a marker of schedule through AddImmediateEvent,
-        // restore the "now" schedule time to ensure next AddImmediateEvent
-        // will also be insert front in schedule queue, and finally leave the
-        // schedule in a consistent state before its execution.
-        s->setTime(_timeKeeper->GetSimulationTime());
+    {
+        Synchronized(_mutex) _scheduled.insert(s);
+        if (s->getTime() == 0) {
+            // 0 schedule time is a marker of schedule through AddImmediateEvent,
+            // restore the "now" schedule time to ensure next AddImmediateEvent
+            // will also be insert front in schedule queue, and finally leave the
+            // schedule in a consistent state before its execution.
+            s->setTime(_timeKeeper->GetSimulationTime());
+        }
     }
+    _monitor.notify_all();
 }
 // ..........................................................
 void Scheduler::connect() {
@@ -311,6 +313,7 @@ void Scheduler::step() {
         Synchronized(_mutex);
         while (_run && getNextScheduledEventTime() >= DURATION_MAX) {
             // TODO wait there is something to exectue or run cancelled
+            MonitorWait(_monitor);
         }
         if (!_run) {
             // wait state exited because stop was requested
@@ -324,7 +327,7 @@ void Scheduler::step() {
         // after event emit, timekeeper should have updated current time,
         // run next event only if its scheduled time is not ahead the new
         // current simulation time.
-        if (getNextScheduledEventTime()<=_timeKeeper->GetSimulationTime()) {
+        if (_run && getNextScheduledEventTime() <= _timeKeeper->GetSimulationTime()) {
             _currentSchedule = *_scheduled.begin();
             _scheduled.erase(_scheduled.begin());
             toRun = _currentSchedule;
@@ -371,6 +374,7 @@ void Scheduler::epLeaveExecuting() {
         _run=false;
         // TODO may be pulse something if sched thread is waiting for something.
     }
+    _monitor.notify_all();
     if (_th != nullptr) {
         if (!_th->isCurrentThread()) {
             _th->join();

@@ -102,6 +102,7 @@ private:
     bool _run;
     // TODO check mutable here
     mutable std::mutex _mutex;
+    std::condition_variable _monitor;
     std::unique_ptr<simph::sys::Thread> _th;
 
     /*
