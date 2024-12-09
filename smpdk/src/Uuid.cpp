@@ -80,9 +80,14 @@ bool Uuid::operator<(const Smp::Uuid& other) const {
 }
 // ..........................................................
 std::ostream& operator<<(std::ostream& os, const Smp::Uuid& uuid) {
-    os << std::hex << std::setfill('0') << std::setw(8) << uuid.Data1 << std::setw(4) << "-" << uuid.Data2[0] << "-"
-       << uuid.Data2[1] << "-" << uuid.Data2[2] << std::setw(2) << uuid.Data3[1] << uuid.Data3[2] << uuid.Data3[3]
-       << uuid.Data3[4] << uuid.Data3[5] << uuid.Data3[6] << std::dec;
+    os << std::hex << std::setfill('0') << std::setw(8) << uuid.Data1 
+       << "-" << std::setw(4) << uuid.Data2[0] 
+       << "-" << uuid.Data2[1] 
+       << "-" << uuid.Data2[2] 
+       << "-" << std::setw(2) 
+              << (int)uuid.Data3[0] << (int)uuid.Data3[1] << (int)uuid.Data3[2]
+              << (int)uuid.Data3[3] << (int)uuid.Data3[4] << (int)uuid.Data3[5]
+              << std::dec ;
     return os;
 }
 }  // namespace Smp
