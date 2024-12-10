@@ -3,8 +3,7 @@
 #include <iomanip>
 #include "Smp/PrimitiveTypes.h"
 
-// for ntohl() and ntohs()
-#include "arpa/inet.h"
+#include "simph/smpdk/endian.h"
 
 namespace Smp {
 // --------------------------------------------------------------------
@@ -37,15 +36,15 @@ Uuid::Uuid(const char* value) {
         }
     }
     i = 0;
-    Data1 = ntohl(*(uint32_t*)&buf[i]);
+    Data1 = ntoh32(*reinterpret_cast<uint32_t*>(&buf[i]));
     i += sizeof(uint32_t);
-    Data2[0] = ntohs(*(uint16_t*)&buf[i]);
+    Data2[0] = ntoh16(*reinterpret_cast<uint16_t*>(&buf[i]));
     i += sizeof(uint16_t);
-    Data2[1] = ntohs(*(uint16_t*)&buf[i]);
+    Data2[1] = ntoh16(*reinterpret_cast<uint16_t*>(&buf[i]));
     i += sizeof(uint16_t);
-    Data2[2] = ntohs(*(uint16_t*)&buf[i]);
+    Data2[2] = ntoh16(*reinterpret_cast<uint16_t*>(&buf[i]));
     i += sizeof(uint16_t);
-    std::array<uint8_t, 6>* bd3 = (std::array<uint8_t, 6>*)(&buf[i]);
+    std::array<uint8_t, 6>* bd3 = reinterpret_cast<std::array<uint8_t, 6>*>(&buf[i]);
     Data3 = *bd3;
 }
 // ..........................................................
