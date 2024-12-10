@@ -35,6 +35,9 @@ public:
     inline const uint8_t* getDigest() const {
         return _digest;
     }
+    inline size_t getDigestSize() const {
+        return sizeof(_digest);
+    }
 private:
     void step(uint32_t* input);
     static uint32_t rotateLeft(uint32_t x, uint32_t n);

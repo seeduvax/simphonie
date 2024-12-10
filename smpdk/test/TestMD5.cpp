@@ -61,6 +61,16 @@ public:
             CHECK_DIGEST( 0xd4, 0x1d, 0x8c, 0xd9, 0x8f, 0x00, 0xb2, 0x04,
                           0xe9, 0x80, 0x09, 0x98, 0xec, 0xf8, 0x42, 0x7e )
         }
+        {
+            uint8_t buf[2560];
+            std::ifstream f("test/random.bin", std::ios::binary);
+            f.read(reinterpret_cast<char*>(buf),sizeof(buf));
+            MD5 md5;
+            md5.update(buf,sizeof(buf));
+            md5.finalize();
+            CHECK_DIGEST( 0xf0, 0x48, 0x78, 0x00, 0xdd, 0x86, 0x50, 0x33,
+                          0xd7, 0x7a, 0xc3, 0xa7, 0x0c, 0x16, 0x5e, 0xac )
+        }
     ABS_TEST_CASE_END
 ABS_TEST_SUITE_END
 } // namespace test

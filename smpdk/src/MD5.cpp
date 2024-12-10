@@ -10,12 +10,13 @@
  * $Date$
  */
 #include "simph/smpdk/MD5.hpp"
+#include "simph/smpdk/endian.h"
+#include <iostream>
 
 #define F(X, Y, Z) ((X & Y) | (~X & Z))
 #define G(X, Y, Z) ((X & Z) | (Y & ~Z))
 #define H(X, Y, Z) (X ^ Y ^ Z)
 #define I(X, Y, Z) (Y ^ (X | ~Z))
-
 
 namespace simph {
 namespace smpdk {
@@ -66,6 +67,17 @@ MD5::MD5() {
 MD5::~MD5() {
 }
 
+#if COMPILER_HOST_BYTE_ORDER==COMPILER_HOST_LITTLE_ENDIAN
+#define I32_MSB  3
+#define I32_MMSB  2
+#define I32_MLSB  1
+#define I32_LSB  0
+#else
+#define I32_MSB  0
+#define I32_MMSB  1
+#define I32_MLSB  2
+#define I32_LSB  3
+#endif
 // --------------------------------------------------------------------
 // ..........................................................
 void MD5::update(const uint8_t* inBuf, size_t inputLen) {
@@ -79,13 +91,10 @@ void MD5::update(const uint8_t* inBuf, size_t inputLen) {
 
         if(offset % 64 == 0){
             for(unsigned int j = 0; j < 16; ++j){
-                /* Convert to little-endian 
-                 * TODO: shall take care of host endianness.
-                 */ 
-                input[j] = (_input[(j * 4) + 3]) << 24 |
-                           (_input[(j * 4) + 2]) << 16 |
-                           (_input[(j * 4) + 1]) <<  8 |
-                           (_input[(j * 4)]);
+                input[j] = (_input[(j * 4) + I32_MSB]) << 24 |
+                           (_input[(j * 4) + I32_MMSB]) << 16 |
+                           (_input[(j * 4) + I32_MLSB]) <<  8 |
+                           (_input[(j * 4) + I32_LSB]);
             }
             step(input);
             offset = 0;
@@ -105,10 +114,11 @@ void MD5::finalize() {
      * Last two 32-bit words are the two halves of the size (converted from bytes to bits)
      */ 
     for(unsigned int j = 0; j < 14; ++j){
-        input[j] = _input[(j * 4) + 3] << 24 |
-                   _input[(j * 4) + 2] << 16 |
-                   _input[(j * 4) + 1] <<  8 |
-                   _input[(j * 4)];
+        input[j] = ntoh32(*reinterpret_cast<uint32_t*>(&_input[j * 4]));
+        input[j] = _input[(j * 4) + I32_MSB] << 24 |
+                   _input[(j * 4) + I32_MMSB] << 16 |
+                   _input[(j * 4) + I32_MLSB] <<  8 |
+                   _input[(j * 4) + I32_LSB];
     }
     input[14] = _size * 8;
     input[15] = (_size * 8) >> 32;
@@ -116,13 +126,12 @@ void MD5::finalize() {
     step(input);
 
     /* convert result from little-endian)
-     * TODO: should take care of host endianness.
      */ 
     for(unsigned int i = 0; i < 4; ++i){
-        _digest[(i * 4) + 0] = (_buf[i] & 0x000000FF);
-        _digest[(i * 4) + 1] = (_buf[i] & 0x0000FF00) >>  8;
-        _digest[(i * 4) + 2] = (_buf[i] & 0x00FF0000) >> 16;
-        _digest[(i * 4) + 3] = (_buf[i] & 0xFF000000) >> 24;
+        _digest[(i * 4) + I32_LSB] = (_buf[i] & 0x000000FF);
+        _digest[(i * 4) + I32_MLSB] = (_buf[i] & 0x0000FF00) >>  8;
+        _digest[(i * 4) + I32_MMSB] = (_buf[i] & 0x00FF0000) >> 16;
+        _digest[(i * 4) + I32_MSB] = (_buf[i] & 0xFF000000) >> 24;
     }
 }
 // ..........................................................
