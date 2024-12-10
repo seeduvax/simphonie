@@ -3,12 +3,13 @@
 #include <iomanip>
 #include "Smp/PrimitiveTypes.h"
 
+// for ntohl() and ntohs()
+#include "arpa/inet.h"
+
 namespace Smp {
 // --------------------------------------------------------------------
 // ..........................................................
 Uuid::Uuid(const char* value) {
-    // TODO check if this naive way of doing does not
-    // introduce endianness issue.
     int bSize = sizeof(Data1) + sizeof(Data2) + sizeof(Data3);
     uint8_t buf[bSize];
     std::memset(buf, 0, bSize);
@@ -35,11 +36,16 @@ Uuid::Uuid(const char* value) {
             i++;
         }
     }
-    uint32_t* bd1 = (uint32_t*)buf;
-    Data1 = *bd1;
-    std::array<uint16_t, 3>* bd2 = (std::array<uint16_t, 3>*)(buf + sizeof(Data1));
-    Data2 = *bd2;
-    std::array<uint8_t, 6>* bd3 = (std::array<uint8_t, 6>*)(buf + sizeof(Data1) + sizeof(Data2));
+    i = 0;
+    Data1 = ntohl(*(uint32_t*)&buf[i]);
+    i += sizeof(uint32_t);
+    Data2[0] = ntohs(*(uint16_t*)&buf[i]);
+    i += sizeof(uint16_t);
+    Data2[1] = ntohs(*(uint16_t*)&buf[i]);
+    i += sizeof(uint16_t);
+    Data2[2] = ntohs(*(uint16_t*)&buf[i]);
+    i += sizeof(uint16_t);
+    std::array<uint8_t, 6>* bd3 = (std::array<uint8_t, 6>*)(&buf[i]);
     Data3 = *bd3;
 }
 // ..........................................................
@@ -55,8 +61,6 @@ bool Uuid::operator!=(const Smp::Uuid& other) const {
 }
 // ..........................................................
 bool Uuid::operator<(const Smp::Uuid& other) const {
-    // TODO check endianness effect of uint16 && uint32 for such
-    // comparaison...
     return Data1 < other.Data1
            || (Data1 == other.Data1
                && (Data2[0] < other.Data2[0]
