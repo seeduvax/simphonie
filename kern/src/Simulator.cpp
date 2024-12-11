@@ -17,7 +17,7 @@
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/TimeKeeper.hpp"
 #include "simph/kern/TypeRegistry.hpp"
-#include "simph/smpdk/ExDuplicateName.hpp"
+#include "simph/smpdk/ExInvalidComponentState.hpp"
 
 #include "Smp/IDataflowField.h"
 
@@ -52,8 +52,6 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
     _services->AddComponent(_eventMgr);
     _services->AddComponent(_linkRegistry);
     _services->AddComponent(_resolver);
-    // TODO make the simulator appear in resolver itself ?
-    //  _resolver->publish(this);
     setState(Smp::SimulatorStateKind::SSK_Building);
 }
 // ..........................................................
@@ -180,7 +178,8 @@ void Simulator::doPublish(Smp::IComponent* comp) {
         }
     }
     else {
-        // TODO add Smpc exception ExInvalidComponentState
+        throw simph::smpdk::ExInvalidComponentState(comp,comp->GetState(),
+                Smp::ComponentStateKind::CSK_Created);
     }
 }
 // ..........................................................
@@ -219,7 +218,8 @@ void Simulator::doConfigure(Smp::IComponent* comp) {
         }
     }
     else {
-        // TODO add Smpc exception ExInvalidComponentState
+        throw simph::smpdk::ExInvalidComponentState(comp,comp->GetState(),
+                Smp::ComponentStateKind::CSK_Publishing);
     }
 }
 // ..........................................................
@@ -253,7 +253,8 @@ void Simulator::doConnect(Smp::IComponent* comp) {
         }
     }
     else {
-        // TODO add Smpc expcetion ExInvalidComponentState
+        throw simph::smpdk::ExInvalidComponentState(comp,comp->GetState(),
+                Smp::ComponentStateKind::CSK_Configured);
     }
 }
 // ..........................................................
@@ -391,19 +392,21 @@ Smp::IComponent* Simulator::CreateInstance(Smp::Uuid uuid, Smp::String8 name, Sm
             res = fac->CreateInstance(name, description, parent == nullptr ? this : parent);
             // TODO is it required to add new instance in a container when
             // the parent is set?
+            // may trouble publication/configure/connect loops since the same
+            // component may be processed twice: one from the "root" containers
+            // processing, and one through the recusive composite component
+            // processing.
             if (dynamic_cast<Smp::IModel*>(res)) {
                 _models->AddComponent(res);
             }
             if (dynamic_cast<Smp::IService*>(res)) {
                 _services->AddComponent(res);
             }
-            // TODO check it is needed to pulish/configure/connect immediately
-            // according to current simulator state.
             break;
         }
     }
 
-    // When no factory is found, Smp header tels to return null. So nothing
+    // When no factory is found, Smp header tells to return null. So nothing
     // particular to do since res is initialized as nullptr.
     return res;
 }
@@ -451,6 +454,7 @@ Smp::Publication::ITypeRegistry* Simulator::GetTypeRegistry() const {
     return _typeRegistry;
 }
 // ..........................................................
+// TODO moved that to a dedicated connection service.
 void Simulator::connect(std::string inputFieldPath, std::string outputFieldPath) {
     // TODO handle input/output field inversion
     auto output_field = dynamic_cast<Smp::IDataflowField*>(GetResolver()->ResolveAbsolute(outputFieldPath.c_str()));

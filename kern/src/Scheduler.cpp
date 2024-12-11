@@ -28,6 +28,10 @@ namespace kern {
 
 // --------------------------------------------------------------------
 // ..........................................................
+// TODO consider a Schedule being a Smp::IObject and extend IScheduler interface
+// to provide a schedule list view list, or put the schedule events into a 
+// IContainer.
+// 
 class Scheduler::Schedule {
 public:
     Schedule(const Smp::IEntryPoint* ep, Smp::Duration simTime, Scheduler* owner,
@@ -312,14 +316,12 @@ void Scheduler::step() {
     {
         Synchronized(_mutex);
         while (_run && getNextScheduledEventTime() >= DURATION_MAX) {
-            // TODO wait there is something to exectue or run cancelled
             MonitorWait(_monitor);
         }
         if (!_run) {
             // wait state exited because stop was requested
             return;
         }
-        // TODO check if event emission shall remain inside the critical section
     }
     _eventMgr->Emit(_preEventExecuteId);
     {
@@ -372,7 +374,6 @@ void Scheduler::epLeaveExecuting() {
             return;
         }
         _run=false;
-        // TODO may be pulse something if sched thread is waiting for something.
     }
     _monitor.notify_all();
     if (_th != nullptr) {
