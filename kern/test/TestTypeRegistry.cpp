@@ -58,7 +58,7 @@ public:
         struct ts tFieldA = {1, 1.1};
         struct ts tFieldB = {2, 2.2};
         Smp::Uuid structUuid("00000000-0000-0000-0000-000000000001");
-        Smp::Publication::IStructureType* t = _reg->AddStructureType("struct", "structure test", structUuid);
+        Smp::Publication::IStructureType* t = _reg->AddStructureType("Struct", "structure test", structUuid);
         CPPUNIT_ASSERT(t != nullptr);
         t->AddField("f1", "Field One integer", Smp::Uuids::Uuid_Int64, 0);
         t->AddField("f2", "Field Two double", Smp::Uuids::Uuid_Float64, (uint64_t) & (tFieldA.f2) - (uint64_t)&tFieldA);

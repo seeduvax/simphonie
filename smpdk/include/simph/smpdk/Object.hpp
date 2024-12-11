@@ -33,7 +33,7 @@ public:
     Smp::String8 GetDescription() const override;
     Smp::IObject* GetParent() const override;
 
-    static bool checkName(Smp::String8 name);
+    void checkName(Smp::String8 name);
 
 protected:
 private:

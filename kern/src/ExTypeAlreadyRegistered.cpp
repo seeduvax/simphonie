@@ -22,7 +22,7 @@ ExTypeAlreadyRegistered::ExTypeAlreadyRegistered(Smp::IObject* sender, Smp::Stri
     std::ostringstream d;
     d << "Can't register type " << name << ", type " << type->GetName()
       << " with same uuid "
-      /* TODO <<type->GetUuid()*/
+      << type->GetUuid()
       << " already registered.";
     setDescription(d.str().c_str());
     setMessage();

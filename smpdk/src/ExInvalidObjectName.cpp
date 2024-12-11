@@ -18,7 +18,7 @@ ExInvalidObjectName::ExInvalidObjectName(Smp::IObject* sender, Smp::String8 inva
     setName("InvalidObjectName");
     setSender(sender);
     std::ostringstream d;
-    d << "'" << _invalidName << "' include char(s) not useable in a Smp object name.";
+    d << "'" << _invalidName << "' string is invalid as a SMP object name.";
     setDescription(d.str().c_str());
     setMessage();
 }

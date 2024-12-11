@@ -26,9 +26,7 @@ EnumerationType::~EnumerationType() {}
 // --------------------------------------------------------------------
 // ..........................................................
 void EnumerationType::AddLiteral(Smp::String8 name, Smp::String8 description, Smp::Int32 value) {
-    if (!Object::checkName(name)) {
-        throw ExInvalidObjectName(this, name);
-    }
+    Object::checkName(name);
     for (auto l : _literals) {
         if (strcmp(name, l.name) == 0) {
             throw ExDuplicateName(this, name);

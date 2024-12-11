@@ -18,9 +18,7 @@ namespace smpdk {
 // ..........................................................
 Object::Object(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : _name(name), _description(descr), _parent(parent) {
-    if (!checkName(name)) {
-        throw ExInvalidObjectName(this, name);
-    }
+    checkName(name);
 }
 // ..........................................................
 Object::~Object() {}
@@ -39,9 +37,7 @@ Smp::IObject* Object::GetParent() const {
 }
 // ..........................................................
 void Object::setName(Smp::String8 name) {
-    if (!checkName(name)) {
-        throw ExInvalidObjectName(this, name);
-    }
+    checkName(name);
     _name = name;
 }
 // ..........................................................
@@ -52,13 +48,37 @@ void Object::setDescription(Smp::String8 description) {
 void Object::setParent(Smp::IObject* parent) {
     _parent = parent;
 }
+class ExInvalidNameBadFormat: public ExInvalidObjectName {
+public:
+    ExInvalidNameBadFormat(Smp::IObject* sender, Smp::String8 invalidName):
+            ExInvalidObjectName(sender,invalidName) {
+        std::ostringstream d;
+        d << "'" << invalidName << "' invalid name format, bad char or does not start with a letter.";
+        setDescription(d.str().c_str());
+        setMessage();
+    }
+    virtual ~ExInvalidNameBadFormat() {
+    }
+};
+class ExInvalidNameCKeyword: public ExInvalidObjectName {
+public:
+    ExInvalidNameCKeyword(Smp::IObject* sender, Smp::String8 invalidName):
+            ExInvalidObjectName(sender,invalidName) {
+        std::ostringstream d;
+        d << "'" << invalidName << "' is a C++/ANSI keyword that can't be used as a SMP object name.";
+        setDescription(d.str().c_str());
+        setMessage();
+    }
+    virtual ~ExInvalidNameCKeyword() {
+    }
+};
 // ..........................................................
-bool Object::checkName(Smp::String8 name) {
+void Object::checkName(Smp::String8 name) {
     std::string n = name;
     // Check for non empty alphanumeric names.
     // '_', '[' and ']' are also valid in names
     if (!std::regex_match(n, std::regex("[a-zA-Z][a-zA-Z0-9_\\[\\]]*"))) {
-        return false;
+        throw ExInvalidNameBadFormat(this,name);
     }
     // ISO/ANSI C++ keywords are not valid (see ECSS SMP 5.2.1.a.1.d).
     // keyword list fetched 2024-12-11 from https://en.cppreference.com/w/cpp/keyword
@@ -163,10 +183,9 @@ bool Object::checkName(Smp::String8 name) {
     };
     for (auto kw : forbidden) {
         if (kw == n) {
-            return false;
+            throw ExInvalidNameCKeyword(this,name);
         }
     }
-    return true;
 }
 
 }  // namespace smpdk
