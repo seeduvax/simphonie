@@ -11,7 +11,6 @@ AnySimple::AnySimple() : type(Smp::PrimitiveTypeKind::PTK_None) {}
 // ..........................................................
 AnySimple::AnySimple(Smp::PrimitiveTypeKind kind) : type(kind) {}
 // ..........................................................
-// TODO Verify AnySimple& other type, throw exception if other type is non null and doesn't match, handle all cases
 AnySimple::AnySimple(const AnySimple& other) : type(other.type), value(other.value) {}
 // ..........................................................
 AnySimple::AnySimple(AnySimple&& other) : type(std::move(other.type)), value(std::move(other.value)) {}
@@ -77,10 +76,7 @@ std::ostream& operator<<(std::ostream& os, const Smp::AnySimple& obj) {
             os << obj.value.string8Value;
             break;
         default:
-            std::stringstream ss;
-            ss << "Primitive type " << obj.GetType() << " not found";
-            // TODO logical_error
-            throw std::runtime_error(ss.str().c_str());
+            os << "[not an AnySimple, type="<<obj.GetType()<<"]";
             break;
     }
 

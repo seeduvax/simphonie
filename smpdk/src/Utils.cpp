@@ -34,13 +34,6 @@ std::string Utils::Hex(uint8_t* pBuf, size_t bufSize) {
         ret += hex;
     }
     return ret;
-    // char hexStr[bufSize*2+1];
-    // uint8_t* p = reinterpret_cast<uint8_t*>(hexStr);
-    // for (uint16_t i = 0; i < bufSize; i++) {
-    //    p += i*2;
-    //    ::sprintf(reinterpret_cast<char*>(p), "%02x", pCharBuf[i]);
-    //}
-    // return std::string(hexStr,bufSize*2);
 }
 // ..........................................................
 Smp::Uuid Utils::generateUuid(std::string fullName) {

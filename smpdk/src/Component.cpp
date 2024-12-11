@@ -98,9 +98,6 @@ void Component::Connect(Smp::ISimulator* simulator) {
     if (_state != Smp::ComponentStateKind::CSK_Configured) {
         throw ExInvalidComponentState(this, _state, Smp::ComponentStateKind::CSK_Configured);
     }
-    if (_simulator != nullptr && _simulator != simulator) {
-        // TODO raise exception, there seems to be 2 simulator instances
-    }
     _simulator = simulator;
     connect();
     _state = Smp::ComponentStateKind::CSK_Connected;
@@ -113,8 +110,8 @@ void Component::Disconnect() {
     }
     _simulator = nullptr;
     _logger = nullptr;
+    _linkRegistry->RemoveLinks(this);
     _linkRegistry = nullptr;
-    // TODO to be completed
     disconnect();
 }
 // ..........................................................
