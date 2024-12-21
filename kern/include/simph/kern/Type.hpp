@@ -10,6 +10,7 @@
 #ifndef __simph_kern_Type_HPP__
 #define __simph_kern_Type_HPP__
 #include "Smp/Publication/IType.h"
+#include "Smp/IPublication.h"
 #include "simph/smpdk/Object.hpp"
 
 namespace simph {
@@ -33,9 +34,15 @@ public:
     // Smp::Publication::IType implementation
     Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
     Smp::Uuid GetUuid() const override;
-    void Publish(Smp::IPublication* receiver, Smp::String8 name, Smp::String8 description, void* address,
-                 Smp::ViewKind view = Smp::ViewKind::VK_All, Smp::Bool state = true, Smp::Bool input = false,
-                 Smp::Bool output = false) override;
+    Smp::IField* Publish(
+        Smp::Publication::IPublishField* receiver,
+        Smp::String8 name,
+        Smp::String8 description,
+        void* address,
+        Smp::ViewKind view = Smp::ViewKind::VK_All,
+        Smp::Bool state = true,
+        Smp::Bool input = false,
+        Smp::Bool output = false) override;
     inline Smp::UInt64 getSize() const {
         return _size;
     }

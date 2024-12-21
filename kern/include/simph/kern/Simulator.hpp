@@ -13,6 +13,7 @@
 #include "Smp/Publication/ITypeRegistry.h"
 #include "simph/smpdk/Composite.hpp"
 #include "simph/sys/DLib.hpp"
+#include "Smp/Services/IResolver.h"
 
 namespace simph {
 namespace kern {
@@ -62,7 +63,9 @@ public:
     Smp::IFactory* GetFactory(Smp::Uuid uuid) const override;
     Smp::FactoryCollection* GetFactories() const override;
     Smp::Publication::ITypeRegistry* GetTypeRegistry() const override;
-    void LoadLibrary(Smp::String8 libraryPath) override;
+    void LoadLibrary(
+            Smp::String8 libraryPath,
+            Smp::LibraryLoadFlag loadFlag = Smp::LibraryLoadFlag::LLF_Auto) override;
     /**
      * Create and add new model instance.
      * Model type is defined as template argument.

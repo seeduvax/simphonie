@@ -9,13 +9,14 @@
  */
 #include "simph/kern/ExInvalidTarget.hpp"
 #include <sstream>
-#include "Smp/IDataflowField.h"
+#include "Smp/IField.h"
+#include "Smp/IOutputField.h"
 
 namespace simph {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidTarget::ExInvalidTarget(Smp::IDataflowField* source, Smp::IField* target) : _source(source), _target(target) {
+ExInvalidTarget::ExInvalidTarget(Smp::IOutputField* source, Smp::IField* target) : _source(source), _target(target) {
     setName("InvalidTarget");
     setSender(source);
     std::ostringstream d;
@@ -27,7 +28,7 @@ ExInvalidTarget::ExInvalidTarget(Smp::IDataflowField* source, Smp::IField* targe
 ExInvalidTarget::~ExInvalidTarget() {}
 // --------------------------------------------------------------------
 // ..........................................................
-Smp::IDataflowField* ExInvalidTarget::GetSource() const noexcept {
+Smp::IOutputField* ExInvalidTarget::GetSource() const noexcept {
     return _source;
 }
 // ..........................................................

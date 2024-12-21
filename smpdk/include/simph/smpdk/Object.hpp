@@ -44,11 +44,11 @@ public:
 
 
 protected:
+    void checkName(Smp::String8 name);
 private:
     std::string _name;
     std::string _description;
     Smp::IObject* _parent;
-    void checkName();
 };
 
 }  // namespace smpdk

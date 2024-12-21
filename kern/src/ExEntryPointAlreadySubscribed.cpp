@@ -9,6 +9,7 @@
  */
 #include "simph/kern/ExEntryPointAlreadySubscribed.hpp"
 #include <sstream>
+#include "Smp/IEntryPoint.h"
 
 namespace simph {
 namespace kern {

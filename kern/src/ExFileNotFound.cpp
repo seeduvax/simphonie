@@ -1,5 +1,5 @@
 /*
- * @file LibraryNotFound.cpp
+ * @file FileNotFound.cpp
  *
  * Copyright 2021 . All rights reserved.
  * Use is subject to license terms.
@@ -7,26 +7,27 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExLibraryNotFound.hpp"
+#include "simph/kern/ExFileNotFound.hpp"
 #include "simph/sys/DLib.hpp"
+#include <sstream>
 
 namespace simph {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExLibraryNotFound::ExLibraryNotFound(const Smp::IObject* sender, Smp::String8 libraryname) : _libraryName(libraryname) {
-    setName("LibraryNotFound");
+ExFileNotFound::ExFileNotFound(const Smp::IObject* sender, Smp::String8 fileName) : _fileName(fileName) {
+    setName("FileNotFound");
     setSender(sender);
     std::ostringstream d;
-    d << "Library " << libraryname << " wasn't found";
+    d << "File " << fileName << " wasn't found";
     setDescription(d.str().c_str());
     setMessage();
 }
 // ..........................................................
-ExLibraryNotFound::~ExLibraryNotFound() {}
+ExFileNotFound::~ExFileNotFound() {}
 // ..........................................................
-Smp::String8 ExLibraryNotFound::GetLibraryName() const noexcept {
-    return _libraryName;
+Smp::String8 ExFileNotFound::GetFileName() const noexcept {
+    return _fileName;
 }
 
 }  // namespace kern

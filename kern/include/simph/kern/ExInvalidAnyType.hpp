@@ -24,17 +24,17 @@ public:
     /**
      * Default constructor.
      */
-    ExInvalidAnyType(Smp::IObject* sender, Smp::PrimitiveTypeKind invalid, Smp::PrimitiveTypeKind expected);
+    ExInvalidAnyType(Smp::IObject* sender, Smp::AnySimple invalidValue, Smp::PrimitiveTypeKind expected);
     /**
      * Destructor.
      */
     virtual ~ExInvalidAnyType();
     // Smp::InvalidAnyType implementation
-    Smp::PrimitiveTypeKind GetInvalidType() const noexcept override;
+    Smp::AnySimple GetInvalidValue() const noexcept override;
     Smp::PrimitiveTypeKind GetExpectedType() const noexcept override;
 
 private:
-    Smp::PrimitiveTypeKind _invalid;
+    Smp::AnySimple _invalidValue;
     Smp::PrimitiveTypeKind _expected;
 };
 

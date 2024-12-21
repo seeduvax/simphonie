@@ -13,6 +13,7 @@
 #include "simph/kern/Simulator.hpp"
 #include "simph/smpdk/Utils.hpp"
 #include "simph/sys/Logger.hpp"
+#include "Smp/Services/IScheduler.h"
 
 namespace simph {
 namespace kern {
@@ -113,6 +114,7 @@ void Builder::connect() {
 
     // loadConnect
     for (auto cfg : _loadConnectionCfg) {
+/* TODO recover proper field management
         auto output_field =
             dynamic_cast<Smp::IDataflowField*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.from.c_str()));
         auto input_field =
@@ -131,6 +133,8 @@ void Builder::connect() {
 
         LOGI("Connecting output " << output_field->GetName() << " to " << input_field->GetName());
         output_field->Connect(input_field);
+*/
+LOGE("Field connection not implemented.")
     }
 
     // loadSchedule

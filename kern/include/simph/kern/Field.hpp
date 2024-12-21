@@ -13,15 +13,11 @@
 #include <sstream>
 #include "Smp/IForcibleField.h"
 #include "Smp/ISimpleArrayField.h"
+#include "Smp/IArrayField.h"
 #include "Smp/ISimpleField.h"
 #include "simph/kern/ExInvalidArrayIndex.hpp"
 #include "simph/kern/Persist.hpp"
 #include "simph/smpdk/Collection.hpp"
-// workaround Smp headers issue.
-namespace Smp {
-class IDataflowField;
-}
-#include "Smp/IDataflowField.h"
 
 namespace simph {
 namespace kern {
@@ -29,7 +25,7 @@ using namespace simph::smpdk;
 /**
  *
  */
-class Field : public Persist, virtual public Smp::IDataflowField, virtual public Smp::IForcibleField {
+class Field : public Persist, virtual public Smp::IForcibleField {
 public:
     /**
      * Default constructor.
@@ -47,8 +43,6 @@ public:
     Smp::Bool IsInput() const override;
     Smp::Bool IsOutput() const override;
     const Smp::Publication::IType* GetType() const override;
-    void Connect(Smp::IField* target) override;
-    void Push() override;
     // Smp::IForcibleField implementation
     void Force(Smp::AnySimple value) override;
     void Unforce() override;
@@ -110,8 +104,6 @@ public:
                    Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
                    Smp::IObject* parent);
     virtual ~StructureField();
-    void Push() override;
-    void Connect(Smp::IField* target) override;
     void addField(Field* f);
     inline const void* getAddress(Smp::Int64 offset = 0) {
         return (const void*)((int64_t)getDataPtr() + offset);

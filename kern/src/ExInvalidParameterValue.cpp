@@ -14,26 +14,25 @@ namespace simph {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidParameterValue::ExInvalidParameterValue(Smp::IObject* sender, Smp::String8 pName, Smp::AnySimple value)
-    : _pName(pName), _value(value) {
+ExInvalidParameterValue::ExInvalidParameterValue(Smp::IObject* sender, Smp::String8 opName, Smp::String8 paramName)
+    : _opName(opName), _paramName(paramName) {
     setName("InvalidParameterValue");
     setSender(sender);
     std::ostringstream d;
-    d << "Invalid value for parameter " << pName << " = " << value;
+    d << "Invalid value for parameter " << paramName << " from operation" << opName;
     setDescription(d.str().c_str());
-    // TODO Pourquoi setMessage() ne fonctionne pas sans argument?
-    setMessage("");
+    setMessage();
 }
 // ..........................................................
 ExInvalidParameterValue::~ExInvalidParameterValue() {}
 // --------------------------------------------------------------------
 // ..........................................................
-Smp::String8 ExInvalidParameterValue::GetParameterName() const noexcept {
-    return _pName;
+Smp::String8 ExInvalidParameterValue::GetOperationName() const noexcept {
+    return _opName;
 }
 // ..........................................................
-Smp::AnySimple ExInvalidParameterValue::GetValue() const noexcept {
-    return _value;
+Smp::String8 ExInvalidParameterValue::GetParameterName() const noexcept {
+    return _paramName;
 }
 
 }  // namespace kern

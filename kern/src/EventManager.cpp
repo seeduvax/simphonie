@@ -12,6 +12,7 @@
 #include "simph/kern/ExEntryPointNotSubscribed.hpp"
 #include "simph/kern/ExInvalidEventId.hpp"
 #include "simph/sys/Logger.hpp"
+#include "Smp/IEntryPoint.h"
 
 namespace simph {
 namespace kern {
@@ -29,7 +30,7 @@ const Smp::String8 _SMP_EventNamesTable[] = {
 // --------------------------------------------------------------------
 // ..........................................................
 EventManager::EventManager(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : Component(name[0] == '\0' ? Smp::Services::IEventManager::SMP_EventManager : name, descr, parent) {
+    : Component(name, descr, parent) {
     for (int evtIdx = 1; evtIdx <= Smp::Services::IEventManager::SMP_PostSimTimeChangeId; ++evtIdx) {
         _evRegistry.emplace(std::piecewise_construct, std::forward_as_tuple(evtIdx),
                             std::forward_as_tuple(_SMP_EventNamesTable[evtIdx - 1], "", this));

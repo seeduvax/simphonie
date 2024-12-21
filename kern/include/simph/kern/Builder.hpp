@@ -16,7 +16,6 @@
 #include "Smp/IService.h"
 #include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
-#include "Smp/IDataflowField.h"
 #include "simph/smpdk/Component.hpp"
 #include "simph/kern/Sampler.hpp"
 // clang-format on

@@ -24,17 +24,17 @@ public:
     /**
      * Default constructor.
      */
-    ExInvalidParameterValue(Smp::IObject* sender, Smp::String8 opName, Smp::AnySimple value);
+    ExInvalidParameterValue(Smp::IObject* sender, Smp::String8 opName, Smp::String8 paramName);
     /**
      * Destructor.
      */
     virtual ~ExInvalidParameterValue();
     // Smp::InvalidParameterValue implementation
+    Smp::String8 GetOperationName() const noexcept override;
     Smp::String8 GetParameterName() const noexcept override;
-    Smp::AnySimple GetValue() const noexcept override;
 private:
-    const Smp::String8 _pName;
-    Smp::AnySimple _value;
+    Smp::String8 _opName;
+    Smp::String8 _paramName;
 };
 
 }  // namespace kern

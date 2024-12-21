@@ -26,7 +26,7 @@ public:
     /**
      * Default constructor.
      */
-    EventManager(Smp::String8 name = Smp::Services::IEventManager::SMP_EventManager, Smp::String8 descr = "",
+    EventManager(Smp::String8 name, Smp::String8 descr = "",
                  Smp::IObject* parent = nullptr);
     /**
      * Destructor.

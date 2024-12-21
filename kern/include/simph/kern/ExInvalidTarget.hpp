@@ -24,17 +24,17 @@ public:
     /**
      * Default constructor.
      */
-    ExInvalidTarget(Smp::IDataflowField* source, Smp::IField* target);
+    ExInvalidTarget(Smp::IOutputField* source, Smp::IField* target);
     /**
      * Destructor.
      */
     virtual ~ExInvalidTarget();
     // Smp::InvalidTarget implmentation
-    Smp::IDataflowField* GetSource() const noexcept override;
+    Smp::IOutputField* GetSource() const noexcept override;
     Smp::IField* GetTarget() const noexcept override;
 
 private:
-    Smp::IDataflowField* _source;
+    Smp::IOutputField* _source;
     Smp::IField* _target;
 };
 

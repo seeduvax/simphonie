@@ -52,13 +52,23 @@ public:
     Smp::Publication::IType* AddIntegerType(Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
                                             Smp::Int64 minimum, Smp::Int64 maximum, Smp::String8 unit,
                                             Smp::PrimitiveTypeKind type = Smp::PrimitiveTypeKind::PTK_Int32) override;
-    Smp::Publication::IEnumerationType* AddEnumerationType(Smp::String8 name, Smp::String8 descr, Smp::Uuid typeUuid,
-                                                           Smp::Int16 memorySize) override;
-    Smp::Publication::IArrayType* AddArrayType(Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
-                                               Smp::Uuid itemTypeUuid, Smp::Int64 itemSize, Smp::Int64 arrayCount,
-                                               Smp::Bool simpleArray = false) override;
-    Smp::Publication::IType* AddStringType(Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
-                                           Smp::Int64 length) override;
+    Smp::Publication::IEnumerationType* AddEnumerationType(
+                Smp::String8 name,
+                Smp::String8 descr, 
+                Smp::Uuid typeUuid) override;
+    Smp::Publication::IArrayType* AddArrayType(
+                Smp::String8 name,
+                Smp::String8 description,
+                Smp::Uuid typeUuid,
+                Smp::Uuid itemTypeUuid,
+                Smp::UInt64 itemSize,
+                Smp::UInt64 arrayCount,
+                Smp::Bool simpleArray = false) override;
+    Smp::Publication::IType* AddStringType(
+                Smp::String8 name,
+                Smp::String8 description,
+                Smp::Uuid typeUuid,
+                Smp::UInt64 length) override;
     Smp::Publication::IStructureType* AddStructureType(Smp::String8 name, Smp::String8 description,
                                                        Smp::Uuid typeUuid) override;
     Smp::Publication::IClassType* AddClassType(Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,

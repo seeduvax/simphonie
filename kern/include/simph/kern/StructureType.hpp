@@ -32,8 +32,13 @@ public:
      */
     virtual ~StructureType();
     // Smp::Publication::IStructureType implementation
-    void AddField(Smp::String8 name, Smp::String8 description, Smp::Uuid uuid, Smp::Int64 offset,
-                  Smp::ViewKind view = Smp::ViewKind::VK_All, Smp::Bool state = true, Smp::Bool input = false,
+    void AddField(Smp::String8 name,
+                  Smp::String8 description,
+                  Smp::Uuid uuid,
+                  Smp::UInt64 offset,
+                  Smp::ViewKind view = Smp::ViewKind::VK_All,
+                  Smp::Bool state = true,
+                  Smp::Bool input = false,
                   Smp::Bool output = false) override;
     /**
      * Setup structure field according to this structure type definition.

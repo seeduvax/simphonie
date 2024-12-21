@@ -13,6 +13,7 @@
 #include "Smp/IEntryPoint.h"
 #include "simph/smpdk/Object.hpp"
 #include "simph/sys/Runnable.hpp"
+#include <memory>
 
 namespace simph {
 namespace kern {
