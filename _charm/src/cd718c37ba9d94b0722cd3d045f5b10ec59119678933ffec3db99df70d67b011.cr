@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="cd718c37ba9d94b0722cd3d045f5b10ec59119678933ffec3db99df70d67b011" state="open">
+<cr id="cd718c37ba9d94b0722cd3d045f5b10ec59119678933ffec3db99df70d67b011" state="closed" delivered="simph-0.1.17">
 <title>Scheduler AddImmediateEvent shall insert entry point in front of the schedule queue</title>
 <reporter>sdevaux</reporter>
 <creation>2022-12-05 22:25:46+01:00</creation>

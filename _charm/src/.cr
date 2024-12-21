@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="" state="open">
+<cr id="" state="resolved">
 <title></title>
 <reporter>f001864</reporter>
 <creation>2021-05-07 17:08:56+02:00</creation>

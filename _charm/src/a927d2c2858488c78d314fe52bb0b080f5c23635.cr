@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="a927d2c2858488c78d314fe52bb0b080f5c23635" state="working">
+<cr id="a927d2c2858488c78d314fe52bb0b080f5c23635" state="closed" delivered="simph-0.1.17">
 <title>Scheduler mono-threading</title>
 <reporter>sdevaux</reporter>
 <creation>2019-01-01 12:00:00+02:00</creation>

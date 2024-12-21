@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="4529be401192141b82f8245e66ec2f0655e1ca5644a91572110c0a723e76077d" state="open">
+<cr id="4529be401192141b82f8245e66ec2f0655e1ca5644a91572110c0a723e76077d" state="closed" delivered="simph-0.1.17">
 <title>add functions to support lua rasta fsf (setvalue for fields...)</title>
 <reporter>f001864</reporter>
 <creation>2021-07-29 16:45:16+02:00</creation>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="63af8bda269fca6f435f1ebac69e177c5e019b59f808c672e66f9eeac7a89224" state="working">
+<cr id="63af8bda269fca6f435f1ebac69e177c5e019b59f808c672e66f9eeac7a89224" state="closed" delivered="simph-0.1.17">
 <title>Decouple scheduler and timekeeper</title>
 <reporter>sdevaux</reporter>
 <creation>2024-12-02 22:17:12+01:00</creation>

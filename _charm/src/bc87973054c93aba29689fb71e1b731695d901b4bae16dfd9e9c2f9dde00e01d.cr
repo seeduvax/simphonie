@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="bc87973054c93aba29689fb71e1b731695d901b4bae16dfd9e9c2f9dde00e01d" state="working">
+<cr id="bc87973054c93aba29689fb71e1b731695d901b4bae16dfd9e9c2f9dde00e01d" state="closed" delivered="simph-0.1.17">
 <title>Fix simph_kern run</title>
 <reporter>f001864</reporter>
 <creation>2021-03-23 14:49:48+01:00</creation>

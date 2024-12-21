@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="31b67ea64815ecbc6cecbe4ce824068a1b85083a3e24acb73141ec063c30c598" state="open">
+<cr id="31b67ea64815ecbc6cecbe4ce824068a1b85083a3e24acb73141ec063c30c598" state="closed" delivered="simph-0.1.17">
 <title>fix AnySimple</title>
 <reporter>f001864</reporter>
 <creation>2021-05-04 15:34:06+02:00</creation>

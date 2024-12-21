@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="e97b5c272337fef6cf90ea2dd87921e0302db61b" state="working">
+<cr id="e97b5c272337fef6cf90ea2dd87921e0302db61b" state="closed" delivered="simph-0.1.17">
 <title>Split kern lib to introduce SMP dev kit minimal lib.</title>
 <reporter>sdevaux</reporter>
 <creation>2020-05-01 12:00:00+02:00</creation>

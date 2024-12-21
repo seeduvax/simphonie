@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="ce4f97a2d4176a45e4d45ee5d27de1b79298c3ffe8004804043716e011cc914a" state="open">
+<cr id="ce4f97a2d4176a45e4d45ee5d27de1b79298c3ffe8004804043716e011cc914a" state="closed" delivered="simph-0.1.17">
 <title>UML doc for simphonie, class : Container, Composite, Component</title>
 <reporter>f001864</reporter>
 <creation>2021-03-26 14:53:27+01:00</creation>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><cr id="e7be53dbeeacfb18e51729900a5d42383d0236912690c702bd4c70583525ea82" state="working">
+<?xml version="1.0" encoding="UTF-8"?><cr id="e7be53dbeeacfb18e51729900a5d42383d0236912690c702bd4c70583525ea82" state="closed" delivered="simph-0.1.17">
     <title>Simulator Publish/Configure/Connect implementation not complient to SMP requirement</title>
     <reporter>sdevaux</reporter>
     <creation>2024-03-14 12:17:00+01:00</creation>

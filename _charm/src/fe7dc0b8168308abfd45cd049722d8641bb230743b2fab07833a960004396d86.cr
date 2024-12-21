@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="fe7dc0b8168308abfd45cd049722d8641bb230743b2fab07833a960004396d86" state="working">
+<cr id="fe7dc0b8168308abfd45cd049722d8641bb230743b2fab07833a960004396d86" state="closed" delivered="simph-0.1.17">
 <title>multi threading by multi simulator sync with barrier</title>
 <reporter>m026258</reporter>
 <creation>2022-02-28 13:17:50+01:00</creation>
