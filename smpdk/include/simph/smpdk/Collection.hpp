@@ -19,7 +19,9 @@ namespace simph {
 namespace smpdk {
 
 /**
- *
+ * SMP::ICollection implementation.
+ * TODO consider this collection not being an object and
+ * create a CollectionObject class being both Object and Collection.
  */
 template <typename T>
 class Collection : public Object, public Smp::ICollection<T> {
@@ -47,6 +49,9 @@ public:
     }
     size_t size() const final {
         return _content.size();
+    }
+    Smp::Bool empty() const override {
+        return _content.empty();
     }
     typedef typename Smp::ICollection<T>::const_iterator const_iterator;
     const_iterator begin() const final {

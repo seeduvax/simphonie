@@ -13,7 +13,7 @@ AnySimple::AnySimple(Smp::PrimitiveTypeKind kind) : type(kind) {}
 // ..........................................................
 AnySimple::AnySimple(const AnySimple& other) : type(other.type), value(other.value) {}
 // ..........................................................
-AnySimple::AnySimple(AnySimple&& other) : type(std::move(other.type)), value(std::move(other.value)) {}
+AnySimple::AnySimple(AnySimple&& other) noexcept : type(std::move(other.type)), value(std::move(other.value)) {}
 // ..........................................................
 AnySimple& AnySimple::operator=(const AnySimple& other) {
     type = other.type;
@@ -21,7 +21,7 @@ AnySimple& AnySimple::operator=(const AnySimple& other) {
     return *this;
 }
 // ..........................................................
-AnySimple& AnySimple::operator=(AnySimple&& other) {
+AnySimple& AnySimple::operator=(AnySimple&& other) noexcept {
     type = std::move(other.type);
     value = std::move(other.value);
     return *this;

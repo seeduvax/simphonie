@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "simph/smpdk/Exception.hpp"
+#include "Smp/IObject.h"
 #include <sstream>
 
 namespace simph {

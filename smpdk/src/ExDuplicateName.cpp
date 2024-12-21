@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "simph/smpdk/ExDuplicateName.hpp"
+#include "Smp/IObject.h"
 #include <sstream>
 
 namespace simph {

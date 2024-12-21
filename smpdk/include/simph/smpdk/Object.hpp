@@ -32,19 +32,23 @@ public:
     Smp::String8 GetName() const override;
     Smp::String8 GetDescription() const override;
     Smp::IObject* GetParent() const override;
+    /**
+     * Get child object by name.
+     * Default implementation is a leaf object case, meaning an object having
+     * no child. Composit object shall overide this method to search for
+     * the child object among the containers.
+     * @param name name of searched child
+     * @return nullptr
+     */
+    Smp::IObject* GetChild(Smp::String8 name) const override;
 
-    void checkName(Smp::String8 name);
 
 protected:
 private:
     std::string _name;
     std::string _description;
     Smp::IObject* _parent;
-
-    // TODO reconsider to make the 3 following protected if really needed.
-    void setName(Smp::String8 name);
-    void setDescription(Smp::String8 description);
-    void setParent(Smp::IObject* parent);
+    void checkName();
 };
 
 }  // namespace smpdk

@@ -18,7 +18,7 @@ namespace smpdk {
 // ..........................................................
 Object::Object(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : _name(name), _description(descr), _parent(parent) {
-    checkName(name);
+    checkName();
 }
 // ..........................................................
 Object::~Object() {}
@@ -36,24 +36,18 @@ Smp::IObject* Object::GetParent() const {
     return _parent;
 }
 // ..........................................................
-void Object::setName(Smp::String8 name) {
-    checkName(name);
-    _name = name;
+Smp::IObject* Object::GetChild(Smp::String8 name) const {
+    return nullptr;
 }
+
+// --------------------------------------------------------------------
 // ..........................................................
-void Object::setDescription(Smp::String8 description) {
-    _description = description;
-}
-// ..........................................................
-void Object::setParent(Smp::IObject* parent) {
-    _parent = parent;
-}
 class ExInvalidNameBadFormat: public ExInvalidObjectName {
 public:
-    ExInvalidNameBadFormat(Smp::IObject* sender, Smp::String8 invalidName):
-            ExInvalidObjectName(sender,invalidName) {
+    ExInvalidNameBadFormat(Smp::IObject* sender):
+            ExInvalidObjectName(sender,sender->GetName()) {
         std::ostringstream d;
-        d << "'" << invalidName << "' invalid name format, bad char or does not start with a letter.";
+        d << "'" << sender->GetName() << "' invalid name format, bad char or does not start with a letter.";
         setDescription(d.str().c_str());
         setMessage();
     }
@@ -62,10 +56,10 @@ public:
 };
 class ExInvalidNameCKeyword: public ExInvalidObjectName {
 public:
-    ExInvalidNameCKeyword(Smp::IObject* sender, Smp::String8 invalidName):
-            ExInvalidObjectName(sender,invalidName) {
+    ExInvalidNameCKeyword(Smp::IObject* sender):
+            ExInvalidObjectName(sender, sender->GetName()) {
         std::ostringstream d;
-        d << "'" << invalidName << "' is a C++/ANSI keyword that can't be used as a SMP object name.";
+        d << "'" << sender->GetName() << "' is a C++/ANSI keyword that can't be used as a SMP object name.";
         setDescription(d.str().c_str());
         setMessage();
     }
@@ -73,12 +67,11 @@ public:
     }
 };
 // ..........................................................
-void Object::checkName(Smp::String8 name) {
-    std::string n = name;
+void Object::checkName() {
     // Check for non empty alphanumeric names.
     // '_', '[' and ']' are also valid in names
-    if (!std::regex_match(n, std::regex("[a-zA-Z][a-zA-Z0-9_\\[\\]]*"))) {
-        throw ExInvalidNameBadFormat(this,name);
+    if (!std::regex_match(_name, std::regex("[a-zA-Z][a-zA-Z0-9_\\[\\]]*"))) {
+        throw ExInvalidNameBadFormat(this);
     }
     // ISO/ANSI C++ keywords are not valid (see ECSS SMP 5.2.1.a.1.d).
     // keyword list fetched 2024-12-11 from https://en.cppreference.com/w/cpp/keyword
@@ -182,8 +175,8 @@ void Object::checkName(Smp::String8 name) {
         "xor_eq"
     };
     for (auto kw : forbidden) {
-        if (kw == n) {
-            throw ExInvalidNameCKeyword(this,name);
+        if (kw == _name) {
+            throw ExInvalidNameCKeyword(this);
         }
     }
 }

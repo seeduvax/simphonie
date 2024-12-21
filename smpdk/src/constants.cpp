@@ -4,45 +4,63 @@
 #include "Smp/Services/ILogger.h"
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Uuid.h"
+#include <iostream>
 
 namespace Smp {
 
-std::ostream& operator<<(std::ostream& os, const PrimitiveTypeKind& obj) {
+std::ostream& operator << (std::ostream& os, const PrimitiveTypeKind& obj) {
     switch (obj) {
         case Smp::PrimitiveTypeKind::PTK_None:
             os << "PTK_None";
+            break;
         case Smp::PrimitiveTypeKind::PTK_Char8:
             os << "PTK_Char8";
+            break;
         case Smp::PrimitiveTypeKind::PTK_Bool:
             os << "PTK_Bool";
+            break;
         case Smp::PrimitiveTypeKind::PTK_Int8:
             os << "PTK_Int8";
+            break;
         case Smp::PrimitiveTypeKind::PTK_Int16:
             os << "PTK_Int16";
+            break;
         case Smp::PrimitiveTypeKind::PTK_Int32:
             os << "PTK_Int32";
+            break;
         case Smp::PrimitiveTypeKind::PTK_Int64:
             os << "PTK_Int64";
+            break;
         case Smp::PrimitiveTypeKind::PTK_UInt8:
             os << "PTK_UInt8";
+            break;
         case Smp::PrimitiveTypeKind::PTK_UInt16:
             os << "PTK_UInt16";
+            break;
         case Smp::PrimitiveTypeKind::PTK_UInt32:
             os << "PTK_UInt32";
+            break;
         case Smp::PrimitiveTypeKind::PTK_UInt64:
             os << "PTK_UInt64";
+            break;
         case Smp::PrimitiveTypeKind::PTK_Float32:
             os << "PTK_Float32";
+            break;
         case Smp::PrimitiveTypeKind::PTK_Float64:
             os << "PTK_Float64";
+            break;
         case Smp::PrimitiveTypeKind::PTK_Duration:
             os << "PTK_Duration";
+            break;
         case Smp::PrimitiveTypeKind::PTK_DateTime:
             os << "PTK_DateTime";
+            break;
         case Smp::PrimitiveTypeKind::PTK_String8:
             os << "PTK_String8";
+            break;
         default:
             os << "InvalidType";
+            break;
     }
     return os;
 }
@@ -130,7 +148,6 @@ constexpr Smp::Services::EventId IEventManager::SMP_EnterReconnectingId;
 constexpr Smp::Services::EventId IEventManager::SMP_LeaveReconnectingId;
 constexpr Smp::Services::EventId IEventManager::SMP_PreSimTimeChangeId;
 constexpr Smp::Services::EventId IEventManager::SMP_PostSimTimeChangeId;
-constexpr Smp::Char8 IEventManager::SMP_EventManager[];
 constexpr Smp::Char8 IEventManager::SMP_LeaveConnecting[];
 constexpr Smp::Char8 IEventManager::SMP_EnterInitialising[];
 constexpr Smp::Char8 IEventManager::SMP_LeaveInitialising[];
@@ -163,11 +180,6 @@ constexpr Smp::Char8 ILogger::LMK_EventName[];
 constexpr Smp::Char8 ILogger::LMK_InformationName[];
 constexpr Smp::Char8 ILogger::LMK_WarningName[];
 
-// ..........................................................
-constexpr Smp::Char8 ILinkRegistry::SMP_LinkRegistry[];
-
-// ..........................................................
-constexpr Smp::Char8 ITimeKeeper::SMP_TimeKeeper[];
 }  // namespace Services
 
 }  // namespace Smp
