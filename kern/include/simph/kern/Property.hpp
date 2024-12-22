@@ -37,6 +37,7 @@ public:
     Smp::ViewKind GetView() const override;
     Smp::AnySimple GetValue() const override;
     void SetValue(Smp::AnySimple value) override;
+    Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
 
 private:
     Smp::Publication::IType* _type;

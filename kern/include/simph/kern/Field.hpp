@@ -159,13 +159,23 @@ public:
     void SetValue(Smp::UInt64 index, Smp::AnySimple value) override {
         _tData[index] = value;
     }
-    void GetValues(Smp::UInt64 length, Smp::AnySimpleArray values) const override {
-        Smp::UInt64 c = length > _count ? _count : length;
-        std::memcpy(values, _tData, c * sizeof(T));
+    void GetValues( Smp::UInt64 length,
+                    Smp::AnySimple* values,
+                    Smp::UInt64 startIndex) const override {
+        int j=0;
+        for (int i=startIndex; i<_count && j<length; i++) {
+            values[j]=GetValue(i);
+            j++;
+        }
     }
-    void SetValues(Smp::UInt64 length, Smp::AnySimpleArray values) override {
-        Smp::UInt64 c = length > _count ? _count : length;
-        std::memcpy(_tData, values, c * sizeof(T));
+    void SetValues( Smp::UInt64 length,
+                    Smp::AnySimpleArray values,
+                    Smp::UInt64 startIndex = 0) override {
+        int j=0;
+        for (int i=startIndex; i<_count && j<length; i++) {
+             _tData[i] = values[j];
+            j++;
+        }
     }
 
 private:

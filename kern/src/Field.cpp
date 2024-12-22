@@ -76,6 +76,7 @@ Smp::AnySimple Field::GetValue() const {
 // --------------------------------------------------------------------
 // Smp::IDataflowField implentation
 // ..........................................................
+/* TODO to be restored with a OutputField implementation
 void Field::Connect(Smp::IField* target) {
     auto f = dynamic_cast<Field*>(target);
     if (f != nullptr && (f->_type->GetUuid() == _type->GetUuid()) && f->_dataSize == _dataSize && IsOutput()
@@ -92,6 +93,7 @@ void Field::Push() {
         std::memcpy(f->_data, _data, _dataSize);
     }
 }
+*/
 // --------------------------------------------------------------------
 // Smp::IForcibleField implementation
 // ..........................................................
@@ -255,6 +257,7 @@ StructureField::StructureField(Smp::String8 name, Smp::String8 description, Smp:
 // ..........................................................
 StructureField::~StructureField() {}
 // ..........................................................
+/* TODO to be restored with OutputField
 void StructureField::Push() {
     for (auto f : _fields) {
         f->Push();
@@ -273,6 +276,7 @@ void StructureField::Connect(Smp::IField* target) {
         throw ExInvalidTarget(this, target);
     }
 }
+*/
 // ..........................................................
 void StructureField::addField(Field* f) {
     _fields.push_back(f);

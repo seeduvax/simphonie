@@ -26,7 +26,7 @@ public:
     /**
      * Default constructor.
      */
-    LinkRegistry(Smp::String8 name = Smp::Services::ILinkRegistry::SMP_LinkRegistry, Smp::String8 descr = "",
+    LinkRegistry(Smp::String8 name, Smp::String8 descr = "",
                  Smp::IObject* parent = nullptr);
     /**
      * Destructor.

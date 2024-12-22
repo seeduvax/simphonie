@@ -9,6 +9,7 @@
  */
 #include "simph/kern/Operation.hpp"
 #include "simph/sys/Logger.hpp"
+#include "Smp/IRequest.h"
 
 namespace simph {
 namespace kern {

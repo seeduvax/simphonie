@@ -30,7 +30,7 @@ public:
     virtual ~Request();
 
 public:
-    inline Smp::String8 GetOperationName() const override {
+    inline Smp::String8 GetName() const override {
         return _operationName.c_str();
     }
 

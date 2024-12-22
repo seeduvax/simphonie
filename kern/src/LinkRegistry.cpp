@@ -15,7 +15,7 @@ namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
 LinkRegistry::LinkRegistry(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : Component(name[0] == '\0' ? Smp::Services::ILinkRegistry::SMP_LinkRegistry : name, descr, parent), _links() {}
+    : Component(name, descr, parent), _links() {}
 // ..........................................................
 LinkRegistry::~LinkRegistry() {}
 // --------------------------------------------------------------------

@@ -41,6 +41,29 @@ public:
     Smp::IField* GetField(Smp::String8 fullName) const override;
     const Smp::FieldCollection* GetFields() const override;
     const Smp::Uuid& GetUuid() const override;
+    Smp::AnySimple GetSimpleValue(Smp::String8 fullName) const override;
+    void SetSimpleValue(
+                Smp::String8 fullName,
+                Smp::AnySimple value) override;
+    void GetSimpleArrayValue(
+                Smp::String8 fullName,
+                Smp::UInt64 length,
+                Smp::AnySimple* values,
+                Smp::UInt64 startIndex = 0) const override;
+    void SetSimpleArrayValue(
+                Smp::String8 fullName,
+                Smp::UInt64 length,
+                Smp::AnySimpleArray values,
+                Smp::UInt64 startIndex = 0) override;
+    Smp::Bool AddChild(
+                Smp::IObject* child,
+                Smp::ICollectionBase* collection) override;
+    Smp::Bool RemoveChild(
+                Smp::IObject* child,
+                Smp::ICollectionBase* collection) override;
+    Smp::IObject* IsChildInCollection(
+                Smp::String8 child,
+                const Smp::ICollectionBase* collection) override;
 
 protected:
     Smp::ISimulator* getSimulator();
