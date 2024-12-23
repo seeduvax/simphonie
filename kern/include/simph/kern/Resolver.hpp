@@ -40,7 +40,7 @@ public:
 
     // Smp::Services::IResolver implementation
     Smp::IObject* ResolveAbsolute(Smp::String8 absolutePath) override;
-    Smp::IObject* ResolveRelative(Smp::String8 relativePath, const Smp::IComponent* sender) override;
+    Smp::IObject* ResolveRelative(Smp::String8 relativePath, Smp::IObject* sender) override;
 
     Smp::IPublication* publish(Smp::IObject* toPublish);
 

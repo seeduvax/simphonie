@@ -34,7 +34,7 @@ public:
     /**
      * Default constructor.
      */
-    Scheduler(Smp::String8 name = Smp::Services::IScheduler::SMP_Scheduler, Smp::String8 descr = "",
+    Scheduler(Smp::String8 name, Smp::String8 descr = "",
               Smp::IObject* parent = nullptr);
     /**
      * Destructor.
@@ -51,6 +51,12 @@ public:
                                              Smp::Duration cycleTime = 0, Smp::Int64 repeat = 0) override;
     Smp::Services::EventId AddZuluTimeEvent(const Smp::IEntryPoint* entryPoint, Smp::DateTime zuluTime,
                                             Smp::Duration cycleTime = 0, Smp::Int64 repeat = 0) override;
+    Smp::Services::EventId AddRelativeZuluTimeEvent(
+                const Smp::IEntryPoint* entryPoint,
+                Smp::Duration zuluTimeDelay,
+                Smp::Duration cycleTime = 0,
+                Smp::Int64 repeat = 0) override;
+
     void SetEventSimulationTime(Smp::Services::EventId event, Smp::Duration simulationTime) override;
     void SetEventMissionTime(Smp::Services::EventId event, Smp::Duration missionTime) override;
     void SetEventEpochTime(Smp::Services::EventId event, Smp::DateTime epochTime) override;
@@ -60,6 +66,7 @@ public:
     void RemoveEvent(Smp::Services::EventId event) override;
     Smp::Services::EventId GetCurrentEventId() const override;
     Smp::Duration GetNextScheduledEventTime() const override;
+    Smp::Bool IsEventScheduled(Smp::Services::EventId eventId) const override;
 
     /**
      * SMP Enter Executing event entry point.

@@ -134,7 +134,7 @@ Smp::IObject* Resolver::ResolveAbsolute(Smp::String8 absolutePath) {
     return resolve(absolutePath, _root);
 }
 // ..........................................................
-Smp::IObject* Resolver::ResolveRelative(Smp::String8 relativePath, const Smp::IComponent* sender) {
+Smp::IObject* Resolver::ResolveRelative(Smp::String8 relativePath, Smp::IObject* sender) {
     Smp::IObject* res = nullptr;
     auto it = _publications.find(sender);
     if (it != _publications.end()) {

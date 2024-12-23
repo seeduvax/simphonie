@@ -280,45 +280,29 @@ Smp::Publication::IType* TypeRegistry::AddIntegerType(Smp::String8 name, Smp::St
     return res;
 }
 // ..........................................................
-Smp::Publication::IEnumerationType* TypeRegistry::AddEnumerationType(Smp::String8 name, Smp::String8 descr,
-                                                                     Smp::Uuid typeUuid, Smp::Int16 memorySize) {
+Smp::Publication::IEnumerationType* TypeRegistry::AddEnumerationType(
+                        Smp::String8 name,
+                        Smp::String8 descr,
+                        Smp::Uuid typeUuid) {
     Smp::Publication::IType* ex = GetType(typeUuid);
     if (ex != nullptr) {
         throw ExTypeAlreadyRegistered(this, name, ex);
     }
-    Smp::PrimitiveTypeKind type = Smp::PrimitiveTypeKind::PTK_None;
-    switch (memorySize) {
-        case 1:
-            type = Smp::PrimitiveTypeKind::PTK_Int8;
-            break;
-        case 2:
-            type = Smp::PrimitiveTypeKind::PTK_Int16;
-            break;
-        case 4:
-            type = Smp::PrimitiveTypeKind::PTK_Int32;
-            break;
-        case 8:
-            type = Smp::PrimitiveTypeKind::PTK_Int64;
-            // There is an issue with SMP interface definition, this size
-            // is not really useable since IEnumerationType interface AddLiteral
-            // value use Smp::Int32 type to define the value.
-            break;
-    }
-    Smp::Publication::IEnumerationType* res = nullptr;
-    if (type != Smp::PrimitiveTypeKind::PTK_None) {
-        res = new EnumerationType(typeUuid, type, name, descr, this);
-        _types.push_back(res);
-    }
-    else {
-        LOGE("Invalid memory size for type " << name);
-    }
+    Smp::Publication::IEnumerationType* res = 
+                // TODO 2nd arg should no more be needed.
+                new EnumerationType(typeUuid, Smp::PrimitiveTypeKind::PTK_Int32, name, descr, this);
+    _types.push_back(res);
     return res;
 }
 // ..........................................................
-Smp::Publication::IArrayType* TypeRegistry::AddArrayType(Smp::String8 name, Smp::String8 description,
-                                                         Smp::Uuid typeUuid, Smp::Uuid itemTypeUuid,
-                                                         Smp::Int64 itemSize, Smp::Int64 arrayCount,
-                                                         Smp::Bool simpleArray) {
+Smp::Publication::IArrayType* TypeRegistry::AddArrayType(
+                Smp::String8 name,
+                Smp::String8 description,
+                Smp::Uuid typeUuid,
+                Smp::Uuid itemTypeUuid,
+                Smp::UInt64 itemSize,
+                Smp::UInt64 arrayCount,
+                Smp::Bool simpleArray) {
     // TODO complete behavior regarding simpleArray arg value.
     Smp::Publication::IType* ex = GetType(typeUuid);
     if (ex != nullptr) {
@@ -334,8 +318,11 @@ Smp::Publication::IArrayType* TypeRegistry::AddArrayType(Smp::String8 name, Smp:
     return nullptr;
 }
 // ..........................................................
-Smp::Publication::IType* TypeRegistry::AddStringType(Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
-                                                     Smp::Int64 length) {
+Smp::Publication::IType* TypeRegistry::AddStringType(
+                Smp::String8 name,
+                Smp::String8 description,
+                Smp::Uuid typeUuid,
+                Smp::UInt64 length) {
     Smp::Publication::IType* res = GetType(typeUuid);
     if (res != nullptr) {
         throw ExTypeAlreadyRegistered(this, name, res);

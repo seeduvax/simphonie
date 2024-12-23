@@ -29,7 +29,7 @@ public:
     /**
      * Default constructor.
      */
-    TimeKeeper(Smp::String8 name = Smp::Services::ITimeKeeper::SMP_TimeKeeper, Smp::String8 descr = "",
+    TimeKeeper(Smp::String8 name, Smp::String8 descr = "",
                Smp::IObject* parent = nullptr);
     /**
      * Destructor.

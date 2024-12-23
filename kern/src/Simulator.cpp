@@ -10,7 +10,7 @@
 #include "simph/kern/Simulator.hpp"
 #include "simph/kern/EventManager.hpp"
 #include "simph/kern/ExDuplicateUuid.hpp"
-#include "simph/kern/ExLibraryNotFound.hpp"
+#include "simph/kern/ExFileNotFound.hpp"
 #include "simph/kern/LinkRegistry.hpp"
 #include "simph/kern/Logger.hpp"
 #include "simph/kern/Resolver.hpp"
@@ -19,7 +19,7 @@
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/smpdk/ExInvalidComponentState.hpp"
 
-#include "Smp/IDataflowField.h"
+#include "Smp/IOutputField.h"
 
 #include "simph/kern/Builder.hpp"
 
@@ -420,7 +420,8 @@ Smp::IFactory* Simulator::GetFactory(Smp::Uuid uuid) const {
     return nullptr;
 }
 // ..........................................................
-void Simulator::LoadLibrary(Smp::String8 name) {
+void Simulator::LoadLibrary(Smp::String8 name, Smp::LibraryLoadFlag loadFlag) {
+    // TODO take care of loadFlag
     std::string libName = name;
     simph::sys::DLib* fLib = nullptr;
     for (auto lib : _libs) {
@@ -439,7 +440,7 @@ void Simulator::LoadLibrary(Smp::String8 name) {
             _libs.push_back(fLib);
         }
         catch (std::runtime_error ex) {
-            throw simph::kern::ExLibraryNotFound(this, name);
+            throw simph::kern::ExFileNotFound(this, name);
         }
     }
 }
@@ -456,26 +457,24 @@ Smp::Publication::ITypeRegistry* Simulator::GetTypeRegistry() const {
 // ..........................................................
 // TODO moved that to a dedicated connection service.
 void Simulator::connect(std::string inputFieldPath, std::string outputFieldPath) {
-    // TODO handle input/output field inversion
-    auto output_field = dynamic_cast<Smp::IDataflowField*>(GetResolver()->ResolveAbsolute(outputFieldPath.c_str()));
-    auto input_field = dynamic_cast<Smp::IDataflowField*>(GetResolver()->ResolveAbsolute(inputFieldPath.c_str()));
+    auto outputField = dynamic_cast<Smp::IOutputField*>(GetResolver()->ResolveAbsolute(outputFieldPath.c_str()));
+    auto inputField = dynamic_cast<Smp::IField*>(GetResolver()->ResolveAbsolute(inputFieldPath.c_str()));
 
-    if (input_field == nullptr) {
+    if (inputField == nullptr) {
         // TODO add macro in sys module to ease this kind of throw
         // ex: S_THROW(std::runtime_error, "my reason:" << reason)
+        // TODO throw right SMP exception rather than std::runtime error
         std::stringstream ss;
         ss << "Input field not found: " << inputFieldPath;
         throw std::runtime_error(ss.str().c_str());
     }
-    if (output_field == nullptr) {
+    if (outputField == nullptr) {
         std::stringstream ss;
         ss << "Output field not found: " << outputFieldPath;
         throw std::runtime_error(ss.str().c_str());
     }
 
-    // TODO handle connection error
-    // output_field->Connect(input_field);
-    input_field->Connect(output_field);
+    outputField->Connect(inputField);
 }
 // ..........................................................
 void Simulator::schedule(std::string modelName, std::string entryPoint, uint32_t period) {

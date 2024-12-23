@@ -41,7 +41,8 @@ void Request::SetParameterValue(Smp::Int32 index, Smp::AnySimple value) {
     else {
         auto& parameter = _parameters[index];
         if (parameter.value.type != value.type) {
-            throw ExInvalidParameterValue(nullptr, parameter.name.c_str(), value);
+            throw ExInvalidParameterValue(nullptr, _operationName.c_str(), 
+                parameter.name.c_str(), value, parameter.value.type);
         }
         else {
             parameter.value = value;
@@ -61,7 +62,7 @@ void Request::SetReturnValue(Smp::AnySimple value) {
         throw ExVoidOperation(nullptr, _operationName.c_str());
     }
     else if (_returnValue.type != value.type) {
-        throw ExInvalidAnyType(nullptr, value.type, _returnValue.type);
+        throw ExInvalidAnyType(nullptr, value, _returnValue.type);
     }
     // TODO: throw  Smp::InvalidReturnValue
     // (Astyl) what are invalid value cases ?

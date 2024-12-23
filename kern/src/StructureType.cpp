@@ -25,8 +25,15 @@ StructureType::StructureType(Smp::Uuid uuid, TypeRegistry* typeReg, Smp::String8
 StructureType::~StructureType() {}
 // --------------------------------------------------------------------
 // ..........................................................
-void StructureType::AddField(Smp::String8 name, Smp::String8 description, Smp::Uuid uuid, Smp::Int64 offset,
-                             Smp::ViewKind view, Smp::Bool state, Smp::Bool input, Smp::Bool output) {
+void StructureType::AddField(
+                Smp::String8 name,
+                Smp::String8 description,
+                Smp::Uuid uuid,
+                Smp::UInt64 offset,
+                Smp::ViewKind view,
+                Smp::Bool state,
+                Smp::Bool input,
+                Smp::Bool output) {
     Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(uuid));
     if (t != nullptr) {
         struct StructureType::FieldDescr fd;

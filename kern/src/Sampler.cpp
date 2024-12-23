@@ -11,6 +11,7 @@
 #include <fstream>
 #include <iostream>
 #include "Smp/ISimulator.h"
+#include "Smp/Services/ITimeKeeper.h"
 #include "simph/kern/Field.hpp"
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/sys/Callback.hpp"

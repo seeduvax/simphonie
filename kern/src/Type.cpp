@@ -29,9 +29,13 @@ Smp::Uuid Type::GetUuid() const {
     return _uuid;
 }
 // ..........................................................
-void Type::Publish(Smp::Publication::IPublishField* receiver, Smp::String8 name,
-                   Smp::String8 description, void* address,
-                   Smp::ViewKind view, Smp::Bool state, Smp::Bool input,
+Smp::IField* Type::Publish(Smp::Publication::IPublishField* receiver,
+                   Smp::String8 name,
+                   Smp::String8 description,
+                   void* address,
+                   Smp::ViewKind view,
+                   Smp::Bool state,
+                   Smp::Bool input,
                    Smp::Bool output) {
     return receiver->PublishField(name, description, address, _uuid, view, state, input, output);
 }

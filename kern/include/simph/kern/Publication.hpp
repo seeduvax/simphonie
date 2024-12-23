@@ -37,6 +37,7 @@ public:
     Smp::String8 GetName() const override;
     Smp::String8 GetDescription() const override;
     Smp::IObject* GetParent() const override;
+    Smp::IObject* GetChild(Smp::String8 childName) const override;
 
     /**
      * @return the published object hold by this publication
@@ -50,7 +51,6 @@ public:
     void removeChild(Publication* pub);
 
     // Smp::IPublication implementation
-    Smp::Publication::ITypeRegistry* GetTypeRegistry() const override;
     Smp::IField* PublishField(Smp::String8 name, Smp::String8 description, Smp::Char8* address,
                       Smp::ViewKind view = Smp::ViewKind::VK_All, Smp::Bool state = true, Smp::Bool input = false,
                       Smp::Bool output = false) override;
@@ -98,15 +98,26 @@ public:
                                     Smp::ViewKind view = Smp::ViewKind::VK_All, Smp::Bool state = true) override;
     Smp::IPublication* PublishStructure(Smp::String8 name, Smp::String8 description,
                                         Smp::ViewKind view = Smp::ViewKind::VK_All, Smp::Bool state = true) override;
-    Smp::Publication::IPublishOperation* PublishOperation(Smp::String8 name, Smp::String8 description,
-                                                          Smp::ViewKind view = Smp::ViewKind::VK_None) override;
-    Smp::IProperty* PublishProperty(Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid, Smp::AccessKind accessKind,
-                         Smp::ViewKind view = Smp::ViewKind::VK_None) override;
-    void Unpublish() override;
+    Smp::Publication::IPublishOperation* PublishOperation(
+                    Smp::String8 name,
+                    Smp::String8 description,
+                    Smp::ViewKind view = Smp::ViewKind::VK_All) override;
+    void PublishOperation(Smp::IOperation* operation) override;
+    Smp::IProperty* PublishProperty(
+                    Smp::String8 name,
+                    Smp::String8 description,
+                    Smp::Uuid typeUuid,
+                    Smp::AccessKind accessKind,
+                    Smp::ViewKind view = Smp::ViewKind::VK_All) override;
+    void PublishProperty(Smp::IProperty* property) override;
     Smp::IField* GetField(Smp::String8 fullName) const override;
     const Smp::FieldCollection* GetFields() const override;
+    Smp::IProperty* GetProperty(Smp::String8 name) const override;
     const Smp::PropertyCollection* GetProperties() const override;
+    Smp::IOperation* GetOperation(Smp::String8 name) const override;
     const Smp::OperationCollection* GetOperations() const override;
+    Smp::Publication::ITypeRegistry* GetTypeRegistry() const override;
+    void Unpublish() override;
 
     void dump(int level = 0);
 

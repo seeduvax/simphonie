@@ -10,8 +10,8 @@
 
 #include "simph/kern/Scheduler.hpp"
 #include <atomic>
-#include "Smp/IDataflowField.h"
 #include "Smp/ISimulator.h"
+#include "Smp/IOutputField.h"
 #include "abs/profiler.h"
 #include "assert.h"
 #include "simph/kern/Resolver.hpp"
@@ -35,7 +35,7 @@ namespace kern {
 class Scheduler::Schedule {
 public:
     Schedule(const Smp::IEntryPoint* ep, Smp::Duration simTime, Scheduler* owner,
-             const std::vector<Smp::IDataflowField*>& fields, Smp::Duration period = 0, Smp::Int64 repeat = 0)
+             const std::vector<Smp::IOutputField*>& fields, Smp::Duration period = 0, Smp::Int64 repeat = 0)
         : _ep(ep),
           _simTime(simTime),
           _owner(owner),
@@ -98,7 +98,7 @@ private:
     const Smp::IEntryPoint* _ep;
     Smp::Duration _simTime;
     Scheduler* _owner;
-    std::vector<Smp::IDataflowField*> _fields;
+    std::vector<Smp::IOutputField*> _fields;
     Smp::Duration _period;
     Smp::Int64 _repeat;
     Smp::Services::EventId _id;
@@ -172,7 +172,7 @@ Smp::Services::EventId Scheduler::AddImmediateEvent(const Smp::IEntryPoint* entr
 // ..........................................................
 Smp::Services::EventId Scheduler::schedule(const Smp::IEntryPoint* entryPoint, Smp::Duration absoluteSimTime,
                                            Smp::Duration cycleTime, Smp::Int64 repeat) {
-    std::vector<Smp::IDataflowField*> flowFields;
+    std::vector<Smp::IOutputField*> flowFields;
     auto resolver = dynamic_cast<Resolver*>(getSimulator()->GetResolver());
     Smp::IObject* obj = entryPoint->GetParent();
     const Smp::IPublication* pub = resolver->getPublication(obj);
@@ -180,7 +180,7 @@ Smp::Services::EventId Scheduler::schedule(const Smp::IEntryPoint* entryPoint, S
         auto fields = pub->GetFields();
         if (fields != nullptr) {
             for (auto itField = fields->begin(); itField != fields->end(); ++itField) {
-                Smp::IDataflowField* dfField = dynamic_cast<Smp::IDataflowField*>(*itField);
+                Smp::IOutputField* dfField = dynamic_cast<Smp::IOutputField*>(*itField);
                 if (dfField != nullptr && dfField->IsOutput()) {
                     flowFields.push_back(dfField);
                 }

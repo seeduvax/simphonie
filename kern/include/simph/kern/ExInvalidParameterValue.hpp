@@ -10,21 +10,25 @@
 #ifndef __simph_kern_ExInvalidParameterValue_HPP__
 #define __simph_kern_ExInvalidParameterValue_HPP__
 #include "Smp/InvalidParameterValue.h"
-#include "simph/smpdk/Exception.hpp"
+#include "simph/kern/ExInvalidAnyType.hpp"
 
 namespace simph {
 namespace kern {
-using namespace simph::smpdk;
 
 /**
  *
  */
-class ExInvalidParameterValue : public Exception, virtual public Smp::InvalidParameterValue {
+class ExInvalidParameterValue : public ExInvalidAnyType, virtual public Smp::InvalidParameterValue {
 public:
     /**
      * Default constructor.
      */
-    ExInvalidParameterValue(Smp::IObject* sender, Smp::String8 opName, Smp::String8 paramName);
+    ExInvalidParameterValue(
+                Smp::IObject* sender,
+                Smp::String8 opName,
+                Smp::String8 paramName,
+                Smp::AnySimple invalidValue,
+                Smp::PrimitiveTypeKind expected);
     /**
      * Destructor.
      */

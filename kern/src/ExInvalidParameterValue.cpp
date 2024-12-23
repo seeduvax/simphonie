@@ -14,8 +14,14 @@ namespace simph {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidParameterValue::ExInvalidParameterValue(Smp::IObject* sender, Smp::String8 opName, Smp::String8 paramName)
-    : _opName(opName), _paramName(paramName) {
+ExInvalidParameterValue::ExInvalidParameterValue(
+         Smp::IObject* sender,
+         Smp::String8 opName,
+         Smp::String8 paramName,
+         Smp::AnySimple invalidValue,
+         Smp::PrimitiveTypeKind expected):
+            ExInvalidAnyType(sender,invalidValue,expected),
+            _opName(opName), _paramName(paramName) {
     setName("InvalidParameterValue");
     setSender(sender);
     std::ostringstream d;
