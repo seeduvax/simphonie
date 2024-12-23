@@ -11,6 +11,7 @@
 
 #include "simph/kern/EventManager.hpp"
 #include "simph/sys/Logger.hpp"
+#include "Smp/IEntryPoint.h"
 
 namespace test {
 using namespace simph::kern;

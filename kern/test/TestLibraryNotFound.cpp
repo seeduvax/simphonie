@@ -8,7 +8,7 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "simph/kern/ExLibraryNotFound.hpp"
+#include "simph/kern/ExFileNotFound.hpp"
 #include "simph/kern/Simulator.hpp"
 
 namespace test {
@@ -16,8 +16,8 @@ using namespace simph::kern;
 
 // ----------------------------------------------------------
 // test fixture implementation
-class TestLibraryNotFound : public CppUnit::TestFixture {
-    CPPUNIT_TEST_SUITE(TestLibraryNotFound);
+class TestFileNotFound : public CppUnit::TestFixture {
+    CPPUNIT_TEST_SUITE(TestFileNotFound);
     CPPUNIT_TEST(testLoadableLibrary);
     CPPUNIT_TEST(testNotLoadableLibrary);
     CPPUNIT_TEST_SUITE_END();
@@ -50,13 +50,13 @@ public:
                 _sim.LoadLibrary(itr.c_str());
             }
         }
-        catch (simph::kern::ExLibraryNotFound ex) {
+        catch (simph::kern::ExFileNotFound ex) {
             return false;
         }
         return true;
     }
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestLibraryNotFound);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestFileNotFound);
 
 }  // namespace test

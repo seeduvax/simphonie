@@ -15,6 +15,9 @@
 #include "simph/smpdk/Container.hpp"
 #include "simph/smpdk/EntryPoint.hpp"
 #include "simph/sys/Synchro.hpp"
+#include "Smp/Services/ITimeKeeper.h"
+#include "Smp/Services/IScheduler.h"
+#include "Smp/Services/IEventManager.h"
 
 
 namespace test {

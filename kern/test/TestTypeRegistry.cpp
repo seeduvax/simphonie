@@ -9,7 +9,7 @@
  */
 #include <cppunit/extensions/HelperMacros.h>
 #include "Smp/IField.h"
-#include "Smp/IDataflowField.h"
+#include "Smp/IOutputField.h"
 #include "simph/kern/StructureType.hpp"
 #include "simph/kern/TypeRegistry.hpp"
 
