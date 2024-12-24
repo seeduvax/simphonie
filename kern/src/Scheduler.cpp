@@ -249,6 +249,17 @@ Smp::Services::EventId Scheduler::AddZuluTimeEvent(const Smp::IEntryPoint* entry
     return -1;
 }
 // ..........................................................
+Smp::Services::EventId Scheduler::AddRelativeZuluTimeEvent(
+                    const Smp::IEntryPoint* entryPoint,
+                    Smp::DateTime zuluTimedelay,
+                    Smp::Duration cycleTime,
+                    Smp::Int64 repeat) {
+    LOGE(
+        "Scheduler::AddRelativeZuluTimeEvent not implemented!!! (unsure of what shall be really done and what are the use "
+        "cases.")
+    return -1;
+}
+// ..........................................................
 void Scheduler::SetEventSimulationTime(Smp::Services::EventId event, Smp::Duration simulationTime) {
     schedule(event, simulationTime + _timeKeeper->GetSimulationTime());
 }
@@ -309,6 +320,16 @@ inline Smp::Duration Scheduler::getNextScheduledEventTime() const {
 Smp::Duration Scheduler::GetNextScheduledEventTime() const {
     Synchronized(_mutex);
     return getNextScheduledEventTime();
+}
+// ..........................................................
+Smp::Bool Scheduler::IsEventScheduled(Smp::Services::EventId eventId) const {
+    Synchronized(_mutex);
+    for (auto it = _scheduled.begin(); it != _scheduled.end(); ++it) {
+        if ((*it)->getId()==eventId) {
+            return true;
+        }
+    }
+    return false;
 }
 // ..........................................................
 void Scheduler::step() {

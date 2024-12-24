@@ -70,8 +70,14 @@ Smp::String8 Publication::GetDescription() const {
 Smp::IObject* Publication::GetParent() const {
     return _pubObj->GetParent();
 }
+// ..........................................................
+Smp::IObject* Publication::GetChild(Smp::String8 name) const {
+    return _pubObj->GetChild(name);
+}
 // --------------------------------------------------------------------
 // Childs management
+// TODO to be reconsidered since IObject now have GetChild and
+// IComponent have AddChild etc.
 // ..........................................................
 void Publication::addChild(Smp::IObject* pub) {
     Smp::IObject* p = getChild(pub->GetName());
@@ -413,14 +419,26 @@ Smp::IPublication* Publication::PublishStructure(Smp::String8 name, Smp::String8
     return nullptr;
 }
 // ..........................................................
-Smp::Publication::IPublishOperation* Publication::PublishOperation(Smp::String8 name, Smp::String8 description,
-                                                                   Smp::ViewKind view) {
+Smp::Publication::IPublishOperation* Publication::PublishOperation(
+                    Smp::String8 name,
+                    Smp::String8 description,
+                    Smp::ViewKind view) {
+    // TODO
     LOGE("Publication::PublishOperation(...) not implemented yet!")
     return nullptr;
 }
 // ..........................................................
-Smp::IProperty* Publication::PublishProperty(Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
-                                  Smp::AccessKind accessKind, Smp::ViewKind view) {
+void Publication::PublishOperation(Smp::IOperation* operation) {
+    // TODO
+    LOGE("Publication::PublishOperation(...) not implemented yet!")
+}
+// ..........................................................
+Smp::IProperty* Publication::PublishProperty(
+                        Smp::String8 name,
+                        Smp::String8 description,
+                        Smp::Uuid typeUuid,
+                        Smp::AccessKind accessKind,
+                        Smp::ViewKind view) {
     Smp::Publication::IType* type = _typeRegistry->GetType(typeUuid);
     if (type != nullptr) {
         // TODO use this or wrapped obj as parent?
@@ -432,6 +450,20 @@ Smp::IProperty* Publication::PublishProperty(Smp::String8 name, Smp::String8 des
     }
     else {
         throw ExTypeNotRegistered(this, typeUuid);
+    }
+    return nullptr;
+}
+// ..........................................................
+void Publication::PublishProperty(Smp::IProperty* property) {
+    _properties.push_back(property);
+    addChild(property);
+}
+// ..........................................................
+Smp::IProperty* Publication::GetProperty(Smp::String8 name) const {
+    for (auto p: _properties) {
+        if (strcmp(name,p->GetName())==0) {
+            return p;
+        }
     }
     return nullptr;
 }
@@ -448,6 +480,10 @@ const Smp::FieldCollection* Publication::GetFields() const {
 }
 const Smp::PropertyCollection* Publication::GetProperties() const {
     return &_properties;
+}
+Smp::IOperation* Publication::GetOperation(Smp::String8 name) const {
+    // TODO
+    return nullptr;
 }
 const Smp::OperationCollection* Publication::GetOperations() const {
     // TODO

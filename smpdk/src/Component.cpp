@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sstream>
 #include "Smp/ISimulator.h"
+#include "Smp/ISimpleField.h"
 #include "simph/smpdk/ExInvalidComponentState.hpp"
 
 // --------------------------------------------------------------------
@@ -116,6 +117,7 @@ void Component::Disconnect() {
 }
 // ..........................................................
 Smp::IField* Component::GetField(Smp::String8 fullName) const {
+    // TODO enable dig structure and arrays when fullName is a path.
     return _fields.at(fullName);
 }
 // ..........................................................
@@ -125,6 +127,65 @@ const Smp::FieldCollection* Component::GetFields() const {
 // ..........................................................
 const Smp::Uuid& Component::GetUuid() const {
     return _uuid;
+}
+// ..........................................................
+Smp::AnySimple Component::GetSimpleValue(Smp::String8 fullName) const {
+    // TODO such method should be called only from scheduler thread
+    //  or any thread only when the simulator is not running.
+    //  Or schedule a request to the scheduler and wait for result...
+    auto f=dynamic_cast<Smp::ISimpleField*>(GetField(fullName));
+    if (f!=nullptr) {
+        return f->GetValue();
+    }
+    // TODO throw InvalidFieldName when found field is not a Simple field.
+throw std::runtime_error("TODO InvalifFieldName exception");
+}
+// ..........................................................
+void Component::SetSimpleValue(Smp::String8 fullName, Smp::AnySimple value) {
+    auto f=dynamic_cast<Smp::ISimpleField*>(GetField(fullName));
+    if (f!=nullptr) {
+        f->SetValue(value);
+    }
+}
+// ..........................................................
+void Component::GetSimpleArrayValue(
+        Smp::String8 fullName,
+        Smp::UInt64 lenght,
+        Smp::AnySimple* values,
+        Smp::UInt64 startIUndex) const {
+throw std::runtime_error("TODO Component::GetSimpleArrayValue not implemented yet");
+}
+// ..........................................................
+void Component::SetSimpleArrayValue(
+        Smp::String8 fullName,
+        Smp::UInt64 lenght,
+        Smp::AnySimple* values,
+        Smp::UInt64 startIUndex) {
+throw std::runtime_error("TODO Component::GetSimpleArrayValue not implemented yet");
+}
+// ..........................................................
+Smp::Bool Component::AddChild(
+        Smp::IObject* child,
+        Smp::ICollectionBase* collection) {
+    // TODO Composite/Component class hierachy is a bit strange.
+    // Not understood yet what should be the default behavior at this level
+    return false;
+}
+// ..........................................................
+Smp::Bool Component::RemoveChild(
+        Smp::IObject* child,
+        Smp::ICollectionBase* collection) {
+    // TODO Composite/Component class hierachy is a bit strange.
+    // Not understood yet what should be the default behavior at this level
+    return false;
+}
+// ..........................................................
+Smp::IObject* Component::IsChildInCollection(
+        Smp::String8 child,
+        const Smp::ICollectionBase* collection) {
+    // TODO Composite/Component class hierachy is a bit strange.
+    // Not understood yet what should be the default behavior at this level
+    return nullptr;
 }
 
 }  // namespace smpdk

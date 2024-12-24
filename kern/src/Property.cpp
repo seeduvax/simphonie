@@ -39,6 +39,10 @@ Smp::AnySimple Property::GetValue() const {
 void Property::SetValue(Smp::AnySimple value) {
     _value = value;
 }
+// ..........................................................
+Smp::PrimitiveTypeKind Property::GetPrimitiveTypeKind() const {
+    return _value.GetType();
+}
 
 }  // namespace kern
 }  // namespace simph
