@@ -9,6 +9,8 @@
  */
 #include "simph/mt/SyncSubSim.hpp"
 #include "Smp/IPublication.h"
+#include "Smp/Services/IEventManager.h"
+#include "Smp/Services/IScheduler.h"
 #include "simph/kern/Simulator.hpp"
 #include "simph/kern/EntryPoint.hpp"
 #include "simph/smpdk/Container.hpp"

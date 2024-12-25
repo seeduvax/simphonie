@@ -14,6 +14,7 @@
 #include "Smp/IService.h"
 #include "Smp/ISimulator.h"
 #include "Smp/IModel.h"
+#include "Smp/Services/EventId.h"
 #include "simph/smpdk/Collection.hpp"
 #include "simph/smpdk/Component.hpp"
 #include "simph/smpdk/Composite.hpp"
