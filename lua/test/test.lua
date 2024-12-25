@@ -2,7 +2,7 @@ s=require "simph_lua"
 sim=s.Simphonie.Simulator.new("luaSim")
 sim:Run()
 print("Plop: "..sim.name)
-sim:LoadLibrary("simph_umdl")
+sim:LoadLibrary("simph_umdl",0)
 tk=sim:GetTimeKeeper()
 print("Plop: "..tk:GetSimulationTime())
 print("Plop: "..tk:GetState())
