@@ -8,8 +8,8 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "Smp/IField.h"
-#include "simph/kern/Field.hpp"
+#include "Smp/IOutputField.h"
+#include "Smp/ISimpleField.h"
 #include "simph/kern/Resolver.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/Simulator.hpp"
@@ -83,11 +83,11 @@ public:
         sim.Configure();
         sim.Connect();
 
-        auto input = dynamic_cast<Field*>(sim.GetResolver()->ResolveAbsolute("increment.input"));
+        auto input = dynamic_cast<Smp::ISimpleField*>(sim.GetResolver()->ResolveAbsolute("increment.input"));
         CPPUNIT_ASSERT(input != nullptr);
-        auto output = dynamic_cast<Field*>(sim.GetResolver()->ResolveAbsolute("increment.output"));
+        auto output = dynamic_cast<Smp::IOutputField*>(sim.GetResolver()->ResolveAbsolute("increment.output"));
         CPPUNIT_ASSERT(output != nullptr);
-        auto step = dynamic_cast<EntryPoint*>(sim.GetResolver()->ResolveAbsolute("increment.step"));
+        auto step = dynamic_cast<Smp::IEntryPoint*>(sim.GetResolver()->ResolveAbsolute("increment.step"));
         CPPUNIT_ASSERT(step != nullptr);
 
         output->Connect(input);
@@ -101,7 +101,7 @@ public:
         simCtl.wait();
 
         CPPUNIT_ASSERT_EQUAL((double)11, input->GetValue().value.float64Value);
-        CPPUNIT_ASSERT_EQUAL((double)11, output->GetValue().value.float64Value);
+        CPPUNIT_ASSERT_EQUAL((double)11, dynamic_cast<Smp::ISimpleField*>(output)->GetValue().value.float64Value);
     }
 };
 

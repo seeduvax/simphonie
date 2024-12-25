@@ -9,7 +9,7 @@
  */
 #include <cppunit/extensions/HelperMacros.h>
 #include "Smp/IField.h"
-#include "Smp/IDataflowField.h"
+#include "Smp/IOutputField.h"
 #include "simph/kern/Resolver.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/Simulator.hpp"
@@ -47,9 +47,9 @@ public:
         sim.Publish();
         sim.Configure();
         sim.Connect();
-        auto f1 = dynamic_cast<Smp::IDataflowField*>(sim.GetResolver()->ResolveRelative("out", mdl));
+        auto f1 = dynamic_cast<Smp::IOutputField*>(sim.GetResolver()->ResolveRelative("out", mdl));
         CPPUNIT_ASSERT(f1 != nullptr);
-        auto f2 = dynamic_cast<Smp::IDataflowField*>(sim.GetResolver()->ResolveRelative("in", log));
+        auto f2 = dynamic_cast<Smp::IOutputField*>(sim.GetResolver()->ResolveRelative("in", log));
         f1->Connect(f2);
         CPPUNIT_ASSERT(f1 != nullptr);
         dynamic_cast<simph::kern::Resolver*>(sim.GetResolver())->dump();

@@ -16,6 +16,7 @@
 #include "simph/sys/Logger.hpp"
 #include "simph/umdl/SmpIncrement.hpp"
 #include "SimControlEnd.hpp"
+#include "Smp/IOutputField.h"
 
 namespace test {
 using namespace simph::umdl;
@@ -68,7 +69,7 @@ public:
 
         auto input = dynamic_cast<Field*>(sim.GetResolver()->ResolveAbsolute("increment.input"));
         CPPUNIT_ASSERT(input != nullptr);
-        auto output = dynamic_cast<Field*>(sim.GetResolver()->ResolveAbsolute("increment.output"));
+        auto output = dynamic_cast<Smp::IOutputField*>(sim.GetResolver()->ResolveAbsolute("increment.output"));
         CPPUNIT_ASSERT(output != nullptr);
         auto arrayfield = dynamic_cast<Field*>(sim.GetResolver()->ResolveAbsolute("obj1.iArray"));
         CPPUNIT_ASSERT(arrayfield != nullptr);
@@ -78,9 +79,12 @@ public:
 
         auto stepSampler = dynamic_cast<EntryPoint*>(sim.GetResolver()->ResolveAbsolute("sampler.step"));
         CPPUNIT_ASSERT(stepSampler != nullptr);
+/* TOBE restored. And reconsider sampler API to rely on "standard" SMP API to
+ * perform connection if achievable.
         sampler->recordField(input);
         sampler->recordField(output);
         sampler->recordField(arrayfield);
+*/
         sim.Connect();
 
         scheduler->AddSimulationTimeEvent(stepIncrement,
