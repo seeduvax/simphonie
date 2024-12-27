@@ -12,6 +12,7 @@
 #include <cstring>
 #include <sstream>
 #include "Smp/IForcibleField.h"
+#include "Smp/IOutputField.h"
 #include "Smp/ISimpleArrayField.h"
 #include "Smp/IArrayField.h"
 #include "Smp/ISimpleField.h"
@@ -21,7 +22,6 @@
 
 namespace simph {
 namespace kern {
-using namespace simph::smpdk;
 /**
  *
  */
@@ -51,6 +51,15 @@ public:
     Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
     Smp::AnySimple GetValue() const override;
     void SetValue(Smp::AnySimple value) override;
+    template <typename T>
+    static IField* Create(  Smp::String8 name,
+                            Smp::String8 description,
+                            Smp::ViewKind viewKind,
+                            void* address,
+                            Smp::Bool isState,
+                            Smp::Bool isInput,
+                            Smp::Bool isOutput,
+                            Smp::IObject* parent);
 
 protected:
     inline void setType(Smp::Publication::IType* type) {
@@ -89,7 +98,7 @@ public:
     Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
     Smp::AnySimple GetValue() const override;
 
-    void SetValue(Smp::AnySimple value) {
+    void SetValue(Smp::AnySimple value) override {
         *_tData = value;
     }
     void initType();
@@ -97,6 +106,81 @@ public:
 private:
     T* _tData;
 };
+template <typename T>
+class TOutputField : public TField<T>, virtual public Smp::IOutputField {
+public:
+    TOutputField(Smp::String8 name,
+                Smp::String8 description,
+                Smp::ViewKind viewKind,
+                T* address,
+                Smp::Bool isState,
+                Smp::Bool isInput,
+                Smp::Bool isOutput,
+                Smp::IObject* parent
+                ):  TField<T>(name, description, viewKind, address,
+                         isState, isInput, isOutput, parent),
+                    _targets("targets","connected fields",this) {
+    } 
+    virtual ~TOutputField() {
+    }
+
+    // Smp::IOutputField implementation
+    void Connect(Smp::IField* target) override {
+        auto sf=dynamic_cast<Smp::ISimpleField*>(target);
+        if (sf!=nullptr && !_targets.contain(sf)) {
+            _targets.push_back(sf);
+        }
+    }
+    void Disconnect(Smp::IField* target) override {
+        auto sf=dynamic_cast<Smp::ISimpleField*>(target);
+        if (sf!=nullptr && _targets.contain(sf)) {
+            _targets.remove(sf);
+        }
+    }
+    void Push() override {
+        for (auto target: _targets) {
+            target->SetValue(this->GetValue());
+        }
+    }
+    const Smp::FieldCollection* GetInputFields() const {
+        return dynamic_cast<const Smp::FieldCollection*>(&_targets);
+    }
+    Smp::Bool IsAutomatic() const {
+        // The runtime and scheduler shall handle data propagation when needed,
+        // i.e when the field owner changed. This should be when one of its
+        // entry point is executed.
+        // So since, the Push is not called on SetValue(), it is considered
+        // here not being automatic. Rational of this decision: Field owner
+        // would probably update the data directly without using SetValue since
+        // it onws the data wrapped in this field.
+        return false;
+    }
+private:
+    ::simph::smpdk::Collection<Smp::ISimpleField> _targets;
+    
+};
+
+template <typename T>
+Smp::IField* Field::Create(
+                            Smp::String8 name,
+                            Smp::String8 description,
+                            Smp::ViewKind viewKind,
+                            void* address,
+                            Smp::Bool isState,
+                            Smp::Bool isInput,
+                            Smp::Bool isOutput,
+                            Smp::IObject* parent) {
+    if (isOutput) {
+        return new TOutputField<T>(
+                        name, description, viewKind, static_cast<T*>(address),
+                        isState, isInput, isOutput, parent);
+    }
+    else {
+        return new TField<T>(
+                        name, description, viewKind, static_cast<T*>(address),
+                        isState, isInput, isOutput, parent);
+    }
+}
 
 class StructureField : public Field {
 public:

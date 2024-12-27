@@ -105,7 +105,7 @@ Smp::Publication::ITypeRegistry* Publication::GetTypeRegistry() const {
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Char8* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=new TField<Smp::Char8>(name, description, view, address, state, input, output, getPubObj());
+    auto f=Field::Create<Smp::Char8>(name, description, view, address, state, input, output, getPubObj());
     addField(f);
     return f;
 }

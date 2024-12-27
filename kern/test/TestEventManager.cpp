@@ -49,7 +49,7 @@ public:
     void tearDown() {}
 
     void testEventManager() {
-        EventManager evMgr("", "", nullptr);
+        EventManager evMgr("EventManager", "", nullptr);
         Smp::Services::EventId evA = evMgr.QueryEventId("A");
         Smp::Services::EventId evB = evMgr.QueryEventId("B");
         Smp::Services::EventId evAbis = evMgr.QueryEventId("A");
