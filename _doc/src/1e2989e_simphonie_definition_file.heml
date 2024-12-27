@@ -1,0 +1,74 @@
+{?set %encoding=utf-8 %line=wrap}
+{document
+  {title Simphonie definition file}
+  {reference 1e2889e}
+  {author Sebastien Devaux}
+  {copyright %year=2019-2025 %holder=Sebastien Devaux}
+  {keywords simulation, simulation modelling platform, ECSS-E-ST-40-07C, kernel}
+  {history
+    {edition %version=1 %date=2024-12-27 %%Document creation}
+  }
+  {section %title=Introduction
+    {section %title=SMP complements
+{req %id=simph.smpex.schedev.1
+The scheduler shall emit an event named {kw Scheduler_PreEventExecute} before
+executing the next scheduled entry point.
+}
+{req %id=simph.smpex.schedev.2
+The scheduler shall emit an event named {kw Scheduler_PostEventExecute} just
+after the execution of each schduled entry point is completed. 
+}
+    }
+  }
+  {section %title=Design
+    {section %title=Scheduler / Time Keeper coordination
+The scheduler / time keeper coordination relies on a specific event that is not
+defined in the SMP standard: {kw Scheduler_PreEventExecute} shall be registered
+in the event manager sometime during the simulator building phase. Then the
+follwing policy shall be applied to let the time keeper and scheduler fulfil
+each its own duty as defined in the SMP standard while being able to remain
+consistent with each other:
+  - the time keeper subscribes the {kw Scheduler_PreEventExecute} to trigger its
+    own simulation time update process according the next scheduled event 
+    simulation time.
+  - the scheduler shall emit the {kw Scheduler_PreEventExecute} before running
+    each scheduled entry point.  
+
+{fig %src=SchedTimeKeeperEvent_seq.png %title=Scheduler / Time keeper coordination}
+{#
+@startuml SchedTimeKeeperEvent_seq.png
+participant Scheduler
+participant EventManager
+participant TimeKeeper
+
+group simulator building phase
+TimeKeeper --> EventManager++: Subscribe(Scheduler_PreEventExecute, tickEntryPoint)
+return
+end
+
+loop scheduler thread
+Scheduler --> EventManager++: Emit(Scheduler_PreEventExecute)
+EventManager --> TimeKeeper++: tickEntryPoint()
+TimeKeeper --> Scheduler++: GetNextEventSimulatinoTime()
+return scheduledEventTime
+alt scheduledEventTime > current simulation time
+TimeKeeper --> TimeKeeper: update simulation time
+return
+end
+return
+return
+
+group scheduled entry point execution
+end
+Scheduler --> EventManager++: Emit(Scheduler_PostEventExecute)
+return
+end
+@enduml
+#}
+
+Any alternate scheduler or time keeper service implementation may be used as
+soon the {kw Scheduler_PreEventExecute} event is handled appling the policy
+defined above in this section. 
+    }
+  }
+}
