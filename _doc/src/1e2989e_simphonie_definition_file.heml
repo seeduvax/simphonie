@@ -42,17 +42,17 @@ participant EventManager
 participant TimeKeeper
 
 group simulator building phase
-TimeKeeper --> EventManager++: Subscribe(Scheduler_PreEventExecute, tickEntryPoint)
+TimeKeeper -> EventManager++: Subscribe(Scheduler_PreEventExecute, tickEntryPoint)
 return
 end
 
 loop scheduler thread
-Scheduler --> EventManager++: Emit(Scheduler_PreEventExecute)
-EventManager --> TimeKeeper++: tickEntryPoint()
-TimeKeeper --> Scheduler++: GetNextEventSimulatinoTime()
+Scheduler -> EventManager++: Emit(Scheduler_PreEventExecute)
+EventManager -> TimeKeeper++: tickEntryPoint()
+TimeKeeper -> Scheduler++: GetNextEventSimulatinoTime()
 return scheduledEventTime
 alt scheduledEventTime > current simulation time
-TimeKeeper --> TimeKeeper: update simulation time
+TimeKeeper -> TimeKeeper: update simulation time
 return
 end
 return
@@ -60,7 +60,7 @@ return
 
 group scheduled entry point execution
 end
-Scheduler --> EventManager++: Emit(Scheduler_PostEventExecute)
+Scheduler -> EventManager++: Emit(Scheduler_PostEventExecute)
 return
 end
 @enduml
@@ -69,6 +69,97 @@ end
 Any alternate scheduler or time keeper service implementation may be used as
 soon the {kw Scheduler_PreEventExecute} event is handled appling the policy
 defined above in this section. 
+    }
+    {section %title=Simulation start / stop control
+According to the SMP standard, the simulator shall emit events when starting and
+stopping the simulation:
+  - on simulation start request, if the current state allows it:
+    - first {kw SMP_LeaveStandby}
+    - then {kw SMP_EnterExecuting}
+  - on simulation stop request, if current state allows it:
+    - first {kw SMP_LeaveExecuting}
+    - then {kw SMP_EnterStandby}
+
+On start request, the simulator preforms the follwing actions:
+  - schedule a start entry point immediately (to be first to execute).
+  - emit the {kw SMP_LeaveStandby} event.
+  - emit the {kw SMP_EnterExecuting} event.
+  - wait for the start process completion.
+
+The start entry point shall:
+  - save the current thread identifier. Since it is executed by the scheduler 
+    thread, this will be used on stop to detect the Hold method is called by
+    a scheduled entry point, or externally.
+  - notify the Start caller thread to release it.
+
+The Simulator's Hold method shall stop the simulation according its boolean
+argument:
+  - when true: stop shall be immediate, this as soon the currently executed
+    scheduled entry point is completed.
+  - when false: stop shall be delayed when all entry point scheduled for the 
+    current simulation time are completed. 
+
+To do so, the simulator on Hold request, according the boolean
+argument, schedules its own stop processing entry point:
+  - immediatly (being the first entry point in the schedule list),
+    when argument is true.
+  - at simulation time now (being the last for the current simulation time in
+    the schedule list), when the Hold argument is false.
+
+Once the stop entry point is scheduled, the Hold method shall wait until the stop
+entry point is completed (if not triggered by the scheduler thread itself),
+then it emits the {kw SMP_EnterStandby} event.
+
+The stop processing entry point shall emit the {kw SMP_LeaveExecuting} event, 
+then it shall release the Hold caller thread and the simulator shall then switch
+to standby state emitting the related event.
+
+The scheduler shall:
+  - subscribe to the {kw SMP_EnterExecuting} event to start its own scheduling
+    thread.
+  - subscribe to the {kw SMP_LeaveExecuting} event to change its running status
+    and end itw own scheduling thread once the currently executing entry point
+    is completed.
+
+{fig %src=SimStartStop_seq.png %title=Scheduler / Time keeper coordination}
+{#
+@startuml SimStartStop_seq.png
+participant Simulator
+participant EventManager
+participant Scheduler
+Scheduler -> EventManager++: Subscribe(SMP_EnterExecuting, Scheduler::startEP)
+return
+Scheduler -> EventManager++: Subscribe(SMP_LeaveExecuting, Scheduler::stopEP)
+return 
+[--> Simulator++: Start
+Simulator -> Scheduler++: AddImmediateEvent(Simulator::startEP)
+return
+Simulator -> EventManager++: Emit(SMP_LeaveStandby)
+return
+Simulator -> EventManager++: Emit(SMP_EnterExecuting)
+EventManager -> Scheduler++: startEP
+Scheduler -> SchedulerThread**: create
+return
+return
+SchedulerThread -[#red]> Simulator++: startEP
+return
+return
+
+[--> Simulator++: Hold(immediate)
+Simulator -> Scheduler++: immediate?AddImmediat:AddSimulationTime(Simulator::stopEP)
+return
+SchedulerThread -[#red]> Simulator++: stopEP
+ Simulator -[#red]> EventManager++: Emit(SMP_LeaveExecuting)
+  EventManager -[#red]> Scheduler++: stopEP
+  return
+ return
+ Simulator -[#red]> EventManager++: Emit(SMP_EnterStandby) 
+ return
+return
+Scheduler -> SchedulerThread!!
+return
+@enduml
+#}
     }
   }
 }
