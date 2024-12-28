@@ -49,6 +49,10 @@ public:
         return std::this_thread::get_id() == _th->get_id();
     }
 
+    inline static std::thread::id GetCurrentThreadId() {
+        return std::this_thread::get_id();
+    }
+
 private:
     Runnable* _toRun;
     std::string _name;

@@ -13,6 +13,7 @@
 #include "Smp/IEntryPoint.h"
 #include "simph/smpdk/Object.hpp"
 #include "simph/sys/Runnable.hpp"
+#include "simph/sys/Callback.hpp"
 #include <memory>
 
 namespace simph {
@@ -29,6 +30,17 @@ public:
 
     inline void Execute() const override {
         _runnable->run();
+    }
+    template <typename _Callable, typename... _Args>  
+    static Smp::IEntryPoint* Create(
+                                Smp::String8 name,
+                                Smp::String8 descr,
+                                Smp::IObject* parent,
+                                _Callable&& func,
+                                _Args&&... args) {
+        return new EntryPoint(
+                simph::sys::Callback::create(std::forward<_Callable>(func),std::forward<_Args>(args)...),
+                name,descr,parent);
     }
 
 private:

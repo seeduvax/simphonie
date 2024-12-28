@@ -15,5 +15,7 @@
 #define Synchronized(mutex_var) std::unique_lock<std::mutex> _synchronized_lock(mutex_var);
 #define MonitorWaitUntil(cond_var, timeout) cond_var.wait_until(_synchronized_lock, timeout);
 #define MonitorWait(cond_var) cond_var.wait(_synchronized_lock);
+#define MonitorNotify(cond_var) cond_var.notify();
+#define MonitorNotifyAll(cond_var) cond_var.notify_all();
 
 #endif  // __simph_sys_Synchro_HPP__

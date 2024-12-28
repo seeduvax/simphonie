@@ -14,6 +14,9 @@
 #include "simph/smpdk/Composite.hpp"
 #include "simph/sys/DLib.hpp"
 #include "Smp/Services/IResolver.h"
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 namespace simph {
 namespace kern {
@@ -128,6 +131,15 @@ private:
     void doConnect(Smp::IComponent* comp);
     void setState(Smp::SimulatorStateKind newState);
     bool checkState(Smp::String8 opName, Smp::SimulatorStateKind expState);
+    void startEP();
+    Smp::IEntryPoint* _startEP=nullptr;
+    void stopEP();
+    Smp::IEntryPoint* _stopEP=nullptr;
+    std::thread::id _schedulerThreadId;
+    // for stop simulation synchro handling.
+    std::mutex _mutex;
+    std::condition_variable _monitor;
+    bool _waitingStop=false;
 };
 
 }  // namespace kern

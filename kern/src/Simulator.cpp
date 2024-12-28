@@ -18,6 +18,7 @@
 #include "simph/kern/TimeKeeper.hpp"
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/smpdk/ExInvalidComponentState.hpp"
+#include "simph/sys/Synchro.hpp"
 
 #include "Smp/IOutputField.h"
 
@@ -44,6 +45,9 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
     TypeRegistry* tr = new TypeRegistry("TypeRegistry", "Type registry service", this);
     _typeRegistry = tr;
 
+    _startEP = EntryPoint::Create("start","",this,&Simulator::startEP,this);
+    _stopEP = EntryPoint::Create("stop","",this,&Simulator::stopEP,this);
+
     _services->AddComponent(tr);
     _resolver = new Resolver("Resolver", "Objects registry and resolver", this);
     _services->AddComponent(_logger);
@@ -53,6 +57,7 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
     _services->AddComponent(_linkRegistry);
     _services->AddComponent(_resolver);
     setState(Smp::SimulatorStateKind::SSK_Building);
+
 }
 // ..........................................................
 Simulator::~Simulator() {
@@ -274,6 +279,7 @@ void Simulator::Connect() {
 // ..........................................................
 void Simulator::Run() {
     if (checkState("Run", Smp::SimulatorStateKind::SSK_Standby)) {
+        _scheduler->AddImmediateEvent(_startEP);
         setState(Smp::SimulatorStateKind::SSK_Executing);
     }
 }
@@ -282,7 +288,23 @@ void Simulator::Hold(Smp::Bool immediate) {
     // TODO manage immediate...
     // But not sure it will be so easy for a multi-threaded scheduler...
     if (checkState("Hold", Smp::SimulatorStateKind::SSK_Executing)) {
-        setState(Smp::SimulatorStateKind::SSK_Standby);
+        if (immediate) {
+            _scheduler->AddImmediateEvent(_stopEP);
+        }
+        else {
+            // schedule 1ns after now to ensure all event scheduled at now
+            // that may also schedule events at now are executed before closing.
+            _scheduler->AddSimulationTimeEvent(_stopEP,1);
+        }
+        if (simph::sys::Thread::GetCurrentThreadId()!=_schedulerThreadId) {
+            // Wait for stop process completion only when caller thread is
+            // not the scheduler thread to not hang the scheduler itself.
+            Synchronized(_mutex)
+            _waitingStop=true;
+            while (_waitingStop) {
+                MonitorWait(_monitor);
+            }    
+        }
     }
 }
 // ..........................................................
@@ -527,5 +549,26 @@ Smp::IComponent* Simulator::createSmpModel(Smp::String8 typeName, Smp::String8 n
     return res;
 }
 
+// ..........................................................
+void Simulator::startEP() {
+    _schedulerThreadId=simph::sys::Thread::GetCurrentThreadId();
+}
+// ..........................................................
+void Simulator::stopEP() {
+    setState(Smp::SimulatorStateKind::SSK_Standby);
+    bool shallNotify=false;
+    {
+        Synchronized(_mutex);
+        if (_waitingStop) {
+            _waitingStop=false;
+            shallNotify=true;
+        }
+    }
+    if (shallNotify) {
+        MonitorNotifyAll(_monitor);
+    }
+}
+
+// ..........................................................
 }  // namespace kern
 }  // namespace simph
