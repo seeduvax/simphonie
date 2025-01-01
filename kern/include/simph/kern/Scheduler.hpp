@@ -68,16 +68,6 @@ public:
     Smp::Duration GetNextScheduledEventTime() const override;
     Smp::Bool IsEventScheduled(Smp::Services::EventId eventId) const override;
 
-    /**
-     * SMP Enter Executing event entry point.
-     * Starts the scheduler threads if not yet running.
-     */ 
-    void epEnterExecuting();
-    /**
-     * SMP Leave Executing event entry point.
-     * If running, request stop, and join the scheduler thread.
-     */
-    void epLeaveExecuting();
 
     /**
      * Run next schedule event.
@@ -145,6 +135,18 @@ private:
     void schedule(Schedule* s);
     // For internal use when mutex is already owned.
     inline Smp::Duration getNextScheduledEventTime() const;
+    /**
+     * SMP Enter Executing event entry point.
+     * Starts the scheduler threads if not yet running.
+     */ 
+    void epEnterExecuting();
+    Smp::IEntryPoint* _epEnterExecuting;
+    /**
+     * SMP Leave Executing event entry point.
+     * If running, request stop, and join the scheduler thread.
+     */
+    void epLeaveExecuting();
+    Smp::IEntryPoint* _epLeaveExecuting;
 };
 
 }  // namespace kern

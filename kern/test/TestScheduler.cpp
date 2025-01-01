@@ -33,6 +33,10 @@ class TestScheduler : public CppUnit::TestFixture {
 private:
     Simulator* _sim;
     Scheduler* _scheduler;
+    std::mutex _mutex;
+    std::condition_variable _monitor;
+    Smp::IEntryPoint* _epLeaveExecuting;
+    bool _run=false;
 
 public:
     void setUp() {
@@ -41,10 +45,37 @@ public:
         _sim->Publish();
         _sim->Configure();
         _sim->Connect();
+        _epLeaveExecuting=EntryPoint::Create("leaveExecution","",nullptr,
+                &TestScheduler::epLeaveExecuting,this);
+        _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId,_epLeaveExecuting);
     }
 
     void tearDown() {
+        delete _epLeaveExecuting;
         delete _sim;
+    }
+
+    void simStart() {
+        {
+            Synchronized(_mutex);
+            _run=true;
+        }
+        _sim->Run();
+    }
+
+    void waitSimEnd() {
+        Synchronized(_mutex);
+        while (_run!=false) {
+            MonitorWait(_monitor);
+        }
+    }
+
+    void epLeaveExecuting() {
+        {
+            Synchronized(_mutex);
+            _run=false;
+        }
+        MonitorNotifyAll(_monitor);
     }
 
     void callback(std::vector<Smp::Duration>* vv) {
@@ -53,7 +84,7 @@ public:
         TRACE("" << st);
         if (vv->size()>=4) {
             // emulate simulator stop after 4 iterations
-            _scheduler->epLeaveExecuting();
+            _sim->Hold(true);
         }
     }
 
@@ -66,7 +97,8 @@ public:
         _scheduler->AddSimulationTimeEvent(ep.get(), 30);
         _scheduler->AddSimulationTimeEvent(ep.get(), 20);
         _scheduler->AddSimulationTimeEvent(ep.get(), 20);
-        _scheduler->run();
+        simStart();
+        waitSimEnd();
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)10, scheduledTime[0]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)20, scheduledTime[1]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)20, scheduledTime[2]);
@@ -96,7 +128,8 @@ public:
         _sim->GetEventManager()->Subscribe(
                 Smp::Services::IEventManager::SMP_PostSimTimeChangeId,
                 epf.get());
-        _scheduler->run();
+        simStart();
+        waitSimEnd();
 
         CPPUNIT_ASSERT_EQUAL(4,(int)scheduledTime.size());
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)10, scheduledTime[0]);

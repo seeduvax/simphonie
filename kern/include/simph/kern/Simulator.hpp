@@ -131,10 +131,23 @@ private:
     void doConnect(Smp::IComponent* comp);
     void setState(Smp::SimulatorStateKind newState);
     bool checkState(Smp::String8 opName, Smp::SimulatorStateKind expState);
-    void startEP();
-    Smp::IEntryPoint* _startEP=nullptr;
-    void stopEP();
-    Smp::IEntryPoint* _stopEP=nullptr;
+    /**
+     * Entry point - start the simulation.
+     * On Run(), The simulator schedule itself this entry point once to the
+     * scheduler in order to have some action performed from the scheduler
+     * thrend on simulation start.
+     */  
+    void epStart();
+    Smp::IEntryPoint* _epStart=nullptr;
+    /**
+     * Entry Point - stop the simulation.
+     * On Hold(), the simulator schedule itself this entry point, immediate or
+     * with smallest delay in conformance with the immeadiate argument of Hold
+     * to let the simulation end be triggered at the right time by the scheduler
+     * thread.
+     */
+    void epStop();
+    Smp::IEntryPoint* _epStop=nullptr;
     std::thread::id _schedulerThreadId;
     // for stop simulation synchro handling.
     std::mutex _mutex;

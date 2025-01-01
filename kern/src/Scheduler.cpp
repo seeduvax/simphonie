@@ -17,8 +17,6 @@
 #include "simph/kern/Resolver.hpp"
 #include "simph/sys/Logger.hpp"
 
-#define EP_NAME_ENTER_EXECUTE "enterExecute"
-#define EP_NAME_LEAVE_EXECUTE "leaveExecute"
 #define EV_NAME_PRE_EVENT_EXECUTE "Scheduler_PreEventExecute"
 #define EV_NAME_POST_EVENT_EXECUTE "Scheduler_PostEventExecute"
 #define DURATION_MAX INT64_MAX
@@ -114,10 +112,10 @@ Scheduler::Scheduler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
       _th(),
       _currentSchedule(nullptr),
       _scheduled(compareSchedule) {
-    addEP(EP_NAME_ENTER_EXECUTE,"simulation enter execute event entry point", 
-                                &Scheduler::epEnterExecuting,this);
-    addEP(EP_NAME_LEAVE_EXECUTE,"simulation leave execute event entry point",
-                                &Scheduler::epLeaveExecuting,this);
+    _epEnterExecuting=EntryPoint::Create("enterExecuting","simulation enter execute event entry point", 
+                                this, &Scheduler::epEnterExecuting, this);
+    _epLeaveExecuting=EntryPoint::Create("leaveExecuting","simulation leave execute event entry point",
+                                this, &Scheduler::epLeaveExecuting, this);
 }
 // ..........................................................
 Scheduler::~Scheduler() {
@@ -127,6 +125,8 @@ Scheduler::~Scheduler() {
     for (auto s : _scheduled) {
         delete s;
     }
+    delete _epEnterExecuting;
+    delete _epLeaveExecuting;
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -158,9 +158,9 @@ void Scheduler::connect() {
     _timeKeeper = getSimulator()->GetTimeKeeper();
     _eventMgr = getSimulator()->GetEventManager();
     _eventMgr->Subscribe(Smp::Services::IEventManager::SMP_EnterExecutingId,
-            GetEntryPoint(EP_NAME_ENTER_EXECUTE));
+            _epEnterExecuting);
     _eventMgr->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId,
-            GetEntryPoint(EP_NAME_LEAVE_EXECUTE));
+            _epLeaveExecuting);
     _preEventExecuteId=_eventMgr->QueryEventId(EV_NAME_PRE_EVENT_EXECUTE);
     _postEventExecuteId=_eventMgr->QueryEventId(EV_NAME_POST_EVENT_EXECUTE);
 }

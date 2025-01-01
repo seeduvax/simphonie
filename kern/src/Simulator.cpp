@@ -45,8 +45,8 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
     TypeRegistry* tr = new TypeRegistry("TypeRegistry", "Type registry service", this);
     _typeRegistry = tr;
 
-    _startEP = EntryPoint::Create("start","",this,&Simulator::startEP,this);
-    _stopEP = EntryPoint::Create("stop","",this,&Simulator::stopEP,this);
+    _epStart = EntryPoint::Create("start","",this,&Simulator::epStart,this);
+    _epStop = EntryPoint::Create("stop","",this,&Simulator::epStop,this);
 
     _services->AddComponent(tr);
     _resolver = new Resolver("Resolver", "Objects registry and resolver", this);
@@ -74,6 +74,8 @@ Simulator::~Simulator() {
         }
         delete lib;
     }
+    delete _epStart;
+    delete _epStop;
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -279,7 +281,7 @@ void Simulator::Connect() {
 // ..........................................................
 void Simulator::Run() {
     if (checkState("Run", Smp::SimulatorStateKind::SSK_Standby)) {
-        _scheduler->AddImmediateEvent(_startEP);
+        _scheduler->AddImmediateEvent(_epStart);
         setState(Smp::SimulatorStateKind::SSK_Executing);
     }
 }
@@ -289,12 +291,12 @@ void Simulator::Hold(Smp::Bool immediate) {
     // But not sure it will be so easy for a multi-threaded scheduler...
     if (checkState("Hold", Smp::SimulatorStateKind::SSK_Executing)) {
         if (immediate) {
-            _scheduler->AddImmediateEvent(_stopEP);
+            _scheduler->AddImmediateEvent(_epStop);
         }
         else {
             // schedule 1ns after now to ensure all event scheduled at now
             // that may also schedule events at now are executed before closing.
-            _scheduler->AddSimulationTimeEvent(_stopEP,1);
+            _scheduler->AddSimulationTimeEvent(_epStop,1);
         }
         if (simph::sys::Thread::GetCurrentThreadId()!=_schedulerThreadId) {
             // Wait for stop process completion only when caller thread is
@@ -550,11 +552,11 @@ Smp::IComponent* Simulator::createSmpModel(Smp::String8 typeName, Smp::String8 n
 }
 
 // ..........................................................
-void Simulator::startEP() {
+void Simulator::epStart() {
     _schedulerThreadId=simph::sys::Thread::GetCurrentThreadId();
 }
 // ..........................................................
-void Simulator::stopEP() {
+void Simulator::epStop() {
     setState(Smp::SimulatorStateKind::SSK_Standby);
     bool shallNotify=false;
     {
