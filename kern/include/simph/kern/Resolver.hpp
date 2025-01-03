@@ -42,16 +42,15 @@ public:
     Smp::IObject* ResolveAbsolute(Smp::String8 absolutePath) override;
     Smp::IObject* ResolveRelative(Smp::String8 relativePath, Smp::IObject* sender) override;
 
-    Smp::IPublication* publish(Smp::IObject* toPublish);
+    void dump() const;
 
-    const Smp::IPublication* getPublication(const Smp::IObject* obj) const;
+protected:
+    void connect();
 
-    void dump();
 private:
-    Publication* _root;
-    std::map<const Smp::IObject*, Publication*> _publications;
-    Smp::Publication::ITypeRegistry* _typeRegistry;
+    Smp::IObject* _root;
     Smp::IObject* resolve(Smp::String8 path, Smp::IObject* from);
+    void dumpObj(const Smp::IObject* from, int level=0) const;
 };
 
 }  // namespace kern

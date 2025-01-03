@@ -174,10 +174,9 @@ Smp::Services::EventId Scheduler::schedule(const Smp::IEntryPoint* entryPoint, S
                                            Smp::Duration cycleTime, Smp::Int64 repeat) {
     std::vector<Smp::IOutputField*> flowFields;
     auto resolver = dynamic_cast<Resolver*>(getSimulator()->GetResolver());
-    Smp::IObject* obj = entryPoint->GetParent();
-    const Smp::IPublication* pub = resolver->getPublication(obj);
-    if (pub != nullptr) {
-        auto fields = pub->GetFields();
+    auto obj = dynamic_cast<Smp::IComponent*>(entryPoint->GetParent());
+    if (obj!=nullptr) {
+        auto fields = obj->GetFields();
         if (fields != nullptr) {
             for (auto itField = fields->begin(); itField != fields->end(); ++itField) {
                 Smp::IOutputField* dfField = dynamic_cast<Smp::IOutputField*>(*itField);

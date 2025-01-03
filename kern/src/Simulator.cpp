@@ -61,6 +61,12 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
 }
 // ..........................................................
 Simulator::~Simulator() {
+    for (auto pub : _publications) {
+        // TODO consider delete the publication earlier in the simulator
+        // life cycle since publication shloud not be used further the 
+        // simulator initialization.
+        delete pub;
+    }
     for (auto model : *(_models->GetComponents())) {
         delete model;
     }
@@ -166,14 +172,9 @@ void Simulator::Initialise() {
 void Simulator::doPublish(Smp::IComponent* comp) {
     if (comp->GetState() == Smp::ComponentStateKind::CSK_Created) {
         LOGI("Publishing component : " << comp->GetName() << " " << comp->GetState());
-        auto pub = dynamic_cast<Publication*>(_resolver->publish(comp));
+        Smp::IPublication* pub=new Publication(comp,_typeRegistry);
+        _publications.push_back(pub);
         comp->Publish(pub);
-        Smp::IEntryPointPublisher* epp = dynamic_cast<Smp::IEntryPointPublisher*>(comp);
-        if (epp != nullptr) {
-            for (auto ep : *(epp->GetEntryPoints())) {
-                pub->addChild(ep);
-            }
-        }
         // forward publication to children if component is a composite.
         auto composite=dynamic_cast<Smp::IComposite*>(comp);
         if (composite!=nullptr) {

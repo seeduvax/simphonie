@@ -125,6 +125,7 @@ private:
     Smp::Publication::ITypeRegistry* _typeRegistry;
     Resolver* _resolver;
     std::vector<simph::sys::DLib*> _libs;
+    std::vector<Smp::IPublication*> _publications;
 
     void doPublish(Smp::IComponent* comp);
     void doConfigure(Smp::IComponent* comp);

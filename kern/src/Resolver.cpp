@@ -10,9 +10,12 @@
 #include "simph/kern/Resolver.hpp"
 #include "Smp/IArrayField.h"
 #include "Smp/IComposite.h"
-#include "Smp/IPublication.h"
+#include "Smp/IComponent.h"
 #include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
+#include "Smp/IModel.h"
+#include "Smp/IService.h"
+#include "Smp/Publication/IType.h"
 #include "simph/kern/Publication.hpp"
 #include "simph/sys/Callback.hpp"
 #include "simph/sys/Logger.hpp"
@@ -23,32 +26,20 @@ namespace kern {
 // ..........................................................
 Resolver::Resolver(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : simph::smpdk::Component(name, descr, parent) {
-    // Parent should be a Simulator holong already a TypeRegistry...
-    _typeRegistry = nullptr;
-    auto c = dynamic_cast<Smp::IComposite*>(parent);
-    if (c != nullptr) {
-        _typeRegistry = dynamic_cast<Smp::Publication::ITypeRegistry*>(
-            c->GetContainer(Smp::ISimulator::SMP_SimulatorServices)->GetComponent("TypeRegistry"));
-    }
-    if (_typeRegistry == nullptr) {
-        throw std::runtime_error("Cannot find 'TypeRegistry'");
-    }
-    if (parent != nullptr) {
-        _root = new Publication(parent, _typeRegistry);
-        _publications[parent] = _root;
-    }
-    else {
-        _root = new Publication(this, _typeRegistry);
-        _publications[this] = _root;
-    }
+    // Default root is the parent object, until connect step where
+    // the simulator is recovered.
+    _root=parent;
     addEP("dump", "List published objects to stdout", &Resolver::dump, this);
 }
 // ..........................................................
 Resolver::~Resolver() {
-    delete _root;
 }
 // --------------------------------------------------------------------
-
+// ..........................................................
+void Resolver::connect() {
+    _root=getSimulator();
+}
+// --------------------------------------------------------------------
 // ..........................................................
 Smp::IObject* Resolver::resolve(Smp::String8 path, Smp::IObject* from) {
     Smp::IObject* res = nullptr;
@@ -67,12 +58,7 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Smp::IObject* from) {
 
     // .. case
     if (dotIdx == 0 && char(input[1]) == '.') {
-        Publication* p = dynamic_cast<Publication*>(obj);
-
-        auto it = _publications.find(p->GetParent());
-        p = it == _publications.end() ? nullptr : it->second;
-        res = p != nullptr ? p->getPubObj() : nullptr;
-        obj = dynamic_cast<Smp::IObject*>(p);
+        obj = obj->GetParent();
 
         // ... or more dot case delete only first dot
         if (char(input[2]) == '.') {
@@ -99,23 +85,14 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Smp::IObject* from) {
         // delete next delimiter if it's not the last element of the path
         input = input.size() > bracketInput2.size() ? input.substr(bracketInput2.size() + 1) : "";
     }
-    // Publication case
+    // commone object child case
     else {
-        Publication* p = dynamic_cast<Publication*>(obj);
         // get child object;
-        obj = p->getChild(bracketInput1.c_str());
-        if (obj != nullptr) {
-            p = dynamic_cast<Publication*>(obj);
-            // a field has a dedicated publication
-            // an entryppoint has no dedicated publication
-            res = p != nullptr ? p->getPubObj() : obj;
-        }
-        else {
-            res = nullptr;
-        }
+        obj = obj->GetChild(bracketInput1.c_str());
 
         // delete next delimiter if it's not the last element of the path
         input = input.size() > bracketInput1.size() ? input.substr(bracketInput1.size() + 1) : "";
+        res=obj;
     }
 
     if (input.size() > 0 && obj != nullptr) {
@@ -135,48 +112,49 @@ Smp::IObject* Resolver::ResolveAbsolute(Smp::String8 absolutePath) {
 }
 // ..........................................................
 Smp::IObject* Resolver::ResolveRelative(Smp::String8 relativePath, Smp::IObject* sender) {
-    Smp::IObject* res = nullptr;
-    auto it = _publications.find(sender);
-    if (it != _publications.end()) {
-        res = resolve(relativePath, it->second);
-    }
-    return res;
+    return resolve(relativePath, sender);
 }
 // --------------------------------------------------------------------
 // ..........................................................
-void Resolver::dump() {
-    _root->dump();
+void Resolver::dump() const {
+    dumpObj(_root);
 }
 // ..........................................................
-Smp::IPublication* Resolver::publish(Smp::IObject* toPublish) {
-    Publication* pub = nullptr;
-    auto itPub = _publications.find(toPublish);
-    if (itPub == _publications.end()) {
-        pub = new Publication(toPublish, _typeRegistry);
-        _publications[toPublish] = pub;
-        Publication* parentPub = _root;
-        Smp::IObject* parent = toPublish->GetParent();
-        if (parent != nullptr) {
-            auto itParent = _publications.find(parent);
-            if (itParent != _publications.end()) {
-                parentPub = itParent->second;
-            }
-            else {
-                LOGW("Publication of " << toPublish->GetName()
-                                       << "'s parent not found. Publishing object to root node.");
-            }
+void Resolver::dumpObj(const Smp::IObject* from, int level) const {
+    for (int i=0; i<level; i++) {
+        std::cout << "    ";
+    }
+    std::cout << from->GetName();
+    if (dynamic_cast<const Smp::IService*>(from)!=nullptr) {
+        std::cout << " [Service]" << std::endl;
+    }   
+    else if (dynamic_cast<const Smp::IModel*>(from)!=nullptr) {
+        std::cout << " [Model]" << std::endl;
+    }   
+    else if (dynamic_cast<const Smp::IField*>(from)!=nullptr) {
+        auto f=dynamic_cast<const Smp::IField*>(from);
+        std::cout << " [Field:";
+        if (f->IsInput()) {
+            std::cout << "in";
         }
-        parentPub->addChild(pub);
+        if (f->IsOutput()) {
+            std::cout << "out";
+        }
+        std::cout << f->GetType()->GetPrimitiveTypeKind() << "]" << std::endl;
     }
-    else {
-        pub = itPub->second;
-    }
-    return pub;
-}
-// ..........................................................
-const Smp::IPublication* Resolver::getPublication(const Smp::IObject* obj) const {
-    auto it = _publications.find(obj);
-    return it != _publications.end() ? it->second : nullptr;
+    int l=level+1;
+    auto epp=dynamic_cast<const Smp::IEntryPointPublisher*>(from);
+    if (epp!=nullptr) {
+        for (auto ep: *(epp->GetEntryPoints())) {
+            dumpObj(ep,l);
+        } 
+    }   
+    auto c=dynamic_cast<const Smp::IComponent*>(from);
+    if (c!=nullptr) {
+        for (auto f: *(c->GetFields())) {
+            dumpObj(f,l);
+        } 
+    }   
 }
 
 }  // namespace kern
