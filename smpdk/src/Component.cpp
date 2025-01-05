@@ -164,11 +164,25 @@ void Component::SetSimpleArrayValue(
 throw std::runtime_error("TODO Component::GetSimpleArrayValue not implemented yet");
 }
 // ..........................................................
+Smp::IObject* Component::GetChild(Smp::String8 name) const {
+    // At this level, the only possible child is a field
+    return GetField(name);
+}
+// ..........................................................
 Smp::Bool Component::AddChild(
         Smp::IObject* child,
         Smp::ICollectionBase* collection) {
-    // TODO Composite/Component class hierachy is a bit strange.
-    // Not understood yet what should be the default behavior at this level
+    // Default case is only to handle field registration
+    auto f=dynamic_cast<Smp::IField*>(child);
+    if (f!=nullptr) {
+        // check this is a valid field insertion request
+        if (f->GetParent()==this
+                    && (collection == nullptr || collection == &_fields)
+                    && GetChild(f->GetName())==nullptr) {
+            _fields.push_back(f);
+            return true;
+        }
+    }
     return false;
 }
 // ..........................................................

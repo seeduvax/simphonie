@@ -41,10 +41,11 @@ public:
 
     /**
      * @return the published object hold by this publication
-     */
+// TODO is this still needed?
     inline Smp::IObject* getPubObj() const {
         return _pubObj;
     }
+     */
 
     void addChild(IObject* pub);
     IObject* getChild(Smp::String8 name) const;
@@ -122,17 +123,13 @@ public:
     void dump(int level = 0);
 
 private:
-    Smp::IObject* _pubObj;
+    Smp::IComponent* _pubObj;
     std::vector<Smp::IObject*> _childs;
     Smp::Publication::ITypeRegistry* _typeRegistry;
     Smp::Publication::IType* getArrayType(Smp::PrimitiveTypeKind ptk, Smp::Int64 count);
-    simph::smpdk::Collection<Smp::IField> _fields;
     simph::smpdk::Collection<Smp::IProperty> _properties;
 
-    inline void addField(Smp::IField* field) {
-        addChild(field);
-        _fields.push_back(field);
-    }
+    inline void addField(Smp::IField* field);
 };
 
 }  // namespace kern

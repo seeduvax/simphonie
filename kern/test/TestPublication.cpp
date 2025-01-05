@@ -13,7 +13,7 @@
 #include "Smp/ISimpleField.h"
 #include "simph/kern/Publication.hpp"
 #include "simph/kern/TypeRegistry.hpp"
-#include "simph/smpdk/Object.hpp"
+#include "simph/smpdk/Component.hpp"
 
 namespace test {
 using namespace simph::kern;
@@ -34,7 +34,7 @@ public:
     void tearDown() {}
 
     void testPublishField() {
-        Publication pub(new simph::smpdk::Object("testObj", "dummy object for testing", nullptr), nullptr);
+        Publication pub(new simph::smpdk::Component("testObj", "dummy object for testing", nullptr), nullptr);
 
         Smp::Char8 testChar = 'A';
         pub.PublishField("Char", "char8 test pub", &testChar);
@@ -74,7 +74,7 @@ public:
 
     void testPublishArrayField() {
         TypeRegistry tReg("TypesRegistry", "test types registry", nullptr);
-        Publication pub(new simph::smpdk::Object("testObj", "dummy object for testing", nullptr), &tReg);
+        Publication pub(new simph::smpdk::Component("testObj", "dummy object for testing", nullptr), &tReg);
 
         Smp::Int32 iArray[] = {12, 17, 42};
         pub.PublishArray("iArray", "int array test pub", 3, iArray, Smp::PrimitiveTypeKind::PTK_Int32);

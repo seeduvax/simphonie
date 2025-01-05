@@ -55,6 +55,7 @@ public:
                 Smp::UInt64 length,
                 Smp::AnySimpleArray values,
                 Smp::UInt64 startIndex = 0) override;
+    Smp::IObject* GetChild(Smp::String8 fullName) const override;
     Smp::Bool AddChild(
                 Smp::IObject* child,
                 Smp::ICollectionBase* collection) override;

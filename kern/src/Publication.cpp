@@ -9,6 +9,7 @@
  */
 #include "simph/kern/Publication.hpp"
 #include <string.h>
+#include "Smp/IComponent.h"
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/Publication/IArrayType.h"
 #include "simph/kern/ExInvalidPrimitiveType.hpp"
@@ -36,9 +37,8 @@ private:
 // --------------------------------------------------------------------
 // ..........................................................
 Publication::Publication(Smp::IObject* toPublish, Smp::Publication::ITypeRegistry* typeRegistry)
-    : _pubObj(toPublish),
+    : _pubObj(dynamic_cast<Smp::IComponent*>(toPublish)),
       _typeRegistry(typeRegistry),
-      _fields("fields", "", this),
       _properties("properties", "", this) {
 }
 // ..........................................................
@@ -80,6 +80,13 @@ void Publication::addChild(Smp::IObject* pub) {
     }
     _childs.push_back(pub);
 }
+void Publication::addField(Smp::IField* field) {
+    auto* f = _pubObj->GetChild(field->GetName());
+    if (f != nullptr) {
+        throw simph::smpdk::ExDuplicateName(_pubObj, field->GetName());
+    }
+    _pubObj->AddChild(field,(Smp::ICollectionBase*)_pubObj->GetFields());
+}
 // ..........................................................
 Smp::IObject* Publication::getChild(Smp::String8 name) const {
     for (auto ch : _childs) {
@@ -87,7 +94,7 @@ Smp::IObject* Publication::getChild(Smp::String8 name) const {
             return ch;
         }
     }
-    return nullptr;
+    return _pubObj->GetChild(name);
 }
 
 // --------------------------------------------------------------------
@@ -99,84 +106,84 @@ Smp::Publication::ITypeRegistry* Publication::GetTypeRegistry() const {
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Char8* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=Field::Create<Smp::Char8>(name, description, view, address, state, input, output, getPubObj());
+    auto f=Field::Create<Smp::Char8>(name, description, view, address, state, input, output, _pubObj);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Bool* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=Field::Create<Smp::Bool>(name, description, view, address, state, input, output, getPubObj());
+    auto f=Field::Create<Smp::Bool>(name, description, view, address, state, input, output, _pubObj);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Int8* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=Field::Create<Smp::Int8>(name, description, view, address, state, input, output, getPubObj());
+    auto f=Field::Create<Smp::Int8>(name, description, view, address, state, input, output, _pubObj);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Int16* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=Field::Create<Smp::Int16>(name, description, view, address, state, input, output, getPubObj());
+    auto f=Field::Create<Smp::Int16>(name, description, view, address, state, input, output, _pubObj);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Int32* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=Field::Create<Smp::Int32>(name, description, view, address, state, input, output, getPubObj());
+    auto f=Field::Create<Smp::Int32>(name, description, view, address, state, input, output, _pubObj);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Int64* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=Field::Create<Smp::Int64>(name, description, view, address, state, input, output, getPubObj());
+    auto f=Field::Create<Smp::Int64>(name, description, view, address, state, input, output, _pubObj);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::UInt8* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=Field::Create<Smp::UInt8>(name, description, view, address, state, input, output, getPubObj());
+    auto f=Field::Create<Smp::UInt8>(name, description, view, address, state, input, output, _pubObj);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::UInt16* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=Field::Create<Smp::UInt16>(name, description, view, address, state, input, output, getPubObj());
+    auto f=Field::Create<Smp::UInt16>(name, description, view, address, state, input, output, _pubObj);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::UInt32* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=Field::Create<Smp::UInt32>(name, description, view, address, state, input, output, getPubObj());
+    auto f=Field::Create<Smp::UInt32>(name, description, view, address, state, input, output, _pubObj);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::UInt64* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=Field::Create<Smp::UInt64>(name, description, view, address, state, input, output, getPubObj());
+    auto f=Field::Create<Smp::UInt64>(name, description, view, address, state, input, output, _pubObj);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Float32* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=Field::Create<Smp::Float32>(name, description, view, address, state, input, output, getPubObj());
+    auto f=Field::Create<Smp::Float32>(name, description, view, address, state, input, output, _pubObj);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Float64* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=Field::Create<Smp::Float64>(name, description, view, address, state, input, output, getPubObj());
+    auto f=Field::Create<Smp::Float64>(name, description, view, address, state, input, output, _pubObj);
     addField(f);
     return f;
 }
@@ -187,86 +194,86 @@ Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 descripti
     if (t != nullptr) {
         StructureType* st = dynamic_cast<StructureType*>(t);
         if (st != nullptr) {
-            auto f=new StructureField(name, description, view, address, st, state, input, output, getPubObj());
+            auto f=new StructureField(name, description, view, address, st, state, input, output, _pubObj);
             addField(f);
             return f;
         }
         else {
             if (typeUuid == Smp::Uuids::Uuid_Bool) {
                 auto f=new TField<Smp::Bool>(name, description, view, (Smp::Bool*)address, state, input, output,
-                                               getPubObj());
+                                               _pubObj);
                 addField(f);
                 return f;
             }
             else if (typeUuid == Smp::Uuids::Uuid_Char8) {
                 auto f=new TField<Smp::Char8>(name, description, view, (Smp::Char8*)address, state, input, output,
-                                                getPubObj());
+                                                _pubObj);
                 addField(f);
                 return f;
             }
             else if (typeUuid == Smp::Uuids::Uuid_Int8) {
                 auto f=new TField<Smp::Int8>(name, description, view, (Smp::Int8*)address, state, input, output,
-                                               getPubObj());
+                                               _pubObj);
                 addField(f);
                 return f;
             }
             else if (typeUuid == Smp::Uuids::Uuid_Int16) {
                 auto f=new TField<Smp::Int16>(name, description, view, (Smp::Int16*)address, state, input, output,
-                                                getPubObj());
+                                                _pubObj);
                 addField(f);
                 return f;
             }
             else if (typeUuid == Smp::Uuids::Uuid_Int32) {
                 auto f=new TField<Smp::Int32>(name, description, view, (Smp::Int32*)address, state, input, output,
-                                                getPubObj());
+                                                _pubObj);
                 addField(f);
                 return f;
             }
             else if (typeUuid == Smp::Uuids::Uuid_Int64) {
                 auto f=new TField<Smp::Int64>(name, description, view, (Smp::Int64*)address, state, input, output,
-                                                getPubObj());
+                                                _pubObj);
                 addField(f);
                 return f;
             }
             else if (typeUuid == Smp::Uuids::Uuid_UInt8) {
                 auto f=new TField<Smp::UInt8>(name, description, view, (Smp::UInt8*)address, state, input, output,
-                                                getPubObj());
+                                                _pubObj);
                 addField(f);
                 return f;
             }
             else if (typeUuid == Smp::Uuids::Uuid_UInt16) {
                 auto f=new TField<Smp::UInt16>(name, description, view, (Smp::UInt16*)address, state, input, output,
-                                                 getPubObj());
+                                                 _pubObj);
                 addField(f);
                 return f;
             }
             else if (typeUuid == Smp::Uuids::Uuid_UInt32) {
                 auto f=new TField<Smp::UInt32>(name, description, view, (Smp::UInt32*)address, state, input, output,
-                                                 getPubObj());
+                                                 _pubObj);
                 addField(f);
                 return f;
             }
             else if (typeUuid == Smp::Uuids::Uuid_UInt64) {
                 auto f=new TField<Smp::UInt64>(name, description, view, (Smp::UInt64*)address, state, input, output,
-                                                 getPubObj());
+                                                 _pubObj);
                 addField(f);
                 return f;
             }
             else if (typeUuid == Smp::Uuids::Uuid_Float32) {
                 auto f=new TField<Smp::Float32>(name, description, view, (Smp::Float32*)address, state, input, output,
-                                                  getPubObj());
+                                                  _pubObj);
                 addField(f);
                 return f;
             }
             else if (typeUuid == Smp::Uuids::Uuid_Float64) {
                 auto f=new TField<Smp::Float64>(name, description, view, (Smp::Float64*)address, state, input, output,
-                                                  getPubObj());
+                                                  _pubObj);
                 addField(f);
                 return f;
             }
             else {
                 auto f=
-                    new Field(name, description, view, address, t->getSize(), t, state, input, output, getPubObj());
+                    new Field(name, description, view, address, t->getSize(), t, state, input, output, _pubObj);
                 addField(f);
                 return f;
             }
@@ -312,84 +319,84 @@ Smp::ISimpleArrayField* Publication::PublishArray(Smp::String8 name, Smp::String
     switch (type) {
         case Smp::PrimitiveTypeKind::PTK_Bool: {
                 auto f=new SimpleArrayField<Smp::Bool>(name, description, count, address, type, view, t, state, input,
-                                                         output, getPubObj());
+                                                         output, _pubObj);
                 addField(f);
                 rf=f;
             }
             break;
         case Smp::PrimitiveTypeKind::PTK_Char8: {
                 auto f=new SimpleArrayField<Smp::Char8>(name, description, count, address, type, view, t, state, input,
-                                                          output, getPubObj());
+                                                          output, _pubObj);
                 addField(f);
                 return f;
             }
             break;
         case Smp::PrimitiveTypeKind::PTK_Int8: {
                 auto f=new SimpleArrayField<Smp::Int8>(name, description, count, address, type, view, t, state, input,
-                                                         output, getPubObj());
+                                                         output, _pubObj);
                 addField(f);
                 return f;
             }
             break;
         case Smp::PrimitiveTypeKind::PTK_Int16: {
                 auto f=new SimpleArrayField<Smp::Int16>(name, description, count, address, type, view, t, state, input,
-                                                          output, getPubObj());
+                                                          output, _pubObj);
                 addField(f);
                 return f;
             }
             break;
         case Smp::PrimitiveTypeKind::PTK_Int32: {
                 auto f=new SimpleArrayField<Smp::Int32>(name, description, count, address, type, view, t, state, input,
-                                                          output, getPubObj());
+                                                          output, _pubObj);
                 addField(f);
                 return f;
             }
             break;
         case Smp::PrimitiveTypeKind::PTK_Int64: {
                 auto f=new SimpleArrayField<Smp::Int64>(name, description, count, address, type, view, t, state, input,
-                                                          output, getPubObj());
+                                                          output, _pubObj);
                 addField(f);
                 return f;
             }
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt8: {
                 auto f=new SimpleArrayField<Smp::UInt8>(name, description, count, address, type, view, t, state, input,
-                                                          output, getPubObj());
+                                                          output, _pubObj);
                 addField(f);
                 return f;
             }
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt16: {
                 auto f=new SimpleArrayField<Smp::UInt16>(name, description, count, address, type, view, t, state, input,
-                                                           output, getPubObj());
+                                                           output, _pubObj);
                 addField(f);
                 return f;
             }
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt32: {
                 auto f=new SimpleArrayField<Smp::UInt32>(name, description, count, address, type, view, t, state, input,
-                                                           output, getPubObj());
+                                                           output, _pubObj);
                 addField(f);
                 return f;
             }
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt64: {
                 auto f=new SimpleArrayField<Smp::UInt64>(name, description, count, address, type, view, t, state, input,
-                                                           output, getPubObj());
+                                                           output, _pubObj);
                 addField(f);
                 return f;
             }
             break;
         case Smp::PrimitiveTypeKind::PTK_Float32: {
                 auto f=new SimpleArrayField<Smp::Float32>(name, description, count, address, type, view, t, state, input,
-                                                            output, getPubObj());
+                                                            output, _pubObj);
                 addField(f);
                 return f;
             }
             break;
         case Smp::PrimitiveTypeKind::PTK_Float64: {
                 auto f=new SimpleArrayField<Smp::Float64>(name, description, count, address, type, view, t, state, input,
-                                                            output, getPubObj());
+                                                            output, _pubObj);
                 addField(f);
                 return f;
             }
@@ -466,11 +473,11 @@ void Publication::Unpublish(){// TODO
                               LOGE("Publication::Unpublish(...) not implemented yet!")}
 // ..........................................................
 Smp::IField* Publication::GetField(Smp::String8 fullName) const {
-    return _fields.at(fullName);
+    return _pubObj->GetField(fullName);
 }
 // ..........................................................
 const Smp::FieldCollection* Publication::GetFields() const {
-    return &_fields;
+    return _pubObj->GetFields();
 }
 const Smp::PropertyCollection* Publication::GetProperties() const {
     return &_properties;
