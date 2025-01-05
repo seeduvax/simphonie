@@ -133,16 +133,40 @@ void Resolver::dumpObj(const Smp::IObject* from, int level) const {
     }   
     else if (dynamic_cast<const Smp::IField*>(from)!=nullptr) {
         auto f=dynamic_cast<const Smp::IField*>(from);
-        std::cout << " [Field:";
+        std::cout << " [Field";
         if (f->IsInput()) {
-            std::cout << "in";
+            std::cout << ":in";
         }
         if (f->IsOutput()) {
-            std::cout << "out";
+            std::cout << ":out";
         }
-        std::cout << f->GetType()->GetPrimitiveTypeKind() << "]" << std::endl;
+        std::cout << ":" << f->GetType()->GetPrimitiveTypeKind() << "]" << std::endl;
+    }
+    else if (dynamic_cast<const Smp::ISimulator*>(from)!=nullptr) {
+        std::cout << " [Simulator]" << std::endl;
+    }
+    else if (dynamic_cast<const Smp::IContainer*>(from)!=nullptr) {
+        std::cout << " [Container]" << std::endl;
+    }
+    else if (dynamic_cast<const Smp::IEntryPoint*>(from)!=nullptr) {
+        std::cout << " [EntryPoint]" << std::endl;
+    }
+    else {
+        std::cout << " [Object]" << std::endl;
     }
     int l=level+1;
+    auto ctnr=dynamic_cast<const Smp::IContainer*>(from);
+    if (ctnr!=nullptr) {
+        for (auto cp: *(ctnr->GetComponents())) {
+            dumpObj(cp,l);
+        }
+    }
+    auto cpst=dynamic_cast<const Smp::IComposite*>(from);
+    if (cpst!=nullptr) {
+        for (auto ct: *(cpst->GetContainers())) {
+            dumpObj(ct,l);
+        }
+    }
     auto epp=dynamic_cast<const Smp::IEntryPointPublisher*>(from);
     if (epp!=nullptr) {
         for (auto ep: *(epp->GetEntryPoints())) {

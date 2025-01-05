@@ -10,6 +10,11 @@
 #include "simph/smpdk/Object.hpp"
 #include <regex>
 #include "simph/smpdk/ExInvalidObjectName.hpp"
+#include "Smp/IComponent.h"
+#include "Smp/IEntryPointPublisher.h"
+#include "Smp/IComposite.h"
+#include "Smp/IContainer.h"
+#include "Smp/IDynamicInvocation.h"
 
 namespace simph {
 namespace smpdk {
@@ -37,7 +42,48 @@ Smp::IObject* Object::GetParent() const {
 }
 // ..........................................................
 Smp::IObject* Object::GetChild(Smp::String8 name) const {
-    return nullptr;
+    // quite strange to play with dynamic cast like that, but
+    // the only way to deal properly with possible virtual multiple
+    // inheritences.
+    Smp::IObject* res=nullptr;
+    {
+        auto o=dynamic_cast<const Smp::IComponent*>(this);
+        if (o!=nullptr) {
+            res=o->GetField(name);
+        }
+    }
+    if (res==nullptr) {
+        auto o=dynamic_cast<const Smp::IEntryPointPublisher*>(this);
+        if (o!=nullptr) {
+            res=o->GetEntryPoint(name);
+        }
+    }
+    if (res==nullptr) {
+        auto o=dynamic_cast<const Smp::IComposite*>(this);
+        if (o!=nullptr) {
+            for (auto ctnr: *(o->GetContainers())) {
+                if (res==nullptr) {
+                    res=ctnr->GetComponent(name);
+                }
+            }
+        }
+    }
+    if (res==nullptr) {
+        auto o=dynamic_cast<const Smp::IContainer*>(this);
+        if (o!=nullptr) {
+            res=o->GetComponent(name);
+        }
+    }
+    if (res==nullptr) {
+        auto o=dynamic_cast<const Smp::IDynamicInvocation*>(this);
+        if (o!=nullptr) {
+            res=o->GetProperty(name);
+            if (res==nullptr) {
+                res=o->GetOperation(name);
+            }
+        }
+    }
+    return res;
 }
 
 // --------------------------------------------------------------------

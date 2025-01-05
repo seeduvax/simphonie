@@ -164,11 +164,6 @@ void Component::SetSimpleArrayValue(
 throw std::runtime_error("TODO Component::GetSimpleArrayValue not implemented yet");
 }
 // ..........................................................
-Smp::IObject* Component::GetChild(Smp::String8 name) const {
-    // At this level, the only possible child is a field
-    return GetField(name);
-}
-// ..........................................................
 Smp::Bool Component::AddChild(
         Smp::IObject* child,
         Smp::ICollectionBase* collection) {
