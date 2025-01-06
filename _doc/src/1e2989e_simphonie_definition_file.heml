@@ -21,6 +21,53 @@ after the execution of each schduled entry point is completed.
     }
   }
   {section %title=Design
+    {section %title=Mandatory services bundle
+The kernel library include an implementation for each of the mandatory SMP services:
+  - Logger
+  - Scheduler
+  - Timekeeper
+  - Resolver
+  - TimeKeeper
+
+However those service shall be replaceable, meaning a user may substitute anyone
+with its own implementation using the {kw AddService} method. To do so, the
+simulator Publish process, start with a preliminary added service scan to find
+the eventually provided substitutes, then create the default implementation
+instance for each service not yet provided. From this step, the simulator is
+configured to let service accessors (GetScheduler, GetTimeKeeper, GetResolver,
+etc) to return the right service instance, the explicitly provided one or the
+default created. 
+    }
+    {section %title=Path parsing
+The bundled resolver parses the pathes to be resolved according the following state diagram.
+{fig %src=resolver_path_parse_state.png %title=Pathp arsing state diagram}
+{#
+@startuml resolver_path_parse_state.png
+[*] --> Sep: /
+[*] --> Self: .
+[*] --> Name
+Sep --> Self: .
+Sep --> Ignore: /
+Sep --> Name: name.append()
+Self --> Parent: .
+Parent --> Sep: / c=c.GetParent()
+Parent --> [*]: \0 c=c.GetParent()
+Parent --> [*]: c=null
+Name --> Sep: / c=c.GetChild(name)
+Name --> Name: name.append()
+Name --> DotSep: . c=c.GetChild()
+Name --> [*]: \0 c=c.GetChild(name)
+Name --> Index: [ c=c.GetChild(name); name="["
+Index --> Index: 0-9 name.append()
+Index --> EndIndex: ] name.append(); c.GetChild(name)
+EndIndex --> Sep: Sep
+EndIndex --> [*]: \0
+EndIndex --> [*]: c=null
+DotSep --> Name: a-zA-Z_
+DotSep --> [*]: c=null
+@enduml
+#}
+    }
     {section %title=Scheduler / Time Keeper coordination
 The scheduler / time keeper coordination relies on a specific event that is not
 defined in the SMP standard: {kw Scheduler_PreEventExecute} shall be registered
