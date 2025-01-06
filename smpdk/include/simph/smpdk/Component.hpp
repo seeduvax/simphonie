@@ -98,7 +98,7 @@ private:
     Smp::ComponentStateKind _state;
     Smp::Services::ILogger* _logger;
     Smp::Services::ILinkRegistry* _linkRegistry;
-    CollectionOwner<Smp::IField> _fields;
+    OwnedCollection<Smp::IField> _fields;
     Smp::Uuid _uuid;
     Smp::ISimulator* _simulator;
 };

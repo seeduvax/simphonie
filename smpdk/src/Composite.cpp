@@ -15,9 +15,11 @@ namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 Composite::Composite(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : Object(name, descr, parent), _containers("Containers", "", this) {}
+    : Object(name, descr, parent), _containers("Containers", "", this) {
+}
 // ..........................................................
-Composite::~Composite() {}
+Composite::~Composite() {
+}
 // --------------------------------------------------------------------
 // ..........................................................
 void Composite::addContainer(Smp::String8 name, Smp::String8 descr) {

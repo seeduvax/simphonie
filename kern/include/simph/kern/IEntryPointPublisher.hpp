@@ -47,7 +47,7 @@ public:
     }
 
 private:
-    CollectionOwner<Smp::IEntryPoint> _epList;
+    OwnedCollection<Smp::IEntryPoint> _epList;
 };
 
 }  // namespace kern

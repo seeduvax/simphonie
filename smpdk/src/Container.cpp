@@ -45,7 +45,9 @@ void Container::AddComponent(Smp::IComponent* component) {
     if (!checkComponentType(component)) {
         throw ExInvalidObjectType(this, component);
     }
-    if (_content.at(component->GetName()) != nullptr) {
+    if (_content.at(component->GetName()) != nullptr ||
+            (GetParent()!=nullptr && component->GetParent()==GetParent()
+             && GetParent()->GetChild(component->GetName())!=nullptr)) {
         throw ExDuplicateName(this, component->GetName());
     }
     _content.push_back(component);

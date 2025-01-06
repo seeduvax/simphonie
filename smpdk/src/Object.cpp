@@ -16,6 +16,8 @@
 #include "Smp/IContainer.h"
 #include "Smp/IDynamicInvocation.h"
 
+#include <iostream>
+
 namespace simph {
 namespace smpdk {
 

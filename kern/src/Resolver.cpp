@@ -124,14 +124,14 @@ void Resolver::dumpObj(const Smp::IObject* from, int level) const {
     for (int i=0; i<level; i++) {
         std::cout << "    ";
     }
-    std::cout << from->GetName();
+    std::cout << from->GetName() << " ";
     if (dynamic_cast<const Smp::IService*>(from)!=nullptr) {
-        std::cout << " [Service]" << std::endl;
+        std::cout << "[Service]";
     }   
-    else if (dynamic_cast<const Smp::IModel*>(from)!=nullptr) {
-        std::cout << " [Model]" << std::endl;
+    if (dynamic_cast<const Smp::IModel*>(from)!=nullptr) {
+        std::cout << "[Model]";
     }   
-    else if (dynamic_cast<const Smp::IField*>(from)!=nullptr) {
+    if (dynamic_cast<const Smp::IField*>(from)!=nullptr) {
         auto f=dynamic_cast<const Smp::IField*>(from);
         std::cout << " [Field";
         if (f->IsInput()) {
@@ -140,21 +140,22 @@ void Resolver::dumpObj(const Smp::IObject* from, int level) const {
         if (f->IsOutput()) {
             std::cout << ":out";
         }
-        std::cout << ":" << f->GetType()->GetPrimitiveTypeKind() << "]" << std::endl;
+        std::cout << ":" << f->GetType()->GetPrimitiveTypeKind() << "]";
     }
-    else if (dynamic_cast<const Smp::ISimulator*>(from)!=nullptr) {
-        std::cout << " [Simulator]" << std::endl;
+    if (dynamic_cast<const Smp::ISimulator*>(from)!=nullptr) {
+        std::cout << "[Simulator]";
     }
-    else if (dynamic_cast<const Smp::IContainer*>(from)!=nullptr) {
-        std::cout << " [Container]" << std::endl;
+    if (dynamic_cast<const Smp::IContainer*>(from)!=nullptr) {
+        std::cout << "[Container]";
     }
-    else if (dynamic_cast<const Smp::IEntryPoint*>(from)!=nullptr) {
-        std::cout << " [EntryPoint]" << std::endl;
+    if (dynamic_cast<const Smp::IComposite*>(from)!=nullptr) {
+        std::cout << "[Composite]";
     }
-    else {
-        std::cout << " [Object]" << std::endl;
+    if (dynamic_cast<const Smp::IEntryPoint*>(from)!=nullptr) {
+        std::cout << "[EntryPoint]";
     }
     int l=level+1;
+    std::cout << std::endl;
     auto ctnr=dynamic_cast<const Smp::IContainer*>(from);
     if (ctnr!=nullptr) {
         for (auto cp: *(ctnr->GetComponents())) {

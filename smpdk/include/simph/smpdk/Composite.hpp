@@ -36,7 +36,7 @@ protected:
     void addContainer(Smp::String8 name, Smp::String8 descr = "");
 
 private:
-    CollectionOwner<Smp::IContainer> _containers;
+    OwnedCollection<Smp::IContainer> _containers;
 };
 
 }  // namespace smpdk

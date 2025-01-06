@@ -50,7 +50,8 @@ Component::Component(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
       _linkRegistry(nullptr),
       _fields("Fields", "", this),
       _uuid(),
-      _simulator(nullptr) {}
+      _simulator(nullptr) {
+}
 // ..........................................................
 Component::~Component() {}
 // --------------------------------------------------------------------

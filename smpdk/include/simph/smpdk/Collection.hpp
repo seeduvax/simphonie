@@ -86,11 +86,11 @@ private:
  *
  */
 template <typename T>
-class CollectionOwner : public Collection<T> {
+class OwnedCollection : public Collection<T> {
 public:
-    CollectionOwner(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Collection<T>(name, descr, parent) {}
+    OwnedCollection(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Collection<T>(name, descr, parent) {}
 
-    virtual ~CollectionOwner() {
+    virtual ~OwnedCollection() {
         for (auto field : *this) {
             delete field;
         }

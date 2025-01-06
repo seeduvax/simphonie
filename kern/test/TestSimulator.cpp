@@ -50,7 +50,7 @@ protected:
         }
     }
 private:
-    simph::smpdk::CollectionOwner<Smp::IContainer> _containers;
+    simph::smpdk::OwnedCollection<Smp::IContainer> _containers;
 };
 
 
