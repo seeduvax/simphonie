@@ -42,6 +42,99 @@ void Resolver::connect() {
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::IObject* Resolver::resolve(Smp::String8 path, Smp::IObject* from) {
+    Smp::IObject* obj=from;
+    enum State {
+        Init,
+        Sep,
+        Self,
+        Parent,
+        Name,
+        End 
+    };
+    State state=State::Init;
+    int i=0;
+    std::string name="";
+    while (state!=State::End && obj!=nullptr) {
+        char c=path[0];
+        switch (state) {
+            case State::Init: {
+                    switch (c) {
+                        case '/':
+                            state=State::Sep;
+                            break;
+                        case '.':
+                            state=State::Self;
+                            break;
+                        default:
+                            // don't really care char validity, since this
+                            // should lead to not found child and finally 
+                            // returning nullptr.
+                            // This will be the same for many case of switching
+                            // to Name state and won't be repeated further
+                            name.append(1,c);
+                            state=State::Name;
+                            break;
+                    }
+                }
+                break;
+            case State::Sep: {
+                    switch (c) {
+                        case '/':
+                            // Ignore succesive /
+                            break;
+                        case '.':
+                            state=State::Self;
+                            break;
+                        default:
+                            name.append(1,c);
+                            state=State::Name;
+                            break;
+                    }
+                }
+                break;
+            case State::Self: {
+                    switch (c) {
+                        case '/':
+                            state=State::Sep;
+                            break;
+                        case '.':
+                            state=State::Parent;
+                            break;
+                        default:
+                            name.append(1,c);
+                            state=State::Name;
+                    }
+                }
+                break;
+            case State::Parent: {
+                    switch(c) {
+                        case '/':
+                            obj=obj->GetParent();
+                            state=State::Sep;
+                            break;
+                        case '\0':
+                            obj=obj->GetParent();
+                            state=State::End;
+                            break;
+                        default:
+                            obj=nullptr;
+                            state=State::End;
+                    }
+                }
+                break;
+        }
+        if (c=='\0') {
+            // force final state if end of string is reached.
+            state=State::End;
+        }
+        else {
+            // jump to next char.
+            i++;
+        }
+    }
+
+    return obj;
+/*
     Smp::IObject* res = nullptr;
     Smp::IObject* obj = from;
     std::string input = path;
@@ -102,8 +195,8 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Smp::IObject* from) {
     else if (input.size() > 0) {
         res = nullptr;
     }
-
     return res;
+*/
 }
 
 // ..........................................................

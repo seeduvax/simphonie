@@ -47,9 +47,10 @@ The bundled resolver parses the pathes to be resolved according the following st
 [*] --> Self: .
 [*] --> Name
 Sep --> Self: .
-Sep --> Ignore: /
+Sep --> Sep: /
 Sep --> Name: name.append()
 Self --> Parent: .
+Self --> Sep: /
 Parent --> Sep: / c=c.GetParent()
 Parent --> [*]: \0 c=c.GetParent()
 Parent --> [*]: c=null
