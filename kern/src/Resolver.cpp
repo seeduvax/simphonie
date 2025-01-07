@@ -42,6 +42,9 @@ void Resolver::connect() {
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::IObject* Resolver::resolve(Smp::String8 path, Smp::IObject* from) {
+    // See path parsing state diagram in definition file (ref 1e2889e) 
+    // subsection "Path parsing" somewhere in "Design" section.
+    // (fig resolver_path_parse_state.png)
     Smp::IObject* obj=from;
     enum State {
         Init,
@@ -49,13 +52,16 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Smp::IObject* from) {
         Self,
         Parent,
         Name,
+        Index,
+        EndIndex,
+        DotSep,
         End 
     };
     State state=State::Init;
     int i=0;
     std::string name="";
-    while (state!=State::End && obj!=nullptr) {
-        char c=path[0];
+    while (state!=State::End) {
+        char c=path[i];
         switch (state) {
             case State::Init: {
                     switch (c) {
@@ -122,9 +128,85 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Smp::IObject* from) {
                     }
                 }
                 break;
+            case State::Name: {
+                    switch (c) {
+                        case '/':
+                            obj=obj->GetChild(name.c_str());
+                            name="";
+                            state=State::Sep;
+                            break;
+                        case '[':
+                            obj=obj->GetChild(name.c_str());
+                            name="[";
+                            state=State::Index;
+                            break;
+                        case '.':
+                            obj=obj->GetChild(name.c_str());
+                            name="";
+                            state=State::DotSep;
+                            break;
+                        case '\0':
+                            obj=obj->GetChild(name.c_str());
+                            state=State::End;
+                            break;
+                        default:
+                            name.append(1,c);
+                            break;
+                    }
+                }
+                break;
+            case State::Index: {
+                    switch (c) {
+                        case ']':
+                            name.append(1,c);
+                            obj=obj->GetChild(name.c_str());
+                            name="";
+                            state=State::EndIndex;
+                            break;
+                        default:
+                            name.append(1,c);
+                            break;
+                    }
+                }
+                break;
+            case State::EndIndex: {
+                    switch (c) {
+                        case '/':
+                            state=State::Sep;
+                            break;
+                        case '.':
+                            state=State::DotSep;
+                            break;
+                        case '[':
+                            state=State::Index;
+                            break;
+                        case '\0':
+                            state=State::End;
+                            break;
+                        default:
+                            // parse error
+                            obj=nullptr;
+                            break;
+                    }
+                }
+                break;
+            case State::DotSep: {
+                    switch (c) {
+                        case '.':
+                        case '/':
+                            // parse error
+                            obj=nullptr;
+                            break;
+                        default:
+                            name.append(1,c);
+                            state=State::Name;
+                    }
+                }
+                break;
         }
-        if (c=='\0') {
-            // force final state if end of string is reached.
+        if (c=='\0' || obj==nullptr) {
+            // force final state if end of string is reached or at some level
+            // any of GetParent() or GetChild() returned nullptr.
             state=State::End;
         }
         else {
@@ -132,71 +214,7 @@ Smp::IObject* Resolver::resolve(Smp::String8 path, Smp::IObject* from) {
             i++;
         }
     }
-
     return obj;
-/*
-    Smp::IObject* res = nullptr;
-    Smp::IObject* obj = from;
-    std::string input = path;
-
-    std::string slashInput = input.substr(0, input.find("/"));
-
-    int dotIdx = slashInput.find(".");
-    std::string dotInput = slashInput.substr(0, dotIdx);
-
-    std::string bracketInput1 = dotInput.substr(0, dotInput.find("["));
-
-    int bracketIdx2 = bracketInput1.find("]");
-    std::string bracketInput2 = bracketInput1.substr(0, bracketIdx2);
-
-    // .. case
-    if (dotIdx == 0 && char(input[1]) == '.') {
-        obj = obj->GetParent();
-
-        // ... or more dot case delete only first dot
-        if (char(input[2]) == '.') {
-            input = input.substr(1, -1);
-        }
-        // ../ case
-        else if (char(input[2]) == '/') {
-            input = input.substr(3, -1);
-        }
-        // .. case
-        else {
-            input = input.substr(2, -1);
-        }
-    }
-    // Bracket case
-    else if (bracketIdx2 != -1) {
-        // get field
-        auto field = dynamic_cast<Smp::IArrayField*>(from);
-        if (field != nullptr) {
-            obj = field->GetItem(std::stoi(bracketInput2));
-        }
-        res = obj;
-
-        // delete next delimiter if it's not the last element of the path
-        input = input.size() > bracketInput2.size() ? input.substr(bracketInput2.size() + 1) : "";
-    }
-    // commone object child case
-    else {
-        // get child object;
-        obj = obj->GetChild(bracketInput1.c_str());
-
-        // delete next delimiter if it's not the last element of the path
-        input = input.size() > bracketInput1.size() ? input.substr(bracketInput1.size() + 1) : "";
-        res=obj;
-    }
-
-    if (input.size() > 0 && obj != nullptr) {
-        res = resolve(input.c_str(), obj);
-    }
-    // stop if the path is incorrect
-    else if (input.size() > 0) {
-        res = nullptr;
-    }
-    return res;
-*/
 }
 
 // ..........................................................

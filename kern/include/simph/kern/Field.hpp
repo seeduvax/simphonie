@@ -238,6 +238,17 @@ public:
         }
         throw ExInvalidArrayIndex(this, index, _count);
     }
+    Smp::IObject* GetChild(Smp::String8 fullName) const override {
+        std::string sname=GetName();
+        sname+=fullName;
+// TODO TBC such element name handling is OK
+        for (int i=0;i<_count;i++) {
+            if (sname==_itemFields[i]->GetName()) {
+                return _itemFields[i];
+            }
+        }
+        return nullptr;
+    }
     // Smp::ISimpleArrayField implementation
     Smp::AnySimple GetValue(Smp::UInt64 index) const override;
     void SetValue(Smp::UInt64 index, Smp::AnySimple value) override {

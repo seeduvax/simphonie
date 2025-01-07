@@ -96,7 +96,7 @@ public:
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)mdl2, resolver.ResolveAbsolute("to1/to2"));
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)mdl1, resolver.ResolveAbsolute("to1/to2/.."));
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)mdl2, resolver.ResolveAbsolute("to1/../to1/to2"));
-        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)&simu, resolver.ResolveAbsolute("to1/to2/..."));
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveAbsolute("to1/to2/..."));
 
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveRelative("to1", mdl2));
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)mdl2, resolver.ResolveRelative("to2", mdl1));

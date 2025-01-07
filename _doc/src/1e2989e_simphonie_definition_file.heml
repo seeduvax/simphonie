@@ -61,7 +61,7 @@ Name --> [*]: \0 c=c.GetChild(name)
 Name --> Index: [ c=c.GetChild(name); name="["
 Index --> Index: 0-9 name.append()
 Index --> EndIndex: ] name.append(); c.GetChild(name)
-EndIndex --> Sep: Sep
+EndIndex --> Sep: /
 EndIndex --> [*]: \0
 EndIndex --> [*]: c=null
 DotSep --> Name: a-zA-Z_
