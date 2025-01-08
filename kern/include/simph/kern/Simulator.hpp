@@ -117,13 +117,13 @@ private:
     Smp::IContainer* _models;
     Smp::IContainer* _services;
     Collection<Smp::IFactory> _compFactories;
-    Smp::Services::ILogger* _logger;
-    Scheduler* _scheduler;
-    Smp::Services::ITimeKeeper* _timeKeeper;
-    Smp::Services::IEventManager* _eventMgr;
-    Smp::Services::ILinkRegistry* _linkRegistry;
-    Smp::Publication::ITypeRegistry* _typeRegistry;
-    Resolver* _resolver;
+    Smp::Services::ILogger* _logger=nullptr;
+    Smp::Services::IScheduler* _scheduler=nullptr;
+    Smp::Services::ITimeKeeper* _timeKeeper=nullptr;
+    Smp::Services::IEventManager* _eventMgr=nullptr;
+    Smp::Services::ILinkRegistry* _linkRegistry=nullptr;
+    Smp::Publication::ITypeRegistry* _typeRegistry=nullptr;
+    Smp::Services::IResolver* _resolver=nullptr;
     std::vector<simph::sys::DLib*> _libs;
     std::vector<Smp::IPublication*> _publications;
 
@@ -154,6 +154,17 @@ private:
     std::mutex _mutex;
     std::condition_variable _monitor;
     bool _waitingStop=false;
+
+
+    template<typename T>
+    void overrideService(T** target,Smp::IComponent* service) {
+        auto s=dynamic_cast<T*>(service);
+        if (s!=nullptr) {
+            _services->DeleteComponent(*target);
+            delete *target;
+            *target=s;
+        }
+    }
 };
 
 }  // namespace kern

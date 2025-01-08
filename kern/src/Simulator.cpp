@@ -64,7 +64,7 @@ Simulator::~Simulator() {
     for (auto pub : _publications) {
         // TODO consider delete the publication earlier in the simulator
         // life cycle since publication shloud not be used further the 
-        // simulator initialization.
+        // simulator building phase.
         delete pub;
     }
     for (auto model : *(_models->GetComponents())) {
@@ -190,6 +190,7 @@ void Simulator::doPublish(Smp::IComponent* comp) {
                 Smp::ComponentStateKind::CSK_Created);
     }
 }
+
 // ..........................................................
 void Simulator::Publish() {
     if (checkState("Publish", Smp::SimulatorStateKind::SSK_Building)) {
@@ -199,9 +200,11 @@ void Simulator::Publish() {
         // enter/leave event emission, but:
         // - related state/event identifiers are missing from the SMP header files.
         // - at this step, the event manager itself may not be ready yet (itself published).
+        // publish services.
         for (auto service : *(_services->GetComponents())) {
             doPublish(service);
         }
+        // publish models
         for (auto model : *(_models->GetComponents())) {
             doPublish(model);
         }
@@ -355,6 +358,15 @@ Smp::SimulatorStateKind Simulator::GetState() const {
 }
 // ..........................................................
 void Simulator::AddService(Smp::IService* service) {
+    // replace the default mandatory service when service to add is a
+    // remplacement implementation.
+    overrideService(&_logger,service);
+    overrideService(&_eventMgr,service);
+    overrideService(&_timeKeeper,service);
+    overrideService(&_scheduler,service);
+    overrideService(&_resolver,service);
+    overrideService(&_linkRegistry,service);
+    // finally add service.
     _services->AddComponent(service);
 }
 // ..........................................................

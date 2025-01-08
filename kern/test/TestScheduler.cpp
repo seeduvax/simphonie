@@ -41,10 +41,10 @@ private:
 public:
     void setUp() {
         _sim = new Simulator();
-        _scheduler = dynamic_cast<Scheduler*>(_sim->GetScheduler());
         _sim->Publish();
         _sim->Configure();
         _sim->Connect();
+        _scheduler = dynamic_cast<Scheduler*>(_sim->GetScheduler());
         _epLeaveExecuting=EntryPoint::Create("leaveExecution","",nullptr,
                 &TestScheduler::epLeaveExecuting,this);
         _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId,_epLeaveExecuting);
