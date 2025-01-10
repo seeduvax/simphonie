@@ -21,8 +21,8 @@
 #include "simph/sys/Synchro.hpp"
 
 #include "Smp/IOutputField.h"
+#include "Smp/IModel.h"
 
-#include "simph/kern/Builder.hpp"
 
 // ..........................................................
 namespace simph {
@@ -531,14 +531,7 @@ void Simulator::schedule(std::string modelName, std::string entryPoint, uint32_t
     GetScheduler()->AddSimulationTimeEvent(ep, 0, period, -1);
 };
 // ..........................................................
-void Simulator::setValue(std::string fieldPath, float value) {
-    // TODO handle errors
-    auto field = dynamic_cast<simph::kern::Field*>(GetResolver()->ResolveAbsolute(fieldPath.c_str()));
-    Smp::AnySimple SmpVal;
-    SmpVal.SetValue(Smp::PrimitiveTypeKind::PTK_Float64, value);
-    field->SetValue(SmpVal);
-};
-// ..........................................................
+/*
 Smp::IComponent* Simulator::createSmpModel(Smp::String8 typeName, Smp::String8 name, Smp::String8 description) {
     Smp::IComponent* res = nullptr;
     for (auto fac : _compFactories) {
@@ -558,6 +551,7 @@ Smp::IComponent* Simulator::createSmpModel(Smp::String8 typeName, Smp::String8 n
             break;
         }
     }
+*/
 
     // When no factory is found, Smp header tels to return null. So nothing
     // particular to do since res is initialized as nullptr.
