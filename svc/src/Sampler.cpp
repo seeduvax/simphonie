@@ -7,7 +7,7 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Sampler.hpp"
+#include "simph/svc/Sampler.hpp"
 #include <fstream>
 #include <iostream>
 #include "Smp/ISimulator.h"
@@ -17,8 +17,11 @@
 #include "simph/sys/Callback.hpp"
 #include "simph/sys/Logger.hpp"
 
+// TODO: stop using directly kern classes, rely on SMP and smpdk only.
+// => may need to relocate some part of kern to smpdk.
+
 namespace simph {
-namespace kern {
+namespace svc {
 // --------------------------------------------------------------------
 // ..........................................................
 Sampler::Sampler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
@@ -194,5 +197,5 @@ void Sampler::step() {
     }
 };
 
-}  // namespace kern
+}  // namespace svc
 }  // namespace simph

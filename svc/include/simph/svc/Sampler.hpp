@@ -7,8 +7,8 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Sampler_HPP__
-#define __simph_kern_Sampler_HPP__
+#ifndef __simph_svc_Sampler_HPP__
+#define __simph_svc_Sampler_HPP__
 #include <fstream>
 #include <ostream>
 #include <sstream>
@@ -16,11 +16,11 @@
 #include "simph/kern/Field.hpp"
 
 namespace simph {
-namespace kern {
+namespace svc {
 /**
  *
  */
-class Sampler : public AStepMdl {
+class Sampler : public simph::kern::AStepMdl {
 public:
     /**
      * Default constructor.
@@ -46,6 +46,6 @@ private:
     Smp::Bool _modeValue;
 };
 
-}  // namespace kern
+}  // namespace svc
 }  // namespace simph
-#endif  // __simph_kern_Sampler_HPP__
+#endif  // __simph_svc_Sampler_HPP__

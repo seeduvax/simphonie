@@ -69,40 +69,6 @@ public:
     void LoadLibrary(
             Smp::String8 libraryPath,
             Smp::LibraryLoadFlag loadFlag = Smp::LibraryLoadFlag::LLF_Auto) override;
-    /**
-     * Create and add new model instance.
-     * Model type is defined as template argument.
-     * @param name new model instance name.
-     * @param descr instance description.
-     * @return pointer to the created model, may be nullptr in case
-     * of creation error, for instance when object to create type does
-     * not derive from Smp::IModel.
-     */
-    template <typename T>
-    T* AddModel(Smp::String8 name, Smp::String8 descr = "") {
-        T* m = new T(name, descr, this);
-        auto mdl = dynamic_cast<Smp::IModel*>(m);
-        if (mdl != nullptr) {
-            AddModel(mdl);
-        }
-        else {
-            delete m;
-            m = nullptr;
-        }
-        return m;
-    }
-
-    /**
-     * Connect 2 fields
-     *
-     * @param inputFieldPath
-     * @param outputFieldPath
-     */
-    void connect(std::string inputFieldPath, std::string outputFieldPath);
-
-    void schedule(std::string modelName, std::string entryPoint, uint32_t period);
-
-    void setValue(std::string field, float value);
 
 private:
     Smp::SimulatorStateKind _state;

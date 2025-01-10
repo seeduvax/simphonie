@@ -8,7 +8,7 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Builder.hpp"
+#include "simph/svc/Builder.hpp"
 #include <iostream>
 #include "simph/kern/Simulator.hpp"
 #include "simph/smpdk/Utils.hpp"
@@ -16,7 +16,7 @@
 #include "Smp/Services/IScheduler.h"
 
 namespace simph {
-namespace kern {
+namespace svc {
 // --------------------------------------------------------------------
 // ..........................................................
 Builder::Builder(Smp::IObject* parent) : Parent("Builder", "descr", parent) {}
@@ -64,19 +64,23 @@ void Builder::publish(Smp::IPublication* receiver) {
         auto c = sim->CreateInstance(simph::smpdk::Utils::generateUuid(cfg.type.c_str()), cfg.name.c_str(),
                                      cfg.description.c_str(), sim);
         if (c == nullptr) {
+/* TODO restore this somehow, reimplement feature totally here. Any kind of
+ * ISimulator should work.
             c = simk->createSmpModel(cfg.type.c_str(), cfg.name.c_str(), cfg.description.c_str());
             if (c == nullptr) {
                 std::stringstream ss;
                 ss << "Can't create instance " << cfg.library << " " << cfg.name << " " << cfg.type;
                 throw std::runtime_error(ss.str());
             }
+*/
         }
     }
     // publish samplers
     for (auto cfg : _loadSamplerCfg) {
-        sim->LoadLibrary("libsimph_kern.so");
+// TODO this should not be required. Samplers should be added like any component.
+        sim->LoadLibrary("libsimph_svc.so");
         auto simk = dynamic_cast<simph::kern::Simulator*>(sim);
-        auto sampler = dynamic_cast<simph::kern::Sampler*>(simk->CreateInstance(
+        auto sampler = dynamic_cast<simph::svc::Sampler*>(simk->CreateInstance(
             simph::smpdk::Utils::generateUuid("Sampler"), cfg.name.c_str(), cfg.description.c_str(), sim));
         _samplers.push_back(sampler);
     }
@@ -87,8 +91,9 @@ void Builder::connect() {
     // load EP sampler
     for (auto cfg : _loadSamplerCfg) {
         auto sampler =
-            dynamic_cast<simph::kern::Sampler*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.name.c_str()));
+            dynamic_cast<simph::svc::Sampler*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.name.c_str()));
         for (auto ep : cfg.fields) {
+// TODO: use SMP::IField rather than specific simphonie IField implementation
             auto field = dynamic_cast<simph::kern::Field*>(getSimulator()->GetResolver()->ResolveAbsolute(ep.c_str()));
             sampler->recordField(field);
         }
@@ -157,10 +162,10 @@ LOGE("Field connection not implemented.")
 void Builder::configure() {
     uint16_t k = 0;
     for (auto cfg : _loadSamplerCfg) {
-        auto mode = dynamic_cast<kern::Field*>(_samplers[k]->GetField("mode"));
+        auto mode = dynamic_cast<simph::kern::Field*>(_samplers[k]->GetField("mode"));
         mode->SetValue(cfg.mode);
         for (auto fieldPath : cfg.fields) {
-            auto field = dynamic_cast<kern::Field*>(getSimulator()->GetResolver()->ResolveAbsolute(fieldPath.c_str()));
+            auto field = dynamic_cast<simph::kern::Field*>(getSimulator()->GetResolver()->ResolveAbsolute(fieldPath.c_str()));
             if (field != nullptr)
                 _samplers[k]->recordField(field);
         }
@@ -172,5 +177,5 @@ void Builder::configure() {
     }
 }
 
-}  // namespace kern
+}  // namespace svc
 }  // namespace simph

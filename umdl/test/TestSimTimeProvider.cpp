@@ -42,8 +42,10 @@ public:
         sim.LoadLibrary("simph_umdl");
         auto mdl = sim.CreateInstance(simph::smpdk::Utils::generateUuid("SimTimeProvider"), "clock", "", nullptr);
         CPPUNIT_ASSERT(mdl != nullptr);
-        auto log = sim.AddModel<Logger1D>("log");
-        auto sync = sim.AddModel<SysTimeSynchro>("sync");
+        auto log = new Logger1D("log","",&sim);
+        sim.AddModel(log);
+        auto sync = new SysTimeSynchro("sync","",&sim);
+        sim.AddModel(sync);
         sim.Publish();
         sim.Configure();
         sim.Connect();

@@ -491,6 +491,8 @@ Smp::FactoryCollection* Simulator::GetFactories() const {
 Smp::Publication::ITypeRegistry* Simulator::GetTypeRegistry() const {
     return _typeRegistry;
 }
+
+/*
 // ..........................................................
 // TODO moved that to a dedicated connection service.
 void Simulator::connect(std::string inputFieldPath, std::string outputFieldPath) {
@@ -513,7 +515,9 @@ void Simulator::connect(std::string inputFieldPath, std::string outputFieldPath)
 
     outputField->Connect(inputField);
 }
+*/
 // ..........................................................
+/*
 void Simulator::schedule(std::string modelName, std::string entryPoint, uint32_t period) {
     // TODO handle errors
     auto model = dynamic_cast<Smp::IEntryPointPublisher*>(GetResolver()->ResolveAbsolute(modelName.c_str()));
@@ -530,6 +534,7 @@ void Simulator::schedule(std::string modelName, std::string entryPoint, uint32_t
     }
     GetScheduler()->AddSimulationTimeEvent(ep, 0, period, -1);
 };
+*/
 // ..........................................................
 /*
 Smp::IComponent* Simulator::createSmpModel(Smp::String8 typeName, Smp::String8 name, Smp::String8 description) {
@@ -551,12 +556,12 @@ Smp::IComponent* Simulator::createSmpModel(Smp::String8 typeName, Smp::String8 n
             break;
         }
     }
-*/
 
     // When no factory is found, Smp header tels to return null. So nothing
     // particular to do since res is initialized as nullptr.
     return res;
 }
+*/
 
 // ..........................................................
 void Simulator::epStart() {
