@@ -9,6 +9,20 @@
     {edition %version=1 %date=2024-12-27 %%Document creation}
   }
   {section %title=Introduction
+    {section %title=SMP Level 1 features coverage
+In this section, the requirements are defined only to link to SMP level clauses
+subset in order to organize test traceability and provide an overview of the
+SMP features coverage.
+{req %id=simph.smp.obj
+Simphonie shall provide a concrete class for the Smp::IObject interface.
+}
+{req %id=simph.smp.comp
+Simphonie shall provide a concrete class for the Smp::IComponent interface.
+}
+    }
+    {section %title=SMP Level 2 features coverage
+
+    }
     {section %title=SMP complements
 {req %id=simph.smpex.schedev.1
 The scheduler shall emit an event named {kw Scheduler_PreEventExecute} before
@@ -18,25 +32,80 @@ executing the next scheduled entry point.
 The scheduler shall emit an event named {kw Scheduler_PostEventExecute} just
 after the execution of each schduled entry point is completed. 
 }
+{req %id=simph.smpex.svc.1
+The simphonie's Smp:ISimulator implementation shall let the simulator integrator
+override the simphonie's implementation of the SMP mandatory services with any
+of its own implementation.
+}
+Of course, such service replacement may alter the way simphonie is working (and
+that is for that purpose), and the simulator integrator shall be aware of some
+constraints to keep its simulation system able to run properly:
+ - some simphonie's services are sharing somehow a contract for a good
+   cooperation. For instance the scheduler and time keeper are cooperating
+   through specific events that are not part of the SMP level 1 standard. Then
+   replacing one of this two service requires the contract is maintained by the
+   replacing service. Or both services that may have their own cooperation 
+   scheme shall be overridden.
+ - The service override is allowed only on the very early stage of the simulator
+   build phase: services shall be added using AddService() method before the
+   Publish step starts. After that the simulator behavior is undefined and the 
+   integrator shall assume the resulting behavior can suit its expectations.
+ - The type registry service is used to load libraries, making possible some
+   types being registered before any service is added, then before a type 
+   registry replacement can be set making possible the loss of the early type
+   registrations.
     }
   }
   {section %title=Design
     {section %title=Mandatory services bundle
-The kernel library include an implementation for each of the mandatory SMP services:
+The kernel library include an implementation for each of the mandatory SMP
+services:
   - Logger
   - Scheduler
-  - Timekeeper
   - Resolver
   - TimeKeeper
 
-However those service shall be replaceable, meaning a user may substitute anyone
-with its own implementation using the {kw AddService} method. To do so, the
-simulator Publish process, start with a preliminary added service scan to find
-the eventually provided substitutes, then create the default implementation
-instance for each service not yet provided. From this step, the simulator is
-configured to let service accessors (GetScheduler, GetTimeKeeper, GetResolver,
-etc) to return the right service instance, the explicitly provided one or the
-default created. 
+The services are created on the simulator construction to ensure availability at
+the earliest stages of the simulator build.
+
+However those service shall be replaceable {req %id=simph.esmp.svc.1}, meaning
+a user may substitute anyone with its own implementation using the {kw AddService}
+method. To do so, this method dynamically checks the type of the service to add
+for each mandatory service type. When it matches a type, the simphonie's default
+service implementation is deleted and replaced by the new one. This makes the
+eventual configuration applied to the deleted service be lost. Each mandatory
+service type is checked in sequence, making a single object implementing many of
+the mandatory services be properly registered as the right instance for the many
+services it implements.
+
+This way of doing (creating default services and replace later) has been
+selected because of the few early simulator building action that may need the
+availability of such service before any new one can be added. In most case this
+is without significant effect, since almost nothing is done before the first
+service addition and services should be added and more specifically published
+before any other kinds of components can be published. 
+{fig %src=SimSvcOverride_seq.png %title=Simulator services override}
+{#
+@startuml SimSvcOverride_seq.png
+participant UserIntegration
+UserIntegration -> Simulator**: new
+Simulator -> Logger**: new
+return
+Simulator -> Resolver**: new
+return
+Simulator -> TimeKeeper**: new
+return
+Simulator -> Scheduler**: new
+return
+UserIntegration -> AltTimeKeeper**: new
+return
+UserIntegration -> Simulator++: AddService(AltTimeKeeper)
+Simulator -> TimeKeeper!!
+Simulator -> Simulator++: register AltTimeKeeper
+return
+return
+@enduml
+#}
     }
     {section %title=Path parsing
 The bundled resolver parses the pathes to be resolved according the following state diagram.
