@@ -14,8 +14,10 @@ namespace simph {
 namespace lua {
 // --------------------------------------------------------------------
 // ..........................................................
-LuaBuilder::LuaBuilder(Smp::ISimulator* sim) : _builder(sim), _sim(sim) {
-    _sim->AddService(&_builder);
+LuaBuilder::LuaBuilder(Smp::ISimulator* sim) : 
+//             _builder(sim),
+             _sim(sim) {
+//    _sim->AddService(&_builder);
 }
 // ..........................................................
 LuaBuilder::~LuaBuilder() {}
@@ -48,7 +50,7 @@ void LuaBuilder::loadParameters(sol::table parameters) {
         val = Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float64, (double)value["value"]);
         //}
 
-        _builder.AddLoadParamCfg({path, val});
+//        _builder.AddLoadParamCfg({path, val});
     }
 }
 // ..........................................................
@@ -57,7 +59,7 @@ void LuaBuilder::loadSchedules(sol::table schedules) {
         sol::table value = obj.second;
         std::string path = value["path"];
         auto period = Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt64, (uint32_t)value["period"]);
-        _builder.AddLoadScheduleCfg({path, period});
+//        _builder.AddLoadScheduleCfg({path, period});
     }
 }
 // ..........................................................
@@ -67,7 +69,7 @@ void LuaBuilder::loadInitializations(sol::table initializations) {
         std::string path = value["path"];
         // TODO identify value type : bool, float, int, string, uint32...
         auto val = Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float64, (double)value["value"]);
-        _builder.AddLoadInitCfg({path, val});
+//        _builder.AddLoadInitCfg({path, val});
     }
 }
 // ..........................................................
@@ -84,7 +86,7 @@ void LuaBuilder::loadSamplers(sol::table samplers) {
         for (int field = 1; field <= valueFields.size(); field++) {
             fields.push_back(valueFields[field]);
         }
-        _builder.AddLoadSamplerCfg({name, description, mode, fields});
+//        _builder.AddLoadSamplerCfg({name, description, mode, fields});
     }
 }
 // ..........................................................
@@ -93,7 +95,7 @@ void LuaBuilder::loadConnections(sol::table connections) {
         sol::table value = obj.second;
         std::string from = value["from"];
         std::string to = value["to"];
-        _builder.AddLoadConnectionCfg({from, to});
+//        _builder.AddLoadConnectionCfg({from, to});
     }
 }
 // ..........................................................
@@ -104,7 +106,7 @@ void LuaBuilder::loadSmpModels(sol::table models) {
         std::string type = value["class"];
         std::string name = value["name"];
         std::string description = value["description"];
-        _builder.AddLoadSmpModelCfg({library, type, name, description});
+//        _builder.AddLoadSmpModelCfg({library, type, name, description});
     }
 }
 // ..........................................................

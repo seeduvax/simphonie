@@ -9,9 +9,9 @@
  */
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/ISimulator.h"
+#include "Smp/IModel.h"
 #include "simph/kern/Field.hpp"
 #include "simph/kern/Resolver.hpp"
-#include "simph/kern/Sampler.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/Simulator.hpp"
 #include "simph/lua/LuaBuilder.hpp"
@@ -235,25 +235,34 @@ int luaopen_libsimph_lua(lua_State* L) {
             }
             return sol::object(L, sol::in_place, o);
         },
+// TODO bind those services to addition SMP service or helpers that are provided 
+// with the lua binding. Meaning it shall work on any SMP complient ISimulator
+// implementation.
         sol::meta_function::new_index, myNewIndex,
-        "connect", &simph::kern::Simulator::connect,
-        "schedule", &simph::kern::Simulator::schedule,
-        "setValue", &simph::kern::Simulator::setValue,
-        "createSmpModel", &simph::kern::Simulator::createSmpModel,
+//        "connect", &simph::kern::Simulator::connect,
+//        "schedule", &simph::kern::Simulator::schedule,
+//        "setValue", &simph::kern::Simulator::setValue,
+//        "createSmpModel", &simph::kern::Simulator::createSmpModel,
         "setConfiguration",[](Smp::ISimulator* s, sol::object o) {
             auto b = new simph::lua::LuaBuilder(s);
             b->setConfiguration(o);
             return b;
         },
-        "getSampler",[](Smp::ISimulator* s, std::string name) {
-            auto sampler =  dynamic_cast<simph::kern::Sampler*>(s->GetResolver()->ResolveAbsolute(name.c_str()));
-            return sampler;
-        },
+// TODO: to be replaced by the capability to call entry points.
         "dump",[](Smp::ISimulator* s) {
             dynamic_cast<simph::kern::Resolver*>(s->GetResolver())->dump();
         },
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite, Smp::ISimulator>()
     );
+// TODO: to be reimplemented without using speicif method of simphonie's own 
+// IScheduler implementation:
+//   - register to some event related to one entry point executed by the 
+//     scheduler.
+//      - what's registered shall request ISimulator->Hold();
+//   - register to simulator stop:
+//      - what's registered shall notify simulation stopped.   
+//   - start the simulator
+//   - wait for simulation stop.
     nsSimphonie.new_usertype<simph::kern::Scheduler>("Scheduler",
         "step", &simph::kern::Scheduler::step,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService, Smp::Services::IScheduler>()
@@ -262,24 +271,10 @@ int luaopen_libsimph_lua(lua_State* L) {
         "ResolveAbsolute", &simph::kern::Resolver::ResolveAbsolute,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService, Smp::Services::IResolver>()
     );
-    nsSimphonie.new_usertype<simph::kern::Sampler>("Sampler",        
-        "addData",[](simph::kern::Sampler* s, Smp::IObject* field) {
-            //TODO manage nullptr field
-            auto field_ = dynamic_cast<simph::kern::Field*>(field);
-            if(field_ == nullptr){
-                std::stringstream ss;
-                ss << field->GetName() << " can't be convert to simphonie field";
-                throw std::runtime_error(ss.str().c_str());
-            }
-            s->recordField(field_);
-        },
-        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IModel>()
-    );
-
-    // nsSimphonie.new_usertype<last::smputil::LogiesProxy>("LogiesProxy",
-    //     sol::base_classes, sol::bases<Smp::Management::IManagedObject, Smp::IModel, Smp::IComposite, Smp::Management::IEntryPointPublisher, simba::SmpConcreteModel, simba::ASmpModel>()
-    // );
-    // clang-format on
+// TODO, neeed something to bind entry points and published operations to 
+// to lua.
+// TODO, let the GetContainers()->GetComponents() be bound as meta table to 
+// travel the components composition "naturally" with lua dot operator.
     t.push();
     return 1;
 }

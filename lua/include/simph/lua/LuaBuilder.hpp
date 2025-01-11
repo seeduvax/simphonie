@@ -10,8 +10,8 @@
 #ifndef __simph_lua_LuaBuilder_HPP__
 #define __simph_lua_LuaBuilder_HPP__
 
-#include "simph/kern/Builder.hpp"
 #include "sol/sol.hpp"
+#include "Smp/ISimulator.h"
 
 namespace simph {
 namespace lua {
@@ -24,7 +24,8 @@ public:
     void setConfiguration(sol::table config);
 
 private:
-    simph::kern::Builder _builder;
+// TODO builder to be reconsidered
+//    simph::kern::Builder _builder;
     Smp::ISimulator* _sim;
 
     void loadSmpModels(sol::table models);
