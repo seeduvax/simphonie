@@ -23,15 +23,21 @@ Simphonie shall provide a concrete class for the Smp::IComponent interface.
     {section %title=SMP Level 2 features coverage
 
     }
-    {section %title=SMP complements
-{req %id=simph.smpex.schedev.1
+    {section %title=Simphonie specific behaviors
+{req %id=simph.sched.1
 The scheduler shall emit an event named {kw Scheduler_PreEventExecute} before
 executing the next scheduled entry point.
 }
-{req %id=simph.smpex.schedev.2
+{req %id=simph.sched.2
 The scheduler shall emit an event named {kw Scheduler_PostEventExecute} just
 after the execution of each schduled entry point is completed. 
 }
+{req %id=simph.sched.3
+The scheduler shall request simulator to hold simulation when there are no more
+events in the schedule queue.
+}
+    }
+    {section %title=SMP complements and extension
 {req %id=simph.smpex.svc.1
 The simphonie's Smp:ISimulator implementation shall let the simulator integrator
 override the simphonie's implementation of the SMP mandatory services with any
@@ -54,6 +60,19 @@ constraints to keep its simulation system able to run properly:
    types being registered before any service is added, then before a type 
    registry replacement can be set making possible the loss of the early type
    registrations.
+{req %id=simph.smpex.hold.1
+Simphonie shall provide a service letting control automatic transition of the
+simulator to stand by state.
+}
+{req %id=simph.smpex.hold.2
+The simphonie simulator hold control service shall publish a field named
+{kw endSimTime} defining when the simulation shall stop (as a simulation time
+reference).
+}
+{req %id=simph.smpex.hold.3
+The simphonie simulator hold control service shall request simulator hold when
+the simulation time reached the current value of its {kw endSimTime} field.
+}
     }
   }
   {section %title=Design
