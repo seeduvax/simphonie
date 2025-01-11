@@ -9,14 +9,14 @@
  */
 #include "Smp/ISimulator.h"
 #include "simph/kern/Factory.hpp"
-#include "simph/svc/Sampler.hpp"
+#include "simph/esmp/Sampler.hpp"
 #include "simph/sys/DlDef.h"
 
 namespace simph {
-namespace svc {
+namespace esmp {
 
 REGISTER_SMP_LIBINIT();
 ADD_SMP_FACTORY("Sampler", Sampler);
 
-}  // namespace svc
+}  // namespace esmp
 }  // namespace simph

@@ -8,7 +8,7 @@
  * $Id$
  * $Date$
  */
-#include "simph/svc/Builder.hpp"
+#include "simph/esmp/Builder.hpp"
 #include <iostream>
 #include "simph/kern/Simulator.hpp"
 #include "simph/smpdk/Utils.hpp"
@@ -16,7 +16,7 @@
 #include "Smp/Services/IScheduler.h"
 
 namespace simph {
-namespace svc {
+namespace esmp {
 // --------------------------------------------------------------------
 // ..........................................................
 Builder::Builder(Smp::IObject* parent) : Parent("Builder", "descr", parent) {}
@@ -78,9 +78,9 @@ void Builder::publish(Smp::IPublication* receiver) {
     // publish samplers
     for (auto cfg : _loadSamplerCfg) {
 // TODO this should not be required. Samplers should be added like any component.
-        sim->LoadLibrary("libsimph_svc.so");
+        sim->LoadLibrary("libsimph_esmp.so");
         auto simk = dynamic_cast<simph::kern::Simulator*>(sim);
-        auto sampler = dynamic_cast<simph::svc::Sampler*>(simk->CreateInstance(
+        auto sampler = dynamic_cast<simph::esmp::Sampler*>(simk->CreateInstance(
             simph::smpdk::Utils::generateUuid("Sampler"), cfg.name.c_str(), cfg.description.c_str(), sim));
         _samplers.push_back(sampler);
     }
@@ -91,7 +91,7 @@ void Builder::connect() {
     // load EP sampler
     for (auto cfg : _loadSamplerCfg) {
         auto sampler =
-            dynamic_cast<simph::svc::Sampler*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.name.c_str()));
+            dynamic_cast<simph::esmp::Sampler*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.name.c_str()));
         for (auto ep : cfg.fields) {
 // TODO: use SMP::IField rather than specific simphonie IField implementation
             auto field = dynamic_cast<simph::kern::Field*>(getSimulator()->GetResolver()->ResolveAbsolute(ep.c_str()));
@@ -177,5 +177,5 @@ void Builder::configure() {
     }
 }
 
-}  // namespace svc
+}  // namespace esmp
 }  // namespace simph

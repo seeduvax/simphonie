@@ -7,7 +7,7 @@
  * $Id$
  * $Date$
  */
-#include "simph/svc/Sampler.hpp"
+#include "simph/esmp/Sampler.hpp"
 #include <fstream>
 #include <iostream>
 #include "Smp/ISimulator.h"
@@ -21,7 +21,7 @@
 // => may need to relocate some part of kern to smpdk.
 
 namespace simph {
-namespace svc {
+namespace esmp {
 // --------------------------------------------------------------------
 // ..........................................................
 Sampler::Sampler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
@@ -197,5 +197,5 @@ void Sampler::step() {
     }
 };
 
-}  // namespace svc
+}  // namespace esmp
 }  // namespace simph

@@ -7,8 +7,8 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_svc_Sampler_HPP__
-#define __simph_svc_Sampler_HPP__
+#ifndef __simph_esmp_Sampler_HPP__
+#define __simph_esmp_Sampler_HPP__
 #include <fstream>
 #include <ostream>
 #include <sstream>
@@ -16,7 +16,7 @@
 #include "simph/kern/Field.hpp"
 
 namespace simph {
-namespace svc {
+namespace esmp {
 /**
  *
  */
@@ -46,6 +46,6 @@ private:
     Smp::Bool _modeValue;
 };
 
-}  // namespace svc
+}  // namespace esmp
 }  // namespace simph
-#endif  // __simph_svc_Sampler_HPP__
+#endif  // __simph_esmp_Sampler_HPP__

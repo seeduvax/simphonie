@@ -17,11 +17,11 @@
 #include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
 #include "simph/smpdk/Component.hpp"
-#include "simph/svc/Sampler.hpp"
+#include "simph/esmp/Sampler.hpp"
 // clang-format on
 
 namespace simph {
-namespace svc {
+namespace esmp {
 class Builder : public simph::smpdk::Component, virtual public Smp::IService {
     typedef simph::smpdk::Component Parent;
 
@@ -79,5 +79,5 @@ private:
     std::vector<Sampler*> _samplers;
 };
 
-}  // namespace svc
+}  // namespace esmp
 }  // namespace simph
