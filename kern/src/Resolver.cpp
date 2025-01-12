@@ -29,7 +29,7 @@ Resolver::Resolver(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     // Default root is the parent object, until connect step where
     // the simulator is recovered.
     _root=parent;
-    addEP("dump", "List published objects to stdout", &Resolver::dump, this);
+    addEP("dump", "List published objects to stdout", this, &Resolver::dump);
 }
 // ..........................................................
 Resolver::~Resolver() {

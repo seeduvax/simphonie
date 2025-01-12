@@ -41,7 +41,7 @@ Smp::DateTime TimeKeeper::_y2kJan1Offset = __GetY2KOffset();
 TimeKeeper::TimeKeeper(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : Component(name, descr, parent) {
     addEP(EP_NAME_UPDATE_SIM_TIME,"simulation time update entry point", 
-                                &TimeKeeper::epUpdateSimulationTime,this);
+                                this, &TimeKeeper::epUpdateSimulationTime);
 }
 // ..........................................................
 TimeKeeper::~TimeKeeper() {}

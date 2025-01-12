@@ -25,7 +25,7 @@ public:
     virtual ~IEntryPointPublisher();
 
     template <typename Owner, typename Func>
-    inline void addEP(Smp::String8 name, Smp::String8 descr , Func f, Owner owner) {
+    inline void addEP(Smp::String8 name, Smp::String8 descr , Owner owner, Func f) {
         _epList.push_back(new TEntryPoint(f,owner,name,descr));
     }
 

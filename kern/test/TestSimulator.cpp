@@ -9,26 +9,31 @@
  */
 #include <cppunit/extensions/HelperMacros.h>
 #include "simph/kern/Simulator.hpp"
-#include "simph/kern/AStepMdl.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/smpdk/Collection.hpp"
 #include "simph/smpdk/Container.hpp"
+#include "simph/smpdk/Component.hpp"
 #include "simph/smpdk/EntryPoint.hpp"
+#include "simph/smpdk/IEntryPointPublisher.hpp"
 #include "simph/sys/Synchro.hpp"
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Services/IScheduler.h"
 #include "Smp/Services/IEventManager.h"
+#include "Smp/IModel.h"
 
 
 namespace test {
 using namespace simph::kern;
+using namespace simph::smpdk;
 
-class CompositeModel: public AStepMdl, virtual public Smp::IComposite {
+class CompositeModel: public Component, virtual public Smp::IComposite,
+                    virtual public IEntryPointPublisher, virtual public Smp::IModel {
 public:
     CompositeModel(Smp::String8 name, Smp::String8 descr, Smp::IComposite* parent): 
-            AStepMdl(name,descr,parent), _containers("Containers", "", this) {
+            Component(name,descr,parent), _containers("Containers", "", this) {
+        addEP("step", "", this, &CompositeModel::step);
     }
-    void step() override {
+    void step() {
         TRACE(""<<GetName()<<".step()");
     }
     const Smp::ContainerCollection* GetContainers() const override {
@@ -62,6 +67,31 @@ class TestSimulator : public CppUnit::TestFixture {
     CPPUNIT_TEST_SUITE_END();
 
 private:
+    class EPSet: public Object {
+    public:
+        EPSet(TestSimulator& ts): 
+                Object("epset","",nullptr), _ts(ts) 
+        {
+        } 
+        virtual ~EPSet() {}
+        void checkEndSim() {
+            if (_ts._sim->GetTimeKeeper()->GetSimulationTime()>=_ts._endSimTime) {
+                if (!_ts._endReached) {
+                   _ts._sim->Hold(true);
+                }
+                _ts._endReached=true;
+            }
+        }
+        void notifyEndSim() {
+            {
+                Synchronized(_ts._mutex);
+                _ts._completed=true;
+            }
+            _ts._monitor.notify_all();
+        }
+        TestSimulator& _ts;
+    };
+
     Smp::ISimulator* _sim=nullptr;
     bool _completed=false;
     Smp::Duration _endSimTime=1e9;
@@ -70,36 +100,23 @@ private:
     Smp::IEntryPoint* _checkEndSim;
     Smp::IEntryPoint* _notifyEndSim;
     bool _endReached=false;
+    EPSet* _epset;
 
-    typedef simph::smpdk::EntryPoint<TestSimulator*, void (TestSimulator::*)()> EP;
+    typedef simph::smpdk::TEntryPoint<TestSimulator*, void (TestSimulator::*)()> EP;
 
 public:
     void setUp() {
-        _checkEndSim = new EP(this, &TestSimulator::checkEndSim, "checkEndSim");
-        _notifyEndSim = new EP(this, &TestSimulator::notifyEndSim, "notifyEndSim");
+        _epset=new EPSet(*this);
+        _checkEndSim = EntryPoint::Create("checkEndSim", "", _epset, &EPSet::checkEndSim);
+        _notifyEndSim = EntryPoint::Create("notifyEndSim", "", _epset, &EPSet::notifyEndSim);
     }
 
     void tearDown() {
         delete _checkEndSim;
         delete _notifyEndSim;
+        delete _epset;
     }
 
-    void checkEndSim() {
-        if (_sim->GetTimeKeeper()->GetSimulationTime()>=_endSimTime) {
-            if (!_endReached) {
-               _sim->Hold(true);
-            }
-            _endReached=true;
-        }
-    }
-
-    void notifyEndSim() {
-        {
-            Synchronized(_mutex);
-            _completed=true;
-        }
-        _monitor.notify_all();
-    }
 
 
     void testStates() {
