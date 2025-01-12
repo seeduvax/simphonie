@@ -13,7 +13,7 @@
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Services/IScheduler.h"
 #include "simph/smpdk/Component.hpp"
-#include "simph/kern/IEntryPointPublisher.hpp"
+#include "simph/smpdk/IEntryPointPublisher.hpp"
 
 namespace simph {
 namespace kern {

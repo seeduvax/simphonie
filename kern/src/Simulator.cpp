@@ -45,8 +45,8 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
     TypeRegistry* tr = new TypeRegistry("TypeRegistry", "Type registry service", this);
     _typeRegistry = tr;
 
-    _epStart = EntryPoint::Create("start","",this,&Simulator::epStart,this);
-    _epStop = EntryPoint::Create("stop","",this,&Simulator::epStop,this);
+    _epStart = EntryPoint::Create("start","",this,&Simulator::epStart);
+    _epStop = EntryPoint::Create("stop","",this,&Simulator::epStop);
 
     _services->AddComponent(tr);
     _resolver = new Resolver("Resolver", "Objects registry and resolver", this);

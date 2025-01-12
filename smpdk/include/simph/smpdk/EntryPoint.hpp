@@ -18,34 +18,50 @@
 namespace simph {
     namespace smpdk {
 
+class EntryPoint: public Object, virtual public Smp::IEntryPoint {
+public:
+    EntryPoint(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent):
+            Object(name,descr,parent) {
+    }
+    virtual ~EntryPoint() {
+    }
+    template <typename Owner, typename Func>
+    static inline Smp::IEntryPoint* Create(Smp::String8 name, Smp::String8 descr,
+                Owner owner, Func f);
+};
 /**
  *
  */
-template <typename Class, typename Func>
-class EntryPoint: public Object, virtual public Smp::IEntryPoint {
+template <typename Owner, typename Func>
+class TEntryPoint: public EntryPoint {
 public:
     /**
      * Default constructor.
      */
-    EntryPoint(Class c,Func f, Smp::String8 name, Smp::String8 descr="",
-               Smp::IObject* parent=nullptr) 
-            : Object(name,descr,parent),
-              _class(c), _func(f) {
+    TEntryPoint(Func f, Owner owner, Smp::String8 name, Smp::String8 descr="")
+            : EntryPoint(name,descr,owner),
+              _owner(owner), _func(f) {
     }
     /**
      * Destructor.
      */
-    virtual ~EntryPoint() {
+    virtual ~TEntryPoint() {
     }
     
     // Smp::IEntryPoint implementation
     void Execute() const override {
-        (_class->*_func)();
+        (_owner->*_func)();
     }
 private:
-    Class _class;
+    Owner _owner;
     Func _func;
 };
+template <typename Owner, typename Func>
+inline Smp::IEntryPoint* EntryPoint::Create(
+                                Smp::String8 name, Smp::String8 descr,
+                                Owner owner, Func f) {
+    return new TEntryPoint(f,owner,name,descr);
+}
 
 }} // namespace simph::smpdk
 #endif // __simph_smpdk_EntryPoint_HPP__

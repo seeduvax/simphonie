@@ -12,7 +12,7 @@
 #include <fstream>
 #include <ostream>
 #include <sstream>
-#include "simph/kern/AStepMdl.hpp"
+#include "simph/smpdk/Component.hpp"
 #include "simph/kern/Field.hpp"
 
 namespace simph {
@@ -20,7 +20,8 @@ namespace esmp {
 /**
  *
  */
-class Sampler : public simph::kern::AStepMdl {
+class Sampler : public simph::smpdk::Component {
+    typedef simph::smpdk::Component Parent;
 public:
     /**
      * Default constructor.
@@ -31,15 +32,15 @@ public:
      */
     virtual ~Sampler();
 
-    void recordField(simph::kern::Field* field);
+    void recordField(Smp::IField* field);
 
-    void step() override;
+    void step();
 
 protected:
     void initColumn();
 
 private:
-    std::vector<simph::kern::Field*> _fields;
+    std::vector<Smp::IField*> _fields;
     std::ofstream _file;
     std::string _fileName;
 

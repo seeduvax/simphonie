@@ -112,10 +112,12 @@ Scheduler::Scheduler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
       _th(),
       _currentSchedule(nullptr),
       _scheduled(compareSchedule) {
-    _epEnterExecuting=EntryPoint::Create("enterExecuting","simulation enter execute event entry point", 
-                                this, &Scheduler::epEnterExecuting, this);
-    _epLeaveExecuting=EntryPoint::Create("leaveExecuting","simulation leave execute event entry point",
-                                this, &Scheduler::epLeaveExecuting, this);
+    _epEnterExecuting=EntryPoint::Create("enterExecuting",
+                                "simulation enter execute event entry point", 
+                                this, &Scheduler::epEnterExecuting);
+    _epLeaveExecuting=EntryPoint::Create("leaveExecuting",
+                                "simulation leave execute event entry point",
+                                this, &Scheduler::epLeaveExecuting);
 }
 // ..........................................................
 Scheduler::~Scheduler() {

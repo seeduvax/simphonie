@@ -15,9 +15,9 @@
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Services/IEventManager.h"
 #include "simph/smpdk/Component.hpp"
+#include "simph/smpdk/IEntryPointPublisher.hpp"
 #include "simph/sys/Synchro.hpp"
 #include "simph/sys/Thread.hpp"
-#include "simph/kern/IEntryPointPublisher.hpp"
 
 namespace simph {
 namespace kern {
@@ -28,7 +28,7 @@ class TimeKeeper;
  */
 class Scheduler : public Component, 
                 virtual public simph::sys::Runnable, 
-                virtual public IEntryPointPublisher,
+                virtual public simph::smpdk::IEntryPointPublisher,
                 virtual public Smp::Services::IScheduler {
 public:
     /**

@@ -25,7 +25,7 @@ namespace esmp {
 // --------------------------------------------------------------------
 // ..........................................................
 Sampler::Sampler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : AStepMdl(name, descr, parent), _fields(), _fileName(std::string(GetName())), _modeValue(false) {
+    : Parent(name, descr, parent), _fields(), _fileName(std::string(GetName())), _modeValue(false) {
     /*
     {comment %id=SDE-001
     Creating the file at that moment on model construction with such naming
@@ -37,8 +37,8 @@ Sampler::Sampler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     }
     */
 
+    addEP("step", "Recording step: save the current values of all linked field.", &Sampler::step, this);
     addEP("initColumn", "Init Entry point that Initialize column headers", &Sampler::initColumn, this);
-    getSimulator()->AddInitEntryPoint(this->GetEntryPoint("initColumn"));
 
     addEP("debugPrintFile", "", [=]() {
         TRACE("Sampler::debugPrintFile: " << _fileName << "\n" << std::ifstream(_fileName).rdbuf());
@@ -52,6 +52,11 @@ Sampler::Sampler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
 // ..........................................................
 Sampler::~Sampler() {
     _file.close();
+}
+
+// ..........................................................
+void Sampler::connect() {
+    getSimulator()->AddInitEntryPoint(this->GetEntryPoint("initColumn"));
 }
 
 // ..........................................................

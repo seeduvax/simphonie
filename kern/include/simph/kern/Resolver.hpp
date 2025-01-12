@@ -14,7 +14,7 @@
 #include <regex>
 #include "Smp/Publication/ITypeRegistry.h"
 #include "Smp/Services/IResolver.h"
-#include "simph/kern/IEntryPointPublisher.hpp"
+#include "simph/smpdk/IEntryPointPublisher.hpp"
 #include "simph/kern/Publication.hpp"
 #include "simph/smpdk/Component.hpp"
 
@@ -27,7 +27,7 @@ class Publication;
  */
 class Resolver : public simph::smpdk::Component,
                  virtual public Smp::Services::IResolver,
-                 virtual public IEntryPointPublisher {
+                 virtual public simph::smpdk::IEntryPointPublisher {
 public:
     /**
      * Default constructor.

@@ -1,5 +1,5 @@
 /*
- * @file EntryPoint.cpp
+ * @file IEntryPointPublisher.cpp
  *
  * Copyright 2019 . All rights reserved.
  * Use is subject to license terms.
@@ -7,16 +7,15 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/EntryPoint.hpp"
+#include "simph/smpdk/IEntryPointPublisher.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-EntryPoint::EntryPoint(std::unique_ptr<Runnable> runnable, Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : Object(name, descr, parent), _runnable(std::move(runnable)) {}
+IEntryPointPublisher::IEntryPointPublisher() : _epList("epList", "", nullptr) {}
 // ..........................................................
-EntryPoint::~EntryPoint() {}
+IEntryPointPublisher::~IEntryPointPublisher() {}
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

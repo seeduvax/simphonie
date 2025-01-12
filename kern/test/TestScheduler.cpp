@@ -31,6 +31,24 @@ class TestScheduler : public CppUnit::TestFixture {
     CPPUNIT_TEST_SUITE_END();
 
 private:
+    class StopControl: public Object {
+    public:
+        StopControl(std::mutex& m, bool& r, std::condition_variable& cv): 
+                Object("","",nullptr), _mutex(m), _run(r), _monitor(cv) 
+        {
+        } 
+        virtual ~StopControl() {}
+        void epLeaveExecuting() {
+            {
+                Synchronized(_mutex);
+                _run=false;
+            }
+            MonitorNotifyAll(_monitor);
+        }
+        std::mutex& _mutex;
+        bool& _run;
+        std::condition_variable& _monitor;
+    };
     Simulator* _sim;
     Scheduler* _scheduler;
     std::mutex _mutex;
@@ -45,8 +63,9 @@ public:
         _sim->Configure();
         _sim->Connect();
         _scheduler = dynamic_cast<Scheduler*>(_sim->GetScheduler());
-        _epLeaveExecuting=EntryPoint::Create("leaveExecution","",nullptr,
-                &TestScheduler::epLeaveExecuting,this);
+        StopControl sc(_mutex, _run, _monitor);
+        _epLeaveExecuting=EntryPoint::Create("leaveExecution","",&sc,
+                &StopControl::epLeaveExecuting);
         _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId,_epLeaveExecuting);
     }
 
@@ -70,13 +89,6 @@ public:
         }
     }
 
-    void epLeaveExecuting() {
-        {
-            Synchronized(_mutex);
-            _run=false;
-        }
-        MonitorNotifyAll(_monitor);
-    }
 
     void callback(std::vector<Smp::Duration>* vv) {
         auto st = _sim->GetTimeKeeper()->GetSimulationTime();

@@ -22,7 +22,7 @@ namespace kern {
  */
 class AStepMdl : public simph::smpdk::Component,
                  public virtual Smp::IModel,
-                 public virtual simph::kern::IEntryPointPublisher {
+                 public virtual simph::smpdk::IEntryPointPublisher {
 public:
     /**
      * Default constructor.
