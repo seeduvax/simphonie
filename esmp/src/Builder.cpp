@@ -92,9 +92,9 @@ void Builder::connect() {
     for (auto cfg : _loadSamplerCfg) {
         auto sampler =
             dynamic_cast<simph::esmp::Sampler*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.name.c_str()));
-        for (auto ep : cfg.fields) {
+        for (auto f : cfg.fields) {
 // TODO: use SMP::IField rather than specific simphonie IField implementation
-            auto field = dynamic_cast<simph::kern::Field*>(getSimulator()->GetResolver()->ResolveAbsolute(ep.c_str()));
+            auto field = dynamic_cast<Smp::IField*>(getSimulator()->GetResolver()->ResolveAbsolute(f.c_str()));
             sampler->recordField(field);
         }
         // getSimulator()->GetScheduler()->AddSimulationTimeEvent(dynamic_cast<Smp::IEntryPoint*>(getSimulator()->GetResolver()->ResolveRelative("step",
@@ -162,10 +162,10 @@ LOGE("Field connection not implemented.")
 void Builder::configure() {
     uint16_t k = 0;
     for (auto cfg : _loadSamplerCfg) {
-        auto mode = dynamic_cast<simph::kern::Field*>(_samplers[k]->GetField("mode"));
+        auto mode = dynamic_cast<Smp::ISimpleField*>(_samplers[k]->GetField("mode"));
         mode->SetValue(cfg.mode);
         for (auto fieldPath : cfg.fields) {
-            auto field = dynamic_cast<simph::kern::Field*>(getSimulator()->GetResolver()->ResolveAbsolute(fieldPath.c_str()));
+            auto field = dynamic_cast<Smp::IField*>(getSimulator()->GetResolver()->ResolveAbsolute(fieldPath.c_str()));
             if (field != nullptr)
                 _samplers[k]->recordField(field);
         }

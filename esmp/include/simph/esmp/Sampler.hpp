@@ -13,14 +13,15 @@
 #include <ostream>
 #include <sstream>
 #include "simph/smpdk/Component.hpp"
-#include "simph/kern/Field.hpp"
+#include "simph/smpdk/IEntryPointPublisher.hpp"
 
 namespace simph {
 namespace esmp {
 /**
  *
  */
-class Sampler : public simph::smpdk::Component {
+class Sampler : public simph::smpdk::Component,
+                public virtual simph::smpdk::IEntryPointPublisher {
     typedef simph::smpdk::Component Parent;
 public:
     /**
@@ -38,6 +39,8 @@ public:
 
 protected:
     void initColumn();
+    void Publish(Smp::IPublication* receiver) override;
+    void Connect(Smp::ISimulator* sim) override;
 
 private:
     std::vector<Smp::IField*> _fields;
