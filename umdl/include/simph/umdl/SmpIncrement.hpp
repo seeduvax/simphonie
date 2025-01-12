@@ -11,12 +11,12 @@
 #define __simph_umdl_SmpIncrement_HPP__
 
 #include <Smp/IPublication.h>
-#include "simph/kern/AStepMdl.hpp"
+#include "simph/umdl/AStepMdl.hpp"
 
 namespace simph {
 namespace umdl {
 
-class SmpIncrement : public simph::kern::AStepMdl {
+class SmpIncrement : public simph::umdl::AStepMdl {
 public:
     SmpIncrement(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent);
     virtual ~SmpIncrement();

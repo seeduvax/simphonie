@@ -37,12 +37,8 @@ Sampler::Sampler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     }
     */
 
-    addEP("step", "Recording step: save the current values of all linked field.", &Sampler::step, this);
-    addEP("initColumn", "Init Entry point that Initialize column headers", &Sampler::initColumn, this);
-
-    addEP("debugPrintFile", "", [=]() {
-        TRACE("Sampler::debugPrintFile: " << _fileName << "\n" << std::ifstream(_fileName).rdbuf());
-    });
+    addEP("step", "Recording step: save the current values of all linked field.", this, &Sampler::step);
+    addEP("initColumn", "Init Entry point that Initialize column headers", this, &Sampler::initColumn);
     auto field =
         new simph::kern::TField<bool>("mode", "true : sampler generate binary files, false : sampler generate csv file",
                                       Smp::ViewKind::VK_All, &_modeValue, false, true, false, this);

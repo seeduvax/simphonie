@@ -25,8 +25,10 @@ public:
     virtual ~IEntryPointPublisher();
 
     template <typename Owner, typename Func>
-    inline void addEP(Smp::String8 name, Smp::String8 descr , Owner owner, Func f) {
-        _epList.push_back(new TEntryPoint(f,owner,name,descr));
+    inline Smp::IEntryPoint* addEP(Smp::String8 name, Smp::String8 descr , Owner owner, Func f) {
+        auto ep=new TEntryPoint(f,owner,name,descr);
+        _epList.push_back(ep);
+        return ep;
     }
 
     inline const Smp::EntryPointCollection* GetEntryPoints() const override {

@@ -10,7 +10,7 @@
 #ifndef __simph_umdl_Generator1D_HPP__
 #define __simph_umdl_Generator1D_HPP__
 #include "Smp/IPublication.h"
-#include "simph/kern/AStepMdl.hpp"
+#include "simph/umdl/AStepMdl.hpp"
 
 namespace simph {
 namespace umdl {
@@ -18,7 +18,7 @@ namespace umdl {
 /**
  *
  */
-class Generator1D : public simph::kern::AStepMdl {
+class Generator1D : public AStepMdl {
 public:
     /**
      * Default constructor.

@@ -25,10 +25,13 @@ void SimControlEnd::wait() {
 }
 
 SimControlEnd::SimControlEnd(Smp::ISimulator* sim, Smp::Duration stopTime):
+            simph::smpdk::Object("simControlEnd","",sim),
             _sim(sim), _stopTime(stopTime) {
-    _ep.reset(new simph::smpdk::EntryPoint(this,&SimControlEnd::ep,"endSimuCtrl"));
+    _ep.reset(simph::smpdk::EntryPoint::Create("endSimuCtrl","",this,&SimControlEnd::ep));
     _sim->GetEventManager()->Subscribe(
             Smp::Services::IEventManager::SMP_PostSimTimeChangeId,
             _ep.get());
+}
+SimControlEnd::~SimControlEnd() {
 }
 }
