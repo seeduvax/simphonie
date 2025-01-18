@@ -121,23 +121,12 @@ int luaopen_libsimph_lua(lua_State* L) {
         "name", sol::property(&Smp::IObject::GetName),
         "description", sol::property(&Smp::IObject::GetDescription),
         "parent", sol::property(&Smp::IObject::GetParent),
-        "type", sol::property([](Smp::IObject* o) { return typeid(*o).name(); })  // TODO add some demangling here
+        "type", sol::property([](Smp::IObject* o) { return typeid(*o).name(); }),  // TODO add some demangling here
+        sol::meta_function::index, [](Smp::IObject* obj, Smp::String8 name) {
+            return obj->GetChild(name);
+        }
     );
     nsSmp.new_usertype<Smp::IComponent>("IComponent", 
-        sol::meta_function::index,
-        [](Smp::IComponent* m, Smp::String8 n, sol::this_state L) {
-            // look up for fields first
-            Smp::IField* f = m->GetField(n);
-            if (f != nullptr) {
-                return sol::object(L, sol::in_place, f);
-            }
-            // then look up for entry points if it's an EntryPointPublisher
-            Smp::IEntryPoint* ep = nullptr;
-            if (dynamic_cast<Smp::IEntryPointPublisher*>(m) != nullptr) {
-                ep = dynamic_cast<Smp::IEntryPointPublisher*>(m)->GetEntryPoint(n);
-            }
-            return sol::object(L, sol::in_place, ep);
-        },
         "GetState", &Smp::IComponent::GetState,
         "GetField", &Smp::IComponent::GetField,
         "GetFields", &Smp::IComponent::GetFields,
@@ -188,33 +177,25 @@ int luaopen_libsimph_lua(lua_State* L) {
         "CreateInstance", &Smp::ISimulator::CreateInstance,
         "GetTimeKeeper", &Smp::ISimulator::GetTimeKeeper,
         "AddService", &Smp::ISimulator::AddService,
-        "GetScheduler", [](Smp::ISimulator& sim) {
-            return dynamic_cast<simph::kern::Scheduler*>(sim.GetScheduler());
-        },
-        "GetResolver", [](Smp::ISimulator& sim) {
-            return dynamic_cast<simph::kern::Resolver*>(sim.GetResolver());
-        },
-        "getData", [](Smp::ISimulator& sim, std::string fieldName) {
-            auto obj = sim.GetResolver()->ResolveAbsolute(fieldName.c_str());
-            //FIXME
-            std::stringstream data;
-           if(dynamic_cast<Smp::ISimpleField*>(obj)){
-             simph::kern::toprint( data, *(dynamic_cast<Smp::ISimpleField*>(obj)));
-           }
-           else if(dynamic_cast<Smp::ISimpleArrayField*>(obj)){
-               simph::kern::toprint( data, *(dynamic_cast<Smp::ISimpleArrayField*>(obj)));
-           }
-           else if(dynamic_cast<Smp::IArrayField*>(obj)){
-               simph::kern::toprint( data, *(dynamic_cast<Smp::IArrayField*>(obj)));
-           }
-            
-            return data.str();
-        },
+        "GetScheduler", &Smp::ISimulator::GetScheduler,
+        "GetResolver", &Smp::ISimulator::GetResolver,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite>()
     );
     nsSmp.new_usertype<Smp::Services::ITimeKeeper>("ITimeKeeper",
         "GetSimulationTime", &Smp::Services::ITimeKeeper::GetSimulationTime,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
+    );
+    // IScheduler binding
+    nsSmp.new_usertype<Smp::Services::IScheduler>("IScheduler",
+        "AddImmediateEvent", &Smp::Services::IScheduler::AddImmediateEvent,
+        "AddSimulationTimeEvent", &Smp::Services::IScheduler::AddSimulationTimeEvent,
+        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService>()
+    );
+    // IResolver binding
+    nsSmp.new_usertype<Smp::Services::IResolver>("IResolver",
+        "ResolveAbsolute", &Smp::Services::IResolver::ResolveAbsolute,
+        "ResolveRelative", &Smp::Services::IResolver::ResolveRelative,
+        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService>()
     );
 
     auto nsSimphonie = t["Simphonie"].get_or_create<sol::table>();
@@ -254,27 +235,11 @@ int luaopen_libsimph_lua(lua_State* L) {
         },
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite, Smp::ISimulator>()
     );
-// TODO: to be reimplemented without using speicif method of simphonie's own 
-// IScheduler implementation:
-//   - register to some event related to one entry point executed by the 
-//     scheduler.
-//      - what's registered shall request ISimulator->Hold();
-//   - register to simulator stop:
-//      - what's registered shall notify simulation stopped.   
-//   - start the simulator
-//   - wait for simulation stop.
-    nsSimphonie.new_usertype<simph::kern::Scheduler>("Scheduler",
-        "step", &simph::kern::Scheduler::step,
-        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService, Smp::Services::IScheduler>()
-    );
-    nsSimphonie.new_usertype<simph::kern::Resolver>("Resolver",
-        "ResolveAbsolute", &simph::kern::Resolver::ResolveAbsolute,
-        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService, Smp::Services::IResolver>()
-    );
+
+    
+
 // TODO, neeed something to bind entry points and published operations to 
 // to lua.
-// TODO, let the GetContainers()->GetComponents() be bound as meta table to 
-// travel the components composition "naturally" with lua dot operator.
     t.push();
     return 1;
 }

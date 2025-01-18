@@ -12,3 +12,5 @@ res=sim:GetResolver()
 print("Plip: "..res.name)
 print("hhh:"..tk:GetState().."/"..tk:GetSimulationTime())
 sim.testTK=tk;
+print("xxxx "..sim.Scheduler.description)
+print("xxxx "..sim.Scheduler:GetState())
