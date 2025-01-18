@@ -12,7 +12,7 @@
 #include "Smp/Services/IEventManager.h"
 #include "Smp/Services/IScheduler.h"
 #include "simph/kern/Simulator.hpp"
-#include "simph/kern/EntryPoint.hpp"
+#include "simph/smpdk/EntryPoint.hpp"
 #include "simph/smpdk/Container.hpp"
 #include "simph/sys/Callback.hpp"
 #include "simph/sys/Logger.hpp"
@@ -24,10 +24,14 @@ namespace mt {
 // ..........................................................
 SyncSubSim::SyncSubSim(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
         : simph::smpdk::Component(name, descr, parent) {
-    _initEP=new simph::kern::EntryPoint(std::move(simph::sys::Callback::create(&SyncSubSim::syncInitEP,this)),"init","",this);
-    _syncEP=new simph::kern::EntryPoint(std::move(simph::sys::Callback::create(&SyncSubSim::syncEP,this)),"sync","",this);
-    _enterExecutingEP=new simph::kern::EntryPoint(std::move(simph::sys::Callback::create(&SyncSubSim::enterExecutingEP,this)),"onRun","",this);
-    _leaveExecutingEP=new simph::kern::EntryPoint(std::move(simph::sys::Callback::create(&SyncSubSim::leaveExecutingEP,this)),"onHold","",this);
+    _initEP=simph::smpdk::EntryPoint::Create("sincInit", "Subsimulator isynchronization initialization entry point",
+                                            this, &SyncSubSim::epSyncInit);
+    _syncEP=simph::smpdk::EntryPoint::Create("sync", "Subsimulator synchronization entry point", 
+                                            this, &SyncSubSim::epSync);
+    _enterExecutingEP=simph::smpdk::EntryPoint::Create("Run", "Subsimulator run entry point",
+                                            this, &SyncSubSim::epRun);
+    _leaveExecutingEP=simph::smpdk::EntryPoint::Create("Hold", "Subsimulator hold entry point",
+                                            this, &SyncSubSim::epHold);
     _subSim = new simph::kern::Simulator(name, "Sub simulator", this);
     _syncRate=1000000; // default 1ms sync rate.
     pthread_barrier_init(&_barrier, nullptr, 0);
@@ -42,6 +46,8 @@ SyncSubSim::~SyncSubSim() {
     delete _subSim;
     delete _syncEP;
     delete _initEP;
+    delete _enterExecutingEP;
+    delete _leaveExecutingEP;
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -65,25 +71,26 @@ void SyncSubSim::connect() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-void SyncSubSim::syncEP() {
+void SyncSubSim::epSync() {
     PROFILER_FUNCTION
     pthread_barrier_wait(&_barrier);
 }
 // ..........................................................
-void SyncSubSim::syncInitEP() {
+void SyncSubSim::epSyncInit() {
     _evSyncMaster = getSimulator()->GetScheduler()->AddSimulationTimeEvent(_syncEP, 0, _syncRate,-1);
     _evSyncSub = _subSim->GetScheduler()->AddSimulationTimeEvent(_syncEP, 0, _syncRate,-1);
 }
 // ..........................................................
-void SyncSubSim::enterExecutingEP() {
+void SyncSubSim::epRun() {
     pthread_barrier_init(&_barrier, nullptr, 2);
     _subSim->Run();
 }
 // ..........................................................
-void SyncSubSim::leaveExecutingEP() {
+void SyncSubSim::epHold() {
     pthread_barrier_init(&_barrier, nullptr, 0);
+    // This wait should unlock the other thread, if currently waiting.
     pthread_barrier_wait(&_barrier);
-    // From heere, slave is unblocked and may run to many things before 
+    // From here, slave is unblocked and may run to many things before 
     // receving Hold. May be somthing more shall be done to drain the 
     // schedule queue or freeze somehow the scheduler without blocking th Hold
     // request.

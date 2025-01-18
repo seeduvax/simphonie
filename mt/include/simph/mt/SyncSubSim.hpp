@@ -52,10 +52,10 @@ private:
     Smp::ISimulator* _subSim;
     Smp::Duration _syncRate;
     pthread_barrier_t _barrier;
-    void syncEP();
-    void syncInitEP();
-    void enterExecutingEP();
-    void leaveExecutingEP();
+    void epSync();
+    void epSyncInit();
+    void epRun();
+    void epHold();
 
     Smp::Services::EventId _evSyncMaster;
     Smp::Services::EventId _evSyncSub;
