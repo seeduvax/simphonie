@@ -13,7 +13,7 @@
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Services/IScheduler.h"
 #include "simph/smpdk/Component.hpp"
-#include "simph/smpdk/IEntryPointPublisher.hpp"
+#include "simph/smpdk/EntryPointPublisher.hpp"
 
 namespace simph {
 namespace kern {
@@ -23,7 +23,7 @@ using namespace simph::smpdk;
  *
  */
 class TimeKeeper : virtual public Component, 
-                   virtual public IEntryPointPublisher,
+                   virtual public EntryPointPublisher,
                    virtual public Smp::Services::ITimeKeeper {
 public:
     /**

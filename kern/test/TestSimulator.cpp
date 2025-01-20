@@ -14,7 +14,7 @@
 #include "simph/smpdk/Container.hpp"
 #include "simph/smpdk/Component.hpp"
 #include "simph/smpdk/EntryPoint.hpp"
-#include "simph/smpdk/IEntryPointPublisher.hpp"
+#include "simph/smpdk/EntryPointPublisher.hpp"
 #include "simph/sys/Synchro.hpp"
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Services/IScheduler.h"
@@ -27,7 +27,7 @@ using namespace simph::kern;
 using namespace simph::smpdk;
 
 class CompositeModel: public Component, virtual public Smp::IComposite,
-                    virtual public IEntryPointPublisher, virtual public Smp::IModel {
+                    virtual public EntryPointPublisher, virtual public Smp::IModel {
 public:
     CompositeModel(Smp::String8 name, Smp::String8 descr, Smp::IComposite* parent): 
             Component(name,descr,parent), _containers("Containers", "", this) {

@@ -27,7 +27,8 @@ class Scheduler;
 /**
  *
  */
-class Simulator : public Composite, public virtual Smp::ISimulator {
+class Simulator : public Object, virtual public Composite, public virtual Smp::ISimulator {
+    typedef Object Parent;
 public:
     /**
      * Default constructor.

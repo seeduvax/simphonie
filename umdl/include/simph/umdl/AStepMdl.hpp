@@ -10,7 +10,7 @@
 #ifndef __simph_umdl_ArrayType_HPP__
 #define __simph_umdl_ArrayType_HPP__
 #include "Smp/IModel.h"
-#include "simph/smpdk/IEntryPointPublisher.hpp"
+#include "simph/smpdk/EntryPointPublisher.hpp"
 #include "simph/smpdk/Component.hpp"
 
 namespace simph {
@@ -21,7 +21,7 @@ namespace umdl {
  */
 class AStepMdl : public simph::smpdk::Component,
                  public virtual Smp::IModel,
-                 public virtual simph::smpdk::IEntryPointPublisher {
+                 public virtual simph::smpdk::EntryPointPublisher {
 public:
     /**
      * Default constructor.

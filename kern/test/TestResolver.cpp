@@ -32,8 +32,7 @@ class Model: public simph::smpdk::Component,
             public virtual Smp::IModel {
 public:
     Model(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent):
-            simph::smpdk::Component(name, descr, parent),
-            simph::smpdk::Composite(name, descr, parent) {
+            simph::smpdk::Component(name, descr, parent) {
         addContainer("Children");
         auto mp=dynamic_cast<Model*>(parent);
         if (mp!=nullptr) {

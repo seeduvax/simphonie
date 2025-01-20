@@ -1,5 +1,5 @@
 /*
- * @file IEntryPointPublisher.cpp
+ * @file EntryPointPublisher.cpp
  *
  * Copyright 2019 . All rights reserved.
  * Use is subject to license terms.
@@ -7,15 +7,15 @@
  * $Id$
  * $Date$
  */
-#include "simph/smpdk/IEntryPointPublisher.hpp"
+#include "simph/smpdk/EntryPointPublisher.hpp"
 
 namespace simph {
 namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-IEntryPointPublisher::IEntryPointPublisher() : _epList("epList", "", nullptr) {}
+EntryPointPublisher::EntryPointPublisher() : _epList("epList", "", nullptr) {}
 // ..........................................................
-IEntryPointPublisher::~IEntryPointPublisher() {}
+EntryPointPublisher::~EntryPointPublisher() {}
 
 }  // namespace smpdk
 }  // namespace simph

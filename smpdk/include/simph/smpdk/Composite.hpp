@@ -18,12 +18,8 @@ namespace smpdk {
 /**
  *
  */
-class Composite : public Object, public virtual Smp::IComposite {
+class Composite:  public virtual Smp::IComposite {
 public:
-    /**
-     * Default constructor.
-     */
-    Composite(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
     /**
      * Destructor.
      */
@@ -33,6 +29,7 @@ public:
     Smp::IContainer* GetContainer(Smp::String8 name) const override;
 
 protected:
+    Composite();
     void addContainer(Smp::String8 name, Smp::String8 descr = "");
 
 private:

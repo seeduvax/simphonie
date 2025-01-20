@@ -1,5 +1,5 @@
 /*
- * @file IEntryPointPublisher.h
+ * @file EntryPointPublisher.h
  *
  * Copyright 2019 . All rights reserved.
  * Use is subject to license terms.
@@ -7,8 +7,8 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_smpdk_IEntryPointPublisher_HPP__
-#define __simph_smpdk_IEntryPointPublisher_HPP__
+#ifndef __simph_smpdk_EntryPointPublisher_HPP__
+#define __simph_smpdk_EntryPointPublisher_HPP__
 
 #include "Smp/IEntryPointPublisher.h"
 #include "simph/smpdk/EntryPoint.hpp"
@@ -18,11 +18,9 @@ namespace simph {
 namespace smpdk {
 using namespace simph::smpdk;
 
-class IEntryPointPublisher : virtual public Smp::IEntryPointPublisher {
+class EntryPointPublisher : virtual public Smp::IEntryPointPublisher {
 public:
-    IEntryPointPublisher();
-
-    virtual ~IEntryPointPublisher();
+    virtual ~EntryPointPublisher();
 
     template <typename Owner, typename Func>
     inline Smp::IEntryPoint* addEP(Smp::String8 name, Smp::String8 descr , Owner owner, Func f) {
@@ -39,10 +37,13 @@ public:
         return _epList.at(name);
     }
 
+protected:
+    EntryPointPublisher();
+
 private:
     OwnedCollection<Smp::IEntryPoint> _epList;
 };
 
 }  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_smpdk_IEntryPointPublisher_HPP__
+#endif  // __simph_smpdk_EntryPointPublisher_HPP__

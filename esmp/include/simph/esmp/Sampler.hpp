@@ -13,7 +13,7 @@
 #include <ostream>
 #include <sstream>
 #include "simph/smpdk/Component.hpp"
-#include "simph/smpdk/IEntryPointPublisher.hpp"
+#include "simph/smpdk/EntryPointPublisher.hpp"
 
 namespace simph {
 namespace esmp {
@@ -21,7 +21,7 @@ namespace esmp {
  *
  */
 class Sampler : public simph::smpdk::Component,
-                public virtual simph::smpdk::IEntryPointPublisher {
+                public virtual simph::smpdk::EntryPointPublisher {
     typedef simph::smpdk::Component Parent;
 public:
     /**
