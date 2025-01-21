@@ -21,8 +21,10 @@ Composite::~Composite() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-void Composite::addContainer(Smp::String8 name, Smp::String8 descr) {
-    _containers.push_back(new Container(name, descr, this));
+Smp::IContainer* Composite::addContainer(Smp::String8 name, Smp::String8 descr) {
+    auto c=new Container(name, descr, this);
+    _containers.push_back(c);
+    return c;
 }
 // --------------------------------------------------------------------
 // ..........................................................

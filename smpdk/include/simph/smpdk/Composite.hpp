@@ -30,7 +30,7 @@ public:
 
 protected:
     Composite();
-    void addContainer(Smp::String8 name, Smp::String8 descr = "");
+    Smp::IContainer* addContainer(Smp::String8 name, Smp::String8 descr = "");
 
 private:
     OwnedCollection<Smp::IContainer> _containers;

@@ -10,52 +10,41 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "simph/kern/Simulator.hpp"
 #include "simph/sys/Logger.hpp"
-#include "simph/smpdk/Collection.hpp"
-#include "simph/smpdk/Container.hpp"
-#include "simph/smpdk/Component.hpp"
+#include "simph/smpdk/CompositeModel.hpp"
 #include "simph/smpdk/EntryPoint.hpp"
 #include "simph/smpdk/EntryPointPublisher.hpp"
 #include "simph/sys/Synchro.hpp"
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Services/IScheduler.h"
 #include "Smp/Services/IEventManager.h"
-#include "Smp/IModel.h"
 
 
 namespace test {
 using namespace simph::kern;
 using namespace simph::smpdk;
 
-class CompositeModel: public Component, virtual public Smp::IComposite,
-                    virtual public EntryPointPublisher, virtual public Smp::IModel {
+class CModel: public CompositeModel {
 public:
-    CompositeModel(Smp::String8 name, Smp::String8 descr, Smp::IComposite* parent): 
-            Component(name,descr,parent), _containers("Containers", "", this) {
-        addEP("step", "", this, &CompositeModel::step);
+    CModel(Smp::String8 name, Smp::String8 descr, Smp::IComposite* parent): 
+            CompositeModel(name,descr,parent) {
+        addEP("step", "", this, &CModel::step);
+    }
+    virtual ~CModel() {
     }
     void step() {
         TRACE(""<<GetName()<<".step()");
     }
-    const Smp::ContainerCollection* GetContainers() const override {
-        return &_containers;
-    }
-    Smp::IContainer* GetContainer(Smp::String8 name) const override {
-        return _containers.at(name);
-    }
 protected:
     // on configure, add a submodel when the parent is the simulator only (to
-    // avoid infinte recursion).
+    // avoid infinte recursion.
     // Used in test to check lately created components are well handled by
     // the simulator.
     void configure() override {
         if (GetParent()==getSimulator()) {
-            auto c=new simph::smpdk::Container("sub","",this);
-            _containers.push_back(c);
-            c->AddComponent(new CompositeModel("childMdl","",this));
+            auto c=addContainer("sub","");
+            c->AddComponent(new CModel("childMdl","",this));
         }
     }
-private:
-    simph::smpdk::OwnedCollection<Smp::IContainer> _containers;
 };
 
 
@@ -121,7 +110,7 @@ public:
 
     void testStates() {
         _sim=new Simulator();
-        _sim->AddModel(new CompositeModel("parentMdl","",_sim));
+        _sim->AddModel(new CModel("parentMdl","",_sim));
         _sim->Publish();
         // after publish, only parent model is expected.
         CPPUNIT_ASSERT(_sim->GetResolver()->ResolveAbsolute("parentMdl")!=nullptr);

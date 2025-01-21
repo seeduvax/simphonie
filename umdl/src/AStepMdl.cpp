@@ -16,7 +16,7 @@ namespace umdl {
 // --------------------------------------------------------------------
 // ..........................................................
 AStepMdl::AStepMdl(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : simph::smpdk::Component(name, descr, parent) {
+    : Parent(name, descr, parent) {
     addEP("step", "Main model entry point", this, &AStepMdl::step);
 }
 // ..........................................................

@@ -19,9 +19,9 @@ namespace umdl {
 /**
  *
  */
-class AStepMdl : public simph::smpdk::Component,
-                 public virtual Smp::IModel,
+class AStepMdl : public simph::smpdk::Model,
                  public virtual simph::smpdk::EntryPointPublisher {
+    typedef simph::smpdk::Model Parent;
 public:
     /**
      * Default constructor.
