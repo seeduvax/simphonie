@@ -7,8 +7,8 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Field_HPP__
-#define __simph_kern_Field_HPP__
+#ifndef __simph_smpdk_Field_HPP__
+#define __simph_smpdk_Field_HPP__
 #include <cstring>
 #include <sstream>
 #include "Smp/IForcibleField.h"
@@ -16,12 +16,12 @@
 #include "Smp/ISimpleArrayField.h"
 #include "Smp/IArrayField.h"
 #include "Smp/ISimpleField.h"
-#include "simph/kern/ExInvalidArrayIndex.hpp"
-#include "simph/kern/Persist.hpp"
+#include "simph/smpdk/ExInvalidArrayIndex.hpp"
+#include "simph/smpdk/Persist.hpp"
 #include "simph/smpdk/Collection.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 /**
  *
  */
@@ -284,6 +284,6 @@ std::ostream& toprint(std::ostream& os, const Smp::IArrayField& obj);
 std::ostream& toprint(std::ostream& os, const Smp::ISimpleArrayField& obj);
 std::ostream& toprint(std::ostream& os, const Smp::ISimpleField& obj);
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_Field_HPP__
+#endif  // __simph_smpdk_Field_HPP__

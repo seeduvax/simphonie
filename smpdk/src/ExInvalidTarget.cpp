@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExInvalidTarget.hpp"
+#include "simph/smpdk/ExInvalidTarget.hpp"
 #include <sstream>
 #include "Smp/IField.h"
 #include "Smp/IOutputField.h"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ExInvalidTarget::ExInvalidTarget(Smp::IOutputField* source, Smp::IField* target) : _source(source), _target(target) {
@@ -36,5 +36,5 @@ Smp::IField* ExInvalidTarget::GetTarget() const noexcept {
     return _target;
 }
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

@@ -7,14 +7,14 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Type_HPP__
-#define __simph_kern_Type_HPP__
+#ifndef __simph_smpdk_Type_HPP__
+#define __simph_smpdk_Type_HPP__
 #include "Smp/Publication/IType.h"
 #include "Smp/IPublication.h"
 #include "simph/smpdk/Object.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 using namespace simph::smpdk;
 
 /**
@@ -58,6 +58,6 @@ private:
     Smp::UInt64 _size;
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_Type_HPP__
+#endif  // __simph_smpdk_Type_HPP__

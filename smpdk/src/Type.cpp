@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Type.hpp"
+#include "simph/smpdk/Type.hpp"
 #include "Smp/IPublication.h"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 Type::Type(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind, Smp::UInt64 typeSize, Smp::String8 name, Smp::String8 descr,
@@ -40,5 +40,5 @@ Smp::IField* Type::Publish(Smp::Publication::IPublishField* receiver,
     return receiver->PublishField(name, description, address, _uuid, view, state, input, output);
 }
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

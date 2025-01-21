@@ -7,12 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExInvalidPrimitiveType.hpp"
+#include "simph/smpdk/ExInvalidPrimitiveType.hpp"
 #include <sstream>
-#include "simph/kern/TypeRegistry.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ExInvalidPrimitiveType::ExInvalidPrimitiveType(Smp::IObject* sender, Smp::PrimitiveTypeKind type) : _type(type) {
@@ -28,11 +27,12 @@ ExInvalidPrimitiveType::~ExInvalidPrimitiveType() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 ExInvalidPrimitiveType::GetTypeName() const noexcept {
-    return TypeRegistry::getPrimitiveTypeName(_type);
+// TODO can't do that, this involves a singleton!    return TypeRegistry::getPrimitiveTypeName(_type);
+return "name_not_retrieved";
 }
 // ..........................................................
 Smp::PrimitiveTypeKind ExInvalidPrimitiveType::GetType() const noexcept {
     return _type;
 }
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

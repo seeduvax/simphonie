@@ -7,12 +7,12 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Persist_HPP__
-#define __simph_kern_Persist_HPP__
+#ifndef __simph_smpdk_Persist_HPP__
+#define __simph_smpdk_Persist_HPP__
 #include "Smp/IPersist.h"
 #include "simph/smpdk/Object.hpp"
 namespace simph {
-namespace kern {
+namespace smpdk {
 using namespace simph::smpdk;
 
 /**
@@ -35,6 +35,6 @@ public:
 private:
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_Persist_HPP__
+#endif  // __simph_smpdk_Persist_HPP__

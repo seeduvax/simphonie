@@ -7,18 +7,16 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/StructureType.hpp"
-#include "simph/kern/ExInvalidPrimitiveType.hpp"
-#include "simph/kern/Field.hpp"
-#include "simph/kern/Type.hpp"
-#include "simph/kern/TypeRegistry.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simph/smpdk/StructureType.hpp"
+#include "simph/smpdk/ExInvalidPrimitiveType.hpp"
+#include "simph/smpdk/Field.hpp"
+#include "simph/smpdk/Type.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-StructureType::StructureType(Smp::Uuid uuid, TypeRegistry* typeReg, Smp::String8 name, Smp::String8 description,
+StructureType::StructureType(Smp::Uuid uuid, Smp::Publication::ITypeRegistry* typeReg, Smp::String8 name, Smp::String8 description,
                              Smp::IObject* parent)
     : Type(uuid, Smp::PrimitiveTypeKind::PTK_None, 0, name, description, parent), _typeRegistry(typeReg) {}
 // ..........................................................
@@ -54,7 +52,7 @@ void StructureType::AddField(
         }
     }
     else {
-        LOGE("Can't add type " << name << " to structure type " << GetName() << ", can't find uuid in registry.");
+// TODO ?        LOGE("Can't add type " << name << " to structure type " << GetName() << ", can't find uuid in registry.");
         throw new ExInvalidPrimitiveType(this, Smp::PrimitiveTypeKind::PTK_None);
     }
 }
@@ -73,10 +71,10 @@ void StructureType::setup(StructureField* sf) {
         }
         else {
             // should not happen if type registry is well managed.
-            LOGE("Can't add field " << fd.name << " to structure " << GetName() << ". Type Uuid not found in registry");
+// TODO            LOGE("Can't add field " << fd.name << " to structure " << GetName() << ". Type Uuid not found in registry");
         }
     }
 }
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

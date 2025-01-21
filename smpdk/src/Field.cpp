@@ -7,14 +7,13 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Field.hpp"
-#include "simph/kern/ExInvalidTarget.hpp"
-#include "simph/kern/StructureType.hpp"
-#include "simph/kern/Type.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simph/smpdk/Field.hpp"
+#include "simph/smpdk/ExInvalidTarget.hpp"
+#include "simph/smpdk/StructureType.hpp"
+#include "simph/smpdk/Type.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 Field::Field(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, void* address, unsigned int dataSize,
@@ -62,7 +61,7 @@ const Smp::Publication::IType* Field::GetType() const {
 }
 // ..........................................................
 void Field::SetValue(Smp::AnySimple value) {
-    LOGW("Can't set simple value to non simple field " << GetName());
+// TODO    LOGW("Can't set simple value to non simple field " << GetName());
 }
 // ..........................................................
 Smp::PrimitiveTypeKind Field::GetPrimitiveTypeKind() const {
@@ -70,7 +69,7 @@ Smp::PrimitiveTypeKind Field::GetPrimitiveTypeKind() const {
 }
 // ..........................................................
 Smp::AnySimple Field::GetValue() const {
-    LOGW("Requesting simple value from non simple field " << GetName());
+// TODO    LOGW("Requesting simple value from non simple field " << GetName());
     return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int64, 0);
 }
 // --------------------------------------------------------------------
@@ -251,7 +250,7 @@ StructureField::StructureField(Smp::String8 name, Smp::String8 description, Smp:
         st->setup(this);
     }
     else {
-        LOGE("Can't setup field " << name << ", its type " << type->GetName() << " is not an expected Structure Type.");
+// TODO        LOGE("Can't setup field " << name << ", its type " << type->GetName() << " is not an expected Structure Type.");
     }
 }
 // ..........................................................
@@ -388,5 +387,5 @@ std::ostream& toprint(std::ostream& os, const Smp::ISimpleField& obj) {
     return os;
 }
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

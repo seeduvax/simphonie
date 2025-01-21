@@ -7,15 +7,15 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_StructureType_HPP__
-#define __simph_kern_StructureType_HPP__
+#ifndef __simph_smpdk_StructureType_HPP__
+#define __simph_smpdk_StructureType_HPP__
 #include <vector>
 #include "Smp/Publication/IStructureType.h"
-#include "simph/kern/Type.hpp"
+#include "simph/smpdk/Type.hpp"
+#include "Smp/Publication/ITypeRegistry.h"
 
 namespace simph {
-namespace kern {
-class TypeRegistry;
+namespace smpdk {
 class StructureField;
 /**
  *
@@ -25,7 +25,7 @@ public:
     /**
      * Default constructor.
      */
-    StructureType(Smp::Uuid uuid, TypeRegistry* typeReg, Smp::String8 name, Smp::String8 description = "",
+    StructureType(Smp::Uuid uuid, Smp::Publication::ITypeRegistry* typeReg, Smp::String8 name, Smp::String8 description = "",
                   Smp::IObject* parent = nullptr);
     /**
      * Destructor.
@@ -59,9 +59,9 @@ private:
         Smp::Bool output;
     };
     std::vector<struct FieldDescr> _fields;
-    TypeRegistry* _typeRegistry;
+    Smp::Publication::ITypeRegistry* _typeRegistry;
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_StructureType_HPP__
+#endif  // __simph_smpdk_StructureType_HPP__

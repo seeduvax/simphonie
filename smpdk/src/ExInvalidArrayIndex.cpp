@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExInvalidArrayIndex.hpp"
+#include "simph/smpdk/ExInvalidArrayIndex.hpp"
 #include <sstream>
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ExInvalidArrayIndex::ExInvalidArrayIndex(const Smp::IObject* sender, Smp::Int64 invalid, Smp::Int64 size)
@@ -35,5 +35,5 @@ Smp::Int64 ExInvalidArrayIndex::GetArraySize() const noexcept {
     return _arraySize;
 }
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
