@@ -9,7 +9,7 @@
  */
 #include <cppunit/extensions/HelperMacros.h>
 #include "Smp/IFailure.h"
-#include "simph/kern/Failure.hpp"
+#include "simph/smpdk/Failure.hpp"
 #include "simph/smpdk/Collection.hpp"
 #include "simph/smpdk/FallibleModel.hpp"
 

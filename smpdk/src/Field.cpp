@@ -387,5 +387,55 @@ std::ostream& toprint(std::ostream& os, const Smp::ISimpleField& obj) {
     return os;
 }
 
+// ..........................................................
+template <>
+void TField<Smp::Char8>::initType() {
+    setType(&_char8Type);
+}
+template <>
+void TField<Smp::Bool>::initType() {
+    setType(&_boolType);
+}
+template <>
+void TField<Smp::Int8>::initType() {
+    setType(&_int8Type);
+}
+template <>
+void TField<Smp::Int16>::initType() {
+    setType(&_int16Type);
+}
+template <>
+void TField<Smp::Int32>::initType() {
+    setType(&_int32Type);
+}
+template <>
+void TField<Smp::Int64>::initType() {
+    setType(&_int64Type);
+}
+template <>
+void TField<Smp::UInt8>::initType() {
+    setType(&_uint8Type);
+}
+template <>
+void TField<Smp::UInt16>::initType() {
+    setType(&_uint16Type);
+}
+template <>
+void TField<Smp::UInt32>::initType() {
+    setType(&_uint32Type);
+}
+template <>
+void TField<Smp::UInt64>::initType() {
+    setType(&_uint64Type);
+}
+template <>
+void TField<Smp::Float32>::initType() {
+    setType(&_float32Type);
+}
+template <>
+void TField<Smp::Float64>::initType() {
+    setType(&_float64Type);
+}
+
 }  // namespace smpdk
 }  // namespace simph

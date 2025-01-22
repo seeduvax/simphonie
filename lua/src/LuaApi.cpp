@@ -10,7 +10,6 @@
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/ISimulator.h"
 #include "Smp/IModel.h"
-#include "simph/kern/Field.hpp"
 #include "simph/kern/Resolver.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/Simulator.hpp"

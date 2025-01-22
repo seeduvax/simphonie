@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_ClassType_HPP__
-#define __simph_kern_ClassType_HPP__
+#ifndef __simph_smpdk_ClassType_HPP__
+#define __simph_smpdk_ClassType_HPP__
 #include "Smp/Publication/IClassType.h"
-#include "simph/kern/StructureType.hpp"
+#include "simph/smpdk/StructureType.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 class TypeRegistry;
 
 /**
@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    ClassType(Smp::Uuid, TypeRegistry* typeReg, Smp::String8 name, Smp::String8 description = "",
+    ClassType(Smp::Uuid, Smp::Publication::ITypeRegistry* typeReg, Smp::String8 name, Smp::String8 description = "",
               Smp::IObject* parent = nullptr);
     /**
      * Destructor.
@@ -34,6 +34,6 @@ public:
 private:
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_ClassType_HPP__
+#endif  // __simph_smpdk_ClassType_HPP__

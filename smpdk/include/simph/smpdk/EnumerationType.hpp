@@ -7,14 +7,14 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_EnumerationType_HPP__
-#define __simph_kern_EnumerationType_HPP__
+#ifndef __simph_smpdk_EnumerationType_HPP__
+#define __simph_smpdk_EnumerationType_HPP__
 #include <vector>
 #include "Smp/Publication/IEnumerationType.h"
-#include "simph/kern/Type.hpp"
+#include "simph/smpdk/Type.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 
 /**
  *
@@ -42,6 +42,6 @@ private:
     std::vector<struct literal> _literals;
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_EnumerationType_HPP__
+#endif  // __simph_smpdk_EnumerationType_HPP__

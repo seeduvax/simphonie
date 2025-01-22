@@ -8,10 +8,10 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "simph/kern/Field.hpp"
+#include "simph/smpdk/Field.hpp"
 
 namespace test {
-using namespace simph::kern;
+using namespace simph::smpdk;
 
 // ----------------------------------------------------------
 // test fixture implementation

@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Failure_HPP__
-#define __simph_kern_Failure_HPP__
+#ifndef __simph_smpdk_Failure_HPP__
+#define __simph_smpdk_Failure_HPP__
 #include "Smp/IFailure.h"
-#include "simph/kern/Persist.hpp"
+#include "simph/smpdk/Persist.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 /**
  *
  */
@@ -44,6 +44,6 @@ private:
 
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_Failure_HPP__
+#endif  // __simph_smpdk_Failure_HPP__

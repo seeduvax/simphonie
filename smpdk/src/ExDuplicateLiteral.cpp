@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExDuplicateLiteral.hpp"
+#include "simph/smpdk/ExDuplicateLiteral.hpp"
 #include <sstream>
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ExDuplicateLiteral::ExDuplicateLiteral(Smp::IObject* sender, Smp::String8 name, Smp::Int32 value)
@@ -34,5 +34,5 @@ Smp::String8 ExDuplicateLiteral::GetLiteralName() const noexcept {
 Smp::Int32 ExDuplicateLiteral::GetLiteralValue() const noexcept {
     return _lValue;
 }
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

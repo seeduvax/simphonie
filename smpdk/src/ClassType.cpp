@@ -7,18 +7,17 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ClassType.hpp"
-#include "simph/kern/TypeRegistry.hpp"
+#include "simph/smpdk/ClassType.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ClassType::ClassType(Smp::Uuid uuid, TypeRegistry* typeReg, Smp::String8 name, Smp::String8 description,
+ClassType::ClassType(Smp::Uuid uuid, Smp::Publication::ITypeRegistry* typeReg, Smp::String8 name, Smp::String8 description,
                      Smp::IObject* parent)
     : StructureType(uuid, typeReg, name, description, parent) {}
 // ..........................................................
 ClassType::~ClassType() {}
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

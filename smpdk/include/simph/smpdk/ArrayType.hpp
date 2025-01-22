@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_ArrayType_HPP__
-#define __simph_kern_ArrayType_HPP__
+#ifndef __simph_smpdk_ArrayType_HPP__
+#define __simph_smpdk_ArrayType_HPP__
 #include "Smp/Publication/IArrayType.h"
-#include "simph/kern/Type.hpp"
+#include "simph/smpdk/Type.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 
 /**
  *
@@ -38,6 +38,6 @@ private:
     const Smp::Publication::IType* _itemType;
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_ArrayType_HPP__
+#endif  // __simph_smpdk_ArrayType_HPP__

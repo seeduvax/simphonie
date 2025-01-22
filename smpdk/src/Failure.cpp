@@ -7,11 +7,10 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Failure.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simph/smpdk/Failure.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 Failure::Failure(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
@@ -22,7 +21,7 @@ Failure::~Failure() {}
 // ..........................................................
 void Failure::Fail() {
     if (_failed == true) {
-        LOGW(this->GetName() << " is already faulty");
+// TODO get logger from parent ?        LOGW(this->GetName() << " is already faulty");
     }
     else {
         // TODO
@@ -36,7 +35,7 @@ void Failure::doFail() {
 // ..........................................................
 void Failure::Unfail() {
     if (_failed == false) {
-        LOGW(this->GetName() << " isn't faulty");
+// TODO get logger from parent ?        LOGW(this->GetName() << " isn't faulty");
     }
     else {
         // TODO
@@ -52,5 +51,5 @@ Smp::Bool Failure::IsFailed() const {
     return _failed;
 }
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

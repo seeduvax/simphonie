@@ -7,14 +7,14 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/EnumerationType.hpp"
+#include "simph/smpdk/EnumerationType.hpp"
 #include <string.h>
-#include "simph/kern/ExDuplicateLiteral.hpp"
+#include "simph/smpdk/ExDuplicateLiteral.hpp"
 #include "simph/smpdk/ExDuplicateName.hpp"
 #include "simph/smpdk/ExInvalidObjectName.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 using namespace simph::smpdk;
 // --------------------------------------------------------------------
 // ..........................................................
@@ -41,5 +41,5 @@ void EnumerationType::AddLiteral(Smp::String8 name, Smp::String8 description, Sm
     l.value = value;
     _literals.push_back(l);
 }
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

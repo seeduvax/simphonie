@@ -10,11 +10,12 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "Smp/IField.h"
 #include "Smp/IOutputField.h"
-#include "simph/kern/StructureType.hpp"
+#include "simph/smpdk/StructureType.hpp"
 #include "simph/kern/TypeRegistry.hpp"
 
 namespace test {
 using namespace simph::kern;
+using namespace simph::smpdk;
 
 // ----------------------------------------------------------
 // test fixture implementation

@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_ExDuplicateLiteral_HPP__
-#define __simph_kern_ExDuplicateLiteral_HPP__
+#ifndef __simph_smpdk_ExDuplicateLiteral_HPP__
+#define __simph_smpdk_ExDuplicateLiteral_HPP__
 #include "Smp/Publication/DuplicateLiteral.h"
 #include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 using namespace simph::smpdk;
 
 /**
@@ -39,6 +39,6 @@ private:
     Smp::Int32 _lValue;
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_ExDuplicateLiteral_HPP__
+#endif  // __simph_smpdk_ExDuplicateLiteral_HPP__

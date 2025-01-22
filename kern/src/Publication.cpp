@@ -12,18 +12,20 @@
 #include "Smp/IComponent.h"
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/Publication/IArrayType.h"
-#include "simph/kern/ExInvalidPrimitiveType.hpp"
+#include "simph/smpdk/ExInvalidPrimitiveType.hpp"
 #include "simph/kern/ExTypeNotRegistered.hpp"
-#include "simph/kern/Field.hpp"
+#include "simph/smpdk/Field.hpp"
 #include "simph/kern/Property.hpp"
-#include "simph/kern/StructureType.hpp"
-#include "simph/kern/Type.hpp"
+#include "simph/smpdk/StructureType.hpp"
+#include "simph/smpdk/Type.hpp"
 #include "simph/smpdk/ExDuplicateName.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/sys/RttiUtil.hpp"
 
 namespace simph {
 namespace kern {
+
+using namespace simph::smpdk;
 // --------------------------------------------------------------------
 // ..........................................................
 class StructurePublication : public Publication {

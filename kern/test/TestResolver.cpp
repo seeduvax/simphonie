@@ -8,7 +8,7 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "simph/kern/Field.hpp"
+#include "simph/smpdk/Field.hpp"
 #include "simph/kern/Resolver.hpp"
 #include "simph/kern/Simulator.hpp"
 #include "simph/kern/TypeRegistry.hpp"
@@ -17,6 +17,7 @@
 
 namespace test {
 using namespace simph::kern;
+using namespace simph::smpdk;
 
 
 // ----------------------------------------------------------

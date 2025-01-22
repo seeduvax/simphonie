@@ -7,10 +7,10 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ArrayType.hpp"
+#include "simph/smpdk/ArrayType.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ArrayType::ArrayType(Smp::Uuid uuid, Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, Smp::UInt64 elemSize,
@@ -27,5 +27,5 @@ Smp::UInt64 ArrayType::GetSize() const {
 const Smp::Publication::IType* ArrayType::GetItemType() const {
     return _itemType;
 }
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
