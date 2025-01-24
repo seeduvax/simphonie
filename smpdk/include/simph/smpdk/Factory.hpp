@@ -7,8 +7,8 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Factory_HPP__
-#define __simph_kern_Factory_HPP__
+#ifndef __simph_smpdk_Factory_HPP__
+#define __simph_smpdk_Factory_HPP__
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -19,8 +19,7 @@
 #include "simph/sys/RttiUtil.hpp"
 
 namespace simph {
-namespace kern {
-using namespace simph::smpdk;
+namespace smpdk {
 /**
  *
  */
@@ -94,10 +93,10 @@ private:
 #define ADD_SMP_FACTORY(name, factoryType)                                                                             \
     static int static_add_##factoryType{[] {                                                                          \
         _createFactoryFns.push_back(                                                                                   \
-            [&](Smp::ISimulator* simulator) { return new simph::kern::Factory<factoryType>(name, name, simulator); }); \
+            [&](Smp::ISimulator* simulator) { return new simph::smpdk::Factory<factoryType>(name, name, simulator); }); \
         return 1;                                                                                                      \
     }()};
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_Factory_HPP__
+#endif  // __simph_smpdk_Factory_HPP__

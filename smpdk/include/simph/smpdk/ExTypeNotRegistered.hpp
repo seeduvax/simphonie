@@ -7,14 +7,14 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_ExTypeNotRegistered_HPP__
-#define __simph_kern_ExTypeNotRegistered_HPP__
+#ifndef __simph_smpdk_ExTypeNotRegistered_HPP__
+#define __simph_smpdk_ExTypeNotRegistered_HPP__
 
 #include "Smp/Publication/TypeNotRegistered.h"
 #include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 
 /**
  *
@@ -36,6 +36,6 @@ private:
     Smp::Uuid _uuid;
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_ExTypeNotRegistered_HPP__
+#endif  // __simph_smpdk_ExTypeNotRegistered_HPP__

@@ -35,6 +35,7 @@ public:
 
 private:
     Smp::PrimitiveTypeKind _type;
+    std::string _typeName;
 };
 
 }  // namespace smpdk

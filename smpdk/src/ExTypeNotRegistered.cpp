@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExTypeNotRegistered.hpp"
+#include "simph/smpdk/ExTypeNotRegistered.hpp"
 #include <sstream>
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ExTypeNotRegistered::ExTypeNotRegistered(Smp::IObject* sender, Smp::Uuid typeUuid) : _uuid(typeUuid) {
@@ -30,5 +30,5 @@ Smp::Uuid ExTypeNotRegistered::GetUuid() const noexcept {
     return _uuid;
 }
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

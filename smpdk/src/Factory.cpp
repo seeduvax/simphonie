@@ -8,5 +8,5 @@
  * $Date$
  */
 /*
- * No implementation kern/simph/Factory.hpp contains templates only.
+ * No implementation smpdk/simph/Factory.hpp contains templates only.
  */

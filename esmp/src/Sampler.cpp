@@ -12,7 +12,7 @@
 #include <iostream>
 #include "Smp/ISimulator.h"
 #include "Smp/Services/ITimeKeeper.h"
-#include "simph/kern/Field.hpp"
+#include "simph/smpdk/Field.hpp"
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/sys/Callback.hpp"
 #include "simph/sys/Logger.hpp"
@@ -64,7 +64,7 @@ void Sampler::recordField(Smp::IField* field) {
     if (dynamic_cast<Smp::IArrayField*>(field) != nullptr) {
         Smp::IArrayField* fieldArray = dynamic_cast<Smp::IArrayField*>(field);
         for (int idx = 0; idx < fieldArray->GetSize(); idx++) {
-            recordField(dynamic_cast<simph::kern::Field*>(fieldArray->GetItem(idx)));
+            recordField(dynamic_cast<simph::smpdk::Field*>(fieldArray->GetItem(idx)));
         }
     }
     else {

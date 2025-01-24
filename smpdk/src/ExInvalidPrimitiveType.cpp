@@ -21,14 +21,16 @@ ExInvalidPrimitiveType::ExInvalidPrimitiveType(Smp::IObject* sender, Smp::Primit
     d << "Invalid primitive type: " << _type;
     setDescription(d.str().c_str());
     setMessage();
+    std::ostringstream ss;
+    ss << _type;
+    _typeName=ss.str();
 }
 // ..........................................................
 ExInvalidPrimitiveType::~ExInvalidPrimitiveType() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 ExInvalidPrimitiveType::GetTypeName() const noexcept {
-// TODO can't do that, this involves a singleton!    return TypeRegistry::getPrimitiveTypeName(_type);
-return "name_not_retrieved";
+    return _typeName.c_str();
 }
 // ..........................................................
 Smp::PrimitiveTypeKind ExInvalidPrimitiveType::GetType() const noexcept {

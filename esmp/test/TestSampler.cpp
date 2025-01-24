@@ -8,7 +8,7 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "simph/svc/Sampler.hpp"
+#include "simph/esmp/Sampler.hpp"
 #include "simph/kern/Resolver.hpp"
 #include "simph/kern/Scheduler.hpp"
 #include "simph/kern/Simulator.hpp"

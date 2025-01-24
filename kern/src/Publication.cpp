@@ -13,7 +13,7 @@
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/Publication/IArrayType.h"
 #include "simph/smpdk/ExInvalidPrimitiveType.hpp"
-#include "simph/kern/ExTypeNotRegistered.hpp"
+#include "simph/smpdk/ExTypeNotRegistered.hpp"
 #include "simph/smpdk/Field.hpp"
 #include "simph/kern/Property.hpp"
 #include "simph/smpdk/StructureType.hpp"

@@ -8,7 +8,7 @@
  * $Date$
  */
 #include "Smp/ISimulator.h"
-#include "simph/kern/Factory.hpp"
+#include "simph/smpdk/Factory.hpp"
 #include "simph/sys/DlDef.h"
 #include "simph/umdl/Logger1D.hpp"
 #include "simph/umdl/SimTimeProvider.hpp"

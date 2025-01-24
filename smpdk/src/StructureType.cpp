@@ -8,7 +8,7 @@
  * $Date$
  */
 #include "simph/smpdk/StructureType.hpp"
-#include "simph/smpdk/ExInvalidPrimitiveType.hpp"
+#include "simph/smpdk/ExTypeNotRegistered.hpp"
 #include "simph/smpdk/Field.hpp"
 #include "simph/smpdk/Type.hpp"
 
@@ -34,6 +34,9 @@ void StructureType::AddField(
                 Smp::Bool output) {
     Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(uuid));
     if (t != nullptr) {
+// TODO from IStructureField header, type shall be checked:
+//  - be a value type.
+//  - not String8
         struct StructureType::FieldDescr fd;
         fd.name = name;
         fd.description = description;
@@ -52,8 +55,7 @@ void StructureType::AddField(
         }
     }
     else {
-// TODO ?        LOGE("Can't add type " << name << " to structure type " << GetName() << ", can't find uuid in registry.");
-        throw new ExInvalidPrimitiveType(this, Smp::PrimitiveTypeKind::PTK_None);
+        throw new ExTypeNotRegistered(this, uuid);
     }
 }
 // ..........................................................
