@@ -7,12 +7,12 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Operation.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simph/smpdk/Operation.hpp"
+#include "simph/smpdk/Exception.hpp"
 #include "Smp/IRequest.h"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 Operation::Operation(Smp::String8 name, Smp::String8 description, Smp::IObject* parent)
@@ -39,21 +39,22 @@ Smp::ViewKind Operation::GetView() const {
 // ..........................................................
 Smp::IRequest* Operation::CreateRequest() {
     // TODO
-    LOGE("Operation::CreateRequest() not implemented yet!")
+    throw Exception(this, "Operation::CreateRequest() not implemented yet!");
     return nullptr;
 }
 // ..........................................................
 void Operation::Invoke(Smp::IRequest* request) {
-    LOGE("Operation::Invoke(Smp::IRequest*) not implemented yet!")
+    // TODO
+    throw Exception(this, "Operation::Invoke(Smp::IRequest*) not implemented yet!");
 }
 // ..........................................................
 void Operation::DeleteRequest(Smp::IRequest* request) {
     if (request != nullptr) {
-        // TODO should be checked here the given request was created from
-        // this operation instance...
-        delete request;
+        // TODO 
+        throw Exception(this, "Operation::DeleteRequest(Smp::IRequest*) not implemented yet!");
+//        delete request;
     }
 }
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

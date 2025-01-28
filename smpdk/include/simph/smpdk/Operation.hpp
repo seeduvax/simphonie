@@ -7,15 +7,15 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Operation_HPP__
-#define __simph_kern_Operation_HPP__
+#ifndef __simph_smpdk_Operation_HPP__
+#define __simph_smpdk_Operation_HPP__
 
 #include "Smp/IOperation.h"
 #include "simph/smpdk/Collection.hpp"
 #include "simph/smpdk/Object.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 
 /**
  *
@@ -46,6 +46,6 @@ private:
     Smp::ViewKind _view;
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_Operation_HPP__
+#endif  // __simph_smpdk_Operation_HPP__

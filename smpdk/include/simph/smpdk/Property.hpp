@@ -7,14 +7,14 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Property_HPP__
-#define __simph_kern_Property_HPP__
+#ifndef __simph_smpdk_Property_HPP__
+#define __simph_smpdk_Property_HPP__
 
 #include "Smp/IProperty.h"
 #include "simph/smpdk/Object.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 
 /**
  *
@@ -46,6 +46,6 @@ private:
     Smp::AnySimple _value;
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_Property_HPP__
+#endif  // __simph_smpdk_Property_HPP__

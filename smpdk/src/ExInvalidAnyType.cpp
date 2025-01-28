@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExInvalidAnyType.hpp"
+#include "simph/smpdk/ExInvalidAnyType.hpp"
 #include <sstream>
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ExInvalidAnyType::ExInvalidAnyType(Smp::IObject* sender,
@@ -37,5 +37,5 @@ Smp::PrimitiveTypeKind ExInvalidAnyType::GetExpectedType() const noexcept {
     return _expected;
 }
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

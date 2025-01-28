@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExVoidOperation.hpp"
+#include "simph/smpdk/ExVoidOperation.hpp"
 #include <sstream>
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ExVoidOperation::ExVoidOperation(Smp::IObject* sender, Smp::String8 opName) : _opName(opName) {
@@ -30,5 +30,5 @@ Smp::String8 ExVoidOperation::GetOperationName() const noexcept {
     return _opName;
 }
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

@@ -24,6 +24,13 @@ public:
      * Default constructor.
      */
     Exception();
+
+    /**
+     * Constructor for direct exception throwing for cases not specifically
+     * defined by any SMP standard requirement.
+     * @param msg exception message.
+     */  
+    Exception(Smp::IObject* sender, Smp::String8 msg);
     /**
      * Destructor.
      */

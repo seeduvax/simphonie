@@ -7,14 +7,14 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Request.hpp"
-#include "simph/kern/ExInvalidAnyType.hpp"
-#include "simph/kern/ExInvalidParameterIndex.hpp"
-#include "simph/kern/ExInvalidParameterValue.hpp"
-#include "simph/kern/ExVoidOperation.hpp"
+#include "simph/smpdk/Request.hpp"
+#include "simph/smpdk/ExInvalidAnyType.hpp"
+#include "simph/smpdk/ExInvalidParameterIndex.hpp"
+#include "simph/smpdk/ExInvalidParameterValue.hpp"
+#include "simph/smpdk/ExVoidOperation.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -76,5 +76,5 @@ Smp::AnySimple Request::GetReturnValue() const {
     return _returnValue;
 }
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

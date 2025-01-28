@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExInvalidParameterValue.hpp"
+#include "simph/smpdk/ExInvalidParameterValue.hpp"
 #include <sstream>
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 ExInvalidParameterValue::ExInvalidParameterValue(
@@ -41,5 +41,5 @@ Smp::String8 ExInvalidParameterValue::GetParameterName() const noexcept {
     return _paramName;
 }
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

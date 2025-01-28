@@ -15,7 +15,7 @@
 #include "simph/smpdk/ExInvalidPrimitiveType.hpp"
 #include "simph/smpdk/ExTypeNotRegistered.hpp"
 #include "simph/smpdk/Field.hpp"
-#include "simph/kern/Property.hpp"
+#include "simph/smpdk/Property.hpp"
 #include "simph/smpdk/StructureType.hpp"
 #include "simph/smpdk/Type.hpp"
 #include "simph/smpdk/ExDuplicateName.hpp"

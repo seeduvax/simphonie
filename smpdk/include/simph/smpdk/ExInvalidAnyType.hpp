@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_ExInvalidAnyType_HPP__
-#define __simph_kern_ExInvalidAnyType_HPP__
+#ifndef __simph_smpdk_ExInvalidAnyType_HPP__
+#define __simph_smpdk_ExInvalidAnyType_HPP__
 #include "Smp/InvalidAnyType.h"
 #include "simph/smpdk/Exception.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 using namespace simph::smpdk;
 
 /**
@@ -38,6 +38,6 @@ private:
     Smp::PrimitiveTypeKind _expected;
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_ExInvalidAnyType_HPP__
+#endif  // __simph_smpdk_ExInvalidAnyType_HPP__

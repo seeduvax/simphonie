@@ -7,15 +7,19 @@
  * $Id$
  * $Date$
  */
+
+#include <string.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "Smp/AnySimple.h"
 #include "Smp/IObject.h"
 #include "Smp/IPublication.h"
 #include "Smp/PrimitiveTypes.h"
-#include "simph/kern/ExInvalidObjectName.hpp"
-#include "simph/kern/ExInvalidParameterValue.hpp"
+#include "simph/smpdk/ExInvalidObjectName.hpp"
+#include "simph/smpdk/Object.hpp"
+//#include "simph/smpdk/ExInvalidParameterValue.hpp"
 
 namespace test {
+using namespace simph::smpdk;
 
 // ----------------------------------------------------------
 // test fixture implementation
@@ -45,11 +49,15 @@ public:
 
 
     void testExInvalidObjectName() {
-/* TODO this is dummy a test checking nothing!! Do a real test.
-        Smp::IObject* object;
-        auto except = simph::kern::ExInvalidObjectName(object, "ObjectName test");
-        std::cout << " • Name : " << except.GetInvalidName() << std::endl;
-*/
+        bool exThrown=false;
+        try {
+            Object o("for","",nullptr);
+        }
+        catch (Smp::InvalidObjectName& ex) {
+            exThrown=true;
+            CPPUNIT_ASSERT(strcmp("InvalidObjectName",ex.GetName())==0);
+        }
+        CPPUNIT_ASSERT(exThrown);
     }
 };
 

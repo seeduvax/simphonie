@@ -7,10 +7,10 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Property.hpp"
+#include "simph/smpdk/Property.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
 Property::Property(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, Smp::Publication::IType* type,
@@ -44,5 +44,5 @@ Smp::PrimitiveTypeKind Property::GetPrimitiveTypeKind() const {
     return _value.GetType();
 }
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph

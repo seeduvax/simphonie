@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_ExInvalidParameterValue_HPP__
-#define __simph_kern_ExInvalidParameterValue_HPP__
+#ifndef __simph_smpdk_ExInvalidParameterValue_HPP__
+#define __simph_smpdk_ExInvalidParameterValue_HPP__
 #include "Smp/InvalidParameterValue.h"
-#include "simph/kern/ExInvalidAnyType.hpp"
+#include "simph/smpdk/ExInvalidAnyType.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 
 /**
  *
@@ -41,6 +41,6 @@ private:
     Smp::String8 _paramName;
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_ExInvalidParameterValue_HPP__
+#endif  // __simph_smpdk_ExInvalidParameterValue_HPP__

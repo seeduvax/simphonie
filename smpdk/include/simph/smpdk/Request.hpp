@@ -7,14 +7,14 @@
  * $Id$
  * $Date$
  */
-#ifndef __simph_kern_Request_HPP__
-#define __simph_kern_Request_HPP__
+#ifndef __simph_smpdk_Request_HPP__
+#define __simph_smpdk_Request_HPP__
 
 #include "Smp/IRequest.h"
 #include "simph/smpdk/Collection.hpp"
 
 namespace simph {
-namespace kern {
+namespace smpdk {
 using namespace simph::smpdk;
 
 class Request : public Smp::IRequest {
@@ -54,6 +54,6 @@ private:
     std::vector<Parameter> _parameters;
 };
 
-}  // namespace kern
+}  // namespace smpdk
 }  // namespace simph
-#endif  // __simph_kern_Request_HPP__
+#endif  // __simph_smpdk_Request_HPP__
