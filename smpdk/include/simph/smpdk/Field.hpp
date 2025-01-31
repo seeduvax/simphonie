@@ -24,16 +24,10 @@
 namespace simph {
 namespace smpdk {
 /**
- *
+ * Concrete IField, IPersist and IForcibleField
  */
 class Field : public Persist, virtual public Smp::IForcibleField {
 public:
-    /**
-     * Default constructor.
-     */
-    Field(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, void* address, unsigned int dataSize,
-          Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
-          Smp::IObject* parent);
     /**
      * Destructor.
      */
@@ -44,14 +38,11 @@ public:
     Smp::Bool IsInput() const override;
     Smp::Bool IsOutput() const override;
     const Smp::Publication::IType* GetType() const override;
-    // Smp::IForcibleField implementation
-    void Force(Smp::AnySimple value) override;
-    void Unforce() override;
-    Smp::Bool IsForced() override;
-    void Freeze() override;
     Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
     Smp::AnySimple GetValue() const override;
     void SetValue(Smp::AnySimple value) override;
+
+    
     template <typename T>
     static IField* Create(  Smp::String8 name,
                             Smp::String8 description,
@@ -63,6 +54,24 @@ public:
                             Smp::IObject* parent);
 
 protected:
+    /**
+     * Create a field from existing memory space or using its own memory space.
+     * This constructor is protected since this Field class is not yet fully
+     * concrete but is supposed to be extended.
+     * @param name field name
+     * @param description field destriction
+     * @param viewKind field view kind.
+     * @param address to wrap memory space address or nullptr to let the field
+     *        allocate itself the memory.
+     * @param dataSize to wrap memory space size.
+     * @param type data field type
+     * @param isState state flag.
+     * @param isInput input flag.
+     * @param isOutput output flag.
+     */
+    Field(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, void* address, unsigned int dataSize,
+          Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+          Smp::IObject* parent);
     inline void setType(Smp::Publication::IType* type) {
         _type = type;
     }
@@ -71,18 +80,22 @@ protected:
     }
 
 private:
+    /** state flag */
     Smp::Bool _stateType;
+    /** input flag */
     Smp::Bool _inputType;
+    /** output flag */
     Smp::Bool _outputType;
+    /** field type */
     const Smp::Publication::IType* _type;
+    /** view kind */
     Smp::ViewKind _viewKind;
+    /** data address */
     void* _data;
+    /** data byte size */
     unsigned int _dataSize;
+    /** memory owner flag */
     bool _allocated;
-    Field* _src;
-    Smp::Bool _forced;
-    Smp::AnySimple _forcedValue;
-    Collection<Field> _targets;
 };
 
 template <typename T>
@@ -102,10 +115,28 @@ public:
     void SetValue(Smp::AnySimple value) override {
         *_tData = value;
     }
+    // Smp::IForcibleField implementation
+    void Force(Smp::AnySimple value) override {
+        _forcedValue=value;
+        _forced=true;
+    }
+    void Unforce() override {
+        _forced=false;
+    }
+    Smp::Bool IsForced() override {
+        return _forced;
+    }
+    void Freeze() override {
+        _forcedValue=*_tData;
+        _forced=true;
+    }
+protected:
     void initType();
 
 private:
     T* _tData;
+    T _forcedValue{0};
+    Smp::Bool _forced{false};
 };
 template <typename T>
 class TOutputField : public TField<T>, virtual public Smp::IOutputField {
@@ -115,11 +146,9 @@ public:
                 Smp::ViewKind viewKind,
                 T* address,
                 Smp::Bool isState,
-                Smp::Bool isInput,
-                Smp::Bool isOutput,
                 Smp::IObject* parent
                 ):  TField<T>(name, description, viewKind, address,
-                         isState, isInput, isOutput, parent),
+                         isState, false, true, parent),
                     _targets("targets","connected fields",this) {
     } 
     virtual ~TOutputField() {
@@ -174,12 +203,12 @@ Smp::IField* Field::Create(
     if (isOutput) {
         return new TOutputField<T>(
                         name, description, viewKind, static_cast<T*>(address),
-                        isState, isInput, isOutput, parent);
+                        isState, parent);
     }
     else {
         return new TField<T>(
                         name, description, viewKind, static_cast<T*>(address),
-                        isState, isInput, isOutput, parent);
+                        isState, isInput, false, parent);
     }
 }
 
@@ -189,16 +218,16 @@ public:
                    Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
                    Smp::IObject* parent);
     virtual ~StructureField();
-    void addField(Field* f);
+    void addField(Smp::IField* f);
     inline const void* getAddress(Smp::Int64 offset = 0) {
         return (const void*)((int64_t)getDataPtr() + offset);
     }
-    inline const std::vector<Field*> getFields() const {
+    inline const std::vector<Smp::IField*> getFields() const {
         return _fields;
     }
 
 private:
-    std::vector<Field*> _fields;
+    std::vector<Smp::IField*> _fields;
 };
 
 template <typename T>

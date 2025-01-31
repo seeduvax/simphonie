@@ -27,11 +27,8 @@ Field::Field(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind
       _viewKind(viewKind),
       _data(address == nullptr ? malloc(dataSize) : address),
       _dataSize(dataSize),
-      _allocated(address == nullptr),
-      _src(nullptr),
-      _forced(false),
-      _forcedValue(),
-      _targets("cnx", "", this) {}
+      _allocated(address == nullptr) {
+}
 // ..........................................................
 Field::~Field() {
     if (_allocated) {
@@ -60,57 +57,8 @@ const Smp::Publication::IType* Field::GetType() const {
     return _type;
 }
 // ..........................................................
-void Field::SetValue(Smp::AnySimple value) {
-// TODO    LOGW("Can't set simple value to non simple field " << GetName());
-}
-// ..........................................................
 Smp::PrimitiveTypeKind Field::GetPrimitiveTypeKind() const {
     return Smp::PrimitiveTypeKind::PTK_None;
-}
-// ..........................................................
-Smp::AnySimple Field::GetValue() const {
-// TODO    LOGW("Requesting simple value from non simple field " << GetName());
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int64, 0);
-}
-// --------------------------------------------------------------------
-// Smp::IDataflowField implentation
-// ..........................................................
-/* TODO to be restored with a OutputField implementation
-void Field::Connect(Smp::IField* target) {
-    auto f = dynamic_cast<Field*>(target);
-    if (f != nullptr && (f->_type->GetUuid() == _type->GetUuid()) && f->_dataSize == _dataSize && IsOutput()
-        && f->IsInput()) {
-        _targets.push_back(f);
-    }
-    else {
-        throw ExInvalidTarget(this, target);
-    }
-}
-// ..........................................................
-void Field::Push() {
-    for (auto f : _targets) {
-        std::memcpy(f->_data, _data, _dataSize);
-    }
-}
-*/
-// --------------------------------------------------------------------
-// Smp::IForcibleField implementation
-// ..........................................................
-void Field::Force(Smp::AnySimple value) {
-    _forcedValue = value;
-    _forced = true;
-}
-// ..........................................................
-void Field::Unforce() {
-    _forced = false;
-}
-// ..........................................................
-Smp::Bool Field::IsForced() {
-    return _forced;
-}
-// ..........................................................
-void Field::Freeze() {
-    Force(GetValue());
 }
 // ..........................................................
 template <>
@@ -175,67 +123,68 @@ Smp::PrimitiveTypeKind TField<Smp::Float64>::GetPrimitiveTypeKind() const {
 // ..........................................................
 template <>
 Smp::AnySimple TField<Smp::Char8>::GetValue() const {
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Char8, *_tData);
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Char8, _forced?_forcedValue:*_tData);
 }
 // ..........................................................
 template <>
 Smp::AnySimple TField<Smp::Bool>::GetValue() const {
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Bool, *_tData);
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Bool, _forced?_forcedValue:*_tData);
 }
 // ..........................................................
 template <>
 Smp::AnySimple TField<Smp::Int8>::GetValue() const {
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int8, *_tData);
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int8, _forced?_forcedValue:*_tData);
 }
 // ..........................................................
 template <>
 Smp::AnySimple TField<Smp::UInt8>::GetValue() const {
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt8, *_tData);
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt8, _forced?_forcedValue:*_tData);
 }
 // ..........................................................
 template <>
 Smp::AnySimple TField<Smp::Int16>::GetValue() const {
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int16, *_tData);
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int16, _forced?_forcedValue:*_tData);
 }
 // ..........................................................
 template <>
 Smp::AnySimple TField<Smp::UInt16>::GetValue() const {
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt16, *_tData);
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt16, _forced?_forcedValue:*_tData);
 }
 // ..........................................................
 template <>
 Smp::AnySimple TField<Smp::Int32>::GetValue() const {
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int32, *_tData);
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int32, _forced?_forcedValue:*_tData);
 }
 // ..........................................................
 template <>
 Smp::AnySimple TField<Smp::UInt32>::GetValue() const {
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt32, *_tData);
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt32, _forced?_forcedValue:*_tData);
 }
 // ..........................................................
 template <>
 Smp::AnySimple TField<Smp::Int64>::GetValue() const {
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int64, *_tData);
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int64, _forced?_forcedValue:*_tData);
 }
 // ..........................................................
 template <>
 Smp::AnySimple TField<Smp::UInt64>::GetValue() const {
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt64, *_tData);
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt64, _forced?_forcedValue:*_tData);
 }
 // ..........................................................
 template <>
 Smp::AnySimple TField<Smp::Float32>::GetValue() const {
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float32, *_tData);
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float32, _forced?_forcedValue:*_tData);
 }
 // ..........................................................
 template <>
 Smp::AnySimple TField<Smp::Float64>::GetValue() const {
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float64, *_tData);
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float64, _forced?_forcedValue:*_tData);
 }
 // ..........................................................
 template <>
 Smp::AnySimple TField<Smp::String8>::GetValue() const {
-    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_String8, *_tData);
+    // TODO this is probably wrong and not the way strings should be handled.
+    return Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_String8, _forced?_forcedValue:*_tData);
 }
 
 // --------------------------------------------------------------------
@@ -277,7 +226,7 @@ void StructureField::Connect(Smp::IField* target) {
 }
 */
 // ..........................................................
-void StructureField::addField(Field* f) {
+void StructureField::addField(Smp::IField* f) {
     _fields.push_back(f);
 }
 // --------------------------------------------------------------------

@@ -66,10 +66,133 @@ void StructureType::setup(StructureField* sf) {
         const void* address = sf->getAddress(fd.offset);
         Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(fd.uuid));
         if (t != nullptr) {
+            Smp::IField* f=nullptr;
+            if (fd.uuid==_char8Type.GetUuid()) {
             // TODO according fd.uuid create field using right field subclass
-            Field* f = new Field(fd.name, fd.description, fd.view, (void*)address, fd.size, t, sf->IsState(),
-                                 sf->IsInput(), sf->IsOutput(), sf);
-            sf->addField(f);
+                f = Field::Create<Smp::Char8>(fd.name, 
+                                 fd.description,
+                                 fd.view, (void*)address,
+                                 sf->IsState(),
+                                 sf->IsInput(),
+                                 sf->IsOutput(),
+                                 sf);
+            }
+            else if (fd.uuid==_boolType.GetUuid()) {
+            // TODO according fd.uuid create field using right field subclass
+                f = Field::Create<Smp::Bool>(fd.name, 
+                                 fd.description,
+                                 fd.view, (void*)address,
+                                 sf->IsState(),
+                                 sf->IsInput(),
+                                 sf->IsOutput(),
+                                 sf);
+            }
+            else if (fd.uuid==_int8Type.GetUuid()) {
+            // TODO according fd.uuid create field using right field subclass
+                f = Field::Create<Smp::Int8>(fd.name, 
+                                 fd.description,
+                                 fd.view, (void*)address,
+                                 sf->IsState(),
+                                 sf->IsInput(),
+                                 sf->IsOutput(),
+                                 sf);
+            }
+            else if (fd.uuid==_int16Type.GetUuid()) {
+            // TODO according fd.uuid create field using right field subclass
+                f = Field::Create<Smp::Int16>(fd.name, 
+                                 fd.description,
+                                 fd.view, (void*)address,
+                                 sf->IsState(),
+                                 sf->IsInput(),
+                                 sf->IsOutput(),
+                                 sf);
+            }
+            else if (fd.uuid==_int32Type.GetUuid()) {
+            // TODO according fd.uuid create field using right field subclass
+                f = Field::Create<Smp::Int32>(fd.name, 
+                                 fd.description,
+                                 fd.view, (void*)address,
+                                 sf->IsState(),
+                                 sf->IsInput(),
+                                 sf->IsOutput(),
+                                 sf);
+            }
+            else if (fd.uuid==_int64Type.GetUuid()) {
+            // TODO according fd.uuid create field using right field subclass
+                f = Field::Create<Smp::Int64>(fd.name, 
+                                 fd.description,
+                                 fd.view, (void*)address,
+                                 sf->IsState(),
+                                 sf->IsInput(),
+                                 sf->IsOutput(),
+                                 sf);
+            }
+            else if (fd.uuid==_uint8Type.GetUuid()) {
+            // TODO according fd.uuid create field using right field subclass
+                f = Field::Create<Smp::UInt8>(fd.name, 
+                                 fd.description,
+                                 fd.view, (void*)address,
+                                 sf->IsState(),
+                                 sf->IsInput(),
+                                 sf->IsOutput(),
+                                 sf);
+            }
+            else if (fd.uuid==_uint16Type.GetUuid()) {
+            // TODO according fd.uuid create field using right field subclass
+                f = Field::Create<Smp::UInt16>(fd.name, 
+                                 fd.description,
+                                 fd.view, (void*)address,
+                                 sf->IsState(),
+                                 sf->IsInput(),
+                                 sf->IsOutput(),
+                                 sf);
+            }
+            else if (fd.uuid==_uint32Type.GetUuid()) {
+            // TODO according fd.uuid create field using right field subclass
+                f = Field::Create<Smp::UInt32>(fd.name, 
+                                 fd.description,
+                                 fd.view, (void*)address,
+                                 sf->IsState(),
+                                 sf->IsInput(),
+                                 sf->IsOutput(),
+                                 sf);
+            }
+            else if (fd.uuid==_uint64Type.GetUuid()) {
+            // TODO according fd.uuid create field using right field subclass
+                f = Field::Create<Smp::UInt64>(fd.name, 
+                                 fd.description,
+                                 fd.view, (void*)address,
+                                 sf->IsState(),
+                                 sf->IsInput(),
+                                 sf->IsOutput(),
+                                 sf);
+            }
+            else if (fd.uuid==_float32Type.GetUuid()) {
+            // TODO according fd.uuid create field using right field subclass
+                f = Field::Create<Smp::Float32>(fd.name, 
+                                 fd.description,
+                                 fd.view, (void*)address,
+                                 sf->IsState(),
+                                 sf->IsInput(),
+                                 sf->IsOutput(),
+                                 sf);
+            }
+            else if (fd.uuid==_float64Type.GetUuid()) {
+            // TODO according fd.uuid create field using right field subclass
+                f = Field::Create<Smp::Float64>(fd.name, 
+                                 fd.description,
+                                 fd.view, (void*)address,
+                                 sf->IsState(),
+                                 sf->IsInput(),
+                                 sf->IsOutput(),
+                                 sf);
+            }
+            if (f!=nullptr) {
+                sf->addField(f);
+            }
+            else {
+                // TODO throw exception
+            }
         }
         else {
             // should not happen if type registry is well managed.
