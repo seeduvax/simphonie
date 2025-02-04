@@ -14,7 +14,7 @@ namespace simph {
 namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExDuplicateLiteral::ExDuplicateLiteral(Smp::IObject* sender, Smp::String8 name, Smp::Int32 value)
+ExDuplicateLiteral::ExDuplicateLiteral(const Smp::IObject* sender, Smp::String8 name, Smp::Int32 value)
     : _lName(name), _lValue(value) {
     setSender(sender);
     setName("DuplicateLiteral");

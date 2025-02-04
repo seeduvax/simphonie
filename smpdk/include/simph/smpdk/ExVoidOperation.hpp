@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    ExVoidOperation(Smp::IObject* sender, Smp::String8 opName);
+    ExVoidOperation(const Smp::IObject* sender, Smp::String8 opName);
     /**
      * Destructor.
      */

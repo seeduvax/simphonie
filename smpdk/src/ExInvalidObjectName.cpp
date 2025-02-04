@@ -14,7 +14,7 @@ namespace simph {
 namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidObjectName::ExInvalidObjectName(Smp::IObject* sender, Smp::String8 invalidName) : _invalidName(invalidName) {
+ExInvalidObjectName::ExInvalidObjectName(const Smp::IObject* sender, Smp::String8 invalidName) : _invalidName(invalidName) {
     setName("InvalidObjectName");
     setSender(sender);
     std::ostringstream d;

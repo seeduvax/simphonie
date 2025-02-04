@@ -14,7 +14,7 @@ namespace simph {
 namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExContainerFull::ExContainerFull(Smp::IContainer* sender) {
+ExContainerFull::ExContainerFull(const Smp::IContainer* sender) {
     _size = sender->GetCount();
     setName("ContainerFull");
     setSender(sender);

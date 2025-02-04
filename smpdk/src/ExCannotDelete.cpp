@@ -14,7 +14,7 @@ namespace simph {
 namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExCannotDelete::ExCannotDelete(Smp::IContainer* sender, Smp::IComponent* comp) : _comp(comp) {
+ExCannotDelete::ExCannotDelete(const Smp::IContainer* sender, Smp::IComponent* comp) : _comp(comp) {
     _lower = sender->GetLower();
     setName("CannotDelete");
     setSender(sender);

@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    ExInvalidParameterIndex(Smp::IObject* sender, const Smp::String8 opName, Smp::Int32 index, Smp::Int32 count);
+    ExInvalidParameterIndex(const Smp::IObject* sender, Smp::String8 opName, Smp::Int32 index, Smp::Int32 count);
     /**
      * Destructor.
      */

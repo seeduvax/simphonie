@@ -22,7 +22,7 @@ public:
     /**
      * Default constructor.
      */
-    ExInvalidComponentState(Smp::IObject* sender, Smp::ComponentStateKind invalid, Smp::ComponentStateKind expected);
+    ExInvalidComponentState(const Smp::IObject* sender, Smp::ComponentStateKind invalid, Smp::ComponentStateKind expected);
     /**
      * Destructor.
      */

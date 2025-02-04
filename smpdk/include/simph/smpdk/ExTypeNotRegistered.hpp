@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    ExTypeNotRegistered(Smp::IObject* sender, Smp::Uuid typeUuid);
+    ExTypeNotRegistered(const Smp::IObject* sender, Smp::Uuid typeUuid);
     /**
      * Destructor.
      */

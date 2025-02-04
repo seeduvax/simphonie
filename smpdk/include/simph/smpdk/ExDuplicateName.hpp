@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    ExDuplicateName(Smp::IObject* sender, Smp::String8 dName);
+    ExDuplicateName(const Smp::IObject* sender, Smp::String8 dName);
     /**
      * Destructor.
      */

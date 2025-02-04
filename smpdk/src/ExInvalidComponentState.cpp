@@ -14,7 +14,7 @@ namespace simph {
 namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidComponentState::ExInvalidComponentState(Smp::IObject* sender, Smp::ComponentStateKind invalid,
+ExInvalidComponentState::ExInvalidComponentState(const Smp::IObject* sender, Smp::ComponentStateKind invalid,
                                                  Smp::ComponentStateKind expected)
     : _invalid(invalid), _expected(expected) {
     setName("InvalidComponentState");

@@ -15,7 +15,7 @@ namespace simph {
 namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExDuplicateName::ExDuplicateName(Smp::IObject* sender, Smp::String8 dName) {
+ExDuplicateName::ExDuplicateName(const Smp::IObject* sender, Smp::String8 dName) {
     _dName = dName;
     setName("DuplicateName");
     setSender(sender);

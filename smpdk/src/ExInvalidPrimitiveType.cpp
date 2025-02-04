@@ -14,7 +14,7 @@ namespace simph {
 namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidPrimitiveType::ExInvalidPrimitiveType(Smp::IObject* sender, Smp::PrimitiveTypeKind type) : _type(type) {
+ExInvalidPrimitiveType::ExInvalidPrimitiveType(const Smp::IObject* sender, Smp::PrimitiveTypeKind type) : _type(type) {
     setName("InvalidPrimitiveType");
     setSender(sender);
     std::ostringstream d;

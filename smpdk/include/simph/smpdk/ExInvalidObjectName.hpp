@@ -23,7 +23,7 @@ public:
     /**
      * Default constructor.
      */
-    ExInvalidObjectName(Smp::IObject* sender, Smp::String8 invalidName);
+    ExInvalidObjectName(const Smp::IObject* sender, Smp::String8 invalidName);
     /**
      * Destructor.
      */

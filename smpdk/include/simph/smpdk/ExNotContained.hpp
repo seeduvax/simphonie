@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    ExNotContained(Smp::IContainer* sender, Smp::IComponent* comp);
+    ExNotContained(const Smp::IContainer* sender, Smp::IComponent* comp);
     /**
      * Destructor.
      */

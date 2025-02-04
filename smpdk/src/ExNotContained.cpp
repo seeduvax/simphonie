@@ -14,7 +14,7 @@ namespace simph {
 namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExNotContained::ExNotContained(Smp::IContainer* sender, Smp::IComponent* comp) : _comp(comp) {
+ExNotContained::ExNotContained(const Smp::IContainer* sender, Smp::IComponent* comp) : _comp(comp) {
     setName("NotContained");
     setSender(sender);
     std::ostringstream d;

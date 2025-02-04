@@ -14,7 +14,7 @@ namespace simph {
 namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidParameterIndex::ExInvalidParameterIndex(Smp::IObject* sender, const Smp::String8 opName, Smp::Int32 index,
+ExInvalidParameterIndex::ExInvalidParameterIndex(const Smp::IObject* sender, Smp::String8 opName, Smp::Int32 index,
                                                  Smp::Int32 count)
     : _opName(opName), _index(index), _count(count) {
     setName("InvalidParameterIndex");

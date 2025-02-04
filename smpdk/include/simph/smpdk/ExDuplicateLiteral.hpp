@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    ExDuplicateLiteral(Smp::IObject* sender, Smp::String8 name, Smp::Int32 value);
+    ExDuplicateLiteral(const Smp::IObject* sender, Smp::String8 name, Smp::Int32 value);
     /**
      * Destructor.
      */

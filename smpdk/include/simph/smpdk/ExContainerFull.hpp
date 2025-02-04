@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    ExContainerFull(Smp::IContainer* sender);
+    ExContainerFull(const Smp::IContainer* sender);
     /**
      * Destructor.
      */

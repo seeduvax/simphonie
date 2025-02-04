@@ -14,7 +14,7 @@ namespace simph {
 namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExTypeNotRegistered::ExTypeNotRegistered(Smp::IObject* sender, Smp::Uuid typeUuid) : _uuid(typeUuid) {
+ExTypeNotRegistered::ExTypeNotRegistered(const Smp::IObject* sender, Smp::Uuid typeUuid) : _uuid(typeUuid) {
     setName("TypeNotRegistered");
     setSender(sender);
     std::ostringstream d;

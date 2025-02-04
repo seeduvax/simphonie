@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    ExCannotDelete(Smp::IContainer* sender, Smp::IComponent* comp);
+    ExCannotDelete(const Smp::IContainer* sender, Smp::IComponent* comp);
     /**
      * Destructor.
      */

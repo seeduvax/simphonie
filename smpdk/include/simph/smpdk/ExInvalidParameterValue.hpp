@@ -24,7 +24,7 @@ public:
      * Default constructor.
      */
     ExInvalidParameterValue(
-                Smp::IObject* sender,
+                const Smp::IObject* sender,
                 Smp::String8 opName,
                 Smp::String8 paramName,
                 Smp::AnySimple invalidValue,
