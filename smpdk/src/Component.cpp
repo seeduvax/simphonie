@@ -12,7 +12,9 @@
 #include <sstream>
 #include "Smp/ISimulator.h"
 #include "Smp/ISimpleField.h"
+#include "Smp/Services/IResolver.h"
 #include "simph/smpdk/ExInvalidComponentState.hpp"
+#include "simph/smpdk/ExInvalidFieldName.hpp"
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -90,7 +92,7 @@ Smp::ISimulator* Component::getSimulator() {
     }
     _simulator = dynamic_cast<Smp::ISimulator*>(obj);
     if (_simulator == nullptr) {
-        throw std::runtime_error("Cannot construct builder, root parent is not a Smp::ISimulator ");
+        throw Exception(this,"Component not connected to a simulator.");
     }
     return _simulator;
 }
@@ -118,8 +120,7 @@ void Component::Disconnect() {
 }
 // ..........................................................
 Smp::IField* Component::GetField(Smp::String8 fullName) const {
-    // TODO enable dig structure and arrays when fullName is a path.
-    return _fields.at(fullName);
+    return dynamic_cast<Smp::IField*>(resolveChild(fullName,this));
 }
 // ..........................................................
 const Smp::FieldCollection* Component::GetFields() const {
@@ -139,7 +140,7 @@ Smp::AnySimple Component::GetSimpleValue(Smp::String8 fullName) const {
         return f->GetValue();
     }
     // TODO throw InvalidFieldName when found field is not a Simple field.
-throw std::runtime_error("TODO InvalifFieldName exception");
+    throw ExInvalidFieldName(this,fullName);
 }
 // ..........................................................
 void Component::SetSimpleValue(Smp::String8 fullName, Smp::AnySimple value) {
@@ -154,7 +155,7 @@ void Component::GetSimpleArrayValue(
         Smp::UInt64 lenght,
         Smp::AnySimple* values,
         Smp::UInt64 startIUndex) const {
-throw std::runtime_error("TODO Component::GetSimpleArrayValue not implemented yet");
+throw Exception(this, "TODO Component::GetSimpleArrayValue not implemented yet");
 }
 // ..........................................................
 void Component::SetSimpleArrayValue(
@@ -162,7 +163,7 @@ void Component::SetSimpleArrayValue(
         Smp::UInt64 lenght,
         Smp::AnySimple* values,
         Smp::UInt64 startIUndex) {
-throw std::runtime_error("TODO Component::GetSimpleArrayValue not implemented yet");
+throw Exception(this, "TODO Component::GetSimpleArrayValue not implemented yet");
 }
 // ..........................................................
 Smp::Bool Component::AddChild(

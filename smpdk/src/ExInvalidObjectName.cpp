@@ -27,7 +27,7 @@ ExInvalidObjectName::~ExInvalidObjectName() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::String8 ExInvalidObjectName::GetInvalidName() const noexcept {
-    return _invalidName;
+    return _invalidName.c_str();
 }
 }  // namespace smpdk
 }  // namespace simph

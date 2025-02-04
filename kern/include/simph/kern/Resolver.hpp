@@ -49,7 +49,6 @@ protected:
 
 private:
     Smp::IObject* _root;
-    Smp::IObject* resolve(Smp::String8 path, Smp::IObject* from);
     void dumpObj(const Smp::IObject* from, int level=0) const;
 };
 

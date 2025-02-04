@@ -32,7 +32,7 @@ public:
     Smp::String8 GetInvalidName() const noexcept override;
 
 private:
-    Smp::String8 _invalidName;
+    std::string _invalidName;
 };
 
 }  // namespace smpdk

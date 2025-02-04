@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    ExInvalidAnyType(Smp::IObject* sender, Smp::AnySimple invalidValue, Smp::PrimitiveTypeKind expected);
+    ExInvalidAnyType(const Smp::IObject* sender, Smp::AnySimple invalidValue, Smp::PrimitiveTypeKind expected);
     /**
      * Destructor.
      */

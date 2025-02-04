@@ -45,6 +45,7 @@ public:
 
 protected:
     void checkName(Smp::String8 name);
+    static Smp::IObject* resolveChild(Smp::String8 name, const Smp::IObject* from);
 private:
     std::string _name;
     std::string _description;

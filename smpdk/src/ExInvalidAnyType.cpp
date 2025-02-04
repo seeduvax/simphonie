@@ -14,7 +14,7 @@ namespace simph {
 namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidAnyType::ExInvalidAnyType(Smp::IObject* sender,
+ExInvalidAnyType::ExInvalidAnyType(const Smp::IObject* sender,
                                    Smp::AnySimple invalidValue,
                                    Smp::PrimitiveTypeKind expected)
     : _invalidValue(invalidValue), _expected(expected) {

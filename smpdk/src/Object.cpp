@@ -43,6 +43,185 @@ Smp::IObject* Object::GetParent() const {
     return _parent;
 }
 // ..........................................................
+Smp::IObject* Object::resolveChild(Smp::String8 path, const Smp::IObject* from) {
+    // See path parsing state diagram in definition file (ref 1e2889e) 
+    // subsection "Path parsing" somewhere in "Design" section.
+    // (fig resolver_path_parse_state.png)
+    const Smp::IObject* obj=from;
+    enum State {
+        Init,
+        Sep,
+        Self,
+        Parent,
+        Name,
+        Index,
+        EndIndex,
+        DotSep,
+        End 
+    };
+    State state=State::Init;
+    int i=0;
+    std::string name="";
+    while (state!=State::End) {
+        char c=path[i];
+        switch (state) {
+            case State::Init: {
+                    switch (c) {
+                        case '/':
+                            state=State::Sep;
+                            break;
+                        case '.':
+                            state=State::Self;
+                            break;
+                        default:
+                            // don't really care char validity, since this
+                            // should lead to not found child and finally 
+                            // returning nullptr.
+                            // This will be the same for many case of switching
+                            // to Name state and won't be repeated further
+                            name.append(1,c);
+                            state=State::Name;
+                            break;
+                    }
+                }
+                break;
+            case State::Sep: {
+                    switch (c) {
+                        case '/':
+                            // Ignore succesive /
+                            break;
+                        case '.':
+                            state=State::Self;
+                            break;
+                        default:
+                            name.append(1,c);
+                            state=State::Name;
+                            break;
+                    }
+                }
+                break;
+            case State::Self: {
+                    switch (c) {
+                        case '/':
+                            state=State::Sep;
+                            break;
+                        case '.':
+                            state=State::Parent;
+                            break;
+                        default:
+                            name.append(1,c);
+                            state=State::Name;
+                    }
+                }
+                break;
+            case State::Parent: {
+                    switch(c) {
+                        case '/':
+                            obj=obj->GetParent();
+                            state=State::Sep;
+                            break;
+                        case '\0':
+                            obj=obj->GetParent();
+                            state=State::End;
+                            break;
+                        default:
+                            obj=nullptr;
+                            state=State::End;
+                    }
+                }
+                break;
+            case State::Name: {
+                    switch (c) {
+                        case '/':
+                            obj=obj->GetChild(name.c_str());
+                            name="";
+                            state=State::Sep;
+                            break;
+                        case '[':
+                            obj=obj->GetChild(name.c_str());
+                            name="[";
+                            state=State::Index;
+                            break;
+                        case '.':
+                            obj=obj->GetChild(name.c_str());
+                            name="";
+                            state=State::DotSep;
+                            break;
+                        case '\0':
+                            obj=obj->GetChild(name.c_str());
+                            state=State::End;
+                            break;
+                        default:
+                            name.append(1,c);
+                            break;
+                    }
+                }
+                break;
+            case State::Index: {
+                    switch (c) {
+                        case ']':
+                            name.append(1,c);
+                            obj=obj->GetChild(name.c_str());
+                            name="";
+                            state=State::EndIndex;
+                            break;
+                        default:
+                            name.append(1,c);
+                            break;
+                    }
+                }
+                break;
+            case State::EndIndex: {
+                    switch (c) {
+                        case '/':
+                            state=State::Sep;
+                            break;
+                        case '.':
+                            state=State::DotSep;
+                            break;
+                        case '[':
+                            state=State::Index;
+                            break;
+                        case '\0':
+                            state=State::End;
+                            break;
+                        default:
+                            // parse error
+                            obj=nullptr;
+                            break;
+                    }
+                }
+                break;
+            case State::DotSep: {
+                    switch (c) {
+                        case '.':
+                        case '/':
+                            // parse error
+                            obj=nullptr;
+                            break;
+                        default:
+                            name.append(1,c);
+                            state=State::Name;
+                    }
+                }
+                break;
+        }
+        if (c=='\0' || obj==nullptr) {
+            // force final state if end of string is reached or at some level
+            // any of GetParent() or GetChild() returned nullptr.
+            state=State::End;
+        }
+        else {
+            // jump to next char.
+            i++;
+        }
+    }
+    // even travelling the object hierchy does not need anything else than
+    // const object. Requester of object may seek for non const object.
+    // Then cast to non const is needed.
+    return (Smp::IObject*)obj;
+}
+// ..........................................................
 Smp::IObject* Object::GetChild(Smp::String8 name) const {
     // quite strange to play with dynamic cast like that, but
     // the only way to deal properly with possible virtual multiple
@@ -51,7 +230,7 @@ Smp::IObject* Object::GetChild(Smp::String8 name) const {
     {
         auto o=dynamic_cast<const Smp::IComponent*>(this);
         if (o!=nullptr) {
-            res=o->GetField(name);
+            res=o->GetFields()->at(name);
         }
     }
     if (res==nullptr) {

@@ -39,8 +39,6 @@ public:
     Smp::Bool IsOutput() const override;
     const Smp::Publication::IType* GetType() const override;
     Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
-    Smp::AnySimple GetValue() const override;
-    void SetValue(Smp::AnySimple value) override;
 
     
     template <typename T>

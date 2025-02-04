@@ -17,7 +17,7 @@ namespace smpdk {
 // ..........................................................
 Exception::Exception() : _name(), _description(), _sender(nullptr), _msg() {}
 // ..........................................................
-Exception::Exception(Smp::IObject* obj, Smp::String8 msg):
+Exception::Exception(const Smp::IObject* obj, Smp::String8 msg):
             _name("SmpException"),
             _description(),
             _sender(obj),
