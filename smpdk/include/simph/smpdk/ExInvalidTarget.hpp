@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    ExInvalidTarget(const Smp::IOutputField* source, Smp::IField* target);
+    ExInvalidTarget(Smp::IOutputField* source, Smp::IField* target);
     /**
      * Destructor.
      */

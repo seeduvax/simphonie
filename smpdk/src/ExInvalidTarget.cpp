@@ -16,7 +16,7 @@ namespace simph {
 namespace smpdk {
 // --------------------------------------------------------------------
 // ..........................................................
-ExInvalidTarget::ExInvalidTarget(const Smp::IOutputField* source, Smp::IField* target) : _source(source), _target(target) {
+ExInvalidTarget::ExInvalidTarget(Smp::IOutputField* source, Smp::IField* target) : _source(source), _target(target) {
     setName("InvalidTarget");
     setSender(source);
     std::ostringstream d;

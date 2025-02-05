@@ -42,10 +42,10 @@ public:
 
     
     template <typename T>
-    static IField* Create(  Smp::String8 name,
+    static IField* CreateSimple(  Smp::String8 name,
                             Smp::String8 description,
                             Smp::ViewKind viewKind,
-                            void* address,
+                            T* address,
                             Smp::Bool isState,
                             Smp::Bool isInput,
                             Smp::Bool isOutput,
@@ -97,7 +97,7 @@ private:
 };
 
 template <typename T>
-class TField : public Field {
+class TField : public Field, virtual public Smp::ISimpleField {
 public:
     TField(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, T* address, Smp::Bool isState,
            Smp::Bool isInput, Smp::Bool isOutput, Smp::IObject* parent)
@@ -189,11 +189,11 @@ private:
 };
 
 template <typename T>
-Smp::IField* Field::Create(
+Smp::IField* Field::CreateSimple(
                             Smp::String8 name,
                             Smp::String8 description,
                             Smp::ViewKind viewKind,
-                            void* address,
+                            T* address,
                             Smp::Bool isState,
                             Smp::Bool isInput,
                             Smp::Bool isOutput,
