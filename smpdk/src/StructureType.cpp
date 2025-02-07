@@ -10,8 +10,10 @@
 #include "simph/smpdk/StructureType.hpp"
 #include "simph/smpdk/ExTypeNotRegistered.hpp"
 #include "simph/smpdk/ExInvalidType.hpp"
-#include "simph/smpdk/Field.hpp"
+#include "simph/smpdk/SimpleField.hpp"
 #include "simph/smpdk/Type.hpp"
+
+#include <sstream>
 
 namespace simph {
 namespace smpdk {
@@ -67,7 +69,7 @@ void StructureType::setup(StructureField* sf) {
         const void* address = sf->getAddress(fd.offset);
         Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(fd.uuid));
         if (t != nullptr) {
-            Smp::IField* f=SimpleField::Create(
+            auto f=SimpleField::Create(
                                  fd.name, 
                                  fd.description,
                                  fd.view, (Smp::Char8*)address,

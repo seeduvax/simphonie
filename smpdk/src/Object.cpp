@@ -16,6 +16,7 @@
 #include "Smp/IContainer.h"
 #include "Smp/IDynamicInvocation.h"
 #include "Smp/IArrayField.h"
+#include "Smp/ISimpleArrayField.h"
 
 #include <iostream>
 
@@ -297,7 +298,8 @@ public:
 // ..........................................................
 void Object::checkName(Smp::String8 name) {
     std::string n=name;
-    if (dynamic_cast<Smp::IArrayField*>(_parent)!=nullptr) {
+    if (dynamic_cast<Smp::IArrayField*>(_parent)!=nullptr
+        || dynamic_cast<Smp::ISimpleArrayField*>(_parent)!=nullptr) {
         // when object is a array member, its name shall be
         // "[i]" with i the 0 based integer index
         if (!std::regex_match(n, std::regex("\\[[0-9][0-9]*\\]"))) {

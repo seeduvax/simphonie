@@ -13,6 +13,7 @@
 #include "simph/kern/Simulator.hpp"
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/sys/Logger.hpp"
+#include "Smp/ISimpleArrayField.h"
 #include "Smp/IModel.h"
 
 namespace test {
@@ -108,12 +109,12 @@ public:
         // are the only ones to be considered fallible/forcible ?
         // CPPUNIT_ASSERT(dynamic_cast<Smp::ISimpleField*>(arrField)==nullptr);
 
-        CPPUNIT_ASSERT(dynamic_cast<Smp::IArrayField*>(arrField) != nullptr);
-        CPPUNIT_ASSERT_EQUAL((size_t)3, dynamic_cast<Smp::IArrayField*>(arrField)->GetSize());
+        CPPUNIT_ASSERT(dynamic_cast<Smp::ISimpleArrayField*>(arrField) != nullptr);
+        CPPUNIT_ASSERT_EQUAL((size_t)3, dynamic_cast<Smp::ISimpleArrayField*>(arrField)->GetSize());
 
         auto simpleField = resolver.ResolveAbsolute("to1.to2.iArray[2]");
         std::cout << "ptr : " << &simpleField << std::endl;
-        CPPUNIT_ASSERT(dynamic_cast<Smp::IArrayField*>(simpleField) == nullptr);
+        CPPUNIT_ASSERT(dynamic_cast<Smp::ISimpleArrayField*>(simpleField) == nullptr);
         CPPUNIT_ASSERT(dynamic_cast<Smp::ISimpleField*>(simpleField) != nullptr);
 
         auto simpleFieldSimple = dynamic_cast<Smp::ISimpleField*>(simpleField)->GetValue();
