@@ -15,6 +15,7 @@
 #include "Smp/IComposite.h"
 #include "Smp/IContainer.h"
 #include "Smp/IDynamicInvocation.h"
+#include "Smp/IArrayField.h"
 
 #include <iostream>
 
@@ -296,115 +297,124 @@ public:
 // ..........................................................
 void Object::checkName(Smp::String8 name) {
     std::string n=name;
-    // Check for non empty alphanumeric names.
-    // '_', '[' and ']' are also valid in names
-    if (!std::regex_match(n, std::regex("[a-zA-Z][a-zA-Z0-9_\\[\\]]*"))) {
-        throw ExInvalidNameBadFormat(this, name);
+    if (dynamic_cast<Smp::IArrayField*>(_parent)!=nullptr) {
+        // when object is a array member, its name shall be
+        // "[i]" with i the 0 based integer index
+        if (!std::regex_match(n, std::regex("\\[[0-9][0-9]*\\]"))) {
+            throw ExInvalidNameBadFormat(this, name);
+        }
     }
-    // ISO/ANSI C++ keywords are not valid (see ECSS SMP 5.2.1.a.1.d).
-    // keyword list fetched 2024-12-11 from https://en.cppreference.com/w/cpp/keyword
-    static const std::vector<std::string> forbidden = {
-        "alignas",
-        "alignof",
-        "and",
-        "and_eq",
-        "asm",
-        "atomic_cancel",
-        "atomic_commit",
-        "atomic_noexcept",
-        "auto",
-        "bitand",
-        "bitor",
-        "bool",
-        "break",
-        "case",
-        "catch",
-        "char",
-        "char8_t",
-        "char16_t",
-        "char32_t",
-        "class",
-        "compl",
-        "concept",
-        "const",
-        "consteval",
-        "constexpr",
-        "constinit",
-        "const_cast",
-        "continue",
-        "co_await",
-        "co_return",
-        "co_yield",
-        "decltype",
-        "default",
-        "delete",
-        "do",
-        "double",
-        "dynamic_cast",
-        "else",
-        "enum",
-        "explicit",
-        "export",
-        "extern",
-        "false",
-        "float",
-        "for",
-        "friend",
-        "goto",
-        "if",
-        "inline",
-        "int",
-        "long",
-        "mutable",
-        "namespace",
-        "new",
-        "noexcept",
-        "not",
-        "not_eq",
-        "nullptr",
-        "operator",
-        "or",
-        "or_eq",
-        "private",
-        "protected",
-        "public",
-        "reflexpr",
-        "register",
-        "reinterpret_cast",
-        "requires",
-        "return",
-        "short",
-        "signed",
-        "sizeof",
-        "static",
-        "static_assert",
-        "static_cast",
-        "struct",
-        "switch",
-        "synchronized",
-        "template",
-        "this",
-        "thread_local",
-        "throw",
-        "true",
-        "try",
-        "typedef",
-        "typeid",
-        "typename",
-        "union",
-        "unsigned",
-        "using",
-        "virtual",
-        "void",
-        "volatile",
-        "wchar_t",
-        "while",
-        "xor",
-        "xor_eq"
-    };
-    for (auto kw : forbidden) {
-        if (kw == n) {
-            throw ExInvalidNameCKeyword(this, name);
+    else { 
+        // otherwise, shall start with letter, be alphanumeric.
+        // '_' is also valid in names
+        if (!std::regex_match(n, std::regex("[a-zA-Z][a-zA-Z0-9_]*"))) {
+            throw ExInvalidNameBadFormat(this, name);
+        }
+        // ISO/ANSI C++ keywords are not valid (see ECSS SMP 5.2.1.a.1.d).
+        // keyword list fetched 2024-12-11 from https://en.cppreference.com/w/cpp/keyword
+        static const std::vector<std::string> forbidden = {
+            "alignas",
+            "alignof",
+            "and",
+            "and_eq",
+            "asm",
+            "atomic_cancel",
+            "atomic_commit",
+            "atomic_noexcept",
+            "auto",
+            "bitand",
+            "bitor",
+            "bool",
+            "break",
+            "case",
+            "catch",
+            "char",
+            "char8_t",
+            "char16_t",
+            "char32_t",
+            "class",
+            "compl",
+            "concept",
+            "const",
+            "consteval",
+            "constexpr",
+            "constinit",
+            "const_cast",
+            "continue",
+            "co_await",
+            "co_return",
+            "co_yield",
+            "decltype",
+            "default",
+            "delete",
+            "do",
+            "double",
+            "dynamic_cast",
+            "else",
+            "enum",
+            "explicit",
+            "export",
+            "extern",
+            "false",
+            "float",
+            "for",
+            "friend",
+            "goto",
+            "if",
+            "inline",
+            "int",
+            "long",
+            "mutable",
+            "namespace",
+            "new",
+            "noexcept",
+            "not",
+            "not_eq",
+            "nullptr",
+            "operator",
+            "or",
+            "or_eq",
+            "private",
+            "protected",
+            "public",
+            "reflexpr",
+            "register",
+            "reinterpret_cast",
+            "requires",
+            "return",
+            "short",
+            "signed",
+            "sizeof",
+            "static",
+            "static_assert",
+            "static_cast",
+            "struct",
+            "switch",
+            "synchronized",
+            "template",
+            "this",
+            "thread_local",
+            "throw",
+            "true",
+            "try",
+            "typedef",
+            "typeid",
+            "typename",
+            "union",
+            "unsigned",
+            "using",
+            "virtual",
+            "void",
+            "volatile",
+            "wchar_t",
+            "while",
+            "xor",
+            "xor_eq"
+        };
+        for (auto kw : forbidden) {
+            if (kw == n) {
+                throw ExInvalidNameCKeyword(this, name);
+            }
         }
     }
 }

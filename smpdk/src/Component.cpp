@@ -178,11 +178,13 @@ void Component::SetSimpleArrayValue(
 Smp::Bool Component::AddChild(
         Smp::IObject* child,
         Smp::ICollectionBase* collection) {
-    if ( GetChild(child->GetName())==nullptr || collection==nullptr 
-                || child->GetName()!=nullptr || child->GetParent()!=this) {
+    if ( child==nullptr 
+                || collection==nullptr 
+                || GetChild(child->GetName())!=nullptr 
+                || child->GetParent()!=this) {
         // Can't add child when 
         //   - a child with the same name is already there
-        //   - the chaild to add parent is not this component
+        //   - the child to add parent is not this component
         return false; 
     }
     if (collection==&_fields) {

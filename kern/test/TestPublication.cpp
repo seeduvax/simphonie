@@ -15,6 +15,8 @@
 #include "simph/kern/TypeRegistry.hpp"
 #include "simph/smpdk/Component.hpp"
 
+#include "simph/sys/Logger.hpp"
+
 namespace test {
 using namespace simph::kern;
 

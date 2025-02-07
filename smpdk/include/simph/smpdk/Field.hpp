@@ -26,7 +26,7 @@ namespace smpdk {
 /**
  * Concrete IField, IPersist and IForcibleField
  */
-class Field : public Persist, virtual public Smp::IForcibleField {
+class Field : public Persist, virtual public Smp::IField {
 public:
     /**
      * Destructor.
@@ -38,18 +38,6 @@ public:
     Smp::Bool IsInput() const override;
     Smp::Bool IsOutput() const override;
     const Smp::Publication::IType* GetType() const override;
-    Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
-
-    
-    template <typename T>
-    static IField* CreateSimple(  Smp::String8 name,
-                            Smp::String8 description,
-                            Smp::ViewKind viewKind,
-                            T* address,
-                            Smp::Bool isState,
-                            Smp::Bool isInput,
-                            Smp::Bool isOutput,
-                            Smp::IObject* parent);
 
 protected:
     /**
@@ -96,16 +84,50 @@ private:
     bool _allocated;
 };
 
-template <typename T>
-class TField : public Field, virtual public Smp::ISimpleField {
+class SimpleField : public Field, virtual public Smp::IForcibleField {
 public:
-    TField(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, T* address, Smp::Bool isState,
+    /**
+     * Destructor.
+     */
+    virtual ~SimpleField();
+    template <typename T>
+    static IField* Create(  Smp::String8 name,
+                            Smp::String8 description,
+                            Smp::ViewKind viewKind,
+                            T* address,
+                            Smp::Bool isState,
+                            Smp::Bool isInput,
+                            Smp::Bool isOutput,
+                            Smp::IObject* parent);
+    static IField* Create(  Smp::String8 name,
+                            Smp::String8 description,
+                            Smp::ViewKind viewKind,
+                            void* address,
+                            Smp::Bool isState,
+                            Smp::Bool isInput,
+                            Smp::Bool isOutput,
+                            Smp::IObject* parent,
+                            Smp::Uuid typeUuid);
+    Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
+protected:
+    SimpleField(Smp::String8 name, Smp::String8 description,
+                Smp::ViewKind viewKind, void* address, unsigned int dataSize,
+                Smp::Publication::IType* type, Smp::Bool isState,
+                Smp::Bool isInput, Smp::Bool isOutput,
+                Smp::IObject* parent);
+
+};
+
+template <typename T>
+class TSimpleField : public SimpleField, virtual public Smp::ISimpleField {
+public:
+    TSimpleField(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, T* address, Smp::Bool isState,
            Smp::Bool isInput, Smp::Bool isOutput, Smp::IObject* parent)
-        : Field(name, description, viewKind, (void*)address, sizeof(T), nullptr, isState, isInput, isOutput, parent),
+        : SimpleField(name, description, viewKind, (void*)address, sizeof(T), nullptr, isState, isInput, isOutput, parent),
           _tData(address) {
         initType();
     }
-    virtual ~TField() {}
+    virtual ~TSimpleField() {}
     // Smp::ISimpleField implementation
     Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
     Smp::AnySimple GetValue() const override;
@@ -137,19 +159,20 @@ private:
     Smp::Bool _forced{false};
 };
 template <typename T>
-class TOutputField : public TField<T>, virtual public Smp::IOutputField {
+class TSimpleOutputField : public TSimpleField<T>, virtual public Smp::IOutputField {
 public:
-    TOutputField(Smp::String8 name,
+    TSimpleOutputField(Smp::String8 name,
                 Smp::String8 description,
                 Smp::ViewKind viewKind,
                 T* address,
                 Smp::Bool isState,
+                Smp::Bool isInput,
                 Smp::IObject* parent
-                ):  TField<T>(name, description, viewKind, address,
+                ):  TSimpleField<T>(name, description, viewKind, address,
                          isState, false, true, parent),
                     _targets("targets","connected fields",this) {
     } 
-    virtual ~TOutputField() {
+    virtual ~TSimpleOutputField() {
     }
 
     // Smp::IOutputField implementation
@@ -184,12 +207,12 @@ public:
         return false;
     }
 private:
-    ::simph::smpdk::Collection<Smp::ISimpleField> _targets;
+    OwnedCollection<Smp::ISimpleField> _targets;
     
 };
 
 template <typename T>
-Smp::IField* Field::CreateSimple(
+Smp::IField* SimpleField::Create(
                             Smp::String8 name,
                             Smp::String8 description,
                             Smp::ViewKind viewKind,
@@ -199,12 +222,12 @@ Smp::IField* Field::CreateSimple(
                             Smp::Bool isOutput,
                             Smp::IObject* parent) {
     if (isOutput) {
-        return new TOutputField<T>(
+        return new TSimpleOutputField<T>(
                         name, description, viewKind, static_cast<T*>(address),
-                        isState, parent);
+                        isState, isInput, parent);
     }
     else {
-        return new TField<T>(
+        return new TSimpleField<T>(
                         name, description, viewKind, static_cast<T*>(address),
                         isState, isInput, false, parent);
     }
@@ -228,33 +251,60 @@ private:
     std::vector<Smp::IField*> _fields;
 };
 
-template <typename T>
 class SimpleArrayField : public Field, public virtual Smp::ISimpleArrayField, public virtual Smp::IArrayField {
 public:
-    SimpleArrayField(Smp::String8 name, Smp::String8 description, Smp::UInt64 count, void* address,
+    template <typename T>
+    static Smp::ISimpleArrayField* Create(
+                      Smp::String8 name, Smp::String8 description,
+                      Smp::UInt64 count, T* address,
+                      Smp::PrimitiveTypeKind ptype, Smp::ViewKind viewKind,
+                      Smp::Publication::IType* type,
+                      Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+                      Smp::IObject* parent);
+    static Smp::ISimpleArrayField* Create(
+                      Smp::String8 name, Smp::String8 description,
+                      Smp::UInt64 count, void* address,
+                      Smp::PrimitiveTypeKind ptype, Smp::ViewKind viewKind,
+                      Smp::Publication::IType* type,
+                      Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+                      Smp::IObject* parent);
+    virtual ~SimpleArrayField();
+protected:
+    SimpleArrayField(Smp::String8 name, Smp::String8 description,
+                      Smp::UInt64 count, void* address, Smp::UInt64 itemSize,
+                      Smp::ViewKind viewKind,
+                      Smp::Publication::IType* type,
+                      Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+                      Smp::IObject* parent);
+};
+
+template <typename T>
+class TSimpleArrayField: public SimpleArrayField {
+public:
+    TSimpleArrayField(Smp::String8 name, Smp::String8 description, Smp::UInt64 count, void* address,
                      Smp::PrimitiveTypeKind ptype, Smp::ViewKind viewKind, Smp::Publication::IType* type,
                      Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput, Smp::IObject* parent)
-        : Field(name, description, viewKind, address, sizeof(T) * count, type, isState, isInput, isOutput, parent),
+        : SimpleArrayField(name, description, count, address,
+                          sizeof(T), viewKind, type,
+                          isState, isInput, isOutput,
+                          parent),
           _tData((T*)address),
-          _count(count),
-          _primitiveType(ptype) {
-        _itemFields = new TField<T>*[_count];
+          _count(count) {
+        _itemFields = new TSimpleField<T>*[_count];
         for (int i = 0; i < _count; i++) {
             std::ostringstream s;
-            s << name << "[" << i << "]";
+            s << "[" << i << "]";
             _itemFields[i] =
-                new TField<T>(s.str().c_str(), "", viewKind, &(_tData[i]), isState, isInput, isOutput, this);
+                isOutput ? 
+                new TSimpleOutputField<T>(s.str().c_str(), "", viewKind, &(_tData[i]), isState, isInput, this)
+                : new TSimpleField<T>(s.str().c_str(), "", viewKind, &(_tData[i]), isState, isInput, isOutput, this);
         }
     }
-    virtual ~SimpleArrayField() {
+    virtual ~TSimpleArrayField() {
         for (int i = 0; i < _count; i++) {
             delete _itemFields[i];
         }
         delete[] _itemFields;
-    }
-    // specialization
-    Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override {
-        return _primitiveType;
     }
     // Smp::IArrayField implementation
     Smp::UInt64 GetSize() const override {
@@ -267,9 +317,7 @@ public:
         throw ExInvalidArrayIndex(this, index, _count);
     }
     Smp::IObject* GetChild(Smp::String8 fullName) const override {
-        std::string sname=GetName();
-        sname+=fullName;
-// TODO TBC such element name handling is OK
+        std::string sname=fullName;
         for (int i=0;i<_count;i++) {
             if (sname==_itemFields[i]->GetName()) {
                 return _itemFields[i];
@@ -278,7 +326,9 @@ public:
         return nullptr;
     }
     // Smp::ISimpleArrayField implementation
-    Smp::AnySimple GetValue(Smp::UInt64 index) const override;
+    Smp::AnySimple GetValue(Smp::UInt64 index) const override {
+        return _tData[index];
+    }
     void SetValue(Smp::UInt64 index, Smp::AnySimple value) override {
         _tData[index] = value;
     }
@@ -304,8 +354,58 @@ public:
 private:
     T* _tData;
     Smp::UInt64 _count;
-    Smp::PrimitiveTypeKind _primitiveType;
-    TField<T>** _itemFields;
+    TSimpleField<T>** _itemFields;
+};
+
+template <typename T>
+class TSimpleArrayOutputField: public TSimpleArrayField<T>,
+                            virtual public Smp::IOutputField {
+public:
+    TSimpleArrayOutputField(Smp::String8 name,
+                            Smp::String8 description,
+                            Smp::UInt64 count,
+                            T* address,
+                            Smp::PrimitiveTypeKind ptype,
+                            Smp::ViewKind viewKind,
+                            Smp::Publication::IType* type,
+                            Smp::Bool isState,
+                            Smp::Bool isInput,
+                            Smp::IObject* parent)
+        : TSimpleArrayField<T>(name, description, count, address, ptype,
+                        viewKind, type, isState, isInput, true, parent),
+          _targets("targets","Connected fields",this) {
+    }
+    virtual ~TSimpleArrayOutputField() {
+    }
+    void Connect(Smp::IField* target) override {
+        auto sf=dynamic_cast<Smp::ISimpleArrayField*>(target);
+        if (sf!=nullptr 
+                && !_targets.contain(sf) 
+                && sf->GetSize()>=this->GetSize()) {
+            _targets.push_back(sf);
+        }
+    }
+    void Disconnect(Smp::IField* target) override {
+        auto sf=dynamic_cast<Smp::ISimpleArrayField*>(target);
+        if (sf!=nullptr && _targets.contain(sf)) {
+            _targets.remove(sf);
+        }
+    }
+    void Push() override {
+        for (auto target: _targets) {
+            for (Smp::UInt64 i=0;i<this->GetSize();i++) {
+                target->SetValue(i,this->GetValue(i));
+            }
+        }
+    }
+    const Smp::FieldCollection* GetInputFields() const override {
+        return dynamic_cast<const Smp::FieldCollection*>(&_targets);
+    }
+    Smp::Bool IsAutomatic() const override {
+        return false;
+    }
+private:
+    OwnedCollection<Smp::ISimpleArrayField> _targets;
 };
 
 std::ostream& toprint(std::ostream& os, const Smp::IArrayField& obj);

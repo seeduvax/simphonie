@@ -67,115 +67,15 @@ void StructureType::setup(StructureField* sf) {
         const void* address = sf->getAddress(fd.offset);
         Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(fd.uuid));
         if (t != nullptr) {
-            Smp::IField* f=nullptr;
-            if (fd.uuid==_char8Type.GetUuid()) {
-                f = Field::CreateSimple(fd.name, 
+            Smp::IField* f=SimpleField::Create(
+                                 fd.name, 
                                  fd.description,
                                  fd.view, (Smp::Char8*)address,
                                  sf->IsState(),
                                  sf->IsInput(),
                                  sf->IsOutput(),
-                                 sf);
-            }
-            else if (fd.uuid==_boolType.GetUuid()) {
-                f = Field::CreateSimple(fd.name, 
-                                 fd.description,
-                                 fd.view, (Smp::Bool*)address,
-                                 sf->IsState(),
-                                 sf->IsInput(),
-                                 sf->IsOutput(),
-                                 sf);
-            }
-            else if (fd.uuid==_int8Type.GetUuid()) {
-                f = Field::CreateSimple(fd.name, 
-                                 fd.description,
-                                 fd.view, (Smp::Int8*)address,
-                                 sf->IsState(),
-                                 sf->IsInput(),
-                                 sf->IsOutput(),
-                                 sf);
-            }
-            else if (fd.uuid==_int16Type.GetUuid()) {
-                f = Field::CreateSimple(fd.name, 
-                                 fd.description,
-                                 fd.view, (Smp::Int16*)address,
-                                 sf->IsState(),
-                                 sf->IsInput(),
-                                 sf->IsOutput(),
-                                 sf);
-            }
-            else if (fd.uuid==_int32Type.GetUuid()) {
-                f = Field::CreateSimple(fd.name, 
-                                 fd.description,
-                                 fd.view, (Smp::Int32*)address,
-                                 sf->IsState(),
-                                 sf->IsInput(),
-                                 sf->IsOutput(),
-                                 sf);
-            }
-            else if (fd.uuid==_int64Type.GetUuid()) {
-                f = Field::CreateSimple(fd.name, 
-                                 fd.description,
-                                 fd.view, (Smp::Int64*)address,
-                                 sf->IsState(),
-                                 sf->IsInput(),
-                                 sf->IsOutput(),
-                                 sf);
-            }
-            else if (fd.uuid==_uint8Type.GetUuid()) {
-                f = Field::CreateSimple(fd.name, 
-                                 fd.description,
-                                 fd.view, (Smp::UInt8*)address,
-                                 sf->IsState(),
-                                 sf->IsInput(),
-                                 sf->IsOutput(),
-                                 sf);
-            }
-            else if (fd.uuid==_uint16Type.GetUuid()) {
-                f = Field::CreateSimple(fd.name, 
-                                 fd.description,
-                                 fd.view, (Smp::UInt16*)address,
-                                 sf->IsState(),
-                                 sf->IsInput(),
-                                 sf->IsOutput(),
-                                 sf);
-            }
-            else if (fd.uuid==_uint32Type.GetUuid()) {
-                f = Field::CreateSimple(fd.name, 
-                                 fd.description,
-                                 fd.view, (Smp::UInt32*)address,
-                                 sf->IsState(),
-                                 sf->IsInput(),
-                                 sf->IsOutput(),
-                                 sf);
-            }
-            else if (fd.uuid==_uint64Type.GetUuid()) {
-                f = Field::CreateSimple(fd.name, 
-                                 fd.description,
-                                 fd.view, (Smp::UInt64*)address,
-                                 sf->IsState(),
-                                 sf->IsInput(),
-                                 sf->IsOutput(),
-                                 sf);
-            }
-            else if (fd.uuid==_float32Type.GetUuid()) {
-                f = Field::CreateSimple(fd.name, 
-                                 fd.description,
-                                 fd.view, (Smp::UInt32*)address,
-                                 sf->IsState(),
-                                 sf->IsInput(),
-                                 sf->IsOutput(),
-                                 sf);
-            }
-            else if (fd.uuid==_float64Type.GetUuid()) {
-                f = Field::CreateSimple(fd.name, 
-                                 fd.description,
-                                 fd.view, (Smp::Float64*)address,
-                                 sf->IsState(),
-                                 sf->IsInput(),
-                                 sf->IsOutput(),
-                                 sf);
-            }
+                                 sf,
+                                 fd.uuid);
             if (f!=nullptr) {
                 sf->addField(f);
             }
