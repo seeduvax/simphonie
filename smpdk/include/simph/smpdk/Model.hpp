@@ -11,7 +11,6 @@
 #define __simph_smpdk_Model_HPP__
 
 #include "simph/smpdk/Component.hpp"
-#include "simph/smpdk/EntryPointPublisher.hpp"
 #include "Smp/IModel.h"
 
 namespace simph {
@@ -20,7 +19,7 @@ namespace smpdk {
 /**
  *
  */
-class Model: public Component, virtual public EntryPointPublisher, virtual public Smp::IModel {
+class Model: public Component, virtual public Smp::IModel {
     typedef Component Parent;
 public:
     /**

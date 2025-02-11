@@ -15,6 +15,8 @@
 #include "Smp/ICollection.h"
 #include "simph/smpdk/Object.hpp"
 
+#include <iostream>
+
 namespace simph {
 namespace smpdk {
 

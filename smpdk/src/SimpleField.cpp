@@ -103,7 +103,7 @@ public:
         return false;
     }
 private:
-    OwnedCollection<Smp::ISimpleField> _targets;
+    Collection<Smp::ISimpleField> _targets;
     
 };
 

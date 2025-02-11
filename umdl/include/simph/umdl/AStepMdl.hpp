@@ -10,7 +10,7 @@
 #ifndef __simph_umdl_ArrayType_HPP__
 #define __simph_umdl_ArrayType_HPP__
 #include "Smp/IModel.h"
-#include "simph/smpdk/Model.hpp"
+#include "simph/smpdk/EPPModel.hpp"
 
 namespace simph {
 namespace umdl {
@@ -18,8 +18,8 @@ namespace umdl {
 /**
  *
  */
-class AStepMdl : public simph::smpdk::Model {
-    typedef simph::smpdk::Model Parent;
+class AStepMdl : public simph::smpdk::EPPModel {
+    typedef simph::smpdk::EPPModel Parent;
 public:
     /**
      * Default constructor.
