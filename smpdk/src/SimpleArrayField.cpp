@@ -150,7 +150,7 @@ public:
         return false;
     }
 private:
-    OwnedCollection<Smp::ISimpleArrayField> _targets;
+    Collection<Smp::ISimpleArrayField> _targets;
 };
 // --------------------------------------------------------------------
 // ..........................................................
