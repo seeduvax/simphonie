@@ -1,21 +1,103 @@
-include:
-    - remote: "http://ftfdsvp245.fr.st.space.corp/astre/astre-components/-/raw/absplus-1.3/git/template_astre_runner.yml"
-
 variables:
-  USER_TASK_OPTVAR: "ABS_REPO=https://ftfdsvp245.fr.st.space.corp/dist"
+    GIT_SSL_NO_VERIFY: "true"
+    ABS_REPO: "https://www.eduvax.net/dist"
+    DIST_HOST: "www.eduvax.net"
+
+stages:
+    - test
+    - deploy
+    - tag
+
+.task:
+    variables:
+       GIT_STRATEGY: clone
+       GIT_CHECKOUT: "true"
+       GIT_CLEAN_FLAGS: -ffdx -e cache/
+       GIT_DEPTH: "3"
+       GIT_CLONE_PATH: $CI_BUILDS_DIR
+    before_script:
+      - echo "before_script"
+      
+.test_base:
+    extends: .task
+    stage: test
+    variables:
+        # FIXME: abs workaround to force MODE env var value when calling test target
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release"
+    script: 
+        - echo HOME=`pwd` make test $TASK_OPTVAR
+        # change HOME to have a new ABS directory to avoid impacting others compilations.
+        - HOME=`pwd` make test $TASK_OPTVAR | tee execution.log
+        - egrep -ri 'errors="[1-9]+' build/unit_test_results && exit 1 || echo "ok"
+        - egrep -ri 'failures="[1-9]+' build/unit_test_results && exit 1 || echo "ok"
+    only:
+        - branches
+    artifacts:
+        paths:
+            - build/unit_test_results/*.xml
+        reports:
+            junit: build/unit_test_results/*.xml
+          
+.deploy_base:
+    extends: .task
+    stage: deploy
+    only:
+        - tags
+    variables:
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release DISTHOST=$DIST_HOST"
+    script:
+        - echo make pubdist $TASK_OPTVAR
+        # change HOME to have a new ABS directory to avoid impacting others compilations.
+        - HOME=`pwd` make pubdist $TASK_OPTVAR
 
 # Test jobs triggered only at branch push
-test_debian10:
-    extends: .test_debian10
+test_debian11:
+    extends: .test_base
+    tags:
+        - debian_11
 
-# Deployment jobs triggered only at new tag push
-deploy_debian10:
-    extends: .deploy_debian10
+# Main Deployment job triggered only at new tag push
+deploy_debian11:
+    extends: .deploy_base
+    tags:
+        - debian_11
     after_script:
-      - make pubdist.sdk MAKEARGS="$TASK_OPTVAR" WORKSPACE_IS_TAG=yes
+        - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR" WORKSPACE_IS_TAG=yes
 
-deploy_raspberry:
-    extends: .deploy_raspberry
-    after_script:
-      - make pubdist.sdk MAKEARGS="$TASK_OPTVAR" WORKSPACE_IS_TAG=yes
+# Deployment jobs for smpdk
+deploy_suse12:
+    extends: .deploy_base
+    tags:
+        - suse_12
+    variables:
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release DISTHOST=$DIST_HOST CC=`pwd`/gcc-4.9.4/bin/gcc CPPC=`pwd`/gcc-4.9.4/bin/g++"
+    before_script:
+        # need a more recent version of gcc
+        - wget --no-check-certificate $ABS_REPO/SUSE_12_x86_64/gcc-4.9.4.SUSE_12_x86_64.tar.gz
+        - tar -xf gcc-4.9.4.SUSE_12_x86_64.tar.gz
+    script:
+        - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
+
+deploy_debian9:
+    extends: .deploy_base
+    tags:
+        - debian_9
+    script:
+        - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
+
+deploy_redhawk7_clang13:
+    extends: .deploy_base
+    tags:
+        - redhawk7
+    variables:
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release DISTHOST=$DIST_HOST BUILDCHAIN=clang-13"
+    script:
+        - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
+
+deploy_suse15sp5:
+    extends: .deploy_base
+    tags:
+        - suse_15sp5
+    script:
+        - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
 

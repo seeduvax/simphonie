@@ -10,6 +10,7 @@
 #ifndef __simph_smpdk_Field_HPP__
 #define __simph_smpdk_Field_HPP__
 #include <cstring>
+#include <vector>
 #include "Smp/IForcibleField.h"
 #include "simph/smpdk/Persist.hpp"
 #include "simph/smpdk/Type.hpp"

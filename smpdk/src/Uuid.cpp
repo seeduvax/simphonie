@@ -1,6 +1,7 @@
 #include "Smp/Uuid.h"
 #include <cstring>
 #include <iomanip>
+#include <sstream>
 #include "Smp/PrimitiveTypes.h"
 
 #include "simph/smpdk/endian.h"

@@ -24,7 +24,7 @@ public:
 
     template <typename Owner, typename Func>
     inline Smp::IEntryPoint* addEP(Smp::String8 name, Smp::String8 descr , Owner owner, Func f) {
-        auto ep=new TEntryPoint(f,owner,name,descr);
+        auto ep=new TEntryPoint<Owner, Func>(f,owner,name,descr);
         _epList.push_back(ep);
         return ep;
     }

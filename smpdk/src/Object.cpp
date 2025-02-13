@@ -19,6 +19,7 @@
 #include "Smp/ISimpleArrayField.h"
 
 #include <iostream>
+#include <sstream>
 
 namespace simph {
 namespace smpdk {
@@ -207,6 +208,7 @@ Smp::IObject* Object::resolveChild(Smp::String8 path, const Smp::IObject* from) 
                     }
                 }
                 break;
+            case State::End: break;
         }
         if (c=='\0' || obj==nullptr) {
             // force final state if end of string is reached or at some level

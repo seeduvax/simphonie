@@ -60,7 +60,7 @@ template <typename Owner, typename Func>
 inline Smp::IEntryPoint* EntryPoint::Create(
                                 Smp::String8 name, Smp::String8 descr,
                                 Owner owner, Func f) {
-    return new TEntryPoint(f,owner,name,descr);
+    return new TEntryPoint<Owner, Func>(f,owner,name,descr);
 }
 
 }} // namespace simph::smpdk
