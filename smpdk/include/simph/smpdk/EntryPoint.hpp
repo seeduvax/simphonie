@@ -12,19 +12,22 @@
 
 #include <functional>
 #include <memory>
-#include "simph/smpdk/Object.hpp"
+#include "simph/smpdk/Component.hpp"
 #include "Smp/IEntryPoint.h"
 
 namespace simph {
     namespace smpdk {
 
-class EntryPoint: public Object, virtual public Smp::IEntryPoint {
+class EntryPoint: public Component, virtual public Smp::IEntryPoint {
 public:
     EntryPoint(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent):
-            Object(name,descr,parent) {
+            Component(name,descr,parent) {
     }
     virtual ~EntryPoint() {
     }
+    
+    void Execute() const override {}
+    
     template <typename Owner, typename Func>
     static inline Smp::IEntryPoint* Create(Smp::String8 name, Smp::String8 descr,
                 Owner owner, Func f);

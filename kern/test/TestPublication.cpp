@@ -36,7 +36,8 @@ public:
     void tearDown() {}
 
     void testPublishField() {
-        Publication pub(new simph::smpdk::Component("testObj", "dummy object for testing", nullptr), nullptr);
+        std::unique_ptr<simph::smpdk::Component> component(new simph::smpdk::Component("testObj", "dummy object for testing", nullptr));
+        Publication pub(component.get(), nullptr);
 
         Smp::Char8 testChar = 'A';
         pub.PublishField("Char", "char8 test pub", &testChar);
@@ -76,7 +77,8 @@ public:
 
     void testPublishArrayField() {
         TypeRegistry tReg("TypesRegistry", "test types registry", nullptr);
-        Publication pub(new simph::smpdk::Component("testObj", "dummy object for testing", nullptr), &tReg);
+        std::unique_ptr<simph::smpdk::Component> component(new simph::smpdk::Component("testObj", "dummy object for testing", nullptr));
+        Publication pub(component.get(), &tReg);
 
         Smp::Int32 iArray[] = {12, 17, 42};
         pub.PublishArray("iArray", "int array test pub", 3, iArray, Smp::PrimitiveTypeKind::PTK_Int32);

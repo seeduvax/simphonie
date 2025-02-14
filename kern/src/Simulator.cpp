@@ -63,7 +63,7 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
 Simulator::~Simulator() {
     for (auto pub : _publications) {
         // TODO consider delete the publication earlier in the simulator
-        // life cycle since publication shloud not be used further the 
+        // life cycle since publication should not be used further the 
         // simulator building phase.
         delete pub;
     }

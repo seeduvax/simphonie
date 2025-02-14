@@ -47,9 +47,11 @@ Smp::Services::EventId EventManager::QueryEventId(Smp::String8 eventName) {
         }
     }
     const char* c = eventName;
+    // max uint64 to avoid an overflow error when multiplying by 31
+    uint64_t maxU64 = std::numeric_limits<uint64_t>::max() >> 4;
     Smp::Services::EventId id = 32;
     while (*c != '\0') {
-        id = id * 31 + (int)(*c);
+        id = (id % maxU64) * 31 + (int)(*c);
         c++;
     }
     auto itEps = _evRegistry.find(id);

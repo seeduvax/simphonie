@@ -28,7 +28,7 @@ class CModel: public CompositeModel {
 public:
     CModel(Smp::String8 name, Smp::String8 descr, Smp::IComposite* parent): 
             CompositeModel(name,descr,parent) {
-        // addEP("step", "", this, &CModel::step);
+        addEP("step", "", this, &CModel::step);
     }
     virtual ~CModel() {
         auto container = GetContainer("sub");
@@ -36,6 +36,17 @@ public:
             CModel* subMdl = dynamic_cast<CModel*>(container->GetChild("childMdl"));
             container->DeleteComponent(subMdl);
         }
+        container = GetContainer("entryPoints");
+        if (container != nullptr) {
+            EntryPoint* entryPoint = dynamic_cast<EntryPoint*>(container->GetChild("step"));
+            container->DeleteComponent(entryPoint);
+        }
+    }
+
+    template <class C>
+    void addEP(Smp::String8 name, Smp::String8 description, C* parent, void(C::*fct)()) {
+        auto c = addContainer("entryPoints","");
+        c->AddComponent(new EntryPoint(name, description, parent));
     }
     void step() {
         TRACE(""<<GetName()<<".step()");
