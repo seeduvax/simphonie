@@ -82,7 +82,7 @@ stages:
         - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
 
 # Test jobs triggered only at branch push
-.sanitize_debian11:
+sanitize_debian11:
     extends: .task
     stage: test
     variables:
