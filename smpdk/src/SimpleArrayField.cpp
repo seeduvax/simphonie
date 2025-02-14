@@ -45,7 +45,8 @@ public:
                                             isState,
                                             isInput,
                                             isOutput,
-                                            this);
+                                            this,
+                                            SimpleField::GetPrimitiveUuid<T>());
         }
     }
     virtual ~TSimpleArrayField() {

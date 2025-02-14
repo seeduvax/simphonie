@@ -426,4 +426,28 @@ void TSimpleField<Smp::Float64>::initType() {
     setType(&_float64Type);
 }
 
+template <>
+Smp::Uuid SimpleField::GetPrimitiveUuid<Smp::Bool>() { return Smp::Uuids::Uuid_Bool; }
+template <>
+Smp::Uuid SimpleField::GetPrimitiveUuid<Smp::Char8>() { return Smp::Uuids::Uuid_Char8; }
+template <>
+Smp::Uuid SimpleField::GetPrimitiveUuid<Smp::Int8>() { return Smp::Uuids::Uuid_Int8; }
+template <>
+Smp::Uuid SimpleField::GetPrimitiveUuid<Smp::Int16>() { return Smp::Uuids::Uuid_Int16; }
+template <>
+Smp::Uuid SimpleField::GetPrimitiveUuid<Smp::Int32>() { return Smp::Uuids::Uuid_Int32; }
+template <>
+Smp::Uuid SimpleField::GetPrimitiveUuid<Smp::Int64>() { return Smp::Uuids::Uuid_Int64; }
+template <>
+Smp::Uuid SimpleField::GetPrimitiveUuid<Smp::UInt8>() { return Smp::Uuids::Uuid_UInt8; }
+template <>
+Smp::Uuid SimpleField::GetPrimitiveUuid<Smp::UInt16>() { return Smp::Uuids::Uuid_UInt16; }
+template <>
+Smp::Uuid SimpleField::GetPrimitiveUuid<Smp::UInt32>() { return Smp::Uuids::Uuid_UInt32; }
+template <>
+Smp::Uuid SimpleField::GetPrimitiveUuid<Smp::UInt64>() { return Smp::Uuids::Uuid_UInt64; }
+template <>
+Smp::Uuid SimpleField::GetPrimitiveUuid<Smp::Float32>() { return Smp::Uuids::Uuid_Float32; }
+template <>
+Smp::Uuid SimpleField::GetPrimitiveUuid<Smp::Float64>() { return Smp::Uuids::Uuid_Float64; }
 }} // namespace simph::smpdk
