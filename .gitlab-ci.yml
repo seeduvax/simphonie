@@ -38,6 +38,26 @@ stages:
         reports:
             junit: build/unit_test_results/*.xml
           
+.test_sdk:
+    extends: .task
+    stage: test
+    variables:
+        # FIXME: abs workaround to force MODE env var value when calling test target
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST -j8"
+    script: 
+        - echo HOME=`pwd` make test -C smpdk $TASK_OPTVAR
+        # change HOME to have a new ABS directory to avoid impacting others compilations.
+        - HOME=`pwd` make test -C smpdk $TASK_OPTVAR | tee execution.log
+        - egrep -ri 'errors="[1-9]+' build/unit_test_results && exit 1 || echo "ok"
+        - egrep -ri 'failures="[1-9]+' build/unit_test_results && exit 1 || echo "ok"
+    only:
+        - branches
+    artifacts:
+        paths:
+            - build/unit_test_results/*.xml
+        reports:
+            junit: build/unit_test_results/*.xml
+          
 .deploy_base:
     extends: .task
     stage: deploy
@@ -65,6 +85,34 @@ test_debian11:
     extends: .test_base
     tags:
         - debian_11
+        
+test_debian9:
+    extends: .test_sdk
+    tags:
+        - debian_9
+        
+test_suse12:
+    extends: .test_sdk
+    tags:
+        - suse_12
+    variables:
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST CC=`pwd`/gcc-4.9.4/bin/gcc CPPC=`pwd`/gcc-4.9.4/bin/g++"
+    before_script:
+        # need a more recent version of gcc
+        - wget --no-check-certificate $ABS_REPO/SUSE_12_x86_64/gcc-4.9.4.SUSE_12_x86_64.tar.gz
+        - tar -xf gcc-4.9.4.SUSE_12_x86_64.tar.gz
+        
+test_redhawk7_clang13:
+    extends: .test_sdk
+    tags:
+        - redhawk7
+    variables:
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST BUILDCHAIN=clang-13"
+
+deploy_suse15sp5:
+    extends: .test_sdk
+    tags:
+        - suse_15sp5
 
 # Main Deployment job triggered only at new tag push
 deploy_debian11:
@@ -80,7 +128,7 @@ deploy_suse12:
     tags:
         - suse_12
     variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release DISTHOST=$DIST_HOST CC=`pwd`/gcc-4.9.4/bin/gcc CPPC=`pwd`/gcc-4.9.4/bin/g++"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST CC=`pwd`/gcc-4.9.4/bin/gcc CPPC=`pwd`/gcc-4.9.4/bin/g++"
     before_script:
         # need a more recent version of gcc
         - wget --no-check-certificate $ABS_REPO/SUSE_12_x86_64/gcc-4.9.4.SUSE_12_x86_64.tar.gz
@@ -100,7 +148,7 @@ deploy_redhawk7_clang13:
     tags:
         - redhawk7
     variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release DISTHOST=$DIST_HOST BUILDCHAIN=clang-13"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST BUILDCHAIN=clang-13"
 
 deploy_suse15sp5:
     extends: .deploy_sdk

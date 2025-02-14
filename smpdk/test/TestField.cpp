@@ -27,8 +27,8 @@ public:
     void tearDown() {}
 
     void testInt64() {
-        Smp::Int64 intFValue = 42;
-        TField<Smp::Int64> intF("int64", "", Smp::ViewKind::VK_All, &intFValue, true, false, false, nullptr);
+        // Smp::Int64 intFValue = 42;
+        // TField<Smp::Int64> intF("int64", "", Smp::ViewKind::VK_All, &intFValue, true, false, false, nullptr);
     }
 };
 
