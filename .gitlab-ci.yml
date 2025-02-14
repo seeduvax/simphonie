@@ -23,7 +23,7 @@ stages:
     stage: test
     variables:
         # FIXME: abs workaround to force MODE env var value when calling test target
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST"
     script: 
         - echo HOME=`pwd` make test $TASK_OPTVAR
         # change HOME to have a new ABS directory to avoid impacting others compilations.
@@ -44,11 +44,21 @@ stages:
     only:
         - tags
     variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release DISTHOST=$DIST_HOST"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST"
     script:
-        - echo make pubdist $TASK_OPTVAR
+        - echo HOME=`pwd` make pubdist $TASK_OPTVAR
         # change HOME to have a new ABS directory to avoid impacting others compilations.
         - HOME=`pwd` make pubdist $TASK_OPTVAR
+        
+.deploy_sdk:
+    extends: .task
+    stage: deploy
+    only:
+        - tags
+    variables:
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST"
+    script:
+        - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
 
 # Test jobs triggered only at branch push
 test_debian11:
@@ -66,7 +76,7 @@ deploy_debian11:
 
 # Deployment jobs for smpdk
 deploy_suse12:
-    extends: .deploy_base
+    extends: .deploy_sdk
     tags:
         - suse_12
     variables:
@@ -75,29 +85,25 @@ deploy_suse12:
         # need a more recent version of gcc
         - wget --no-check-certificate $ABS_REPO/SUSE_12_x86_64/gcc-4.9.4.SUSE_12_x86_64.tar.gz
         - tar -xf gcc-4.9.4.SUSE_12_x86_64.tar.gz
-    script:
-        - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
 
 deploy_debian9:
-    extends: .deploy_base
+    extends: .deploy_sdk
     tags:
         - debian_9
     script:
+        - echo "ABS_REPO=$ABS_REPO" > local.cfg
+        - echo "DIST_HOST=$DIST_HOST" >> local.cfg
         - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
 
 deploy_redhawk7_clang13:
-    extends: .deploy_base
+    extends: .deploy_sdk
     tags:
         - redhawk7
     variables:
         TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release DISTHOST=$DIST_HOST BUILDCHAIN=clang-13"
-    script:
-        - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
 
 deploy_suse15sp5:
-    extends: .deploy_base
+    extends: .deploy_sdk
     tags:
         - suse_15sp5
-    script:
-        - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
 
