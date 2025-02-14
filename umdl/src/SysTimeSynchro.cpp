@@ -11,7 +11,7 @@
 #include "Smp/IPublication.h"
 #include "abs/profiler.h"
 
-static const std::chrono::time_point<std::chrono::system_clock> _nullTimePoint;
+static const std::chrono::time_point<std::chrono::steady_clock> _nullTimePoint;
 
 namespace simph {
 namespace umdl {
@@ -35,7 +35,7 @@ void SysTimeSynchro::step() {
         _nextTick =
             // 1st step:
             // next time to wait unit is now + period
-            std::chrono::system_clock::now() + std::chrono::microseconds(_period / 1000);
+            std::chrono::steady_clock::now() + std::chrono::microseconds(_period / 1000);
         // TODO check why nanosec not compiling.
         ;  //+std::chrono::nanoseconds(_period);
     }

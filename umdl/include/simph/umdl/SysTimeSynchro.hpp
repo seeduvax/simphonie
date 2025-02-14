@@ -36,7 +36,7 @@ protected:
 
 private:
     Smp::Duration _period;
-    std::chrono::time_point<std::chrono::system_clock> _nextTick;
+    std::chrono::time_point<std::chrono::steady_clock> _nextTick;
     std::mutex _mutex;
     std::condition_variable _monitor;
 };
