@@ -27,7 +27,7 @@ public:
     void tearDown() {}
 
     void testFailure() {
-        auto failure = new Failure("fail", "failure", nullptr);
+        std::unique_ptr<Failure> failure(new Failure("fail", "failure", nullptr));
         CPPUNIT_ASSERT(failure != nullptr);
         CPPUNIT_ASSERT(failure->IsFailed() == false);
         failure->Fail();
