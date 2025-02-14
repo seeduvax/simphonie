@@ -105,7 +105,7 @@ test_suse12:
 test_redhawk7_clang13:
     extends: .test_sdk
     tags:
-        - redhawk7
+        - redhawk_7
     variables:
         TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST BUILDCHAIN=clang-13"
 
