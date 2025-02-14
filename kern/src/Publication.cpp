@@ -109,84 +109,84 @@ Smp::Publication::ITypeRegistry* Publication::GetTypeRegistry() const {
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Char8* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj);
+    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj, Smp::Uuids::Uuid_Char8);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Bool* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj);
+    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj, Smp::Uuids::Uuid_Bool);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Int8* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj);
+    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj, Smp::Uuids::Uuid_Int8);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Int16* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj);
+    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj, Smp::Uuids::Uuid_Int16);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Int32* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj);
+    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj, Smp::Uuids::Uuid_Int32);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Int64* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj);
+    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj, Smp::Uuids::Uuid_Int64);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::UInt8* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj);
+    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj, Smp::Uuids::Uuid_UInt8);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::UInt16* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj);
+    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj, Smp::Uuids::Uuid_UInt16);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::UInt32* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj);
+    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj, Smp::Uuids::Uuid_UInt32);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::UInt64* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj);
+    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj, Smp::Uuids::Uuid_UInt64);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Float32* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj);
+    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj, Smp::Uuids::Uuid_Float32);
     addField(f);
     return f;
 }
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, Smp::Float64* address, Smp::ViewKind view,
                                Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj);
+    auto f=SimpleField::Create(name, description, view, address, state, input, output, _pubObj, Smp::Uuids::Uuid_Float64);
     addField(f);
     return f;
 }

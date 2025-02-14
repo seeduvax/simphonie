@@ -27,7 +27,7 @@ class CModel: public CompositeModel {
 public:
     CModel(Smp::String8 name, Smp::String8 descr, Smp::IComposite* parent): 
             CompositeModel(name,descr,parent) {
-        addEP("step", "", this, &CModel::step);
+        // addEP("step", "", this, &CModel::step);
     }
     virtual ~CModel() {
     }
