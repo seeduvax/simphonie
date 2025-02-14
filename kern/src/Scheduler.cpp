@@ -392,17 +392,12 @@ void Scheduler::epEnterExecuting() {
 void Scheduler::epLeaveExecuting() {
     {
         Synchronized(_mutex)
-        if (_run==false) {
-            return;
-        }
         _run=false;
     }
     _monitor.notify_all();
-    if (_th != nullptr) {
-        if (!_th->isCurrentThread()) {
-            _th->join();
-            _th.reset();
-        }
+    if (_th != nullptr && !_th->isCurrentThread()) {
+        _th->join();
+        _th.reset();
     }
 }
 }  // namespace kern

@@ -43,14 +43,14 @@ private:
     {                                                                            \
         std::ostringstream _simph_sys_logger_stream_;                            \
         _simph_sys_logger_stream_ << __FILE__ << ":" << __LINE__ << "\t" << msg; \
-        simph::sys::_logger->log("TRACE", _simph_sys_logger_stream_.str());      \
+        simph::sys::_logger.log("TRACE", _simph_sys_logger_stream_.str());      \
     }
 #define LTRACE(expr) TRACE(#expr << " = " << expr)
 #define LOGD(msg)                                                           \
     {                                                                       \
         std::ostringstream _simph_sys_logger_stream_;                       \
         _simph_sys_logger_stream_ << msg;                                   \
-        simph::sys::_logger->log("DEBUG", _simph_sys_logger_stream_.str()); \
+        simph::sys::_logger.log("DEBUG", _simph_sys_logger_stream_.str()); \
     }
 #else
 #define TRACE(msg)
@@ -60,22 +60,22 @@ private:
     {                                                                      \
         std::ostringstream _simph_sys_logger_stream_;                      \
         _simph_sys_logger_stream_ << msg;                                  \
-        simph::sys::_logger->log("INFO", _simph_sys_logger_stream_.str()); \
+        simph::sys::_logger.log("INFO", _simph_sys_logger_stream_.str()); \
     }
 #define LOGW(msg)                                                             \
     {                                                                         \
         std::ostringstream _simph_sys_logger_stream_;                         \
         _simph_sys_logger_stream_ << msg;                                     \
-        simph::sys::_logger->log("WARNING", _simph_sys_logger_stream_.str()); \
+        simph::sys::_logger.log("WARNING", _simph_sys_logger_stream_.str()); \
     }
 #define LOGE(msg)                                                           \
     {                                                                       \
         std::ostringstream _simph_sys_logger_stream_;                       \
         _simph_sys_logger_stream_ << msg;                                   \
-        simph::sys::_logger->log("ERROR", _simph_sys_logger_stream_.str()); \
+        simph::sys::_logger.log("ERROR", _simph_sys_logger_stream_.str()); \
     }
 
-extern simph::sys::Logger* _logger;
+extern simph::sys::Logger& _logger;
 
 }  // namespace sys
 }  // namespace simph

@@ -13,7 +13,8 @@
 
 namespace simph {
 namespace sys {
-Logger* _logger = new Logger();
+simph::sys::Logger _loggerInternal;
+simph::sys::Logger& _logger = _loggerInternal;
 // --------------------------------------------------------------------
 // ..........................................................
 Logger::Logger(std::ostream& out) : _out(out) {}

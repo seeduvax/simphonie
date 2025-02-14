@@ -50,12 +50,13 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
 
     _services->AddComponent(tr);
     _resolver = new Resolver("Resolver", "Objects registry and resolver", this);
-    _services->AddComponent(_logger);
     _services->AddComponent(_scheduler);
     _services->AddComponent(_timeKeeper);
     _services->AddComponent(_eventMgr);
     _services->AddComponent(_linkRegistry);
     _services->AddComponent(_resolver);
+    // add logger at the end to be sure it will be the last removed. (after scheduler at least)
+    _services->AddComponent(_logger);
     setState(Smp::SimulatorStateKind::SSK_Building);
 
 }
