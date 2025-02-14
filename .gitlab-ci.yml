@@ -82,6 +82,27 @@ stages:
         - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
 
 # Test jobs triggered only at branch push
+.sanitize_debian11:
+    extends: .task
+    stage: test
+    variables:
+        # FIXME: abs workaround to force MODE env var value when calling cint target
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=8 MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS ACTIVATE_SANITIZER=true"
+    script: 
+        - echo HOME=`pwd` make test $TASK_OPTVAR
+        # change HOME to have a new ABS directory to avoid impacting others compilations.
+        - HOME=`pwd` make test $TASK_OPTVAR | tee execution.log
+        - egrep -E -q "(LeakSanitizer)|(AddressSanitizer)" execution.log && grep -E "(Starting test suite:)|(LeakSanitizer)|(AddressSanitizer)" execution.log && echo "See execution.log for more details"
+        - egrep -E -q "(LeakSanitizer)|(AddressSanitizer)" execution.log && exit 1 || echo "OK"
+    only:
+        - branches
+    tags:
+        - debian_11
+    artifacts:
+        paths:
+            - execution.log
+
+
 test_debian11:
     extends: .test_base
     tags:
