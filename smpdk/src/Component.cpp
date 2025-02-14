@@ -56,7 +56,8 @@ Component::Component(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
       _simulator(nullptr) {
 }
 // ..........................................................
-Component::~Component() {}
+Component::~Component() {
+}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::ComponentStateKind Component::GetState() const {

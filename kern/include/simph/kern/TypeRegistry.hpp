@@ -12,6 +12,7 @@
 #include "Smp/Publication/ITypeRegistry.h"
 #include "simph/smpdk/Collection.hpp"
 #include "simph/smpdk/Component.hpp"
+#include <memory>
 
 namespace simph {
 namespace kern {
@@ -76,6 +77,7 @@ public:
 
 private:
     Collection<Smp::Publication::IType> _types;
+    std::vector<std::unique_ptr<Smp::Publication::IType>> _ownedTypes;
 };
 
 }  // namespace kern

@@ -40,6 +40,7 @@ public:
 
     class IHandler {
     public:
+        virtual ~IHandler() = default;
         virtual const std::string& getName() const =0;
         virtual void* getEntry(const char* symbol) const=0;
     };

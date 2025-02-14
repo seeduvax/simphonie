@@ -9,6 +9,7 @@
  */
 #include <cppunit/extensions/HelperMacros.h>
 #include "simph/kern/Simulator.hpp"
+#include "simph/kern/EventManager.hpp"
 #include "simph/sys/Logger.hpp"
 #include "simph/smpdk/CompositeModel.hpp"
 #include "simph/smpdk/EntryPoint.hpp"
@@ -30,6 +31,11 @@ public:
         // addEP("step", "", this, &CModel::step);
     }
     virtual ~CModel() {
+        auto container = GetContainer("sub");
+        if (container != nullptr) {
+            CModel* subMdl = dynamic_cast<CModel*>(container->GetChild("childMdl"));
+            container->DeleteComponent(subMdl);
+        }
     }
     void step() {
         TRACE(""<<GetName()<<".step()");
@@ -104,9 +110,8 @@ public:
         delete _checkEndSim;
         delete _notifyEndSim;
         delete _epset;
+        delete _sim;
     }
-
-
 
     void testStates() {
         _sim=new Simulator();

@@ -156,9 +156,11 @@ Smp::Publication::IType* TypeRegistry::AddFloatType(Smp::String8 name, Smp::Stri
     }
     if (type == Smp::PrimitiveTypeKind::PTK_Float32) {
         res = new Type(typeUuid, type, sizeof(Smp::Float32), name, descr, this);
+        _ownedTypes.emplace_back(res);
     }
     else {
         res = new Type(typeUuid, type, sizeof(Smp::Float64), name, descr, this);
+        _ownedTypes.emplace_back(res);
     }
     // TODO create Type subclass to store min, max, unit, etc. Once I can
     // find what to do with such additional attributes....
@@ -203,6 +205,7 @@ Smp::Publication::IType* TypeRegistry::AddIntegerType(Smp::String8 name, Smp::St
             throw ExInvalidPrimitiveType(this, type);
     }
     res = new Type(typeUuid, type, size, name, descr, this);
+    _ownedTypes.emplace_back(res);
     // TODO create Type subclass to store min, max, unit, etc. Once I can
     // find what to do with such additional attributes....
     _types.push_back(res);
@@ -220,6 +223,7 @@ Smp::Publication::IEnumerationType* TypeRegistry::AddEnumerationType(
     Smp::Publication::IEnumerationType* res = 
                 // TODO 2nd arg should no more be needed.
                 new EnumerationType(typeUuid, Smp::PrimitiveTypeKind::PTK_Int32, name, descr, this);
+    _ownedTypes.emplace_back(res);
     _types.push_back(res);
     return res;
 }
@@ -241,6 +245,7 @@ Smp::Publication::IArrayType* TypeRegistry::AddArrayType(
     if (itemType != nullptr) {
         Smp::Publication::IArrayType* res =
             new ArrayType(typeUuid, name, description, this, itemSize, arrayCount, itemType);
+        _ownedTypes.emplace_back(res);
         _types.push_back(res);
         return res;
     }
@@ -257,6 +262,7 @@ Smp::Publication::IType* TypeRegistry::AddStringType(
         throw ExTypeAlreadyRegistered(this, name, res);
     }
     res = new Type(typeUuid, Smp::PrimitiveTypeKind::PTK_String8, length, name, description, this);
+    _ownedTypes.emplace_back(res);
     _types.push_back(res);
     return res;
 }
@@ -268,6 +274,7 @@ Smp::Publication::IStructureType* TypeRegistry::AddStructureType(Smp::String8 na
         throw ExTypeAlreadyRegistered(this, name, ex);
     }
     Smp::Publication::IStructureType* res = new StructureType(typeUuid, this, name, description, this);
+    _ownedTypes.emplace_back(res);
     _types.push_back(res);
     return res;
 }
@@ -280,6 +287,7 @@ Smp::Publication::IClassType* TypeRegistry::AddClassType(Smp::String8 name, Smp:
     }
     // TODO take care of base class type
     Smp::Publication::IClassType* res = new ClassType(typeUuid, this, name, description, this);
+    _ownedTypes.emplace_back(res);
     _types.push_back(res);
     return res;
 }

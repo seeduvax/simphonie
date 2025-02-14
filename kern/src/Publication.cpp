@@ -86,7 +86,8 @@ void Publication::addChild(Smp::IObject* pub) {
 void Publication::addField(Smp::IField* field) {
     auto* f = _pubObj->GetChild(field->GetName());
     if (f != nullptr) {
-        throw simph::smpdk::ExDuplicateName(_pubObj, field->GetName());
+        delete field;
+        throw simph::smpdk::ExDuplicateName(_pubObj, f->GetName());
     }
     _pubObj->AddChild(field,(Smp::ICollectionBase*)_pubObj->GetFields());
 }
