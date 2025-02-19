@@ -5,14 +5,18 @@
 #include "Smp/PrimitiveTypes.h"
 
 #include "simph/smpdk/endian.h"
+#include "simph/smpdk/Exception.hpp"
 
 namespace Smp {
 // --------------------------------------------------------------------
 // ..........................................................
 Uuid::Uuid(const char* value) {
-    int bSize = sizeof(Data1) + sizeof(Data2) + sizeof(Data3);
-    uint8_t buf[bSize];
-    std::memset(buf, 0, bSize);
+    Data1 = 0;
+    Data2.fill(0);
+    Data3.fill(0);
+
+    size_t bSize = sizeof(Uuid);
+    uint8_t* buf = reinterpret_cast<uint8_t*>(this);
     const char* ptr = value;
     int i = 0;
     while (*ptr != '\0' && i < 2 * bSize) {
@@ -28,7 +32,7 @@ Uuid::Uuid(const char* value) {
         }
         ptr++;
         if (v >= 0) {
-            int j = i / 2;
+            int j = i >> 1;
             if (i % 2 != 0) {
                 buf[j] = buf[j] << 4;
             }
@@ -36,24 +40,19 @@ Uuid::Uuid(const char* value) {
             i++;
         }
     }
-    i = 0;
-    Data1 = ntoh32(*reinterpret_cast<uint32_t*>(&buf[i]));
-    i += sizeof(uint32_t);
-    Data2[0] = ntoh16(*reinterpret_cast<uint16_t*>(&buf[i]));
-    i += sizeof(uint16_t);
-    Data2[1] = ntoh16(*reinterpret_cast<uint16_t*>(&buf[i]));
-    i += sizeof(uint16_t);
-    Data2[2] = ntoh16(*reinterpret_cast<uint16_t*>(&buf[i]));
-    i += sizeof(uint16_t);
-    std::array<uint8_t, 6>* bd3 = reinterpret_cast<std::array<uint8_t, 6>*>(&buf[i]);
-    Data3 = *bd3;
+    if (i != 2 * bSize) {
+        std::string msg =  "Cannot parse UUID " + std::string(value);
+        throw simph::smpdk::Exception(nullptr,  msg.c_str());
+    }
+
+    Data1 = be32toh(Data1);
+    Data2[0] = be16toh(Data2[0]);
+    Data2[1] = be16toh(Data2[1]);
+    Data2[2] = be16toh(Data2[2]);
 }
 // ..........................................................
 bool Uuid::operator==(const Smp::Uuid& other) const {
-    return Data1 == other.Data1 && Data2[0] == other.Data2[0] && Data2[1] == other.Data2[1]
-           && Data2[2] == other.Data2[2] && Data3[0] == other.Data3[0] && Data3[1] == other.Data3[1]
-           && Data3[2] == other.Data3[2] && Data3[3] == other.Data3[3] && Data3[4] == other.Data3[4]
-           && Data3[5] == other.Data3[5];
+    return Data1 == other.Data1 && Data2 == other.Data2 && Data3 == other.Data3;
 }
 // ..........................................................
 bool Uuid::operator!=(const Smp::Uuid& other) const {
