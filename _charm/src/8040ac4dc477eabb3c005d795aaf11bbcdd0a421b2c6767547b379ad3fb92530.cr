@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cr id="8040ac4dc477eabb3c005d795aaf11bbcdd0a421b2c6767547b379ad3fb92530" state="working">
+<title>Release simdeck 1.0</title>
+<reporter>sdevaux</reporter>
+<creation>2024-12-21 16:29:49+01:00</creation>
+<description></description>
+<links>
+<link name="child">f812cea1d4f3c7281a6bbfd10e4009134ab8ac7a23e61ed0be230868d7ab73fd</link>
+</links>
+<cf v="sdevaux 2024-12-21T16:33:58+01:00"/>
+</cr>
