@@ -1,0 +1,39 @@
+/*
+ * @file Composite.h
+ *
+ * Copyright 2019 . All rights reserved.
+ * Use is subject to license terms.
+ *
+ * $Id$
+ * $Date$
+ */
+#ifndef __simdeck_Composite_HPP__
+#define __simdeck_Composite_HPP__
+#include <iostream>
+#include "Smp/IComposite.h"
+#include "simdeck/Collection.hpp"
+namespace simdeck {
+
+/**
+ *
+ */
+class Composite:  public virtual Smp::IComposite {
+public:
+    /**
+     * Destructor.
+     */
+    virtual ~Composite();
+
+    const Smp::ContainerCollection* GetContainers() const override;
+    Smp::IContainer* GetContainer(Smp::String8 name) const override;
+
+protected:
+    Composite();
+    Smp::IContainer* addContainer(Smp::String8 name, Smp::String8 descr = "");
+
+private:
+    OwnedCollection<Smp::IContainer> _containers;
+};
+
+}  // namespace simdeck
+#endif  // __simdeck_Composite_HPP__
