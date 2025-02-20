@@ -18,7 +18,7 @@ namespace simdeck {
 /**
  *
  */
-class CompositeService: public Service, virtual public Composite {
+class CompositeService: public Service, virtual public AComposite {
     typedef Service Parent;
 public:
     /**

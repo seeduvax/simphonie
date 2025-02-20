@@ -2,7 +2,7 @@ variables:
     GIT_SSL_NO_VERIFY: "true"
     ABS_REPO: "https://www.eduvax.net/dist"
     DIST_HOST: "www.eduvax.net"
-    VABS: "3.4.11"
+    VABS: "3.4.13"
 
 stages:
     - test
@@ -38,27 +38,7 @@ stages:
             - build/unit_test_results/*.xml
         reports:
             junit: build/unit_test_results/*.xml
-          
-.test_sdk:
-    extends: .task
-    stage: test
-    variables:
-        # FIXME: abs workaround to force MODE env var value when calling test target
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS -j8"
-    script: 
-        - echo HOME=`pwd` make test.sdk $TASK_OPTVAR
-        # change HOME to have a new ABS directory to avoid impacting others compilations.
-        - HOME=`pwd` make test.sdk $TASK_OPTVAR | tee execution.log
-        - egrep -ri 'errors="[1-9]+' build/unit_test_results && exit 1 || echo "ok"
-        - egrep -ri 'failures="[1-9]+' build/unit_test_results && exit 1 || echo "ok"
-    only:
-        - branches
-    artifacts:
-        paths:
-            - build/unit_test_results/*.xml
-        reports:
-            junit: build/unit_test_results/*.xml
-          
+
 .deploy_base:
     extends: .task
     stage: deploy
@@ -70,16 +50,6 @@ stages:
         - echo HOME=`pwd` make pubdist $TASK_OPTVAR
         # change HOME to have a new ABS directory to avoid impacting others compilations.
         - HOME=`pwd` make pubdist $TASK_OPTVAR
-        
-.deploy_sdk:
-    extends: .task
-    stage: deploy
-    only:
-        - tags
-    variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS"
-    script:
-        - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
 
 # Test jobs triggered only at branch push
 sanitize_debian11:
@@ -109,12 +79,12 @@ test_debian11:
         - debian_11
         
 test_debian9:
-    extends: .test_sdk
+    extends: .test_base
     tags:
         - debian_9
         
 test_suse12:
-    extends: .test_sdk
+    extends: .test_base
     tags:
         - suse_12
     variables:
@@ -125,14 +95,14 @@ test_suse12:
         - tar -xf gcc-4.9.4.SUSE_12_x86_64.tar.gz
         
 test_redhawk7_clang13:
-    extends: .test_sdk
+    extends: .test_base
     tags:
         - redhawk_7
     variables:
         TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS BUILDCHAIN=clang-13"
 
 test_suse15sp5:
-    extends: .test_sdk
+    extends: .test_base
     tags:
         - suse_15sp5
 
@@ -141,12 +111,9 @@ deploy_debian11:
     extends: .deploy_base
     tags:
         - debian_11
-    after_script:
-        - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR" WORKSPACE_IS_TAG=yes
 
-# Deployment jobs for smpdk
 deploy_suse12:
-    extends: .deploy_sdk
+    extends: .deploy_base
     tags:
         - suse_12
     variables:
@@ -157,21 +124,19 @@ deploy_suse12:
         - tar -xf gcc-4.9.4.SUSE_12_x86_64.tar.gz
 
 deploy_debian9:
-    extends: .deploy_sdk
+    extends: .deploy_base
     tags:
         - debian_9
-    script:
-        - HOME=`pwd` make pubdist.sdk MAKEARGS="$TASK_OPTVAR"
 
 deploy_redhawk7_clang13:
-    extends: .deploy_sdk
+    extends: .deploy_base
     tags:
         - redhawk7
     variables:
         TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS BUILDCHAIN=clang-13"
 
 deploy_suse15sp5:
-    extends: .deploy_sdk
+    extends: .deploy_base
     tags:
         - suse_15sp5
 

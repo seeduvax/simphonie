@@ -18,7 +18,7 @@ namespace simdeck {
 /**
  *
  */
-class CompositeComponent: public Component, virtual public Composite {
+class CompositeComponent: public Component, virtual public AComposite {
     typedef Component Parent;
 public:
     /**

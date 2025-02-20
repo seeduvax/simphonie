@@ -12,27 +12,40 @@
 #include <iostream>
 #include "Smp/IComposite.h"
 #include "simdeck/Collection.hpp"
+#include "simdeck/Object.hpp"
 namespace simdeck {
 
 /**
  *
  */
-class Composite:  public virtual Smp::IComposite {
+class AComposite: public virtual Smp::IComposite {
 public:
     /**
      * Destructor.
      */
-    virtual ~Composite();
+    virtual ~AComposite() = default;
 
     const Smp::ContainerCollection* GetContainers() const override;
     Smp::IContainer* GetContainer(Smp::String8 name) const override;
 
 protected:
-    Composite();
+    AComposite();
     Smp::IContainer* addContainer(Smp::String8 name, Smp::String8 descr = "");
 
 private:
     OwnedCollection<Smp::IContainer> _containers;
+};
+
+/**
+ *
+ */
+class Composite: public Object, public virtual AComposite {
+public:
+    Composite(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
+    /**
+     * Destructor.
+     */
+    virtual ~Composite() = default;
 };
 
 }  // namespace simdeck
