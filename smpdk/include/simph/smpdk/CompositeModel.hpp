@@ -19,7 +19,7 @@ namespace smpdk {
 /**
  *
  */
-class CompositeModel: public Model, virtual public Composite {
+class CompositeModel: public Model, virtual public AComposite {
     typedef Model Parent;
 public:
     /**

@@ -12,27 +12,26 @@
 
 namespace simph {
 namespace smpdk {
+
+AComposite::AComposite() : _containers("Containers", "", this) {}
+
+Composite::Composite(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) 
+    : Object(name, descr, parent) {
+}
 // --------------------------------------------------------------------
 // ..........................................................
-Composite::Composite(): _containers("Containers", "", this) {
-}
-// ..........................................................
-Composite::~Composite() {
-}
-// --------------------------------------------------------------------
-// ..........................................................
-Smp::IContainer* Composite::addContainer(Smp::String8 name, Smp::String8 descr) {
+Smp::IContainer* AComposite::addContainer(Smp::String8 name, Smp::String8 descr) {
     auto c=new Container(name, descr, this);
     _containers.push_back(c);
     return c;
 }
 // --------------------------------------------------------------------
 // ..........................................................
-const Smp::ContainerCollection* Composite::GetContainers() const {
+const Smp::ContainerCollection* AComposite::GetContainers() const {
     return &_containers;
 }
 // ..........................................................
-Smp::IContainer* Composite::GetContainer(Smp::String8 name) const {
+Smp::IContainer* AComposite::GetContainer(Smp::String8 name) const {
     return _containers.at(name);
 }
 }  // namespace smpdk

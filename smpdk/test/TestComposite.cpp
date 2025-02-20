@@ -14,9 +14,9 @@
 
 namespace test {
 using namespace simph::smpdk;
-class SampleComposite : public Object, virtual public Composite {
+class SampleComposite : public Composite {
 public:
-    SampleComposite(Smp::String8 name, Smp::IObject* parent = nullptr) : Object(name, "", parent) {
+    SampleComposite(Smp::String8 name, Smp::IObject* parent = nullptr) : Composite(name, "", parent) {
         addContainer("c1");
         addContainer("c2");
     }

@@ -80,6 +80,17 @@ public:
         return initialSize != newSize;
     }
 
+    void clear() { _content.clear(); }
+    bool empty() { return _content.empty(); }
+    
+    Collection<T>& operator=(const Smp::ICollection<T>& other) {
+        _content.clear();
+        for (T* element : other) {
+            _content.push_back(element);
+        }
+        return *this;
+    }
+
 private:
     std::vector<T*> _content;
 };
