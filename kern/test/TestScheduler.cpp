@@ -10,15 +10,15 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <unistd.h>
 #include <memory>
-#include "simph/kern/Scheduler.hpp"
-#include "simph/kern/Simulator.hpp"
-#include "simph/sys/Callback.hpp"
-#include "simph/sys/ChronoTool.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/kern/Scheduler.hpp"
+#include "simphonie/kern/Simulator.hpp"
+#include "simphonie/sys/Callback.hpp"
+#include "simphonie/sys/ChronoTool.hpp"
+#include "simphonie/sys/Logger.hpp"
 
 namespace test {
-using namespace simph::kern;
-using namespace simph::sys;
+using namespace simphonie::kern;
+using namespace simphonie::sys;
 
 // ----------------------------------------------------------
 // test fixture implementation

@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExEntryPointAlreadySubscribed.hpp"
+#include "simphonie/kern/ExEntryPointAlreadySubscribed.hpp"
 #include <sstream>
 #include "Smp/IEntryPoint.h"
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................

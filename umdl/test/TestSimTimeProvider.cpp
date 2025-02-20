@@ -10,19 +10,19 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "Smp/IField.h"
 #include "Smp/IOutputField.h"
-#include "simph/kern/Resolver.hpp"
-#include "simph/kern/Scheduler.hpp"
-#include "simph/kern/Simulator.hpp"
-#include "simph/umdl/Logger1D.hpp"
-#include "simph/umdl/SimTimeProvider.hpp"
-#include "simph/umdl/SysTimeSynchro.hpp"
+#include "simphonie/kern/Resolver.hpp"
+#include "simphonie/kern/Scheduler.hpp"
+#include "simphonie/kern/Simulator.hpp"
+#include "simphonie/umdl/Logger1D.hpp"
+#include "simphonie/umdl/SimTimeProvider.hpp"
+#include "simphonie/umdl/SysTimeSynchro.hpp"
 #include "SimControlEnd.hpp"
 
-#include "simph/smpdk/Utils.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simdeck/Utils.hpp"
+#include "simphonie/sys/Logger.hpp"
 
 namespace test {
-using namespace simph::umdl;
+using namespace simphonie::umdl;
 
 // ----------------------------------------------------------
 // test fixture implementation
@@ -38,9 +38,9 @@ public:
     void tearDown() {}
 
     void testSimTime() {
-        simph::kern::Simulator sim;
+        simphonie::kern::Simulator sim;
         sim.LoadLibrary("simph_umdl");
-        auto mdl = sim.CreateInstance(simph::smpdk::Utils::generateUuid("SimTimeProvider"), "clock", "", nullptr);
+        auto mdl = sim.CreateInstance(simdeck::Utils::generateUuid("SimTimeProvider"), "clock", "", nullptr);
         CPPUNIT_ASSERT(mdl != nullptr);
         auto log = new Logger1D("log","",&sim);
         sim.AddModel(log);
@@ -54,8 +54,8 @@ public:
         auto f2 = dynamic_cast<Smp::IOutputField*>(sim.GetResolver()->ResolveRelative("in", log));
         f1->Connect(f2);
         CPPUNIT_ASSERT(f1 != nullptr);
-        dynamic_cast<simph::kern::Resolver*>(sim.GetResolver())->dump();
-        simph::kern::Scheduler* sched = dynamic_cast<simph::kern::Scheduler*>(sim.GetScheduler());
+        dynamic_cast<simphonie::kern::Resolver*>(sim.GetResolver())->dump();
+        simphonie::kern::Scheduler* sched = dynamic_cast<simphonie::kern::Scheduler*>(sim.GetScheduler());
         sched->AddSimulationTimeEvent(sync->GetEntryPoint("step"),
                                       0,  // 0ms offset
                                       10000000,  // 10ms period

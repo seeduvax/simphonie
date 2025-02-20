@@ -9,12 +9,12 @@
  */
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "simph/kern/EventManager.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/kern/EventManager.hpp"
+#include "simphonie/sys/Logger.hpp"
 #include "Smp/IEntryPoint.h"
 
 namespace test {
-using namespace simph::kern;
+using namespace simphonie::kern;
 
 class Cpt {
 public:
@@ -24,10 +24,10 @@ public:
     }
     Cpt() : _value(0) {}
 };
-class EPCpt : public simph::smpdk::Object, public Smp::IEntryPoint {
+class EPCpt : public simdeck::Object, public Smp::IEntryPoint {
 public:
     Cpt& _cpt;
-    EPCpt(Smp::String8 name, Cpt& cpt) : simph::smpdk::Object(name, "", nullptr), _cpt(cpt) {}
+    EPCpt(Smp::String8 name, Cpt& cpt) : simdeck::Object(name, "", nullptr), _cpt(cpt) {}
     virtual ~EPCpt() {}
     void Execute() const override {
         _cpt.inc();

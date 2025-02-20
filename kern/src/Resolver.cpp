@@ -7,7 +7,7 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Resolver.hpp"
+#include "simphonie/kern/Resolver.hpp"
 #include "Smp/IArrayField.h"
 #include "Smp/IComposite.h"
 #include "Smp/IComponent.h"
@@ -16,16 +16,16 @@
 #include "Smp/IModel.h"
 #include "Smp/IService.h"
 #include "Smp/Publication/IType.h"
-#include "simph/kern/Publication.hpp"
-#include "simph/sys/Callback.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/kern/Publication.hpp"
+#include "simphonie/sys/Callback.hpp"
+#include "simphonie/sys/Logger.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
 Resolver::Resolver(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : simph::smpdk::Component(name, descr, parent) {
+    : simdeck::Component(name, descr, parent) {
     // Default root is the parent object, until connect step where
     // the simulator is recovered.
     _root=parent;

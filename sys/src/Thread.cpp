@@ -7,9 +7,9 @@
  * $Id$
  * $Date$
  */
-#include "simph/sys/Thread.hpp"
+#include "simphonie/sys/Thread.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace sys {
 
 // --------------------------------------------------------------------

@@ -7,14 +7,14 @@
  * $Id$
  * $Date$
  */
-#include "simph/sys/Logger.hpp"
+#include "simphonie/sys/Logger.hpp"
 #include <time.h>
 #include <iomanip>
 
-namespace simph {
+namespace simphonie {
 namespace sys {
-simph::sys::Logger _loggerInternal;
-simph::sys::Logger& _logger = _loggerInternal;
+simphonie::sys::Logger _loggerInternal;
+simphonie::sys::Logger& _logger = _loggerInternal;
 // --------------------------------------------------------------------
 // ..........................................................
 Logger::Logger(std::ostream& out) : _out(out) {}

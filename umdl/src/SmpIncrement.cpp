@@ -7,10 +7,10 @@
  * $Id$
  * $Date$
  */
-#include "simph/umdl/SmpIncrement.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/umdl/SmpIncrement.hpp"
+#include "simphonie/sys/Logger.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace umdl {
 // --------------------------------------------------------------------
 // ..........................................................

@@ -8,10 +8,10 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "simph/lua/LuaApi.hpp"
+#include "simphonie/lua/LuaApi.hpp"
 
 namespace test {
-using namespace simph::lua;
+using namespace simphonie::lua;
 
 // ----------------------------------------------------------
 // test fixture implementation

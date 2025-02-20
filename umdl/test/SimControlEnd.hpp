@@ -1,11 +1,11 @@
 #ifndef __test_SimControlEnd_hpp
 #define __test_SimControlEnd_hpp
 #include "Smp/ISimulator.h"
-#include "simph/smpdk/Object.hpp"
-#include "simph/sys/Synchro.hpp"
+#include "simdeck/Object.hpp"
+#include "simphonie/sys/Synchro.hpp"
 
 namespace test {
-class SimControlEnd: public simph::smpdk::Object {
+class SimControlEnd: public simdeck::Object {
 public:
     SimControlEnd(Smp::ISimulator* sim, Smp::Duration stopTime);
     virtual ~SimControlEnd();

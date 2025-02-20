@@ -7,10 +7,10 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Logger.hpp"
+#include "simphonie/kern/Logger.hpp"
 #include <string.h>
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 static Smp::String8 _LMK_NamesTable[] = {Smp::Services::ILogger::LMK_InformationName,
                                          Smp::Services::ILogger::LMK_EventName, Smp::Services::ILogger::LMK_WarningName,

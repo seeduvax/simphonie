@@ -7,14 +7,14 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/EventManager.hpp"
-#include "simph/kern/ExEntryPointAlreadySubscribed.hpp"
-#include "simph/kern/ExEntryPointNotSubscribed.hpp"
-#include "simph/kern/ExInvalidEventId.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/kern/EventManager.hpp"
+#include "simphonie/kern/ExEntryPointAlreadySubscribed.hpp"
+#include "simphonie/kern/ExEntryPointNotSubscribed.hpp"
+#include "simphonie/kern/ExInvalidEventId.hpp"
+#include "simphonie/sys/Logger.hpp"
 #include "Smp/IEntryPoint.h"
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 const Smp::String8 _SMP_EventNamesTable[] = {
     Smp::Services::IEventManager::SMP_LeaveConnecting,    Smp::Services::IEventManager::SMP_EnterInitialising,

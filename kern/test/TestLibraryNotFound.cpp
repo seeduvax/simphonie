@@ -8,11 +8,11 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "simph/kern/ExFileNotFound.hpp"
-#include "simph/kern/Simulator.hpp"
+#include "simphonie/kern/ExFileNotFound.hpp"
+#include "simphonie/kern/Simulator.hpp"
 
 namespace test {
-using namespace simph::kern;
+using namespace simphonie::kern;
 
 // ----------------------------------------------------------
 // test fixture implementation
@@ -33,7 +33,7 @@ public:
     void testLoadableLibrary() {
         std::vector<std::string> lib;
         lib.push_back("simph_sys");
-        lib.push_back("simph_smpdk");
+        lib.push_back("simdeck");
         CPPUNIT_ASSERT(testLoadLibraries(lib) == true);
     }
 
@@ -50,7 +50,7 @@ public:
                 _sim.LoadLibrary(itr.c_str());
             }
         }
-        catch (simph::kern::ExFileNotFound ex) {
+        catch (simphonie::kern::ExFileNotFound ex) {
             return false;
         }
         return true;

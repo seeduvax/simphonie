@@ -8,20 +8,20 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "simph/esmp/Sampler.hpp"
-#include "simph/kern/Resolver.hpp"
-#include "simph/kern/Scheduler.hpp"
-#include "simph/kern/Simulator.hpp"
-#include "simph/smpdk/Utils.hpp"
-#include "simph/sys/Logger.hpp"
-#include "simph/umdl/SmpIncrement.hpp"
+#include "simphonie/esmp/Sampler.hpp"
+#include "simphonie/kern/Resolver.hpp"
+#include "simphonie/kern/Scheduler.hpp"
+#include "simphonie/kern/Simulator.hpp"
+#include "simdeck/Utils.hpp"
+#include "simphonie/sys/Logger.hpp"
+#include "simphonie/umdl/SmpIncrement.hpp"
 #include "SimControlEnd.hpp"
 #include "Smp/IOutputField.h"
 
 namespace test {
-using namespace simph::umdl;
-using namespace simph::kern;
-using namespace simph::sys;
+using namespace simphonie::umdl;
+using namespace simphonie::kern;
+using namespace simphonie::sys;
 
 // ----------------------------------------------------------
 // test fixture implementation
@@ -48,7 +48,7 @@ public:
         auto scheduler = dynamic_cast<Scheduler*>(sim.GetScheduler());
         auto resolver = dynamic_cast<Resolver*>(sim.GetResolver());
 /* TODO delete or upgrade and restore. Why was this introduced in this test?
-        simph::smpdk::Component obj1("obj1", "test obj 1", &sim);
+        simdeck::Component obj1("obj1", "test obj 1", &sim);
         Smp::IPublication* q = resolver->publish(&obj1);
         CPPUNIT_ASSERT(q != nullptr);
 
@@ -62,8 +62,8 @@ public:
         // sim.AddModel(sampler);
 
         sim.LoadLibrary("simph_kern");
-        auto sampler = dynamic_cast<simph::kern::Sampler*>(
-            sim.CreateInstance(simph::smpdk::Utils::generateUuid("Sampler"), "sampler", "description sampler", &sim));
+        auto sampler = dynamic_cast<simphonie::kern::Sampler*>(
+            sim.CreateInstance(simdeck::Utils::generateUuid("Sampler"), "sampler", "description sampler", &sim));
 
         sim.Publish();
         sim.Configure();

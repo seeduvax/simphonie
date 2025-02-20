@@ -7,8 +7,8 @@
  * $Id$
  * $Date$
  */
-#include "simph/sys/ChronoTool.hpp"
+#include "simphonie/sys/ChronoTool.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace sys {}
 }  // namespace simph

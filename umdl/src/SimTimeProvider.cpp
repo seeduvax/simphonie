@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#include "simph/umdl/SimTimeProvider.hpp"
+#include "simphonie/umdl/SimTimeProvider.hpp"
 #include "Smp/ISimulator.h"
 #include "Smp/Services/ILogger.h"
 #include "Smp/Services/ITimeKeeper.h"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/sys/Logger.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace umdl {
 // --------------------------------------------------------------------
 // ..........................................................

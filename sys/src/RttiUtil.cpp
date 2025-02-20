@@ -7,9 +7,9 @@
  * $Id$
  * $Date$
  */
-#include "simph/sys/RttiUtil.hpp"
+#include "simphonie/sys/RttiUtil.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace sys {
 // --------------------------------------------------------------------
 // ..........................................................

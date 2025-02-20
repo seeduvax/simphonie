@@ -11,14 +11,14 @@
 #include <string.h>
 #include "Smp/ISimpleArrayField.h"
 #include "Smp/ISimpleField.h"
-#include "simph/kern/Publication.hpp"
-#include "simph/kern/TypeRegistry.hpp"
-#include "simph/smpdk/Component.hpp"
+#include "simphonie/kern/Publication.hpp"
+#include "simphonie/kern/TypeRegistry.hpp"
+#include "simdeck/Component.hpp"
 
-#include "simph/sys/Logger.hpp"
+#include "simphonie/sys/Logger.hpp"
 
 namespace test {
-using namespace simph::kern;
+using namespace simphonie::kern;
 
 // ----------------------------------------------------------
 // test fixture implementation
@@ -36,7 +36,7 @@ public:
     void tearDown() {}
 
     void testPublishField() {
-        std::unique_ptr<simph::smpdk::Component> component(new simph::smpdk::Component("testObj", "dummy object for testing", nullptr));
+        std::unique_ptr<simdeck::Component> component(new simdeck::Component("testObj", "dummy object for testing", nullptr));
         Publication pub(component.get(), nullptr);
 
         Smp::Char8 testChar = 'A';
@@ -77,7 +77,7 @@ public:
 
     void testPublishArrayField() {
         TypeRegistry tReg("TypesRegistry", "test types registry", nullptr);
-        std::unique_ptr<simph::smpdk::Component> component(new simph::smpdk::Component("testObj", "dummy object for testing", nullptr));
+        std::unique_ptr<simdeck::Component> component(new simdeck::Component("testObj", "dummy object for testing", nullptr));
         Publication pub(component.get(), &tReg);
 
         Smp::Int32 iArray[] = {12, 17, 42};

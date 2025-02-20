@@ -7,13 +7,13 @@
  * $Id$
  * $Date$
  */
-#include "simph/umdl/SysTimeSynchro.hpp"
+#include "simphonie/umdl/SysTimeSynchro.hpp"
 #include "Smp/IPublication.h"
 #include "abs/profiler.h"
 
 static const std::chrono::time_point<std::chrono::steady_clock> _nullTimePoint;
 
-namespace simph {
+namespace simphonie {
 namespace umdl {
 // --------------------------------------------------------------------
 // ..........................................................

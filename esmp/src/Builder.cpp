@@ -8,14 +8,14 @@
  * $Id$
  * $Date$
  */
-#include "simph/esmp/Builder.hpp"
+#include "simphonie/esmp/Builder.hpp"
 #include <iostream>
-#include "simph/kern/Simulator.hpp"
-#include "simph/smpdk/Utils.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/kern/Simulator.hpp"
+#include "simdeck/Utils.hpp"
+#include "simphonie/sys/Logger.hpp"
 #include "Smp/Services/IScheduler.h"
 
-namespace simph {
+namespace simphonie {
 namespace esmp {
 // --------------------------------------------------------------------
 // ..........................................................
@@ -60,8 +60,8 @@ void Builder::publish(Smp::IPublication* receiver) {
     // publish models
     for (auto cfg : _loadSmpModelCfgs) {
         sim->LoadLibrary(cfg.library.c_str());
-        auto simk = dynamic_cast<simph::kern::Simulator*>(sim);
-        auto c = sim->CreateInstance(simph::smpdk::Utils::generateUuid(cfg.type.c_str()), cfg.name.c_str(),
+        auto simk = dynamic_cast<simphonie::kern::Simulator*>(sim);
+        auto c = sim->CreateInstance(simdeck::Utils::generateUuid(cfg.type.c_str()), cfg.name.c_str(),
                                      cfg.description.c_str(), sim);
         if (c == nullptr) {
 /* TODO restore this somehow, reimplement feature totally here. Any kind of
@@ -79,9 +79,9 @@ void Builder::publish(Smp::IPublication* receiver) {
     for (auto cfg : _loadSamplerCfg) {
 // TODO this should not be required. Samplers should be added like any component.
         sim->LoadLibrary("libsimph_esmp.so");
-        auto simk = dynamic_cast<simph::kern::Simulator*>(sim);
-        auto sampler = dynamic_cast<simph::esmp::Sampler*>(simk->CreateInstance(
-            simph::smpdk::Utils::generateUuid("Sampler"), cfg.name.c_str(), cfg.description.c_str(), sim));
+        auto simk = dynamic_cast<simphonie::kern::Simulator*>(sim);
+        auto sampler = dynamic_cast<simphonie::esmp::Sampler*>(simk->CreateInstance(
+            simdeck::Utils::generateUuid("Sampler"), cfg.name.c_str(), cfg.description.c_str(), sim));
         _samplers.push_back(sampler);
     }
 }
@@ -91,7 +91,7 @@ void Builder::connect() {
     // load EP sampler
     for (auto cfg : _loadSamplerCfg) {
         auto sampler =
-            dynamic_cast<simph::esmp::Sampler*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.name.c_str()));
+            dynamic_cast<simphonie::esmp::Sampler*>(getSimulator()->GetResolver()->ResolveAbsolute(cfg.name.c_str()));
         for (auto f : cfg.fields) {
 // TODO: use SMP::IField rather than specific simphonie IField implementation
             auto field = dynamic_cast<Smp::IField*>(getSimulator()->GetResolver()->ResolveAbsolute(f.c_str()));

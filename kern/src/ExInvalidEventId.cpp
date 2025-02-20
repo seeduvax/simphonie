@@ -7,10 +7,10 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExInvalidEventId.hpp"
+#include "simphonie/kern/ExInvalidEventId.hpp"
 #include <sstream>
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................

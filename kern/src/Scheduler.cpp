@@ -8,20 +8,20 @@
  * $Date$
  */
 
-#include "simph/kern/Scheduler.hpp"
+#include "simphonie/kern/Scheduler.hpp"
 #include <atomic>
 #include "Smp/ISimulator.h"
 #include "Smp/IOutputField.h"
 #include "abs/profiler.h"
 #include "assert.h"
-#include "simph/kern/Resolver.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/kern/Resolver.hpp"
+#include "simphonie/sys/Logger.hpp"
 
 #define EV_NAME_PRE_EVENT_EXECUTE "Scheduler_PreEventExecute"
 #define EV_NAME_POST_EVENT_EXECUTE "Scheduler_PostEventExecute"
 #define DURATION_MAX INT64_MAX
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 
 // --------------------------------------------------------------------
@@ -384,7 +384,7 @@ void Scheduler::run() {
 void Scheduler::epEnterExecuting() {
     Synchronized(_mutex);
     if (!_run) {
-        _th.reset(new simph::sys::Thread(GetName(), this));
+        _th.reset(new simphonie::sys::Thread(GetName(), this));
         _th->start();
     }
 }

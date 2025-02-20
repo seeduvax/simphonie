@@ -7,10 +7,10 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/PublishOperation.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/kern/PublishOperation.hpp"
+#include "simphonie/sys/Logger.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................

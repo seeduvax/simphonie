@@ -1,0 +1,85 @@
+/*
+ * @file TypeRegistry.h
+ *
+ * Copyright 2019 . All rights reserved.
+ * Use is subject to license terms.
+ *
+ * $Id$
+ * $Date$
+ */
+#ifndef __simphonie_kern_TypeRegistry_HPP__
+#define __simphonie_kern_TypeRegistry_HPP__
+#include "Smp/Publication/ITypeRegistry.h"
+#include "simdeck/Collection.hpp"
+#include "simdeck/Component.hpp"
+#include <memory>
+
+namespace simphonie {
+namespace kern {
+using namespace simdeck;
+
+/**
+ *
+ */
+class TypeRegistry : public Component, virtual public Smp::Publication::ITypeRegistry {
+public:
+    /**
+     * Default constructor.
+     */
+    TypeRegistry(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent);
+    /**
+     * Destructor.
+     */
+    virtual ~TypeRegistry();
+    /**
+     * Get the byte size of a primitive type.
+     * @param type primitive type to query for byte size
+     * @return byte size of the provided primitive type
+     */
+    static size_t getPrimitiveTypeSize(Smp::PrimitiveTypeKind type);
+    /**
+     * Get the name of a primitive type.
+     * @param type primitive type to use to fetch for a name
+     * @return name of the provided primitive type
+     */
+    static Smp::String8 getPrimitiveTypeName(Smp::PrimitiveTypeKind _type);
+    // Smp::ITypeRegistry implementation
+    Smp::Publication::IType* GetType(Smp::PrimitiveTypeKind type) const override;
+    Smp::Publication::IType* GetType(Smp::Uuid typeUuid) const override;
+    Smp::Publication::IType* AddFloatType(Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
+                                          Smp::Float64 minimum, Smp::Float64 maximum, Smp::Bool minInclusive,
+                                          Smp::Bool maxInclusive, Smp::String8 unit,
+                                          Smp::PrimitiveTypeKind type = Smp::PrimitiveTypeKind::PTK_Float64) override;
+    Smp::Publication::IType* AddIntegerType(Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
+                                            Smp::Int64 minimum, Smp::Int64 maximum, Smp::String8 unit,
+                                            Smp::PrimitiveTypeKind type = Smp::PrimitiveTypeKind::PTK_Int32) override;
+    Smp::Publication::IEnumerationType* AddEnumerationType(
+                Smp::String8 name,
+                Smp::String8 descr, 
+                Smp::Uuid typeUuid) override;
+    Smp::Publication::IArrayType* AddArrayType(
+                Smp::String8 name,
+                Smp::String8 description,
+                Smp::Uuid typeUuid,
+                Smp::Uuid itemTypeUuid,
+                Smp::UInt64 itemSize,
+                Smp::UInt64 arrayCount,
+                Smp::Bool simpleArray = false) override;
+    Smp::Publication::IType* AddStringType(
+                Smp::String8 name,
+                Smp::String8 description,
+                Smp::Uuid typeUuid,
+                Smp::UInt64 length) override;
+    Smp::Publication::IStructureType* AddStructureType(Smp::String8 name, Smp::String8 description,
+                                                       Smp::Uuid typeUuid) override;
+    Smp::Publication::IClassType* AddClassType(Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
+                                               Smp::Uuid baseClassUuid) override;
+
+private:
+    Collection<Smp::Publication::IType> _types;
+    std::vector<std::unique_ptr<Smp::Publication::IType>> _ownedTypes;
+};
+
+}  // namespace kern
+}  // namespace simph
+#endif  // __simphonie_kern_TypeRegistry_HPP__

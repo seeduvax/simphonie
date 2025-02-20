@@ -8,17 +8,17 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "simph/smpdk/Field.hpp"
-#include "simph/kern/Resolver.hpp"
-#include "simph/kern/Simulator.hpp"
-#include "simph/kern/TypeRegistry.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simdeck/Field.hpp"
+#include "simphonie/kern/Resolver.hpp"
+#include "simphonie/kern/Simulator.hpp"
+#include "simphonie/kern/TypeRegistry.hpp"
+#include "simphonie/sys/Logger.hpp"
 #include "Smp/ISimpleArrayField.h"
 #include "Smp/IModel.h"
 
 namespace test {
-using namespace simph::kern;
-using namespace simph::smpdk;
+using namespace simphonie::kern;
+using namespace simdeck;
 
 
 // ----------------------------------------------------------
@@ -29,12 +29,12 @@ class TestResolver : public CppUnit::TestFixture {
     CPPUNIT_TEST_SUITE_END();
 
 private:
-class Model: public simph::smpdk::Component,
-            public virtual simph::smpdk::AComposite,
+class Model: public simdeck::Component,
+            public virtual simdeck::AComposite,
             public virtual Smp::IModel {
 public:
     Model(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent):
-            simph::smpdk::Component(name, descr, parent) {
+            simdeck::Component(name, descr, parent) {
         addContainer("Children");
         auto mp=dynamic_cast<Model*>(parent);
         if (mp!=nullptr) {
@@ -75,7 +75,7 @@ public:
     void tearDown() {}
 
     void testResolver() {
-        simph::kern::Simulator simu("simu", "Resovler owner", nullptr);
+        simphonie::kern::Simulator simu("simu", "Resovler owner", nullptr);
         auto mdl1 = new Model("to1", "test obj 1", &simu);
         simu.AddModel(mdl1);
         std::unique_ptr<Model> mdl2(new Model("to2", "test obj 2", mdl1));

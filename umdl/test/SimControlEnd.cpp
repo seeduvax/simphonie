@@ -1,7 +1,7 @@
 #include "SimControlEnd.hpp"
-#include "simph/kern/Scheduler.hpp"
-#include "simph/smpdk/EntryPoint.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/kern/Scheduler.hpp"
+#include "simdeck/EntryPoint.hpp"
+#include "simphonie/sys/Logger.hpp"
 
 namespace test {
 
@@ -25,9 +25,9 @@ void SimControlEnd::wait() {
 }
 
 SimControlEnd::SimControlEnd(Smp::ISimulator* sim, Smp::Duration stopTime):
-            simph::smpdk::Object("simControlEnd","",sim),
+            simdeck::Object("simControlEnd","",sim),
             _sim(sim), _stopTime(stopTime) {
-    _ep.reset(simph::smpdk::EntryPoint::Create("endSimuCtrl","",this,&SimControlEnd::ep));
+    _ep.reset(simdeck::EntryPoint::Create("endSimuCtrl","",this,&SimControlEnd::ep));
     _sim->GetEventManager()->Subscribe(
             Smp::Services::IEventManager::SMP_PostSimTimeChangeId,
             _ep.get());

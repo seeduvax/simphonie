@@ -7,9 +7,9 @@
  * $Id$
  * $Date$
  */
-#include "simph/sys/Callback.hpp"
+#include "simphonie/sys/Callback.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace sys {
 // ..........................................................
 

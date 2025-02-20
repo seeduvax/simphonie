@@ -7,10 +7,10 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/LinkRegistry.hpp"
+#include "simphonie/kern/LinkRegistry.hpp"
 #include "Smp/ILinkingComponent.h"
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................

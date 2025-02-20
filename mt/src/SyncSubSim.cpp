@@ -7,32 +7,32 @@
  * $Id$
  * $Date$
  */
-#include "simph/mt/SyncSubSim.hpp"
+#include "simphonie/mt/SyncSubSim.hpp"
 #include "Smp/IPublication.h"
 #include "Smp/Services/IEventManager.h"
 #include "Smp/Services/IScheduler.h"
-#include "simph/kern/Simulator.hpp"
-#include "simph/smpdk/EntryPoint.hpp"
-#include "simph/smpdk/Container.hpp"
-#include "simph/sys/Callback.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/kern/Simulator.hpp"
+#include "simdeck/EntryPoint.hpp"
+#include "simdeck/Container.hpp"
+#include "simphonie/sys/Callback.hpp"
+#include "simphonie/sys/Logger.hpp"
 #include "abs/profiler.h"
 
-namespace simph {
+namespace simphonie {
 namespace mt {
 // --------------------------------------------------------------------
 // ..........................................................
 SyncSubSim::SyncSubSim(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-        : simph::smpdk::Component(name, descr, parent) {
-    _initEP=simph::smpdk::EntryPoint::Create("sincInit", "Subsimulator isynchronization initialization entry point",
+        : simdeck::Component(name, descr, parent) {
+    _initEP=simdeck::EntryPoint::Create("sincInit", "Subsimulator isynchronization initialization entry point",
                                             this, &SyncSubSim::epSyncInit);
-    _syncEP=simph::smpdk::EntryPoint::Create("sync", "Subsimulator synchronization entry point", 
+    _syncEP=simdeck::EntryPoint::Create("sync", "Subsimulator synchronization entry point", 
                                             this, &SyncSubSim::epSync);
-    _enterExecutingEP=simph::smpdk::EntryPoint::Create("Run", "Subsimulator run entry point",
+    _enterExecutingEP=simdeck::EntryPoint::Create("Run", "Subsimulator run entry point",
                                             this, &SyncSubSim::epRun);
-    _leaveExecutingEP=simph::smpdk::EntryPoint::Create("Hold", "Subsimulator hold entry point",
+    _leaveExecutingEP=simdeck::EntryPoint::Create("Hold", "Subsimulator hold entry point",
                                             this, &SyncSubSim::epHold);
-    _subSim = new simph::kern::Simulator(name, "Sub simulator", this);
+    _subSim = new simphonie::kern::Simulator(name, "Sub simulator", this);
     _syncRate=1000000; // default 1ms sync rate.
     pthread_barrier_init(&_barrier, nullptr, 0);
 

@@ -7,10 +7,10 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExInvalidSimulationTime.hpp"
+#include "simphonie/kern/ExInvalidSimulationTime.hpp"
 #include <sstream>
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................

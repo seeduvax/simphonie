@@ -8,21 +8,21 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "simph/kern/Simulator.hpp"
-#include "simph/kern/EventManager.hpp"
-#include "simph/sys/Logger.hpp"
-#include "simph/smpdk/CompositeModel.hpp"
-#include "simph/smpdk/EntryPoint.hpp"
-#include "simph/smpdk/EntryPointPublisher.hpp"
-#include "simph/sys/Synchro.hpp"
+#include "simphonie/kern/Simulator.hpp"
+#include "simphonie/kern/EventManager.hpp"
+#include "simphonie/sys/Logger.hpp"
+#include "simdeck/CompositeModel.hpp"
+#include "simdeck/EntryPoint.hpp"
+#include "simdeck/EntryPointPublisher.hpp"
+#include "simphonie/sys/Synchro.hpp"
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Services/IScheduler.h"
 #include "Smp/Services/IEventManager.h"
 
 
 namespace test {
-using namespace simph::kern;
-using namespace simph::smpdk;
+using namespace simphonie::kern;
+using namespace simdeck;
 
 class CModel: public CompositeModel {
 public:
@@ -108,7 +108,7 @@ private:
     bool _endReached=false;
     EPSet* _epset;
 
-    typedef simph::smpdk::TEntryPoint<TestSimulator*, void (TestSimulator::*)()> EP;
+    typedef simdeck::TEntryPoint<TestSimulator*, void (TestSimulator::*)()> EP;
 
 public:
     void setUp() {

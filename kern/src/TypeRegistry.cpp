@@ -7,24 +7,24 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/TypeRegistry.hpp"
+#include "simphonie/kern/TypeRegistry.hpp"
 #include <iostream>
-#include "simph/smpdk/ArrayType.hpp"
-#include "simph/smpdk/ClassType.hpp"
-#include "simph/smpdk/EnumerationType.hpp"
-#include "simph/smpdk/ExInvalidPrimitiveType.hpp"
-#include "simph/kern/ExTypeAlreadyRegistered.hpp"
-#include "simph/smpdk/Field.hpp"
-#include "simph/smpdk/StructureType.hpp"
-#include "simph/smpdk/Type.hpp"
+#include "simdeck/ArrayType.hpp"
+#include "simdeck/ClassType.hpp"
+#include "simdeck/EnumerationType.hpp"
+#include "simdeck/ExInvalidPrimitiveType.hpp"
+#include "simphonie/kern/ExTypeAlreadyRegistered.hpp"
+#include "simdeck/Field.hpp"
+#include "simdeck/StructureType.hpp"
+#include "simdeck/Type.hpp"
 
 // TODO to be reconsidered, smp logger should be used
-#include "simph/sys/Logger.hpp"
+#include "simphonie/sys/Logger.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 
-using namespace simph::smpdk;
+using namespace simdeck;
 
 // --------------------------------------------------------------------
 // ..........................................................

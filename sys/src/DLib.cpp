@@ -7,8 +7,8 @@
  * $Id$
  * $Date$
  */
-#include "simph/sys/DLib.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/sys/DLib.hpp"
+#include "simphonie/sys/Logger.hpp"
 
 #if defined(WIN32) || defined(_WIN32) || defined(__NT__) || defined(_WIN64)
 #include <Windows.h>
@@ -17,7 +17,7 @@
 #include <dlfcn.h>
 #endif
 
-namespace simph {
+namespace simphonie {
 namespace sys {
 
 #ifdef OS_IS_WINDOWS

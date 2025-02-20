@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExTypeAlreadyRegistered.hpp"
+#include "simphonie/kern/ExTypeAlreadyRegistered.hpp"
 #include <sstream>
 #include "Smp/Publication/IType.h"
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................

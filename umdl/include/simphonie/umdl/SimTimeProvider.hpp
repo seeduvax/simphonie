@@ -1,0 +1,39 @@
+/*
+ * @file SimTimeProvider.h
+ *
+ * Copyright 2019 . All rights reserved.
+ * Use is subject to license terms.
+ *
+ * $Id$
+ * $Date$
+ */
+#ifndef __simphonie_umdl_SimTimeProvider_HPP__
+#define __simphonie_umdl_SimTimeProvider_HPP__
+#include "simphonie/umdl/Generator1D.hpp"
+
+namespace simphonie {
+namespace umdl {
+
+/**
+ *
+ */
+class SimTimeProvider : public Generator1D {
+public:
+    /**
+     * Default constructor.
+     */
+    SimTimeProvider(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent = nullptr);
+    /**
+     * Destructor.
+     */
+    virtual ~SimTimeProvider();
+
+protected:
+    Smp::Float64 compute();
+
+private:
+};
+
+}  // namespace umdl
+}  // namespace simph
+#endif  // __simphonie_umdl_SimTimeProvider_HPP__

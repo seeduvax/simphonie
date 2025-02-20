@@ -8,14 +8,14 @@
  * $Date$
  */
 #include "Smp/ISimulator.h"
-#include "simph/smpdk/Factory.hpp"
-#include "simph/sys/DlDef.h"
-#include "simph/umdl/Logger1D.hpp"
-#include "simph/umdl/SimTimeProvider.hpp"
-#include "simph/umdl/SmpIncrement.hpp"
-#include "simph/umdl/SysTimeSynchro.hpp"
+#include "simdeck/Factory.hpp"
+#include "simphonie/sys/DlDef.h"
+#include "simphonie/umdl/Logger1D.hpp"
+#include "simphonie/umdl/SimTimeProvider.hpp"
+#include "simphonie/umdl/SmpIncrement.hpp"
+#include "simphonie/umdl/SysTimeSynchro.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace umdl {
 
 REGISTER_SMP_LIBINIT();

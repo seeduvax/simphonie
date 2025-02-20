@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExFileNotFound.hpp"
-#include "simph/sys/DLib.hpp"
+#include "simphonie/kern/ExFileNotFound.hpp"
+#include "simphonie/sys/DLib.hpp"
 #include <sstream>
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................

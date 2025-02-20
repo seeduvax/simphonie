@@ -8,13 +8,13 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "simph/kern/TimeKeeper.hpp"
-#include "simph/sys/Logger.hpp"
-#include "simph/kern/Scheduler.hpp"
-#include "simph/kern/Simulator.hpp"
+#include "simphonie/kern/TimeKeeper.hpp"
+#include "simphonie/sys/Logger.hpp"
+#include "simphonie/kern/Scheduler.hpp"
+#include "simphonie/kern/Simulator.hpp"
 
 namespace test {
-using namespace simph::kern;
+using namespace simphonie::kern;
 
 // ----------------------------------------------------------
 // test fixture implementation

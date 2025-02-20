@@ -7,10 +7,10 @@
  * $Id$
  * $Date$
  */
-#include "simph/umdl/AStepMdl.hpp"
-#include "simph/sys/Callback.hpp"
+#include "simphonie/umdl/AStepMdl.hpp"
+#include "simphonie/sys/Callback.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace umdl {
 
 // --------------------------------------------------------------------

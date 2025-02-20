@@ -8,10 +8,10 @@
  * $Date$
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include "simph/sys/Callback.hpp"
+#include "simphonie/sys/Callback.hpp"
 
 namespace test {
-using namespace simph::sys;
+using namespace simphonie::sys;
 
 // ----------------------------------------------------------
 // test fixture implementation

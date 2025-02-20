@@ -7,26 +7,26 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Publication.hpp"
+#include "simphonie/kern/Publication.hpp"
 #include <string.h>
 #include "Smp/IComponent.h"
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/Publication/IArrayType.h"
-#include "simph/smpdk/ExInvalidPrimitiveType.hpp"
-#include "simph/smpdk/ExTypeNotRegistered.hpp"
-#include "simph/smpdk/SimpleField.hpp"
-#include "simph/smpdk/SimpleArrayField.hpp"
-#include "simph/smpdk/Property.hpp"
-#include "simph/smpdk/StructureType.hpp"
-#include "simph/smpdk/Type.hpp"
-#include "simph/smpdk/ExDuplicateName.hpp"
-#include "simph/sys/Logger.hpp"
-#include "simph/sys/RttiUtil.hpp"
+#include "simdeck/ExInvalidPrimitiveType.hpp"
+#include "simdeck/ExTypeNotRegistered.hpp"
+#include "simdeck/SimpleField.hpp"
+#include "simdeck/SimpleArrayField.hpp"
+#include "simdeck/Property.hpp"
+#include "simdeck/StructureType.hpp"
+#include "simdeck/Type.hpp"
+#include "simdeck/ExDuplicateName.hpp"
+#include "simphonie/sys/Logger.hpp"
+#include "simphonie/sys/RttiUtil.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 
-using namespace simph::smpdk;
+using namespace simdeck;
 // --------------------------------------------------------------------
 // ..........................................................
 class StructurePublication : public Publication {
@@ -79,7 +79,7 @@ Smp::IObject* Publication::GetChild(Smp::String8 name) const {
 void Publication::addChild(Smp::IObject* pub) {
     Smp::IObject* p = getChild(pub->GetName());
     if (p != nullptr) {
-        throw simph::smpdk::ExDuplicateName(_pubObj, pub->GetName());
+        throw simdeck::ExDuplicateName(_pubObj, pub->GetName());
     }
     _childs.push_back(pub);
 }
@@ -87,7 +87,7 @@ void Publication::addField(Smp::IField* field) {
     auto* f = _pubObj->GetChild(field->GetName());
     if (f != nullptr) {
         delete field;
-        throw simph::smpdk::ExDuplicateName(_pubObj, f->GetName());
+        throw simdeck::ExDuplicateName(_pubObj, f->GetName());
     }
     _pubObj->AddChild(field,(Smp::ICollectionBase*)_pubObj->GetFields());
 }
@@ -372,7 +372,7 @@ void Publication::dump(int level) {
     for (int i = 0; i < level; ++i) {
         std::cout << "    ";
     }
-    std::cout << GetName() << ": " << simph::sys::RttiUtil::getTypeName(_pubObj) << std::endl;
+    std::cout << GetName() << ": " << simphonie::sys::RttiUtil::getTypeName(_pubObj) << std::endl;
     for (auto child : _childs) {
         auto sp = dynamic_cast<Publication*>(child);
         if (sp != nullptr) {
@@ -382,7 +382,7 @@ void Publication::dump(int level) {
             for (int i = 0; i < level; ++i) {
                 std::cout << "    ";
             }
-            std::cout << "  " << child->GetName() << ": " << simph::sys::RttiUtil::getTypeName(child) << std::endl;
+            std::cout << "  " << child->GetName() << ": " << simphonie::sys::RttiUtil::getTypeName(child) << std::endl;
         }
     }
 }

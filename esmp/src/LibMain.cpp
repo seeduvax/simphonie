@@ -8,11 +8,11 @@
  * $Date$
  */
 #include "Smp/ISimulator.h"
-#include "simph/smpdk/Factory.hpp"
-#include "simph/esmp/Sampler.hpp"
-#include "simph/sys/DlDef.h"
+#include "simdeck/Factory.hpp"
+#include "simphonie/esmp/Sampler.hpp"
+#include "simphonie/sys/DlDef.h"
 
-namespace simph {
+namespace simphonie {
 namespace esmp {
 
 REGISTER_SMP_LIBINIT();

@@ -7,9 +7,9 @@
  * $Id$
  * $Date$
  */
-#include "simph/umdl/Generator1D.hpp"
+#include "simphonie/umdl/Generator1D.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace umdl {
 // --------------------------------------------------------------------
 // ..........................................................

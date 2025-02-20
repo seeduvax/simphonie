@@ -7,22 +7,22 @@
  * $Id$
  * $Date$
  */
-#include "simph/esmp/Sampler.hpp"
+#include "simphonie/esmp/Sampler.hpp"
 #include <fstream>
 #include <iostream>
 #include "Smp/ISimulator.h"
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/ISimpleField.h"
 #include "Smp/IArrayField.h"
-#include "simph/kern/TypeRegistry.hpp"
-#include "simph/sys/Callback.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/kern/TypeRegistry.hpp"
+#include "simphonie/sys/Callback.hpp"
+#include "simphonie/sys/Logger.hpp"
 #include "Smp/IPublication.h"
 
 // TODO: stop using directly kern classes, rely on SMP and smpdk only.
 // => may need to relocate some part of kern to smpdk.
 
-namespace simph {
+namespace simphonie {
 namespace esmp {
 // --------------------------------------------------------------------
 // ..........................................................

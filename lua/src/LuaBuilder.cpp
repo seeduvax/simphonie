@@ -7,10 +7,10 @@
  * $Id$
  * $Date$
  */
-#include "simph/lua/LuaBuilder.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/lua/LuaBuilder.hpp"
+#include "simphonie/sys/Logger.hpp"
 
-namespace simph {
+namespace simphonie {
 namespace lua {
 // --------------------------------------------------------------------
 // ..........................................................

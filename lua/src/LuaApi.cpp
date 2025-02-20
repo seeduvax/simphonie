@@ -10,11 +10,11 @@
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/ISimulator.h"
 #include "Smp/IModel.h"
-#include "simph/kern/Resolver.hpp"
-#include "simph/kern/Scheduler.hpp"
-#include "simph/kern/Simulator.hpp"
-#include "simph/lua/LuaBuilder.hpp"
-#include "simph/smpdk/Utils.hpp"
+#include "simphonie/kern/Resolver.hpp"
+#include "simphonie/kern/Scheduler.hpp"
+#include "simphonie/kern/Simulator.hpp"
+#include "simphonie/lua/LuaBuilder.hpp"
+#include "simdeck/Utils.hpp"
 #include "sol/sol.hpp"
 
 // exemple de meta new_index
@@ -38,7 +38,7 @@ void myNewIndex(Smp::ISimulator& th, sol::stack_object k, sol::stack_object v, s
 }
 
 /*
- getData(simph::kern::Field* field) {
+ getData(simphonie::kern::Field* field) {
      res;
     if(field == nullptr)
     {
@@ -112,7 +112,7 @@ int luaopen_libsimph_lua(lua_State* L) {
     lua.open_libraries(sol::lib::base);
     auto t = lua.create_table();
     t["Uuid"] = [](std::string c) { return Smp::Uuid(c.c_str()); };
-    t["GenerateUuid"] = [](std::string c) { return simph::smpdk::Utils::generateUuid(c.c_str()); };
+    t["GenerateUuid"] = [](std::string c) { return simdeck::Utils::generateUuid(c.c_str()); };
     auto nsSmp = t["Smp"].get_or_create<sol::table>();
 
     // clang-format off
@@ -198,10 +198,10 @@ int luaopen_libsimph_lua(lua_State* L) {
     );
 
     auto nsSimphonie = t["Simphonie"].get_or_create<sol::table>();
-    nsSimphonie.new_usertype<simph::kern::Simulator>("Simulator",
-        sol::constructors<simph::kern::Simulator()>(),
+    nsSimphonie.new_usertype<simphonie::kern::Simulator>("Simulator",
+        sol::constructors<simphonie::kern::Simulator()>(),
         sol::meta_function::construct, [](std::string name) {
-            return new simph::kern::Simulator(name.c_str());
+            return new simphonie::kern::Simulator(name.c_str());
         },
         sol::meta_function::index, [](Smp::ISimulator& th, std::string k, sol::this_state L) {
             auto o = th.GetResolver()->ResolveAbsolute(k.c_str());
@@ -219,18 +219,18 @@ int luaopen_libsimph_lua(lua_State* L) {
 // with the lua binding. Meaning it shall work on any SMP complient ISimulator
 // implementation.
         sol::meta_function::new_index, myNewIndex,
-//        "connect", &simph::kern::Simulator::connect,
-//        "schedule", &simph::kern::Simulator::schedule,
-//        "setValue", &simph::kern::Simulator::setValue,
-//        "createSmpModel", &simph::kern::Simulator::createSmpModel,
+//        "connect", &simphonie::kern::Simulator::connect,
+//        "schedule", &simphonie::kern::Simulator::schedule,
+//        "setValue", &simphonie::kern::Simulator::setValue,
+//        "createSmpModel", &simphonie::kern::Simulator::createSmpModel,
         "setConfiguration",[](Smp::ISimulator* s, sol::object o) {
-            auto b = new simph::lua::LuaBuilder(s);
+            auto b = new simphonie::lua::LuaBuilder(s);
             b->setConfiguration(o);
             return b;
         },
 // TODO: to be replaced by the capability to call entry points.
         "dump",[](Smp::ISimulator* s) {
-            dynamic_cast<simph::kern::Resolver*>(s->GetResolver())->dump();
+            dynamic_cast<simphonie::kern::Resolver*>(s->GetResolver())->dump();
         },
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite, Smp::ISimulator>()
     );
@@ -243,7 +243,7 @@ int luaopen_libsimph_lua(lua_State* L) {
     return 1;
 }
 // according to lib name resolution policy, let short lib name works.
-int luaopen_simph_lua(lua_State* L) {
+int luaopen_simphonie_lua(lua_State* L) {
     return luaopen_libsimph_lua(L);
 }
 }

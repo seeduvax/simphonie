@@ -7,15 +7,15 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/TimeKeeper.hpp"
+#include "simphonie/kern/TimeKeeper.hpp"
 #include <chrono>
 #include <iomanip>
 #include <sstream>
 #include "Smp/IPublication.h"
 #include "Smp/ISimulator.h"
 #include "abs/profiler.h"
-#include "simph/kern/ExInvalidSimulationTime.hpp"
-#include "simph/sys/Logger.hpp"
+#include "simphonie/kern/ExInvalidSimulationTime.hpp"
+#include "simphonie/sys/Logger.hpp"
 
 #define EP_NAME_UPDATE_SIM_TIME "updateSimTime"
 
@@ -25,7 +25,7 @@
 #define EV_NAME_PRE_EVENT_EXECUTE "Scheduler_PreEventExecute"
 #define DURATION_MAX INT64_MAX
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 // ..........................................................
 Smp::DateTime __GetY2KOffset() {

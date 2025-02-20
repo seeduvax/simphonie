@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include "simph/umdl/Logger1D.hpp"
+#include "simphonie/umdl/Logger1D.hpp"
 #include <sstream>
 #include "Smp/IPublication.h"
 
-namespace simph {
+namespace simphonie {
 namespace umdl {
 // --------------------------------------------------------------------
 // ..........................................................

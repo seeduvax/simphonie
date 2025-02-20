@@ -7,10 +7,10 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/ExDuplicateUuid.hpp"
+#include "simphonie/kern/ExDuplicateUuid.hpp"
 #include <sstream>
 
-namespace simph {
+namespace simphonie {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................

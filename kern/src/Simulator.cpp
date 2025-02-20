@@ -7,25 +7,25 @@
  * $Id$
  * $Date$
  */
-#include "simph/kern/Simulator.hpp"
-#include "simph/kern/EventManager.hpp"
-#include "simph/kern/ExDuplicateUuid.hpp"
-#include "simph/kern/ExFileNotFound.hpp"
-#include "simph/kern/LinkRegistry.hpp"
-#include "simph/kern/Logger.hpp"
-#include "simph/kern/Resolver.hpp"
-#include "simph/kern/Scheduler.hpp"
-#include "simph/kern/TimeKeeper.hpp"
-#include "simph/kern/TypeRegistry.hpp"
-#include "simph/smpdk/ExInvalidComponentState.hpp"
-#include "simph/sys/Synchro.hpp"
+#include "simphonie/kern/Simulator.hpp"
+#include "simphonie/kern/EventManager.hpp"
+#include "simphonie/kern/ExDuplicateUuid.hpp"
+#include "simphonie/kern/ExFileNotFound.hpp"
+#include "simphonie/kern/LinkRegistry.hpp"
+#include "simphonie/kern/Logger.hpp"
+#include "simphonie/kern/Resolver.hpp"
+#include "simphonie/kern/Scheduler.hpp"
+#include "simphonie/kern/TimeKeeper.hpp"
+#include "simphonie/kern/TypeRegistry.hpp"
+#include "simdeck/ExInvalidComponentState.hpp"
+#include "simphonie/sys/Synchro.hpp"
 
 #include "Smp/IOutputField.h"
 #include "Smp/IModel.h"
 
 
 // ..........................................................
-namespace simph {
+namespace simphonie {
 namespace kern {
 // --------------------------------------------------------------------
 // ..........................................................
@@ -187,7 +187,7 @@ void Simulator::doPublish(Smp::IComponent* comp) {
         }
     }
     else {
-        throw simph::smpdk::ExInvalidComponentState(comp,comp->GetState(),
+        throw simdeck::ExInvalidComponentState(comp,comp->GetState(),
                 Smp::ComponentStateKind::CSK_Created);
     }
 }
@@ -230,7 +230,7 @@ void Simulator::doConfigure(Smp::IComponent* comp) {
         }
     }
     else {
-        throw simph::smpdk::ExInvalidComponentState(comp,comp->GetState(),
+        throw simdeck::ExInvalidComponentState(comp,comp->GetState(),
                 Smp::ComponentStateKind::CSK_Publishing);
     }
 }
@@ -265,7 +265,7 @@ void Simulator::doConnect(Smp::IComponent* comp) {
         }
     }
     else {
-        throw simph::smpdk::ExInvalidComponentState(comp,comp->GetState(),
+        throw simdeck::ExInvalidComponentState(comp,comp->GetState(),
                 Smp::ComponentStateKind::CSK_Configured);
     }
 }
@@ -303,7 +303,7 @@ void Simulator::Hold(Smp::Bool immediate) {
             // that may also schedule events at now are executed before closing.
             _scheduler->AddSimulationTimeEvent(_epStop,1);
         }
-        if (simph::sys::Thread::GetCurrentThreadId()!=_schedulerThreadId) {
+        if (simphonie::sys::Thread::GetCurrentThreadId()!=_schedulerThreadId) {
             // Wait for stop process completion only when caller thread is
             // not the scheduler thread to not hang the scheduler itself.
             Synchronized(_mutex)
@@ -461,7 +461,7 @@ Smp::IFactory* Simulator::GetFactory(Smp::Uuid uuid) const {
 void Simulator::LoadLibrary(Smp::String8 name, Smp::LibraryLoadFlag loadFlag) {
     // TODO take care of loadFlag
     std::string libName = name;
-    simph::sys::DLib* fLib = nullptr;
+    simphonie::sys::DLib* fLib = nullptr;
     for (auto lib : _libs) {
         if (lib->getName() == libName) {
             fLib = lib;
@@ -469,7 +469,7 @@ void Simulator::LoadLibrary(Smp::String8 name, Smp::LibraryLoadFlag loadFlag) {
     }
     if (fLib == nullptr) {
         try {
-            fLib = new simph::sys::DLib(name);
+            fLib = new simphonie::sys::DLib(name);
             auto init =
                 fLib->getEntry<bool (*)(Smp::ISimulator*, Smp::Publication::ITypeRegistry * tReg)>("Initialise");
             if (init != nullptr) {
@@ -478,7 +478,7 @@ void Simulator::LoadLibrary(Smp::String8 name, Smp::LibraryLoadFlag loadFlag) {
             _libs.push_back(fLib);
         }
         catch (std::runtime_error ex) {
-            throw simph::kern::ExFileNotFound(this, name);
+            throw simphonie::kern::ExFileNotFound(this, name);
         }
     }
 }
@@ -566,7 +566,7 @@ Smp::IComponent* Simulator::createSmpModel(Smp::String8 typeName, Smp::String8 n
 
 // ..........................................................
 void Simulator::epStart() {
-    _schedulerThreadId=simph::sys::Thread::GetCurrentThreadId();
+    _schedulerThreadId=simphonie::sys::Thread::GetCurrentThreadId();
 }
 // ..........................................................
 void Simulator::epStop() {

@@ -10,17 +10,17 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "Smp/IOutputField.h"
 #include "Smp/ISimpleField.h"
-#include "simph/kern/Resolver.hpp"
-#include "simph/kern/Scheduler.hpp"
-#include "simph/kern/Simulator.hpp"
-#include "simph/smpdk/Utils.hpp"
-#include "simph/sys/Logger.hpp"
-#include "simph/umdl/SmpIncrement.hpp"
+#include "simphonie/kern/Resolver.hpp"
+#include "simphonie/kern/Scheduler.hpp"
+#include "simphonie/kern/Simulator.hpp"
+#include "simdeck/Utils.hpp"
+#include "simphonie/sys/Logger.hpp"
+#include "simphonie/umdl/SmpIncrement.hpp"
 #include "SimControlEnd.hpp"
 
 namespace test {
-using namespace simph::umdl;
-using namespace simph::kern;
+using namespace simphonie::umdl;
+using namespace simphonie::kern;
 
 // ----------------------------------------------------------
 // test fixture implementation
@@ -75,7 +75,7 @@ public:
         else {
             sim.LoadLibrary("simph_umdl");
             increment = dynamic_cast<Smp::IEntryPointPublisher*>(sim.CreateInstance(
-                simph::smpdk::Utils::generateUuid("SmpIncrement"), "increment", "description Increment", &sim));
+                simdeck::Utils::generateUuid("SmpIncrement"), "increment", "description Increment", &sim));
         }
         CPPUNIT_ASSERT(increment != nullptr);
 
