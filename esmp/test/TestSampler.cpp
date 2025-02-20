@@ -63,7 +63,7 @@ public:
 
         sim.LoadLibrary("simph_kern");
         auto sampler = dynamic_cast<simphonie::kern::Sampler*>(
-            sim.CreateInstance(simdeck::Utils::generateUuid("Sampler"), "sampler", "description sampler", &sim));
+            sim.CreateInstance(simdeck::Utils::GenerateUuid("Sampler"), "sampler", "description sampler", &sim));
 
         sim.Publish();
         sim.Configure();

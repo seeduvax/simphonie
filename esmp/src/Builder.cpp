@@ -61,7 +61,7 @@ void Builder::publish(Smp::IPublication* receiver) {
     for (auto cfg : _loadSmpModelCfgs) {
         sim->LoadLibrary(cfg.library.c_str());
         auto simk = dynamic_cast<simphonie::kern::Simulator*>(sim);
-        auto c = sim->CreateInstance(simdeck::Utils::generateUuid(cfg.type.c_str()), cfg.name.c_str(),
+        auto c = sim->CreateInstance(simdeck::Utils::GenerateUuid(cfg.type.c_str()), cfg.name.c_str(),
                                      cfg.description.c_str(), sim);
         if (c == nullptr) {
 /* TODO restore this somehow, reimplement feature totally here. Any kind of
@@ -81,7 +81,7 @@ void Builder::publish(Smp::IPublication* receiver) {
         sim->LoadLibrary("libsimph_esmp.so");
         auto simk = dynamic_cast<simphonie::kern::Simulator*>(sim);
         auto sampler = dynamic_cast<simphonie::esmp::Sampler*>(simk->CreateInstance(
-            simdeck::Utils::generateUuid("Sampler"), cfg.name.c_str(), cfg.description.c_str(), sim));
+            simdeck::Utils::GenerateUuid("Sampler"), cfg.name.c_str(), cfg.description.c_str(), sim));
         _samplers.push_back(sampler);
     }
 }

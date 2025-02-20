@@ -112,7 +112,7 @@ int luaopen_libsimph_lua(lua_State* L) {
     lua.open_libraries(sol::lib::base);
     auto t = lua.create_table();
     t["Uuid"] = [](std::string c) { return Smp::Uuid(c.c_str()); };
-    t["GenerateUuid"] = [](std::string c) { return simdeck::Utils::generateUuid(c.c_str()); };
+    t["GenerateUuid"] = [](std::string c) { return simdeck::Utils::GenerateUuid(c.c_str()); };
     auto nsSmp = t["Smp"].get_or_create<sol::table>();
 
     // clang-format off

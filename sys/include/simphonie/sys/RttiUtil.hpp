@@ -35,7 +35,7 @@ public:
     }
     static inline std::string demangle(std::string name) {
         int status = -1;
-        char* dn = abi::__cxa_demangle(name.c_str(), NULL, NULL, &status);
+        char* dn = abi::__cxa_demangle(name.c_str(), nullptr, nullptr, &status);
         if (status == 0) {
             name = dn;
             std::free(dn);

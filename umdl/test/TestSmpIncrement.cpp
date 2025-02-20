@@ -75,7 +75,7 @@ public:
         else {
             sim.LoadLibrary("simph_umdl");
             increment = dynamic_cast<Smp::IEntryPointPublisher*>(sim.CreateInstance(
-                simdeck::Utils::generateUuid("SmpIncrement"), "increment", "description Increment", &sim));
+                simdeck::Utils::GenerateUuid("SmpIncrement"), "increment", "description Increment", &sim));
         }
         CPPUNIT_ASSERT(increment != nullptr);
 

@@ -40,7 +40,7 @@ public:
     void testSimTime() {
         simphonie::kern::Simulator sim;
         sim.LoadLibrary("simph_umdl");
-        auto mdl = sim.CreateInstance(simdeck::Utils::generateUuid("SimTimeProvider"), "clock", "", nullptr);
+        auto mdl = sim.CreateInstance(simdeck::Utils::GenerateUuid("SimTimeProvider"), "clock", "", nullptr);
         CPPUNIT_ASSERT(mdl != nullptr);
         auto log = new Logger1D("log","",&sim);
         sim.AddModel(log);
