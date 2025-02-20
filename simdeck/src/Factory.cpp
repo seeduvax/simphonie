@@ -10,3 +10,4 @@
 /*
  * No implementation smpdk/simph/Factory.hpp contains templates only.
  */
+#include <simdeck/Factory.hpp>

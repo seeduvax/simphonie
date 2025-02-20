@@ -15,8 +15,6 @@
 #include "Smp/IFactory.h"
 #include "simdeck/Object.hpp"
 #include "simdeck/Utils.hpp"
-#include "simph/sys/DlDef.h"
-#include "simph/sys/RttiUtil.hpp"
 
 namespace simdeck {
 /**
@@ -26,10 +24,10 @@ template <typename T>
 class Factory : public Object, virtual public Smp::IFactory {
 public:
     Factory(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, Smp::Uuid uuid)
-        : Object(name, descr, parent), _uuid(uuid), _type(simph::sys::RttiUtil::demangle(typeid(T).name())) {}
+        : Object(name, descr, parent), _uuid(uuid), _type(Utils::Demangle(typeid(T).name())) {}
 
     Factory(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-        : Factory(name, descr, parent, smpdk::Utils::generateUuid(name)) {}
+        : Factory(name, descr, parent, Utils::GenerateUuid(name)) {}
 
     virtual ~Factory() {}
 

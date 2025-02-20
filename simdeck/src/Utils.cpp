@@ -35,7 +35,7 @@ std::string Utils::Hex(uint8_t* pBuf, size_t bufSize) {
     return ret;
 }
 // ..........................................................
-Smp::Uuid Utils::generateUuid(std::string fullName) {
+Smp::Uuid Utils::GenerateUuid(const std::string& fullName) {
     uint8_t md5[UTILS_MD5_DIGEST_LENGTH];
     Utils::CalcMD5(fullName.c_str(), fullName.size(), md5);
     return Smp::Uuid(Utils::Hex(md5, UTILS_MD5_DIGEST_LENGTH).c_str());
