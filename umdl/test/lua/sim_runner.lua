@@ -1,9 +1,9 @@
-s=require 'libsimph_lua'
+s=require 'libsimphonie_lua'
 
 sim = s.Simphonie.Simulator.new("luaSim")
 
 -- With Andre's help
-sim:LoadLibrary("libsimph_umdl.so")
+sim:LoadLibrary("libsimphonie_umdl.so")
 sim:createSmpModel("SmpIncrement","mySmpIncrementMdl","description")
 
 sim:Publish()

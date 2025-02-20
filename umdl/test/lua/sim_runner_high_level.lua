@@ -1,10 +1,10 @@
-s = require 'libsimph_lua'
+s = require 'libsimphonie_lua'
 
 sim = s.Simphonie.Simulator.new("luaSim")
 
 sim:setConfiguration {
         models = { 
-                { library = "libsimph_umdl.so", class = "SmpIncrement", name = "mySmpIncrementMdl", description="description" }
+                { library = "libsimphonie_umdl.so", class = "SmpIncrement", name = "mySmpIncrementMdl", description="description" }
         },
         params= {},
         connections = {

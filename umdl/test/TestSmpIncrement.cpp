@@ -73,7 +73,7 @@ public:
             increment = instance;
         }
         else {
-            sim.LoadLibrary("simph_umdl");
+            sim.LoadLibrary("simphonie_umdl");
             increment = dynamic_cast<Smp::IEntryPointPublisher*>(sim.CreateInstance(
                 simdeck::Utils::GenerateUuid("SmpIncrement"), "increment", "description Increment", &sim));
         }
