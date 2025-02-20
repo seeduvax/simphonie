@@ -30,7 +30,7 @@ class TestResolver : public CppUnit::TestFixture {
 
 private:
 class Model: public simph::smpdk::Component,
-            public virtual simph::smpdk::Composite,
+            public virtual simph::smpdk::AComposite,
             public virtual Smp::IModel {
 public:
     Model(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent):

@@ -90,7 +90,7 @@ std::ostream& operator<<(std::ostream& os, const Smp::Uuid& uuid) {
        << "-" << std::setw(2) 
               << (int)uuid.Data3[0] << (int)uuid.Data3[1] << (int)uuid.Data3[2]
               << (int)uuid.Data3[3] << (int)uuid.Data3[4] << (int)uuid.Data3[5]
-              << std::dec ;
+              << std::nouppercase << std::dec ;
     return os;
 }
 }  // namespace Smp
