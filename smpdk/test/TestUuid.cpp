@@ -31,10 +31,11 @@ public:
     ABS_TEST_CASE_BEGIN(Serialisation)
         ABS_TEST_DESCR(Check deserialization and serialization of Uuid preserve value)
         std::string refUuidStr="01234567-abcd-1234-fedc-ba9876543210";
+        std::string expectedUuidStr="01234567-ABCD-1234-FEDC-BA9876543210";
         Smp::Uuid uuid(refUuidStr.c_str());
         std::ostringstream ss;
         ss << uuid;
-        CPPUNIT_ASSERT_EQUAL(refUuidStr,ss.str());
+        CPPUNIT_ASSERT_EQUAL(expectedUuidStr,ss.str());
 
         Smp::Uuid tmp;
         tmp.Data1 = 0x01234567;

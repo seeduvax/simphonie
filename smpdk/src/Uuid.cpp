@@ -83,7 +83,7 @@ bool Uuid::operator<(const Smp::Uuid& other) const {
 }
 // ..........................................................
 std::ostream& operator<<(std::ostream& os, const Smp::Uuid& uuid) {
-    os << std::hex << std::setfill('0') << std::setw(8) << uuid.Data1 
+    os << std::hex << std::uppercase << std::setfill('0') << std::setw(8) << uuid.Data1 
        << "-" << std::setw(4) << uuid.Data2[0] 
        << "-" << uuid.Data2[1] 
        << "-" << uuid.Data2[2] 
