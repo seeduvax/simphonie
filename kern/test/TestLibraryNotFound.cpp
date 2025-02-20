@@ -32,7 +32,7 @@ public:
 
     void testLoadableLibrary() {
         std::vector<std::string> lib;
-        lib.push_back("simph_sys");
+        lib.push_back("simphonie_sys");
         lib.push_back("simdeck");
         CPPUNIT_ASSERT(testLoadLibraries(lib) == true);
     }
