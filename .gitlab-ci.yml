@@ -117,7 +117,7 @@ deploy_suse12:
     tags:
         - suse_12
     variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS CC=`pwd`/gcc-4.9.4/bin/gcc CPPC=`pwd`/gcc-4.9.4/bin/g++"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS CC=../gcc-4.9.4/bin/gcc CPPC=../gcc-4.9.4/bin/g++"
     before_script:
         # need a more recent version of gcc
         - wget --no-check-certificate $ABS_REPO/SUSE_12_x86_64/gcc-4.9.4.SUSE_12_x86_64.tar.gz
@@ -131,7 +131,7 @@ deploy_debian9:
 deploy_redhawk7_clang13:
     extends: .deploy_base
     tags:
-        - redhawk7
+        - redhawk_7
     variables:
         TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS BUILDCHAIN=clang-13"
 
