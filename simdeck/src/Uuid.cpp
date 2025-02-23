@@ -45,10 +45,10 @@ Uuid::Uuid(const char* value) {
         throw simdeck::Exception(nullptr,  msg.c_str());
     }
 
-    Data1 = be32toh(Data1);
-    Data2[0] = be16toh(Data2[0]);
-    Data2[1] = be16toh(Data2[1]);
-    Data2[2] = be16toh(Data2[2]);
+    Data1 = ntoh32(Data1);
+    Data2[0] = ntoh16(Data2[0]);
+    Data2[1] = ntoh16(Data2[1]);
+    Data2[2] = ntoh16(Data2[2]);
 }
 // ..........................................................
 bool Uuid::operator==(const Smp::Uuid& other) const {
