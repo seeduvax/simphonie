@@ -58,9 +58,9 @@ public:
         for (uint32_t idx = 0; idx < uuid.Data3.size(); idx++) {
             uuid.Data3[idx] = idx + 5;
         }
-        ss = std::ostringstream();
-        ss << uuid;
-        CPPUNIT_ASSERT_EQUAL(std::string("0000002A-0005-0006-0007-05060708090A"), ss.str());
+        std::ostringstream ss2;
+        ss2 << uuid;
+        CPPUNIT_ASSERT_EQUAL(std::string("0000002A-0005-0006-0007-05060708090A"), ss2.str());
     ABS_TEST_CASE_END
     
     ABS_TEST_CASE_BEGIN(CompareUuid)
