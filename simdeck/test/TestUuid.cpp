@@ -50,6 +50,38 @@ public:
         tmp.Data3[5] = 0x10;
         CPPUNIT_ASSERT_EQUAL(tmp, uuid);
         CPPUNIT_ASSERT(uuid != Smp::Uuid());
+
+        uuid.Data1 = 42;
+        for (uint32_t idx = 0; idx < uuid.Data2.size(); idx++) {
+            uuid.Data2[idx] = idx + 5;
+        }
+        for (uint32_t idx = 0; idx < uuid.Data3.size(); idx++) {
+            uuid.Data3[idx] = idx + 5;
+        }
+        ss = std::ostringstream();
+        ss << uuid;
+        CPPUNIT_ASSERT_EQUAL(std::string("0000002A-0005-0006-0007-05060708090A"), ss.str());
+    ABS_TEST_CASE_END
+    
+    ABS_TEST_CASE_BEGIN(CompareUuid)
+        Smp::Uuid uuid1;
+        Smp::Uuid uuid2;
+        CPPUNIT_ASSERT(!(uuid1 < uuid2));
+
+        uuid1.Data1 = 42;
+        uuid2.Data1 = 49;
+        CPPUNIT_ASSERT(uuid1 < uuid2);
+        uuid2.Data1 = 42;
+        CPPUNIT_ASSERT(!(uuid1 < uuid2));
+        
+        uuid2.Data2[1] = 55;
+        CPPUNIT_ASSERT(uuid1 < uuid2);
+        
+        uuid2.Data2[2] = 45;
+        CPPUNIT_ASSERT(uuid1 < uuid2);
+        
+        uuid1.Data2[0] = 20;
+        CPPUNIT_ASSERT(uuid2 < uuid1);
     ABS_TEST_CASE_END
     
     ABS_TEST_CASE_BEGIN(UuidErrorParsing)

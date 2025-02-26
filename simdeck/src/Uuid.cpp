@@ -45,6 +45,7 @@ Uuid::Uuid(const char* value) {
         throw simdeck::Exception(nullptr,  msg.c_str());
     }
 
+    // ntoh32 : network to host, equivalent to be32toh
     Data1 = ntoh32(Data1);
     Data2[0] = ntoh16(Data2[0]);
     Data2[1] = ntoh16(Data2[1]);
@@ -60,37 +61,21 @@ bool Uuid::operator!=(const Smp::Uuid& other) const {
 }
 // ..........................................................
 bool Uuid::operator<(const Smp::Uuid& other) const {
-    return Data1 < other.Data1
-           || (Data1 == other.Data1
-               && (Data2[0] < other.Data2[0]
-                   || (Data2[0] == other.Data2[0]
-                       && (Data2[1] < other.Data2[1]
-                           || (Data2[1] == other.Data2[1]
-                               && (Data2[2] < other.Data2[2]
-                                   || (Data2[2] == other.Data2[2]
-                                       && (Data3[0] < other.Data3[0]
-                                           || (Data3[0] == other.Data3[0]
-                                               && (Data3[1] < other.Data3[1]
-                                                   || (Data3[1] == other.Data3[1]
-                                                       && (Data3[2] < other.Data3[3]
-                                                           || (Data3[2] == other.Data3[2]
-                                                               && (Data3[3] < other.Data3[3]
-                                                                   || (Data3[3] == other.Data3[3]
-                                                                       && (Data3[4] < other.Data3[4]
-                                                                           || (Data3[4] == other.Data3[4]
-                                                                               && (Data3[5]
-                                                                                   < other.Data3[5]))))))))))))))))));
+    return Data1 < other.Data1 || Data2 < other.Data2 || Data3 < other.Data3;
 }
 // ..........................................................
 std::ostream& operator<<(std::ostream& os, const Smp::Uuid& uuid) {
     os << std::hex << std::uppercase << std::setfill('0') << std::setw(8) << uuid.Data1 
        << "-" << std::setw(4) << uuid.Data2[0] 
-       << "-" << uuid.Data2[1] 
-       << "-" << uuid.Data2[2] 
-       << "-" << std::setw(2) 
-              << (int)uuid.Data3[0] << (int)uuid.Data3[1] << (int)uuid.Data3[2]
-              << (int)uuid.Data3[3] << (int)uuid.Data3[4] << (int)uuid.Data3[5]
-               << std::nouppercase << std::dec;
+       << "-" << std::setw(4) << uuid.Data2[1] 
+       << "-" << std::setw(4) << uuid.Data2[2] 
+       << "-" << std::setw(2) << uint16_t(uuid.Data3[0])
+              << std::setw(2) << uint16_t(uuid.Data3[1])
+              << std::setw(2) << uint16_t(uuid.Data3[2])
+              << std::setw(2) << uint16_t(uuid.Data3[3]) 
+              << std::setw(2) << uint16_t(uuid.Data3[4]) 
+              << std::setw(2) << uint16_t(uuid.Data3[5])
+              << std::nouppercase << std::dec;
     return os;
 }
 }  // namespace Smp
