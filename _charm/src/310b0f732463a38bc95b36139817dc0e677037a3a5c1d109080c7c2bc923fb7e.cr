@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="e56ba90338b15805e882937880d547edc3eb47a740ce7b600002b1010d87dfd3" state="working">
-<title>Release simph 1.0</title>
+<cr id="310b0f732463a38bc95b36139817dc0e677037a3a5c1d109080c7c2bc923fb7e" state="working">
+<title>Release simphonie 1.0</title>
 <reporter>sdevaux</reporter>
 <creation>2024-12-21 16:29:49+01:00</creation>
 <description></description>
@@ -18,5 +18,5 @@
 <link name="child">c19610976effdbebf71c202fb721af73ae179d30d89b934a540bf212af98cb36</link>
 <link name="child">8459504131ab2ceeea1b600af626bc6e8a4df6002cbda904c2c522b383799459</link>
 </links>
-<cf v="m096258 2025-02-20T08:28:33+00:00"/>
+<cf v="sdevaux 2025-02-27T18:34:15+01:00"/>
 </cr>
