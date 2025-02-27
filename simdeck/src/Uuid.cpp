@@ -61,7 +61,7 @@ bool Uuid::operator!=(const Smp::Uuid& other) const {
 }
 // ..........................................................
 bool Uuid::operator<(const Smp::Uuid& other) const {
-    return Data1 < other.Data1 || Data2 < other.Data2 || Data3 < other.Data3;
+    return Data1 < other.Data1 || (Data1 == other.Data1 && (Data2 < other.Data2 || (Data2 == other.Data2 && Data3 < other.Data3)));
 }
 // ..........................................................
 std::ostream& operator<<(std::ostream& os, const Smp::Uuid& uuid) {

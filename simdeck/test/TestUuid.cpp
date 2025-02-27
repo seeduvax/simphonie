@@ -11,6 +11,7 @@
 #include "Smp/Uuid.h"
 #include "Smp/Exception.h"
 #include <sstream>
+#include <algorithm>
 
 namespace test {
 // ----------------------------------------------------------
@@ -64,24 +65,25 @@ public:
     ABS_TEST_CASE_END
     
     ABS_TEST_CASE_BEGIN(CompareUuid)
-        Smp::Uuid uuid1;
-        Smp::Uuid uuid2;
-        CPPUNIT_ASSERT(!(uuid1 < uuid2));
+        Smp::Uuid uuid1("0000002A-0005-0006-0007-05060708090A");
+        Smp::Uuid uuid2("0000002A-0005-0002-0007-05060708090A");
+        Smp::Uuid uuid3("0000002A-0005-0006-0002-05060708090A");
+        Smp::Uuid uuid4("0000001A-0005-0006-0007-05060708090A");
+        Smp::Uuid uuid5("0000002A-0005-0006-0007-05020708090A");
 
-        uuid1.Data1 = 42;
-        uuid2.Data1 = 49;
-        CPPUNIT_ASSERT(uuid1 < uuid2);
-        uuid2.Data1 = 42;
-        CPPUNIT_ASSERT(!(uuid1 < uuid2));
-        
-        uuid2.Data2[1] = 55;
-        CPPUNIT_ASSERT(uuid1 < uuid2);
-        
-        uuid2.Data2[2] = 45;
-        CPPUNIT_ASSERT(uuid1 < uuid2);
-        
-        uuid1.Data2[0] = 20;
-        CPPUNIT_ASSERT(uuid2 < uuid1);
+        CPPUNIT_ASSERT(uuid4 < uuid2);
+
+        std::vector<Smp::Uuid> uuids = { uuid1, uuid2, uuid3, uuid4, uuid5 };
+        std::sort(uuids.begin(), uuids.end());
+        std::cout << "Sorted : " << std::endl;
+        for (auto& uuid : uuids) {
+            std::cout << uuid << std::endl;
+        }
+        CPPUNIT_ASSERT(uuid4 == uuids[0]);
+        CPPUNIT_ASSERT(uuid2 == uuids[1]);
+        CPPUNIT_ASSERT(uuid3 == uuids[2]);
+        CPPUNIT_ASSERT(uuid5 == uuids[3]);
+        CPPUNIT_ASSERT(uuid1 == uuids[4]);
     ABS_TEST_CASE_END
     
     ABS_TEST_CASE_BEGIN(UuidErrorParsing)
