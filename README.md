@@ -64,6 +64,10 @@ from the primary repository:
 makedir -p ~/.abs/cache/<your_arch_name>/
 wget http://www.eduvax.net/dist/Debian_12_x86_64/ecss.smp-20240920.Debian_12_x86_64.tar.gz -o ~/.abs/cache/<your_arch_name>/ecss.smp-20240920.<your_arch_name>.tar.gz
 ```
+
+To know the architecture name required for your specific host, just try to build
+and look at the dependency fetching error that should provide you the full name
+of the missing package and let you see obiously the expected architecture name.
  
 
 ## project tools:
