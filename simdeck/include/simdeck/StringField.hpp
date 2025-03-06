@@ -50,8 +50,8 @@ public:
     void Freeze() override;
 
 private:
-    std::string* _str;
-    std::string forceValue="";
+    std::string* _value;
+    std::string _forcedValue="";
     Smp::Bool _forced=false;
 };
 

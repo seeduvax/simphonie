@@ -31,10 +31,42 @@ StringField::~StringField() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
+Smp::PrimitiveTypeKind StringField::GetPrimitiveTypeKind() const {
+    return Smp::PrimitiveTypeKind::PTK_String8;
+}
+// ..........................................................
 Smp::AnySimple StringField::GetValue() const {
     Smp::AnySimple v;
-    v.SetValue(Smp::PrimitiveTypeKind::PTK_String8,_str->c_str());
+    v.SetValue(Smp::PrimitiveTypeKind::PTK_String8,
+            _forced?_forcedValue.c_str():_value->c_str());
     return v;
 } 
+// ..........................................................
+void StringField::SetValue(Smp::AnySimple value) {
+    if (value.GetType()==Smp::PrimitiveTypeKind::PTK_String8) {
+        *_value=(Smp::String8)value;
+    }
+}
+// --------------------------------------------------------------------
+// ..........................................................
+void StringField::Force(Smp::AnySimple value) {
+    if (value.GetType()==Smp::PrimitiveTypeKind::PTK_String8) {
+        _forcedValue=(Smp::String8)value;
+        _forced=true;
+    }
+}
+// ..........................................................
+void StringField::Unforce() {
+    _forced=false;
+}
+// ..........................................................
+Smp::Bool StringField::IsForced() {
+    return _forced;
+}
+// ..........................................................
+void StringField::Freeze() {
+    _forcedValue=*_value;
+    _forced=true;
+}
 
 } // namespace simdeck
