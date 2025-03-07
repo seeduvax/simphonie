@@ -73,6 +73,11 @@ sanitize_debian11:
             - execution.log
 
 
+test_mingw:
+    extends: .test_base
+    tags:
+        - debian_12_mingw
+        
 test_debian11:
     extends: .test_base
     tags:
