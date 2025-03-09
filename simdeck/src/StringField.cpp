@@ -8,6 +8,8 @@
  * $Date$
  */
 #include "simdeck/StringField.hpp"
+#include "simdeck/Collection.hpp"
+#include "Smp/IOutputField.h"
 
 namespace simdeck {
 static Smp::Uuid _uuidString  = { 0, 0, 0, { ' ',' ','S','t','r','i','n','g'} };
@@ -68,5 +70,42 @@ void StringField::Freeze() {
     _forcedValue=*_value;
     _forced=true;
 }
+// --------------------------------------------------------------------
+// ..........................................................
+class StringOutputField: public StringField, virtual public Smp::IOutputField {
+public:
+    virtual ~StringOutputField() {
+    }
+    void Connect(Smp::IField* target) override {
+        auto sf=dynamic_cast<Smp::ISimpleField*>(target);
+        if (sf!=nullptr && !_targets.contain(sf)) {
+            _targets.push_back(sf);
+        }
+    }
+    void Disconnect(Smp::IField* target) {
+        auto sf=dynamic_cast<Smp::ISimpleField*>(target);
+        if (sf!=nullptr) {
+            _targets.remove(sf);
+        }
+    }
+    void Push() override {
+        auto value=this->GetValue();
+        for (auto target: _targets) {
+            target->SetValue(value);
+        }
+    }
+    const Smp::FieldCollection* GetInputFields() const override {
+        return dynamic_cast<const Smp::FieldCollection*>(&_targets);
+    }
+    Smp::Bool IsAutomatic() const override {
+        return false;
+    }
+private:
+    Collection<Smp::ISimpleField> _targets;
+};
+// --------------------------------------------------------------------
+// ..........................................................
+
+
 
 } // namespace simdeck
