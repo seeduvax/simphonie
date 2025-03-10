@@ -83,6 +83,16 @@ test_debian11:
     tags:
         - debian_11
         
+test_debian12:
+    extends: .test_base
+    tags:
+        - debian_12
+        
+test_debian12_arm64:
+    extends: .test_base
+    tags:
+        - debian_12_arm64
+
 test_debian9:
     extends: .test_base
     tags:
@@ -116,6 +126,16 @@ deploy_debian11:
     extends: .deploy_base
     tags:
         - debian_11
+
+deploy_debian12:
+    extends: .deploy_base
+    tags:
+        - debian_12
+
+deploy_debian12_arm64:
+    extends: .deploy_base
+    tags:
+        - debian_12_arm64
 
 deploy_suse12:
     extends: .deploy_base
