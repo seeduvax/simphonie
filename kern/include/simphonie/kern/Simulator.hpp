@@ -65,7 +65,7 @@ public:
     Smp::IComponent* CreateInstance(Smp::Uuid uuid, Smp::String8 name, Smp::String8 description,
                                     Smp::IComposite* parent) override;
     Smp::IFactory* GetFactory(Smp::Uuid uuid) const override;
-    Smp::FactoryCollection* GetFactories() const override;
+    const Smp::FactoryCollection* GetFactories() const override;
     Smp::Publication::ITypeRegistry* GetTypeRegistry() const override;
     void LoadLibrary(
             Smp::String8 libraryPath,

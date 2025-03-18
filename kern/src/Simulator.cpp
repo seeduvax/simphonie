@@ -483,10 +483,8 @@ void Simulator::LoadLibrary(Smp::String8 name, Smp::LibraryLoadFlag loadFlag) {
     }
 }
 // ..........................................................
-Smp::FactoryCollection* Simulator::GetFactories() const {
-    // TODO
-    LOGE("Simulator::Fectories not implemented yet!")
-    return nullptr;
+const Smp::FactoryCollection* Simulator::GetFactories() const {
+    return &_compFactories;
 }
 // ..........................................................
 Smp::Publication::ITypeRegistry* Simulator::GetTypeRegistry() const {

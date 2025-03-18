@@ -17,9 +17,34 @@
 #include "simdeck/Utils.hpp"
 #include "sol/sol.hpp"
 
+#define TRACE(expr) std::cout << __FILE__ << ":" << __LINE__ << ": " << #expr " = " << expr << std::endl
+
+// TODO: do I do something wrong with sol? Why shall resolve polymorphism myself
+// like that? Is it becaus sol2 can't guess the right order for resolving the
+// inheritance graph (specifically in case of multiple inheritance)?
+sol::object solCastObject(Smp::IObject* obj, sol::this_state L) {
+    auto ep=dynamic_cast<Smp::IEntryPoint*>(obj);
+    if (ep!=nullptr) {
+        return sol::object(L, sol::in_place, ep);
+    }
+    auto resolver=dynamic_cast<Smp::Services::IResolver*>(obj);
+    if (resolver!=nullptr) {
+        return sol::object(L, sol::in_place, resolver);
+    }
+    auto simulator=dynamic_cast<Smp::ISimulator*>(obj);
+    if (simulator!=nullptr) {
+        return sol::object(L, sol::in_place, simulator);
+    }
+    auto comp=dynamic_cast<Smp::IComponent*>(obj);
+    if (comp!=nullptr) {
+        return sol::object(L, sol::in_place, comp);
+    }
+    // default ,return object as generic SMP::IObject
+    return sol::object(L, sol::in_place, obj);
+}
 // exemple de meta new_index
 // On ne fait rien, on se content de regarder ce qu'on reçoit en paramètre.
-void myNewIndex(Smp::ISimulator& th, sol::stack_object k, sol::stack_object v, sol::this_state L) {
+void simulatorNewIndex(Smp::ISimulator& th, sol::stack_object k, sol::stack_object v, sol::this_state L) {
     std::cout << "Debug myNewIndex: " << th.GetName() << std::endl;
     auto kIsString = k.as<sol::optional<std::string> >();
     if (kIsString) {
@@ -35,6 +60,72 @@ void myNewIndex(Smp::ISimulator& th, sol::stack_object k, sol::stack_object v, s
             }
         }
     }
+}
+
+sol::object objectIndex(Smp::IObject* obj, Smp::String8 name, sol::this_state L) {
+    return solCastObject(obj->GetChild(name),L);
+}
+
+// TODO not applicable to simulator itself since not a component, reattach to object
+// and do the dynamic cast stuff to address the specific simulator case.
+Smp::Bool simulatorCreateComponent(Smp::ISimulator* sim, Smp::String8 typeName, Smp::String8 name, Smp::String8 description) {
+    for (auto fac: *(sim->GetFactories())) {
+TRACE(fac->GetTypeName());
+        if (strcmp(typeName,fac->GetTypeName())==0) {
+            auto comp=fac->CreateInstance(name,description,sim);
+            if (comp!=nullptr) {
+                auto service=dynamic_cast<Smp::IService*>(comp);
+                if (service!=nullptr) {
+                    sim->AddService(service);
+                    return true;
+                }
+                auto model=dynamic_cast<Smp::IModel*>(comp);
+                if (model!=nullptr) {
+                    sim->AddModel(model);
+                    return true;
+                }
+                // from here built component is neither a service or a model
+                // then it can't be added to the simulator a shall be dropped
+                sim->GetLogger()->Log(comp,
+                        "Component is neither a service or a model. "
+                        "Can't add it to the simulator",
+                        Smp::Services::ILogger::LMK_Error);
+                delete comp;
+                return false;
+            }
+        }
+    }
+    std::string msg="No factory found to build instances of component type ";
+    msg+=typeName;
+    sim->GetLogger()->Log(sim, msg.c_str(), Smp::Services::ILogger::LMK_Error);
+    return false;
+}
+
+Smp::Bool componentCreateChild(Smp::IComponent* th, Smp::String8 typeName, Smp::String8 container, Smp::String8 name, Smp::String8 description) {
+    auto composite=dynamic_cast<Smp::IComposite*>(th);
+    if (composite==nullptr) {
+        return false;
+    }
+    Smp::IObject* node=th;
+    Smp::ISimulator* sim=nullptr;
+    while (node!=nullptr && sim==nullptr) {
+        auto sim=dynamic_cast<Smp::ISimulator*>(node);
+        node=node->GetParent();
+    }
+    if (sim!=nullptr) {
+        auto cnt=composite->GetContainer(container);
+        if (cnt!=nullptr) {
+            for (auto fac: *(sim->GetFactories())) {
+                if (strcmp(typeName,fac->GetTypeName())==0) {
+                    auto comp=fac->CreateInstance(name,description,composite);
+                    if (comp!=nullptr) {
+                        return th->AddChild(comp,(Smp::ICollectionBase*)cnt->GetComponents());
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
 
 /*
@@ -104,6 +195,7 @@ void myNewIndex(Smp::ISimulator& th, sol::stack_object k, sol::stack_object v, s
 };
 */
 
+
 // --------------------------------------------------------------------
 // ..........................................................
 extern "C" {
@@ -117,16 +209,23 @@ int luaopen_libsimph_lua(lua_State* L) {
 
     // clang-format off
     nsSmp.new_usertype<Smp::IObject>( "IObject",
-        "name", sol::property(&Smp::IObject::GetName),
-        "description", sol::property(&Smp::IObject::GetDescription),
-        "parent", sol::property(&Smp::IObject::GetParent),
-        "type", sol::property([](Smp::IObject* o) { return typeid(*o).name(); }),  // TODO add some demangling here
-        sol::meta_function::index, [](Smp::IObject* obj, Smp::String8 name) {
-            return obj->GetChild(name);
-        }
+        "Name", sol::property(&Smp::IObject::GetName),
+        "Description", sol::property(&Smp::IObject::GetDescription),
+        "Parent", sol::property([](Smp::IObject* o,sol::this_state L) { 
+                return solCastObject(o->GetParent(),L);
+        }),
+        "Type", sol::property([](Smp::IObject* o) { return typeid(*o).name(); }),  // TODO add some demangling here
+        sol::meta_function::index, &objectIndex 
+    );
+    nsSmp.new_usertype<Smp::IEntryPoint>("IEntryPoint", 
+        "Execute", [](Smp::IEntryPoint* th) {
+            th->Execute();
+        },
+        sol::base_classes, sol::bases<Smp::IObject>()
     );
     nsSmp.new_usertype<Smp::IComponent>("IComponent", 
-        "GetState", &Smp::IComponent::GetState,
+        sol::meta_function::index, &objectIndex,
+        "State", sol::property(&Smp::IComponent::GetState),
         "GetField", &Smp::IComponent::GetField,
         "GetFields", &Smp::IComponent::GetFields,
         "GetEntryPoint", [](Smp::IComponent* m, Smp::String8 n) {
@@ -144,25 +243,32 @@ int luaopen_libsimph_lua(lua_State* L) {
             }
             return epCollection;
         },
-        sol::base_classes, sol::bases<Smp::IObject>()
-    );
-    nsSmp.new_usertype<Smp::IService>("IService",
-        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
-    );
-    nsSmp.new_usertype<Smp::IModel>("IModel",
-        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
-    );
-    nsSmp.new_usertype<Smp::IComposite>("IComposite",
-        "GetContainer", &Smp::IComposite::GetContainer,
+        "GetContainer", [](Smp::IComponent* m, Smp::String8 n) {
+            Smp::IContainer* cont = nullptr;
+            auto c=dynamic_cast<Smp::IComposite*>(m);
+            if (c != nullptr) {
+                cont = c->GetContainer(n);
+            }
+            return cont;
+        },
+        "GetContainers", [](Smp::IComponent* m) {
+            const Smp::ContainerCollection* cl = nullptr;
+            auto c=dynamic_cast<Smp::IComposite*>(m);
+            if (c != nullptr) {
+                cl = c->GetContainers();
+            }
+            return cl;
+        },
+        "CreateChild", &componentCreateChild, 
         sol::base_classes, sol::bases<Smp::IObject>()
     );
     nsSmp.new_usertype<Smp::Services::IScheduler>("IScheduler",
-        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService>()
-    );
-    nsSmp.new_usertype<Smp::Services::IResolver>("IResolver",
+        sol::meta_function::index, &objectIndex,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService>()
     );
     nsSmp.new_usertype<Smp::ISimulator>("ISimulator",
+        sol::meta_function::index, &objectIndex,
+        "State", sol::property(&Smp::ISimulator::GetState),
         "Publish", &Smp::ISimulator::Publish,
         "Configure", &Smp::ISimulator::Configure,
         "Connect", &Smp::ISimulator::Connect,
@@ -178,20 +284,24 @@ int luaopen_libsimph_lua(lua_State* L) {
         "AddService", &Smp::ISimulator::AddService,
         "GetScheduler", &Smp::ISimulator::GetScheduler,
         "GetResolver", &Smp::ISimulator::GetResolver,
+        "CreateComponent", &simulatorCreateComponent,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite>()
     );
     nsSmp.new_usertype<Smp::Services::ITimeKeeper>("ITimeKeeper",
+        sol::meta_function::index, &objectIndex,
         "GetSimulationTime", &Smp::Services::ITimeKeeper::GetSimulationTime,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
     );
     // IScheduler binding
     nsSmp.new_usertype<Smp::Services::IScheduler>("IScheduler",
+        sol::meta_function::index, &objectIndex,
         "AddImmediateEvent", &Smp::Services::IScheduler::AddImmediateEvent,
         "AddSimulationTimeEvent", &Smp::Services::IScheduler::AddSimulationTimeEvent,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService>()
     );
     // IResolver binding
     nsSmp.new_usertype<Smp::Services::IResolver>("IResolver",
+        sol::meta_function::index, &objectIndex,
         "ResolveAbsolute", &Smp::Services::IResolver::ResolveAbsolute,
         "ResolveRelative", &Smp::Services::IResolver::ResolveRelative,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService>()
@@ -203,7 +313,10 @@ int luaopen_libsimph_lua(lua_State* L) {
         sol::meta_function::construct, [](std::string name) {
             return new simphonie::kern::Simulator(name.c_str());
         },
+        sol::meta_function::index, &objectIndex,
+/*
         sol::meta_function::index, [](Smp::ISimulator& th, std::string k, sol::this_state L) {
+TRACE(th.GetName());
             auto o = th.GetResolver()->ResolveAbsolute(k.c_str());
             // from most concrete to most abstract:
             if (false) {}
@@ -215,10 +328,11 @@ int luaopen_libsimph_lua(lua_State* L) {
             }
             return sol::object(L, sol::in_place, o);
         },
+*/
 // TODO bind those services to addition SMP service or helpers that are provided 
 // with the lua binding. Meaning it shall work on any SMP complient ISimulator
 // implementation.
-        sol::meta_function::new_index, myNewIndex,
+        sol::meta_function::new_index, simulatorNewIndex,
 //        "connect", &simphonie::kern::Simulator::connect,
 //        "schedule", &simphonie::kern::Simulator::schedule,
 //        "setValue", &simphonie::kern::Simulator::setValue,
