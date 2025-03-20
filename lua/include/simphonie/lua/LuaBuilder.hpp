@@ -12,21 +12,46 @@
 
 #include "sol/sol.hpp"
 #include "Smp/ISimulator.h"
+#include "simdeck/Service.hpp"
 
 namespace simphonie {
 namespace lua {
 
-class LuaBuilder {
+class LuaBuilder: public simdeck::Service {
+    typedef simdeck::Service Parent;
 public:
-    LuaBuilder(Smp::ISimulator* sim);
-    ~LuaBuilder();
-
+    LuaBuilder(Smp::String8 name, Smp::String8 description, Smp::IObject* parent);
+    virtual ~LuaBuilder();
+    /**
+     * set builder lua configuration table
+     * @param config configuration table
+     */ 
     void setConfiguration(sol::table config);
 
+    static Smp::Bool simulatorCreateComponent(Smp::ISimulator* sim,
+                                              Smp::String8 typeName,
+                                              Smp::String8 name,
+                                              Smp::String8 description);
+protected:
+    /** 
+     * Publish specialization.
+     * shall trig component creation.
+     * @param receiver Publication not used since this service does not have
+     *        any own field.
+     */
+    void publish(Smp::IPublication* receiver) override;
+    /**
+     * Connect specialization.
+     * Shall:
+     *  - init data.
+     *  - apply connections.
+     */  
+    void connect() override;
 private:
 // TODO builder to be reconsidered
 //    simphonie::kern::Builder _builder;
     Smp::ISimulator* _sim;
+    Smp::Services::IResolver* _resolver;
 
     void loadSmpModels(sol::table models);
     void loadParameters(sol::table parameters);
@@ -34,6 +59,8 @@ private:
     void loadSamplers(sol::table initializations);
     void loadConnections(sol::table connections);
     void loadSchedules(sol::table schedules);
+
+    sol::table _config;
 };
 
 }  // namespace lua

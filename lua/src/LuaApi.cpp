@@ -10,6 +10,7 @@
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/ISimulator.h"
 #include "Smp/IModel.h"
+#include "Smp/IOutputField.h"
 #include "simphonie/kern/Resolver.hpp"
 #include "simphonie/kern/Scheduler.hpp"
 #include "simphonie/kern/Simulator.hpp"
@@ -19,10 +20,24 @@
 
 #define TRACE(expr) std::cout << __FILE__ << ":" << __LINE__ << ": " << #expr " = " << expr << std::endl
 
+// TODO check calling sim.Publish is allowed many times (and simulator
+// implementation shall be robust to that), in order to let services be pre
+// published. May not be required for LuaBuilder since it should finally receive
+// the configuration table through property binding to lua.
+
+
 // TODO: do I do something wrong with sol? Why shall resolve polymorphism myself
 // like that? Is it becaus sol2 can't guess the right order for resolving the
 // inheritance graph (specifically in case of multiple inheritance)?
 sol::object solCastObject(Smp::IObject* obj, sol::this_state L) {
+    auto ofield=dynamic_cast<Smp::IOutputField*>(obj);
+    if (ofield!=nullptr) {
+        return sol::object(L, sol::in_place, ofield);
+    }
+    auto field=dynamic_cast<Smp::IField*>(obj);
+    if (field!=nullptr) {
+        return sol::object(L, sol::in_place, field);
+    }
     auto ep=dynamic_cast<Smp::IEntryPoint*>(obj);
     if (ep!=nullptr) {
         return sol::object(L, sol::in_place, ep);
@@ -66,40 +81,6 @@ sol::object objectIndex(Smp::IObject* obj, Smp::String8 name, sol::this_state L)
     return solCastObject(obj->GetChild(name),L);
 }
 
-// TODO not applicable to simulator itself since not a component, reattach to object
-// and do the dynamic cast stuff to address the specific simulator case.
-Smp::Bool simulatorCreateComponent(Smp::ISimulator* sim, Smp::String8 typeName, Smp::String8 name, Smp::String8 description) {
-    for (auto fac: *(sim->GetFactories())) {
-TRACE(fac->GetTypeName());
-        if (strcmp(typeName,fac->GetTypeName())==0) {
-            auto comp=fac->CreateInstance(name,description,sim);
-            if (comp!=nullptr) {
-                auto service=dynamic_cast<Smp::IService*>(comp);
-                if (service!=nullptr) {
-                    sim->AddService(service);
-                    return true;
-                }
-                auto model=dynamic_cast<Smp::IModel*>(comp);
-                if (model!=nullptr) {
-                    sim->AddModel(model);
-                    return true;
-                }
-                // from here built component is neither a service or a model
-                // then it can't be added to the simulator a shall be dropped
-                sim->GetLogger()->Log(comp,
-                        "Component is neither a service or a model. "
-                        "Can't add it to the simulator",
-                        Smp::Services::ILogger::LMK_Error);
-                delete comp;
-                return false;
-            }
-        }
-    }
-    std::string msg="No factory found to build instances of component type ";
-    msg+=typeName;
-    sim->GetLogger()->Log(sim, msg.c_str(), Smp::Services::ILogger::LMK_Error);
-    return false;
-}
 
 Smp::Bool componentCreateChild(Smp::IComponent* th, Smp::String8 typeName, Smp::String8 container, Smp::String8 name, Smp::String8 description) {
     auto composite=dynamic_cast<Smp::IComposite*>(th);
@@ -109,7 +90,7 @@ Smp::Bool componentCreateChild(Smp::IComponent* th, Smp::String8 typeName, Smp::
     Smp::IObject* node=th;
     Smp::ISimulator* sim=nullptr;
     while (node!=nullptr && sim==nullptr) {
-        auto sim=dynamic_cast<Smp::ISimulator*>(node);
+        sim=dynamic_cast<Smp::ISimulator*>(node);
         node=node->GetParent();
     }
     if (sim!=nullptr) {
@@ -262,9 +243,19 @@ int luaopen_libsimph_lua(lua_State* L) {
         "CreateChild", &componentCreateChild, 
         sol::base_classes, sol::bases<Smp::IObject>()
     );
+    nsSmp.new_usertype<Smp::IField>("IField",
+        sol::meta_function::index, &objectIndex,
+        sol::base_classes, sol::bases<Smp::IObject>()
+    );
+    nsSmp.new_usertype<Smp::IOutputField>("IOutputField",
+        sol::meta_function::index, &objectIndex,
+        "Connect", &Smp::IOutputField::Connect,
+        sol::base_classes, sol::bases<Smp::IField>()
+    );
+
     nsSmp.new_usertype<Smp::Services::IScheduler>("IScheduler",
         sol::meta_function::index, &objectIndex,
-        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService>()
+        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
     );
     nsSmp.new_usertype<Smp::ISimulator>("ISimulator",
         sol::meta_function::index, &objectIndex,
@@ -284,7 +275,7 @@ int luaopen_libsimph_lua(lua_State* L) {
         "AddService", &Smp::ISimulator::AddService,
         "GetScheduler", &Smp::ISimulator::GetScheduler,
         "GetResolver", &Smp::ISimulator::GetResolver,
-        "CreateComponent", &simulatorCreateComponent,
+        "CreateComponent", &simphonie::lua::LuaBuilder::simulatorCreateComponent,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite>()
     );
     nsSmp.new_usertype<Smp::Services::ITimeKeeper>("ITimeKeeper",
@@ -297,14 +288,14 @@ int luaopen_libsimph_lua(lua_State* L) {
         sol::meta_function::index, &objectIndex,
         "AddImmediateEvent", &Smp::Services::IScheduler::AddImmediateEvent,
         "AddSimulationTimeEvent", &Smp::Services::IScheduler::AddSimulationTimeEvent,
-        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService>()
+        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
     );
     // IResolver binding
     nsSmp.new_usertype<Smp::Services::IResolver>("IResolver",
         sol::meta_function::index, &objectIndex,
         "ResolveAbsolute", &Smp::Services::IResolver::ResolveAbsolute,
         "ResolveRelative", &Smp::Services::IResolver::ResolveRelative,
-        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent, Smp::IService>()
+        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
     );
 
     auto nsSimphonie = t["Simphonie"].get_or_create<sol::table>();
@@ -314,21 +305,6 @@ int luaopen_libsimph_lua(lua_State* L) {
             return new simphonie::kern::Simulator(name.c_str());
         },
         sol::meta_function::index, &objectIndex,
-/*
-        sol::meta_function::index, [](Smp::ISimulator& th, std::string k, sol::this_state L) {
-TRACE(th.GetName());
-            auto o = th.GetResolver()->ResolveAbsolute(k.c_str());
-            // from most concrete to most abstract:
-            if (false) {}
-            else if (dynamic_cast<Smp::IService*>(o) != nullptr) {
-                return sol::object(L, sol::in_place, dynamic_cast<Smp::IService*>(o));
-            }
-            else if (dynamic_cast<Smp::IModel*>(o) != nullptr) {
-                return sol::object(L, sol::in_place, dynamic_cast<Smp::IModel*>(o));
-            }
-            return sol::object(L, sol::in_place, o);
-        },
-*/
 // TODO bind those services to addition SMP service or helpers that are provided 
 // with the lua binding. Meaning it shall work on any SMP complient ISimulator
 // implementation.
@@ -338,13 +314,10 @@ TRACE(th.GetName());
 //        "setValue", &simphonie::kern::Simulator::setValue,
 //        "createSmpModel", &simphonie::kern::Simulator::createSmpModel,
         "setConfiguration",[](Smp::ISimulator* s, sol::object o) {
-            auto b = new simphonie::lua::LuaBuilder(s);
+            auto b = new simphonie::lua::LuaBuilder("LuaBuilder", "Simulation builder from lua script", s);
+            s->AddService(b);
             b->setConfiguration(o);
             return b;
-        },
-// TODO: to be replaced by the capability to call entry points.
-        "dump",[](Smp::ISimulator* s) {
-            dynamic_cast<simphonie::kern::Resolver*>(s->GetResolver())->dump();
         },
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite, Smp::ISimulator>()
     );

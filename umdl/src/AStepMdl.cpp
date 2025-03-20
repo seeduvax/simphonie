@@ -17,6 +17,7 @@ namespace umdl {
 // ..........................................................
 AStepMdl::AStepMdl(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : Parent(name, descr, parent) {
+    addContainer("Children");
     addEP("step", "Main model entry point", this, &AStepMdl::step);
 }
 // ..........................................................

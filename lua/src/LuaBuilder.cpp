@@ -8,34 +8,94 @@
  * $Date$
  */
 #include "simphonie/lua/LuaBuilder.hpp"
-#include "simphonie/sys/Logger.hpp"
+#include "Smp/IModel.h"
 
+#define TRACE(expr) std::cout << __FILE__ << ":" << __LINE__ << ": " << #expr " = " << expr << std::endl
 namespace simphonie {
 namespace lua {
 // --------------------------------------------------------------------
 // ..........................................................
-LuaBuilder::LuaBuilder(Smp::ISimulator* sim) : 
-//             _builder(sim),
-             _sim(sim) {
-//    _sim->AddService(&_builder);
+LuaBuilder::LuaBuilder(Smp::String8 name, Smp::String8 description, Smp::IObject* parent):
+                    Parent(name, description, parent) { 
+    auto sim=dynamic_cast<Smp::ISimulator*>(parent);
+    if (sim!=nullptr) {
+        _sim=sim;
+    }
+    else {
+        // TODO send exception.
+    }
 }
 // ..........................................................
 LuaBuilder::~LuaBuilder() {}
 // ..........................................................
 void LuaBuilder::setConfiguration(sol::table config) {
-    LOGI("loading smp models")
-    loadSmpModels(config["models"]);
-    LOGI("loading parameters")
-    loadParameters(config["params"]);
-    LOGI("loading init")
-    loadInitializations(config["inits"]);
-    LOGI("loading connections")
-    loadConnections(config["connections"]);
-    LOGI("loading schedules")
-    loadSchedules(config["schedules"]);
-    LOGI("loading samplers")
-    loadSamplers(config["samplers"]);
+    _config=config;
 }
+// --------------------------------------------------------------------
+// ..........................................................
+void LuaBuilder::publish(Smp::IPublication* receiver) {
+    // iterate on configuration table component section to create and add
+    // components to the simulator.
+    sol::table components=_config["components"];
+    for (auto te: components) {
+        //std::string name=te.first;    
+        std::string name=te.first.as<std::string>();
+        sol::table v=te.second;
+        std::string type=v["type"];
+        std::string description=v["description"];
+        simulatorCreateComponent(_sim, type.c_str(), name.c_str(),
+                                 description.c_str());
+        // TODO recursively scan to build child components.
+    }
+}
+// --------------------------------------------------------------------
+// ..........................................................
+Smp::Bool LuaBuilder::simulatorCreateComponent(Smp::ISimulator* sim,
+                                               Smp::String8 typeName,
+                                               Smp::String8 name,
+                                               Smp::String8 description) {
+    for (auto fac: *(sim->GetFactories())) {
+        if (strcmp(typeName,fac->GetTypeName())==0) {
+            auto comp=fac->CreateInstance(name,description,sim);
+            if (comp!=nullptr) {
+                auto service=dynamic_cast<Smp::IService*>(comp);
+                if (service!=nullptr) {
+                    sim->AddService(service);
+                    return true;
+                }
+                auto model=dynamic_cast<Smp::IModel*>(comp);
+                if (model!=nullptr) {
+                    sim->AddModel(model);
+                    return true;
+                }
+                // from here built component is neither a service or a model
+                // then it can't be added to the simulator a shall be dropped
+                sim->GetLogger()->Log(comp,
+                        "Component is neither a service or a model. "
+                        "Can't add it to the simulator",
+                        Smp::Services::ILogger::LMK_Error);
+                delete comp;
+                return false;
+            }
+        }
+    }
+    std::string msg="No factory found to build instances of component type ";
+    msg+=typeName;
+    sim->GetLogger()->Log(sim, msg.c_str(), Smp::Services::ILogger::LMK_Error);
+    return false;
+}
+
+
+
+// ..........................................................
+void LuaBuilder::connect() {
+    // iterate on configuration table component section to init data defined
+    // at that level to set related fields value.
+    // iterate on init data section to set related fields value.
+    // iterate on connection section to connect fields (TODO all kind of
+    // connection to be handled, not only field to field connections)
+}
+/*
 // ..........................................................
 void LuaBuilder::loadParameters(sol::table parameters) {
     for (const auto& obj : parameters) {
@@ -110,6 +170,6 @@ void LuaBuilder::loadSmpModels(sol::table models) {
     }
 }
 // ..........................................................
-
+*/
 }  // namespace lua
 }  // namespace simph

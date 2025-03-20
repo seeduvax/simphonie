@@ -11,6 +11,7 @@
 #define __simphonie_umdl_ArrayType_HPP__
 #include "Smp/IModel.h"
 #include "simdeck/EPPModel.hpp"
+#include "simdeck/Composite.hpp"
 
 namespace simphonie {
 namespace umdl {
@@ -18,7 +19,7 @@ namespace umdl {
 /**
  *
  */
-class AStepMdl : public simdeck::EPPModel {
+class AStepMdl : public simdeck::EPPModel, virtual public simdeck::AComposite {
     typedef simdeck::EPPModel Parent;
 public:
     /**
