@@ -10,6 +10,7 @@
 #include "simdeck/SimpleField.hpp"
 #include "simdeck/Collection.hpp"
 #include "Smp/IOutputField.h"
+#include "simdeck/ExInvalidTarget.hpp"
 
 
 namespace simdeck {
@@ -76,6 +77,9 @@ public:
         if (sf!=nullptr && !_targets.contain(sf)) {
             _targets.push_back(sf);
         }
+        if (sf==nullptr) {
+            throw ExInvalidTarget(this,target);
+        }
     }
     void Disconnect(Smp::IField* target) override {
         auto sf=dynamic_cast<Smp::ISimpleField*>(target);
@@ -85,11 +89,17 @@ public:
     }
     void Push() override {
         for (auto target: _targets) {
-            target->SetValue(this->GetValue());
+            // TODO should not need to cast anything here, find a way to have
+            // a fully resolved collection type while being able to return
+            // properly the field collection whith GetInputFields 
+            auto sf=dynamic_cast<Smp::ISimpleField*>(target);
+            if (sf!=nullptr) {
+                sf->SetValue(this->GetValue());
+            }
         }
     }
-    const Smp::FieldCollection* GetInputFields() const {
-        return dynamic_cast<const Smp::FieldCollection*>(&_targets);
+    const Smp::FieldCollection* GetInputFields() const override {
+        return &_targets;
     }
     Smp::Bool IsAutomatic() const {
         // The runtime and scheduler shall handle data propagation when needed,
@@ -102,7 +112,7 @@ public:
         return false;
     }
 private:
-    Collection<Smp::ISimpleField> _targets;
+    Collection<Smp::IField> _targets;
     
 };
 

@@ -17,10 +17,13 @@
 
 namespace simdeck {
 
-class EntryPoint: public Component, virtual public Smp::IEntryPoint {
+
+// TODO why entry points inherits from component ???
+class EntryPoint: public Object, virtual public Smp::IEntryPoint {
+    typedef Object Parent;
 public:
     EntryPoint(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent):
-            Component(name,descr,parent) {
+            Parent(name,descr,parent) {
     }
     virtual ~EntryPoint() {
     }

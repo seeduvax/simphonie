@@ -12,6 +12,7 @@
 #include "simdeck/ExContainerFull.hpp"
 #include "simdeck/ExDuplicateName.hpp"
 #include "simdeck/ExInvalidObjectType.hpp"
+#include "simdeck/ExInvalidParent.hpp"
 #include "simdeck/ExNotContained.hpp"
 
 namespace simdeck {
@@ -37,6 +38,9 @@ bool Container::checkComponentType(Smp::IComponent* component) {
 }
 // ..........................................................
 void Container::AddComponent(Smp::IComponent* component) {
+    if (component->GetParent()!=GetParent()) {
+        throw ExInvalidParent(this,component->GetParent(),GetParent());
+    }
     Smp::Int64 maxSize = GetUpper();
     if (maxSize >= 0 && _content.size() >= maxSize) {
         throw ExContainerFull(this);
