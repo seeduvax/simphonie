@@ -68,7 +68,7 @@ public:
         Smp::IEntryPointPublisher* increment;
 
         if (!useDynamicLoad) {
-            auto instance = new SmpIncrement("increment", "increment", nullptr);
+            auto instance = new SmpIncrement("increment", "increment", &sim);
             sim.AddModel(instance);
             increment = instance;
         }

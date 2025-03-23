@@ -51,9 +51,9 @@ public:
         sim.Connect();
         auto f1 = dynamic_cast<Smp::IOutputField*>(sim.GetResolver()->ResolveRelative("out", mdl));
         CPPUNIT_ASSERT(f1 != nullptr);
-        auto f2 = dynamic_cast<Smp::IOutputField*>(sim.GetResolver()->ResolveRelative("in", log));
+        auto f2 = dynamic_cast<Smp::IField*>(sim.GetResolver()->ResolveRelative("in", log));
+        CPPUNIT_ASSERT(f2 != nullptr);
         f1->Connect(f2);
-        CPPUNIT_ASSERT(f1 != nullptr);
         dynamic_cast<simphonie::kern::Resolver*>(sim.GetResolver())->dump();
         simphonie::kern::Scheduler* sched = dynamic_cast<simphonie::kern::Scheduler*>(sim.GetScheduler());
         sched->AddSimulationTimeEvent(sync->GetEntryPoint("step"),
