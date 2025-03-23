@@ -21,7 +21,10 @@ ExInvalidParent::ExInvalidParent(const Smp::IObject* sender, const Smp::IObject*
     setSender(sender);
     std::ostringstream d;
     d << "Invalid parent to add chidl to "<<sender->GetName()
-      <<" found: "<<found->GetName()<<", expected:" << expected<<".";
+      <<" found: "
+      <<(found!=nullptr?found->GetName():"nullptr")
+      <<", expected:" 
+      << (expected!=nullptr?expected->GetName():"nullptr") <<".";
     setDescription(d.str().c_str());
     setMessage();
 }
