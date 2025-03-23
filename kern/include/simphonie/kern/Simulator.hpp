@@ -69,7 +69,7 @@ public:
     Smp::Publication::ITypeRegistry* GetTypeRegistry() const override;
     void LoadLibrary(
             Smp::String8 libraryPath,
-            Smp::LibraryLoadFlag loadFlag = Smp::LibraryLoadFlag::LLF_Auto) override;
+            Smp::LibraryLoadingFlag loadFlag = Smp::LibraryLoadingFlag::LLF_Auto) override;
 
 private:
     Smp::SimulatorStateKind _state;

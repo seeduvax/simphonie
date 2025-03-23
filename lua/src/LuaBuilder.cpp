@@ -9,8 +9,9 @@
  */
 #include "simphonie/lua/LuaBuilder.hpp"
 #include "Smp/IModel.h"
+#include "Smp/IOutputField.h"
+#include "Smp/Services/IResolver.h"
 
-#define TRACE(expr) std::cout << __FILE__ << ":" << __LINE__ << ": " << #expr " = " << expr << std::endl
 namespace simphonie {
 namespace lua {
 // --------------------------------------------------------------------
@@ -43,14 +44,39 @@ void LuaBuilder::publish(Smp::IPublication* receiver) {
         sol::table v=te.second;
         std::string type=v["type"];
         std::string description=v["description"];
-        simulatorCreateComponent(_sim, type.c_str(), name.c_str(),
+        auto comp=simulatorCreateComponent(_sim, type.c_str(), name.c_str(),
                                  description.c_str());
         // TODO recursively scan to build child components.
+        auto composite=dynamic_cast<Smp::IComposite*>(comp);
+        if (composite!=nullptr) {
+            addSubComponents(composite,v);
+        }
+    }
+}
+
+
+// ..........................................................
+void LuaBuilder::connect() {
+    // iterate on configuration table component section to init data defined
+    // at that level to set related fields value.
+    // iterate on init data section to set related fields value.
+    // iterate on connection section to connect fields (TODO all kind of
+    // connection to be handled, not only field to field connections)
+    auto resolver=_sim->GetResolver();
+    sol::table components=_config["connections"];
+    for (auto cnx: components) {
+        std::string toPath=cnx.first.as<std::string>();
+        std::string fromPath=cnx.second.as<std::string>();
+        auto from=dynamic_cast<Smp::IOutputField*>(resolver->ResolveAbsolute(fromPath.c_str()));
+        auto to=dynamic_cast<Smp::IField*>(resolver->ResolveAbsolute(toPath.c_str()));
+        if (from!=nullptr && to!=nullptr) {
+            from->Connect(to);
+        }
     }
 }
 // --------------------------------------------------------------------
 // ..........................................................
-Smp::Bool LuaBuilder::simulatorCreateComponent(Smp::ISimulator* sim,
+Smp::IComponent* LuaBuilder::simulatorCreateComponent(Smp::ISimulator* sim,
                                                Smp::String8 typeName,
                                                Smp::String8 name,
                                                Smp::String8 description) {
@@ -61,12 +87,12 @@ Smp::Bool LuaBuilder::simulatorCreateComponent(Smp::ISimulator* sim,
                 auto service=dynamic_cast<Smp::IService*>(comp);
                 if (service!=nullptr) {
                     sim->AddService(service);
-                    return true;
+                    return comp;
                 }
                 auto model=dynamic_cast<Smp::IModel*>(comp);
                 if (model!=nullptr) {
                     sim->AddModel(model);
-                    return true;
+                    return comp;
                 }
                 // from here built component is neither a service or a model
                 // then it can't be added to the simulator a shall be dropped
@@ -75,26 +101,65 @@ Smp::Bool LuaBuilder::simulatorCreateComponent(Smp::ISimulator* sim,
                         "Can't add it to the simulator",
                         Smp::Services::ILogger::LMK_Error);
                 delete comp;
-                return false;
+                return nullptr;
             }
         }
     }
     std::string msg="No factory found to build instances of component type ";
     msg+=typeName;
     sim->GetLogger()->Log(sim, msg.c_str(), Smp::Services::ILogger::LMK_Error);
-    return false;
+    return nullptr;;
 }
-
-
-
 // ..........................................................
-void LuaBuilder::connect() {
-    // iterate on configuration table component section to init data defined
-    // at that level to set related fields value.
-    // iterate on init data section to set related fields value.
-    // iterate on connection section to connect fields (TODO all kind of
-    // connection to be handled, not only field to field connections)
+Smp::IComponent* LuaBuilder::componentCreateComponent(
+                                           Smp::ISimulator* sim,
+                                           Smp::IComposite* composite,
+                                           Smp::String8 typeName,
+                                           Smp::String8 container,
+                                           Smp::String8 name,
+                                           Smp::String8 description) {
+    auto cnt=composite->GetContainer(container);
+    if (cnt!=nullptr) {
+        for (auto fac: *(sim->GetFactories())) {
+            if (strcmp(typeName,fac->GetTypeName())==0) {
+                auto comp=fac->CreateInstance(name,description,composite);
+                if (comp!=nullptr) {
+                    cnt->AddComponent(comp);
+                    return comp;
+                }
+            }
+        }
+    }
+    return nullptr;
 }
+// ..........................................................
+void LuaBuilder::addSubComponents(Smp::IComposite* node, sol::table t) {
+    for (auto te: t) {
+        std::string kName=te.first.as<std::string>();
+        if (kName!="type" && kName!="description") {
+            sol::table content=te.second;
+            for (auto child: content) {
+                std::string name=child.first.as<std::string>();
+                sol::table v=child.second;
+                std::string type=v["type"];
+                std::string description=v["description"];
+                auto sub = componentCreateComponent(_sim, 
+                                                    node,
+                                                    type.c_str(),
+                                                    kName.c_str(),
+                                                    name.c_str(),
+                                                    description.c_str());
+                auto composite = dynamic_cast<Smp::IComposite*>(sub);
+                if (composite!=nullptr) {
+                    addSubComponents(composite,v);
+                }
+            }
+        }
+    }
+}
+
+
+
 /*
 // ..........................................................
 void LuaBuilder::loadParameters(sol::table parameters) {

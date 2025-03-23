@@ -2,8 +2,15 @@ s=require "simphonie_lua"
 sim=s.Simphonie.Simulator.new("luaSim")
 sim:setConfiguration({
     components={
-        inc1={type="simphonie::umdl::SmpIncrement",description=""},
+        inc1={type="simphonie::umdl::SmpIncrement",description="",
+            Children={
+                inc11={type="simphonie::umdl::SmpIncrement", description=""}
+            }
+        },
         inc2={type="simphonie::umdl::SmpIncrement",description=""},
+    },
+    connections={
+        ["inc2/input"]="inc1/output"
     }
 })
 sim:Run()
@@ -24,7 +31,7 @@ print("scheduler state: "..sim.Scheduler.State)
 print("simulator state "..sim.State)
 
 sim:CreateComponent("simphonie::umdl::SmpIncrement","inc","")
-sim.inc:CreateChild("simphonie::umdl::SmpIncrement","children","subinc","")
+sim.inc:CreateChild("simphonie::umdl::SmpIncrement","Children","subinc","")
 sim:Publish()
 sim.inc.output:Connect(sim.inc.subinc.input)
 

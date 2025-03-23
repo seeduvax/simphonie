@@ -18,7 +18,6 @@
 #include "simdeck/Utils.hpp"
 #include "sol/sol.hpp"
 
-#define TRACE(expr) std::cout << __FILE__ << ":" << __LINE__ << ": " << #expr " = " << expr << std::endl
 
 // TODO check calling sim.Publish is allowed many times (and simulator
 // implementation shall be robust to that), in order to let services be pre
@@ -26,9 +25,6 @@
 // the configuration table through property binding to lua.
 
 
-// TODO: do I do something wrong with sol? Why shall resolve polymorphism myself
-// like that? Is it becaus sol2 can't guess the right order for resolving the
-// inheritance graph (specifically in case of multiple inheritance)?
 sol::object solCastObject(Smp::IObject* obj, sol::this_state L) {
     auto ofield=dynamic_cast<Smp::IOutputField*>(obj);
     if (ofield!=nullptr) {
@@ -54,7 +50,7 @@ sol::object solCastObject(Smp::IObject* obj, sol::this_state L) {
     if (comp!=nullptr) {
         return sol::object(L, sol::in_place, comp);
     }
-    // default ,return object as generic SMP::IObject
+    // default, return object as generic SMP::IObject
     return sol::object(L, sol::in_place, obj);
 }
 // exemple de meta new_index
@@ -94,17 +90,12 @@ Smp::Bool componentCreateChild(Smp::IComponent* th, Smp::String8 typeName, Smp::
         node=node->GetParent();
     }
     if (sim!=nullptr) {
-        auto cnt=composite->GetContainer(container);
-        if (cnt!=nullptr) {
-            for (auto fac: *(sim->GetFactories())) {
-                if (strcmp(typeName,fac->GetTypeName())==0) {
-                    auto comp=fac->CreateInstance(name,description,composite);
-                    if (comp!=nullptr) {
-                        return th->AddChild(comp,(Smp::ICollectionBase*)cnt->GetComponents());
-                    }
-                }
-            }
-        }
+        simphonie::lua::LuaBuilder::componentCreateComponent(sim,
+                                                        composite,
+                                                        typeName,
+                                                        container,
+                                                        name,
+                                                        description);
     }
     return false;
 }

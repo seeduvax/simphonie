@@ -11,7 +11,7 @@
 #include "simphonie/kern/Simulator.hpp"
 #include "simphonie/kern/EventManager.hpp"
 #include "simphonie/sys/Logger.hpp"
-#include "simdeck/CompositeModel.hpp"
+#include "simdeck/EPPModel.hpp"
 #include "simdeck/EntryPoint.hpp"
 #include "simdeck/EntryPointPublisher.hpp"
 #include "simphonie/sys/Synchro.hpp"
@@ -24,30 +24,16 @@ namespace test {
 using namespace simphonie::kern;
 using namespace simdeck;
 
-class CModel: public CompositeModel {
+class CModel: public simdeck::EPPModel, virtual public simdeck::AComposite {
 public:
     CModel(Smp::String8 name, Smp::String8 descr, Smp::IComposite* parent): 
-            CompositeModel(name,descr,parent) {
+            simdeck::EPPModel(name,descr,parent) {
+        addContainer("sub");
         addEP("step", "", this, &CModel::step);
     }
     virtual ~CModel() {
-        auto container = GetContainer("sub");
-        if (container != nullptr) {
-            CModel* subMdl = dynamic_cast<CModel*>(container->GetChild("childMdl"));
-            container->DeleteComponent(subMdl);
-        }
-        container = GetContainer("entryPoints");
-        if (container != nullptr) {
-            EntryPoint* entryPoint = dynamic_cast<EntryPoint*>(container->GetChild("step"));
-            container->DeleteComponent(entryPoint);
-        }
     }
 
-    template <class C>
-    void addEP(Smp::String8 name, Smp::String8 description, C* parent, void(C::*fct)()) {
-        auto c = addContainer("entryPoints","");
-        c->AddComponent(new EntryPoint(name, description, parent));
-    }
     void step() {
         TRACE(""<<GetName()<<".step()");
     }
@@ -58,8 +44,7 @@ protected:
     // the simulator.
     void configure() override {
         if (GetParent()==getSimulator()) {
-            auto c=addContainer("sub","");
-            c->AddComponent(new CModel("childMdl","",this));
+            GetContainer("sub")->AddComponent(new CModel("childMdl","",this));
         }
     }
 };

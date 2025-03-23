@@ -10,15 +10,15 @@
 #include "simphonie/kern/Simulator.hpp"
 #include "simphonie/kern/EventManager.hpp"
 #include "simphonie/kern/ExDuplicateUuid.hpp"
-#include "simphonie/kern/ExFileNotFound.hpp"
 #include "simphonie/kern/LinkRegistry.hpp"
 #include "simphonie/kern/Logger.hpp"
 #include "simphonie/kern/Resolver.hpp"
 #include "simphonie/kern/Scheduler.hpp"
 #include "simphonie/kern/TimeKeeper.hpp"
 #include "simphonie/kern/TypeRegistry.hpp"
-#include "simdeck/ExInvalidComponentState.hpp"
 #include "simphonie/sys/Synchro.hpp"
+#include "simdeck/ExInvalidComponentState.hpp"
+#include "simdeck/ExInvalidFile.hpp"
 
 #include "Smp/IOutputField.h"
 #include "Smp/IModel.h"
@@ -458,7 +458,7 @@ Smp::IFactory* Simulator::GetFactory(Smp::Uuid uuid) const {
     return nullptr;
 }
 // ..........................................................
-void Simulator::LoadLibrary(Smp::String8 name, Smp::LibraryLoadFlag loadFlag) {
+void Simulator::LoadLibrary(Smp::String8 name, Smp::LibraryLoadingFlag loadFlag) {
     // TODO take care of loadFlag
     std::string libName = name;
     simphonie::sys::DLib* fLib = nullptr;
@@ -478,7 +478,7 @@ void Simulator::LoadLibrary(Smp::String8 name, Smp::LibraryLoadFlag loadFlag) {
             _libs.push_back(fLib);
         }
         catch (std::runtime_error ex) {
-            throw simphonie::kern::ExFileNotFound(this, name);
+            throw simdeck::ExInvalidFile(this, name, ex.what());
         }
     }
 }

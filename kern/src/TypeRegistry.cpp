@@ -252,7 +252,7 @@ Smp::Publication::IArrayType* TypeRegistry::AddArrayType(
     return nullptr;
 }
 // ..........................................................
-Smp::Publication::IType* TypeRegistry::AddStringType(
+Smp::Publication::IStringType* TypeRegistry::AddStringType(
                 Smp::String8 name,
                 Smp::String8 description,
                 Smp::Uuid typeUuid,
@@ -261,10 +261,14 @@ Smp::Publication::IType* TypeRegistry::AddStringType(
     if (res != nullptr) {
         throw ExTypeAlreadyRegistered(this, name, res);
     }
+/*
+ * TODO to be restored with proper String Type
     res = new Type(typeUuid, Smp::PrimitiveTypeKind::PTK_String8, length, name, description, this);
     _ownedTypes.emplace_back(res);
     _types.push_back(res);
     return res;
+ */
+return nullptr;
 }
 // ..........................................................
 Smp::Publication::IStructureType* TypeRegistry::AddStructureType(Smp::String8 name, Smp::String8 description,

@@ -28,10 +28,18 @@ public:
      */ 
     void setConfiguration(sol::table config);
 
-    static Smp::Bool simulatorCreateComponent(Smp::ISimulator* sim,
-                                              Smp::String8 typeName,
-                                              Smp::String8 name,
-                                              Smp::String8 description);
+    static Smp::IComponent* simulatorCreateComponent(
+                                            Smp::ISimulator* sim,
+                                            Smp::String8 typeName,
+                                            Smp::String8 name,
+                                            Smp::String8 description);
+    static Smp::IComponent* componentCreateComponent(
+                                            Smp::ISimulator* sim,
+                                            Smp::IComposite* composite,
+                                            Smp::String8 typeName,
+                                            Smp::String8 container,
+                                            Smp::String8 name,
+                                            Smp::String8 description);
 protected:
     /** 
      * Publish specialization.
@@ -48,8 +56,8 @@ protected:
      */  
     void connect() override;
 private:
-// TODO builder to be reconsidered
-//    simphonie::kern::Builder _builder;
+    void addSubComponents(Smp::IComposite* node, sol::table t);
+    
     Smp::ISimulator* _sim;
     Smp::Services::IResolver* _resolver;
 

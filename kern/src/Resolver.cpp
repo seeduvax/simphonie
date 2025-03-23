@@ -13,6 +13,7 @@
 #include "Smp/IComponent.h"
 #include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
+#include "Smp/IOutputField.h"
 #include "Smp/IModel.h"
 #include "Smp/IService.h"
 #include "Smp/Publication/IType.h"
@@ -75,6 +76,16 @@ void Resolver::dumpObj(const Smp::IObject* from, int level) const {
             std::cout << ":out";
         }
         std::cout << ":" << f->GetType()->GetPrimitiveTypeKind() << "]";
+        auto of=dynamic_cast<const Smp::IOutputField*>(f);
+        if (of!=nullptr) {
+            for (auto in: *(of->GetInputFields())) {
+                std::cout << std::endl;
+                for (int i=0; i<level; i++) {
+                    std::cout << "    ";
+                }
+                std::cout << "    -> " << in->GetParent()->GetName() << "/" << in->GetName();
+            }
+        }
     }
     if (dynamic_cast<const Smp::ISimulator*>(from)!=nullptr) {
         std::cout << "[Simulator]";

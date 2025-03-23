@@ -9,6 +9,7 @@
  */
 #include <cppunit/extensions/HelperMacros.h>
 #include "simphonie/kern/ExFileNotFound.hpp"
+#include "simdeck/ExInvalidFile.hpp"
 #include "simphonie/kern/Simulator.hpp"
 
 namespace test {
@@ -50,7 +51,7 @@ public:
                 _sim.LoadLibrary(itr.c_str());
             }
         }
-        catch (simphonie::kern::ExFileNotFound ex) {
+        catch (simdeck::ExInvalidFile ex) {
             return false;
         }
         return true;
