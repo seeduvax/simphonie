@@ -2,7 +2,6 @@ variables:
     GIT_SSL_NO_VERIFY: "true"
     ABS_REPO: "https://www.eduvax.net/dist"
     DIST_HOST: "www.eduvax.net"
-    VABS: "3.4.13"
 
 stages:
     - test
@@ -24,11 +23,11 @@ stages:
     stage: test
     variables:
         # FIXME: abs workaround to force MODE env var value when calling test target
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST"
     script: 
-        - echo HOME=`pwd` make test $TASK_OPTVAR
+        - echo HOME=`pwd` make test $TASK_OPTVAR `test -n "$VABS" && echo "VABS=$VABS"`
         # change HOME to have a new ABS directory to avoid impacting others compilations.
-        - HOME=`pwd` make test $TASK_OPTVAR | tee execution.log
+        - HOME=`pwd` make test $TASK_OPTVAR `test -n "$VABS" && echo "VABS=$VABS"` | tee execution.log
         - egrep -ri 'errors="[1-9]+' build/unit_test_results && exit 1 || echo "ok"
         - egrep -ri 'failures="[1-9]+' build/unit_test_results && exit 1 || echo "ok"
     only:
@@ -45,11 +44,11 @@ stages:
     only:
         - tags
     variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST"
     script:
-        - echo HOME=`pwd` make pubdist $TASK_OPTVAR
+        - echo HOME=`pwd` make pubdist $TASK_OPTVAR `test -n "$VABS" && echo "VABS=$VABS"`
         # change HOME to have a new ABS directory to avoid impacting others compilations.
-        - HOME=`pwd` make pubdist $TASK_OPTVAR
+        - HOME=`pwd` make pubdist $TASK_OPTVAR `test -n "$VABS" && echo "VABS=$VABS"`
 
 # Test jobs triggered only at branch push
 sanitize_debian11:
@@ -57,11 +56,11 @@ sanitize_debian11:
     stage: test
     variables:
         # FIXME: abs workaround to force MODE env var value when calling cint target
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=8 MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS ACTIVATE_SANITIZER=true"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=8 MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST ACTIVATE_SANITIZER=true"
     script: 
-        - echo HOME=`pwd` make test $TASK_OPTVAR
+        - echo HOME=`pwd` make test $TASK_OPTVAR `test -n "$VABS" && echo "VABS=$VABS"`
         # change HOME to have a new ABS directory to avoid impacting others compilations.
-        - HOME=`pwd` make test $TASK_OPTVAR | tee execution.log
+        - HOME=`pwd` make test $TASK_OPTVAR `test -n "$VABS" && echo "VABS=$VABS"` | tee execution.log
         - egrep -E -q "(LeakSanitizer)|(AddressSanitizer)" execution.log && grep -E "(Starting test suite:)|(LeakSanitizer)|(AddressSanitizer)" execution.log && echo "See execution.log for more details"
         - egrep -E -q "(LeakSanitizer)|(AddressSanitizer)" execution.log && exit 1 || echo "OK"
     only:
@@ -103,7 +102,7 @@ test_suse12:
     tags:
         - suse_12
     variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS CC=../gcc-4.9.4/bin/gcc CPPC=../gcc-4.9.4/bin/g++"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST CC=../gcc-4.9.4/bin/gcc CPPC=../gcc-4.9.4/bin/g++"
     before_script:
         # need a more recent version of gcc
         - wget --no-check-certificate $ABS_REPO/SUSE_12_x86_64/gcc-4.9.4.SUSE_12_x86_64.tar.gz
@@ -114,7 +113,7 @@ test_redhawk7_clang13:
     tags:
         - redhawk_7
     variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS BUILDCHAIN=clang-13"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST BUILDCHAIN=clang-13"
 
 test_suse15sp5:
     extends: .test_base
@@ -142,7 +141,7 @@ deploy_suse12:
     tags:
         - suse_12
     variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS CC=../gcc-4.9.4/bin/gcc CPPC=../gcc-4.9.4/bin/g++"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST CC=../gcc-4.9.4/bin/gcc CPPC=../gcc-4.9.4/bin/g++"
     before_script:
         # need a more recent version of gcc
         - wget --no-check-certificate $ABS_REPO/SUSE_12_x86_64/gcc-4.9.4.SUSE_12_x86_64.tar.gz
@@ -158,7 +157,7 @@ deploy_redhawk7_clang13:
     tags:
         - redhawk_7
     variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST VABS=$VABS BUILDCHAIN=clang-13"
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST BUILDCHAIN=clang-13"
 
 deploy_suse15sp5:
     extends: .deploy_base
