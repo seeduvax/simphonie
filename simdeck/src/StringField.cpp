@@ -10,6 +10,7 @@
 #include "simdeck/StringField.hpp"
 #include "simdeck/Collection.hpp"
 #include "Smp/IOutputField.h"
+#include "Smp/Publication/IType.h"
 
 namespace simdeck {
 static Smp::Uuid _uuidString  = { 0, 0, 0, { ' ',' ','S','t','r','i','n','g'} };
@@ -20,12 +21,13 @@ StringField::StringField(Smp::String8 name,
                 Smp::String8 description,
                 Smp::ViewKind viewKind,
                 std::string* address,
+                Smp::Publication::IType* type,
                 Smp::Bool isState,
                 Smp::Bool isInput,
                 Smp::Bool isOutput,
                 Smp::IObject* parent):
                     Parent(name, description, viewKind, address, 
-                        sizeof(std::string), &_stringType,
+                        sizeof(std::string), type,
                         isState, isInput, isOutput, parent) {
 }
 // ..........................................................
@@ -74,6 +76,18 @@ void StringField::Freeze() {
 // ..........................................................
 class StringOutputField: public StringField, virtual public Smp::IOutputField {
 public:
+    StringOutputField(Smp::String8 name,
+                Smp::String8 description,
+                Smp::ViewKind viewKind,
+                std::string* address,
+                Smp::Publication::IType* type,
+                Smp::Bool isState,
+                Smp::Bool isInput,
+                Smp::Bool isOutput,
+                Smp::IObject* parent): StringField(name, description, viewKind,
+                        address, type, isState, isInput, isOutput, parent),
+                        _targets("targets","connected fields",this) {
+    }
     virtual ~StringOutputField() {
     }
     void Connect(Smp::IField* target) override {
@@ -82,7 +96,7 @@ public:
             _targets.push_back(sf);
         }
     }
-    void Disconnect(Smp::IField* target) {
+    void Disconnect(Smp::IField* target) override {
         auto sf=dynamic_cast<Smp::ISimpleField*>(target);
         if (sf!=nullptr) {
             _targets.remove(sf);
@@ -91,20 +105,45 @@ public:
     void Push() override {
         auto value=this->GetValue();
         for (auto target: _targets) {
-            target->SetValue(value);
+            auto stringF=dynamic_cast<StringField*>(target);
+            if (stringF!=nullptr) {
+                stringF->SetValue(value);
+            }
+            auto simpleF=dynamic_cast<ISimpleField*>(target);
+            if (simpleF!=nullptr) {
+                simpleF->SetValue(value);
+            }
         }
     }
     const Smp::FieldCollection* GetInputFields() const override {
-        return dynamic_cast<const Smp::FieldCollection*>(&_targets);
+        return &_targets;
     }
     Smp::Bool IsAutomatic() const override {
         return false;
     }
 private:
-    Collection<Smp::ISimpleField> _targets;
+    Collection<Smp::IField> _targets;
 };
 // --------------------------------------------------------------------
 // ..........................................................
+StringField* StringField::Create(Smp::String8 name,
+                Smp::String8 description,
+                Smp::ViewKind viewKind,
+                std::string* address,
+                Smp::Publication::IType* type,
+                Smp::Bool isState,
+                Smp::Bool isInput,
+                Smp::Bool isOutput,
+                Smp::IObject* parent) {
+    if (isOutput) {
+        return new StringOutputField(name, description, viewKind, address, type,
+                isState, isInput, isOutput, parent);
+    }
+    else {
+        return new StringField(name, description, viewKind, address, type,
+                isState, isInput, isOutput, parent);
+    }
+}
 
 
 
