@@ -23,11 +23,11 @@ stages:
     stage: test
     variables:
         # FIXME: abs workaround to force MODE env var value when calling test target
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST "`test -n "$VABS" && echo "VABS=$VABS"`
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST" 
     script: 
-        - echo HOME=`pwd` make test $TASK_OPTVAR
+        - echo HOME=`pwd` make test $TASK_OPTVAR `test -n "$VABS" && echo "VABS=$VABS"`
         # change HOME to have a new ABS directory to avoid impacting others compilations.
-        - HOME=`pwd` make test $TASK_OPTVAR | tee execution.log
+        - HOME=`pwd` make test $TASK_OPTVAR `test -n "$VABS" && echo "VABS=$VABS"` | tee execution.log
         - egrep -ri 'errors="[1-9]+' build/unit_test_results && exit 1 || echo "ok"
         - egrep -ri 'failures="[1-9]+' build/unit_test_results && exit 1 || echo "ok"
     only:
@@ -44,11 +44,11 @@ stages:
     only:
         - tags
     variables:
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST "`test -n "$VABS" && echo "VABS=$VABS"`
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST"
     script:
-        - echo HOME=`pwd` make pubdist $TASK_OPTVAR
+        - echo HOME=`pwd` make pubdist $TASK_OPTVAR `test -n "$VABS" && echo "VABS=$VABS"`
         # change HOME to have a new ABS directory to avoid impacting others compilations.
-        - HOME=`pwd` make pubdist $TASK_OPTVAR
+        - HOME=`pwd` make pubdist $TASK_OPTVAR `test -n "$VABS" && echo "VABS=$VABS"`
 
 # Test jobs triggered only at branch push
 sanitize_debian11:
@@ -56,11 +56,11 @@ sanitize_debian11:
     stage: test
     variables:
         # FIXME: abs workaround to force MODE env var value when calling cint target
-        TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=8 MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST ACTIVATE_SANITIZER=true "`test -n "$VABS" && echo "VABS=$VABS"`
+        TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=8 MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST ACTIVATE_SANITIZER=true "
     script: 
-        - echo HOME=`pwd` make test $TASK_OPTVAR
+        - echo HOME=`pwd` make test $TASK_OPTVAR `test -n "$VABS" && echo "VABS=$VABS"`
         # change HOME to have a new ABS directory to avoid impacting others compilations.
-        - HOME=`pwd` make test $TASK_OPTVAR | tee execution.log
+        - HOME=`pwd` make test $TASK_OPTVAR `test -n "$VABS" && echo "VABS=$VABS"` | tee execution.log
         - egrep -E -q "(LeakSanitizer)|(AddressSanitizer)" execution.log && grep -E "(Starting test suite:)|(LeakSanitizer)|(AddressSanitizer)" execution.log && echo "See execution.log for more details"
         - egrep -E -q "(LeakSanitizer)|(AddressSanitizer)" execution.log && exit 1 || echo "OK"
     only:
