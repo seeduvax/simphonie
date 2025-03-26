@@ -9,9 +9,9 @@
  */
 #ifndef __simdeck_ExContainerFull_HPP__
 #define __simdeck_ExContainerFull_HPP__
+#include "simdeck/Exception.hpp"
 #include "Smp/ContainerFull.h"
 #include "Smp/IContainer.h"
-#include "simdeck/Exception.hpp"
 
 namespace simdeck {
 

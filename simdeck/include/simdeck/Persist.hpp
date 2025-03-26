@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_Persist_HPP__
 #define __simdeck_Persist_HPP__
-#include "Smp/IPersist.h"
 #include "simdeck/Object.hpp"
+#include "Smp/IPersist.h"
 namespace simdeck {
 
 /**

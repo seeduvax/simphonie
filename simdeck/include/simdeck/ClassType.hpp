@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_ClassType_HPP__
 #define __simdeck_ClassType_HPP__
-#include "Smp/Publication/IClassType.h"
 #include "simdeck/StructureType.hpp"
+#include "Smp/Publication/IClassType.h"
 
 namespace simdeck {
 class TypeRegistry;

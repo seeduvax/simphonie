@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_ExInvalidFieldName_HPP__
 #define __simdeck_ExInvalidFieldName_HPP__
-#include "Smp/InvalidFieldName.h"
 #include "simdeck/Exception.hpp"
+#include "Smp/InvalidFieldName.h"
 
 namespace simdeck {
 

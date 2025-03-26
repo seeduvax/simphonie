@@ -9,9 +9,9 @@
  */
 #ifndef __simdeck_Type_HPP__
 #define __simdeck_Type_HPP__
+#include "simdeck/Object.hpp"
 #include "Smp/Publication/IType.h"
 #include "Smp/IPublication.h"
-#include "simdeck/Object.hpp"
 
 namespace simdeck {
 using namespace simdeck;

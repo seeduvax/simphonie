@@ -10,7 +10,7 @@
 #ifndef __simdeck_Utils_HPP__
 #define __simdeck_Utils_HPP__
 
-#include <Smp/Uuid.h>
+#include <simdeck/Uuid.hpp>
 #include <cstdint>
 #include <cstddef>
 #include <string>

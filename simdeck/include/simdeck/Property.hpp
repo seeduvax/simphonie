@@ -10,8 +10,8 @@
 #ifndef __simdeck_Property_HPP__
 #define __simdeck_Property_HPP__
 
-#include "Smp/IProperty.h"
 #include "simdeck/Object.hpp"
+#include "Smp/IProperty.h"
 
 namespace simdeck {
 

@@ -1,5 +1,6 @@
+#include "simdeck/Uuid.hpp"
 #include "Smp/AnySimple.h"
-#include <string.h>
+#include <cstring>
 #include <iostream>
 #include <sstream>
 

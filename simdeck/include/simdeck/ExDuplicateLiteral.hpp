@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_ExDuplicateLiteral_HPP__
 #define __simdeck_ExDuplicateLiteral_HPP__
-#include "Smp/Publication/DuplicateLiteral.h"
 #include "simdeck/Exception.hpp"
+#include "Smp/Publication/DuplicateLiteral.h"
 
 namespace simdeck {
 using namespace simdeck;

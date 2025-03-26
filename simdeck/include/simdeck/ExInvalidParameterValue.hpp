@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_ExInvalidParameterValue_HPP__
 #define __simdeck_ExInvalidParameterValue_HPP__
-#include "Smp/InvalidParameterValue.h"
 #include "simdeck/ExInvalidAnyType.hpp"
+#include "Smp/InvalidParameterValue.h"
 
 namespace simdeck {
 

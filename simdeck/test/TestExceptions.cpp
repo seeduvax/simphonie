@@ -10,12 +10,12 @@
 
 #include <string.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include "simdeck/ExInvalidObjectName.hpp"
+#include "simdeck/Object.hpp"
 #include "Smp/AnySimple.h"
 #include "Smp/IObject.h"
 #include "Smp/IPublication.h"
 #include "Smp/PrimitiveTypes.h"
-#include "simdeck/ExInvalidObjectName.hpp"
-#include "simdeck/Object.hpp"
 //#include "simdeck/ExInvalidParameterValue.hpp"
 
 namespace test {

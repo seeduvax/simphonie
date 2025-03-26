@@ -10,8 +10,8 @@
 #ifndef __simdeck_SimpleArrayField_HPP__
 #define __simdeck_SimpleArrayField_HPP__
 
-#include "Smp/ISimpleArrayField.h"
 #include "simdeck/Field.hpp"
+#include "Smp/ISimpleArrayField.h"
 
 namespace simdeck {
 

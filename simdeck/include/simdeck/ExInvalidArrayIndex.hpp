@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_ExInvalidArrayIndex_HPP__
 #define __simdeck_ExInvalidArrayIndex_HPP__
-#include "Smp/InvalidArrayIndex.h"
 #include "simdeck/Exception.hpp"
+#include "Smp/InvalidArrayIndex.h"
 
 namespace simdeck {
 using namespace simdeck;

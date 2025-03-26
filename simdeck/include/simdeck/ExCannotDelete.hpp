@@ -9,9 +9,9 @@
  */
 #ifndef __simdeck_ExCannotDelete_HPP__
 #define __simdeck_ExCannotDelete_HPP__
+#include "simdeck/Exception.hpp"
 #include "Smp/CannotDelete.h"
 #include "Smp/IContainer.h"
-#include "simdeck/Exception.hpp"
 
 namespace simdeck {
 

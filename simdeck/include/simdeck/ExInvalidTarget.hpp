@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_ExInvalidTarget_HPP__
 #define __simdeck_ExInvalidTarget_HPP__
-#include "Smp/InvalidTarget.h"
 #include "simdeck/Exception.hpp"
+#include "Smp/InvalidTarget.h"
 
 namespace simdeck {
 using namespace simdeck;

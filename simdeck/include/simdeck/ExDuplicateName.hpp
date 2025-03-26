@@ -10,8 +10,8 @@
 #ifndef __simdeck_DuplicateName_HPP__
 #define __simdeck_DuplicateName_HPP__
 #include <string>
-#include "Smp/DuplicateName.h"
 #include "simdeck/Exception.hpp"
+#include "Smp/DuplicateName.h"
 
 namespace simdeck {
 

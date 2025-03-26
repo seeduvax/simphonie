@@ -10,8 +10,8 @@
 #ifndef __simdeck_StructureType_HPP__
 #define __simdeck_StructureType_HPP__
 #include <vector>
-#include "Smp/Publication/IStructureType.h"
 #include "simdeck/Type.hpp"
+#include "Smp/Publication/IStructureType.h"
 #include "Smp/Publication/ITypeRegistry.h"
 
 namespace simdeck {

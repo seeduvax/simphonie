@@ -10,9 +10,9 @@
 #ifndef __simdeck_Operation_HPP__
 #define __simdeck_Operation_HPP__
 
-#include "Smp/IOperation.h"
 #include "simdeck/Collection.hpp"
 #include "simdeck/Object.hpp"
+#include "Smp/IOperation.h"
 
 namespace simdeck {
 

@@ -10,9 +10,9 @@
 #ifndef __simdeck_EntryPointPublisher_HPP__
 #define __simdeck_EntryPointPublisher_HPP__
 
-#include "Smp/IEntryPointPublisher.h"
 #include "simdeck/EntryPoint.hpp"
 #include "simdeck/Collection.hpp"
+#include "Smp/IEntryPointPublisher.h"
 
 namespace simdeck {
 using namespace simdeck;

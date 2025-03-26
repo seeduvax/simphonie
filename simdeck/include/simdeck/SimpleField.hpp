@@ -10,8 +10,8 @@
 #ifndef __simdeck_SimpleField_HPP__
 #define __simdeck_SimpleField_HPP__
 
-#include "Smp/ISimpleField.h"
 #include "simdeck/Field.hpp"
+#include "Smp/ISimpleField.h"
 
 namespace simdeck {
 

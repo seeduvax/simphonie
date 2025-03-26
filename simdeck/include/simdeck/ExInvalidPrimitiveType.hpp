@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_ExInvalidPrimitiveType_HPP__
 #define __simdeck_ExInvalidPrimitiveType_HPP__
-#include "Smp/Publication/InvalidPrimitiveType.h"
 #include "simdeck/Exception.hpp"
+#include "Smp/Publication/InvalidPrimitiveType.h"
 
 namespace simdeck {
 using namespace simdeck;

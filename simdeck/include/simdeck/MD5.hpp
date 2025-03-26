@@ -11,7 +11,7 @@
 #define __simdeck_MD5_HPP__
 
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
 
 namespace simdeck {
 

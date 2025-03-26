@@ -10,9 +10,9 @@
 #ifndef __simdeck_Composite_HPP__
 #define __simdeck_Composite_HPP__
 #include <iostream>
-#include "Smp/IComposite.h"
-#include "simdeck/Collection.hpp"
 #include "simdeck/Object.hpp"
+#include "simdeck/Collection.hpp"
+#include "Smp/IComposite.h"
 namespace simdeck {
 
 /**

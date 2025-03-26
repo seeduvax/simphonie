@@ -10,8 +10,8 @@
 #ifndef __simdeck_ExInvalidParent_HPP__
 #define __simdeck_ExInvalidParent_HPP__
 
-#include "Smp/InvalidParent.h"
 #include "simdeck/Exception.hpp"
+#include "Smp/InvalidParent.h"
 
 namespace simdeck {
 

@@ -9,6 +9,8 @@
  */
 #ifndef __simdeck_Component_HPP__
 #define __simdeck_Component_HPP__
+
+#include "simdeck/Uuid.hpp"
 #include "Smp/IComponent.h"
 #include "Smp/Services/ILinkRegistry.h"
 #include "Smp/Services/ILogger.h"

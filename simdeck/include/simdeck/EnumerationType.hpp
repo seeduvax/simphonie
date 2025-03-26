@@ -10,8 +10,8 @@
 #ifndef __simdeck_EnumerationType_HPP__
 #define __simdeck_EnumerationType_HPP__
 #include <vector>
-#include "Smp/Publication/IEnumerationType.h"
 #include "simdeck/Type.hpp"
+#include "Smp/Publication/IEnumerationType.h"
 
 namespace simdeck {
 

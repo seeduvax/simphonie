@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_Failure_HPP__
 #define __simdeck_Failure_HPP__
-#include "Smp/IFailure.h"
 #include "simdeck/Persist.hpp"
+#include "Smp/IFailure.h"
 
 namespace simdeck {
 /**

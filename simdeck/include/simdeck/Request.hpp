@@ -10,8 +10,8 @@
 #ifndef __simdeck_Request_HPP__
 #define __simdeck_Request_HPP__
 
-#include "Smp/IRequest.h"
 #include "simdeck/Collection.hpp"
+#include "Smp/IRequest.h"
 
 namespace simdeck {
 using namespace simdeck;

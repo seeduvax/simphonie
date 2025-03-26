@@ -10,10 +10,10 @@
 #ifndef __simdeck_FallibleModel_HPP__
 #define __simdeck_FallibleModel_HPP__
 
+#include "simdeck/Collection.hpp"
 #include "Smp/IFailure.h"
 #include "Smp/IFallibleModel.h"
 #include "Smp/IModel.h"
-#include "simdeck/Collection.hpp"
 
 namespace simdeck {
 /**

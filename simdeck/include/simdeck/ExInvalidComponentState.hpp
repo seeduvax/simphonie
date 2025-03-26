@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_ExInvalidComponentState_HPP__
 #define __simdeck_ExInvalidComponentState_HPP__
-#include "Smp/InvalidComponentState.h"
 #include "simdeck/Exception.hpp"
+#include "Smp/InvalidComponentState.h"
 namespace simdeck {
 
 /**

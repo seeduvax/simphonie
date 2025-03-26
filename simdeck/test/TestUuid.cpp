@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "abs/test.h"
+#include "simdeck/Uuid.hpp"
 #include "Smp/Uuid.h"
 #include "Smp/Exception.h"
 #include <sstream>

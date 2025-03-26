@@ -9,6 +9,7 @@
  */
 #ifndef __simdeck_ArrayType_HPP__
 #define __simdeck_ArrayType_HPP__
+#include "simdeck/Uuid.hpp"
 #include "Smp/Publication/IArrayType.h"
 #include "simdeck/Type.hpp"
 

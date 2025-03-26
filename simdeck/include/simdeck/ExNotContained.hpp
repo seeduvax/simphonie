@@ -9,9 +9,9 @@
  */
 #ifndef __simdeck_ExNotContained_HPP__
 #define __simdeck_ExNotContained_HPP__
+#include "simdeck/Exception.hpp"
 #include "Smp/IContainer.h"
 #include "Smp/NotContained.h"
-#include "simdeck/Exception.hpp"
 
 namespace simdeck {
 

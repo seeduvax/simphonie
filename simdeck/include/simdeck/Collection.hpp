@@ -9,11 +9,11 @@
  */
 #ifndef __simdeck_Collection_HPP__
 #define __simdeck_Collection_HPP__
-#include <string.h>
+#include <cstring>
 #include <algorithm>
 #include <vector>
-#include "Smp/ICollection.h"
 #include "simdeck/Object.hpp"
+#include "Smp/ICollection.h"
 
 #include <iostream>
 

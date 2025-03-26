@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_ExVoidOperation_HPP__
 #define __simdeck_ExVoidOperation_HPP__
-#include "Smp/VoidOperation.h"
 #include "simdeck/Exception.hpp"
+#include "Smp/VoidOperation.h"
 
 namespace simdeck {
 using namespace simdeck;

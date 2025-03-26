@@ -12,9 +12,11 @@
 #include <functional>
 #include <iostream>
 #include <memory>
-#include "Smp/IFactory.h"
 #include "simdeck/Object.hpp"
 #include "simdeck/Utils.hpp"
+
+#include <Smp/IComponent.h>
+#include "Smp/IFactory.h"
 
 namespace simdeck {
 /**

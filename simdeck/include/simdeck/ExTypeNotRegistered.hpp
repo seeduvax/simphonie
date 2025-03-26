@@ -10,8 +10,8 @@
 #ifndef __simdeck_ExTypeNotRegistered_HPP__
 #define __simdeck_ExTypeNotRegistered_HPP__
 
-#include "Smp/Publication/TypeNotRegistered.h"
 #include "simdeck/Exception.hpp"
+#include "Smp/Publication/TypeNotRegistered.h"
 
 namespace simdeck {
 

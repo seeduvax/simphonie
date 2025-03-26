@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_ExInvalidObjectName_HPP__
 #define __simdeck_ExInvalidObjectName_HPP__
-#include "Smp/InvalidObjectName.h"
 #include "simdeck/Exception.hpp"
+#include "Smp/InvalidObjectName.h"
 
 namespace simdeck {
 

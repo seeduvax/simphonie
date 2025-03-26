@@ -10,8 +10,8 @@
 #ifndef __simdeck_ExInvalidFile_HPP__
 #define __simdeck_ExInvalidFile_HPP__
 
-#include "Smp/InvalidFile.h"
 #include "simdeck/Exception.hpp"
+#include "Smp/InvalidFile.h"
 
 namespace simdeck {
 

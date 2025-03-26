@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_Container_HPP__
 #define __simdeck_Container_HPP__
-#include "Smp/IContainer.h"
 #include "simdeck/Collection.hpp"
+#include "Smp/IContainer.h"
 
 namespace simdeck {
 

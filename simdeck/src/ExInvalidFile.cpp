@@ -20,7 +20,7 @@ ExInvalidFile::ExInvalidFile(const Smp::IObject* sender,
     setSender(sender);
     std::ostringstream d;
     d << "invalid file " << _fileName;
-    if ( errorMsg != "" ) {
+    if ( std::string(errorMsg) != "" ) {
         d << ": " << errorMsg;
     }
     setDescription(d.str().c_str());
