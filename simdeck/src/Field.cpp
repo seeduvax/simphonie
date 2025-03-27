@@ -12,9 +12,26 @@
 #include "simdeck/StructureType.hpp"
 #include "simdeck/Type.hpp"
 
+#include "simdeck/ExInvalidObjectName.hpp"
+#include "Smp/IArrayField.h"
+#include "Smp/ISimpleArrayField.h"
+#include <regex>
+
 namespace simdeck {
 // --------------------------------------------------------------------
 // ..........................................................
+class ExInvalidArrayMemberBadFormat: public ExInvalidObjectName {
+public:
+    ExInvalidArrayMemberBadFormat(Smp::IObject* sender, Smp::String8 invalidName):
+            ExInvalidObjectName(sender, invalidName) {
+        std::ostringstream d;
+        d << "'" << invalidName << "' invalid name format, bad char or does not start with a letter.";
+        setDescription(d.str().c_str());
+        setMessage();
+    }
+    virtual ~ExInvalidArrayMemberBadFormat() {
+    }
+};
 Field::Field(Smp::String8 name, Smp::String8 description,
              Smp::ViewKind viewKind, void* address, unsigned int dataSize,
              Smp::Publication::IType* type, Smp::Bool isState,
@@ -29,6 +46,15 @@ Field::Field(Smp::String8 name, Smp::String8 description,
       _data(address == nullptr ? malloc(dataSize) : address),
       _dataSize(dataSize),
       _allocated(address == nullptr) {
+    //Moved from Object to Field because ArrayField can have a Collection component
+    if ((dynamic_cast<Smp::IArrayField*>(parent)!=nullptr
+        || dynamic_cast<Smp::ISimpleArrayField*>(parent)!=nullptr)) {
+        // when object is a array member, its name shall be
+        // "[i]" with i the 0 based integer index
+        if (!std::regex_match(name, std::regex("\\[[0-9][0-9]*\\]"))) {
+            throw ExInvalidArrayMemberBadFormat(this, name);
+        }
+    }
 }
 // ..........................................................
 Field::~Field() {

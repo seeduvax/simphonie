@@ -299,15 +299,9 @@ public:
 // ..........................................................
 void Object::checkName(Smp::String8 name) {
     std::string n=name;
-    if (dynamic_cast<Smp::IArrayField*>(_parent)!=nullptr
-        || dynamic_cast<Smp::ISimpleArrayField*>(_parent)!=nullptr) {
-        // when object is a array member, its name shall be
-        // "[i]" with i the 0 based integer index
-        if (!std::regex_match(n, std::regex("\\[[0-9][0-9]*\\]"))) {
-            throw ExInvalidNameBadFormat(this, name);
-        }
-    }
-    else { 
+    //ArrayField check moved from Object to Field because ArrayField can have a Collection component
+    if ((dynamic_cast<Smp::IArrayField*>(_parent)==nullptr
+        && dynamic_cast<Smp::ISimpleArrayField*>(_parent)==nullptr)) {
         // otherwise, shall start with letter, be alphanumeric.
         // '_' is also valid in names
         if (!std::regex_match(n, std::regex("[a-zA-Z][a-zA-Z0-9_]*"))) {
