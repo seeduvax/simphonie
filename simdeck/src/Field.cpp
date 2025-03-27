@@ -15,6 +15,7 @@
 #include "simdeck/ExInvalidObjectName.hpp"
 #include "Smp/IArrayField.h"
 #include "Smp/ISimpleArrayField.h"
+#include <sstream>
 #include <regex>
 
 namespace simdeck {
