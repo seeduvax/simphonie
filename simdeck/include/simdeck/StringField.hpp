@@ -29,6 +29,7 @@ public:
                 Smp::String8 description,
                 Smp::ViewKind viewKind,
                 std::string* address,
+                Smp::Publication::IType* type,
                 Smp::Bool isState,
                 Smp::Bool isInput,
                 Smp::Bool isOutput,
@@ -48,6 +49,17 @@ public:
     void Unforce() override;
     Smp::Bool IsForced() override;
     void Freeze() override;
+
+    static StringField* Create(
+                Smp::String8 name,
+                Smp::String8 description,
+                Smp::ViewKind viewKind,
+                std::string* address,
+                Smp::Publication::IType* type,
+                Smp::Bool isState,
+                Smp::Bool isInput,
+                Smp::Bool isOutput,
+                Smp::IObject* parent);
 
 private:
     std::string* _value;
