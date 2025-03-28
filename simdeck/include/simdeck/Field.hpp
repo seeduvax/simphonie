@@ -57,6 +57,7 @@ protected:
     inline const void* getDataPtr() {
         return _data;
     }
+    void checkName(Smp::String8 name);
 
 private:
     /** state flag */

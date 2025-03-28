@@ -9,6 +9,7 @@
  */
 #include "simdeck/Field.hpp"
 #include "simdeck/ExInvalidTarget.hpp"
+#include "simdeck/Object.hpp"
 #include "simdeck/StructureType.hpp"
 #include "simdeck/Type.hpp"
 
@@ -38,7 +39,7 @@ Field::Field(Smp::String8 name, Smp::String8 description,
              Smp::Publication::IType* type, Smp::Bool isState,
              Smp::Bool isInput, Smp::Bool isOutput,
              Smp::IObject* parent)
-    : Persist(name, description, parent),
+    : Persist(name, description, parent,true),
       _stateType(isState),
       _inputType(isInput),
       _outputType(isOutput),
@@ -47,15 +48,7 @@ Field::Field(Smp::String8 name, Smp::String8 description,
       _data(address == nullptr ? malloc(dataSize) : address),
       _dataSize(dataSize),
       _allocated(address == nullptr) {
-    //Moved from Object to Field because ArrayField can have a Collection component
-    if ((dynamic_cast<Smp::IArrayField*>(parent)!=nullptr
-        || dynamic_cast<Smp::ISimpleArrayField*>(parent)!=nullptr)) {
-        // when object is a array member, its name shall be
-        // "[i]" with i the 0 based integer index
-        if (!std::regex_match(name, std::regex("\\[[0-9][0-9]*\\]"))) {
-            throw ExInvalidArrayMemberBadFormat(this, name);
-        }
-    }
+    checkName(name);
 }
 // ..........................................................
 Field::~Field() {
@@ -65,6 +58,21 @@ Field::~Field() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
+
+void Field::checkName(Smp::String8 name) {
+    if ((dynamic_cast<Smp::IArrayField*>(GetParent())!=nullptr
+        || dynamic_cast<Smp::ISimpleArrayField*>(GetParent())!=nullptr)) {
+        // when object is a array member, its name shall be
+        // "[i]" with i the 0 based integer index
+        if (!std::regex_match(name, std::regex("\\[[0-9][0-9]*\\]"))) {
+            throw ExInvalidArrayMemberBadFormat(this, name);
+        }
+    }
+    else{
+        Object::checkName(name);
+    }
+}
+
 Smp::ViewKind Field::GetView() const {
     return _viewKind;
 }

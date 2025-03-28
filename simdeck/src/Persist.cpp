@@ -12,7 +12,7 @@
 namespace simdeck {
 // --------------------------------------------------------------------
 // ..........................................................
-Persist::Persist(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Object(name, descr, parent) {}
+Persist::Persist(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, Smp::Bool overrideNameCheck) : Object(name, descr, parent, overrideNameCheck) {}
 // ..........................................................
 Persist::~Persist() {}
 // --------------------------------------------------------------------
