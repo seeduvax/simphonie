@@ -21,7 +21,7 @@ public:
     /**
      * Default constructor.
      */
-    Persist(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
+    Persist(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr, Smp::Bool overrideNameCheck = false);
     /**
      * Destructor.
      */

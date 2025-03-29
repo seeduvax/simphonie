@@ -23,7 +23,7 @@ public:
     /**
      * Default constructor.
      */
-    Object(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
+    Object(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr, Smp::Bool overrideNameCheck = false);
     /**
      * Destructor.
      */

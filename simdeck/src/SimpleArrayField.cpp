@@ -139,18 +139,18 @@ public:
     void Push() override {
         for (auto target: _targets) {
             for (Smp::UInt64 i=0;i<this->GetSize();i++) {
-                target->SetValue(i,this->GetValue(i));
+                dynamic_cast<Smp::ISimpleArrayField*>(target)->SetValue(i,this->GetValue(i));
             }
         }
     }
     const Smp::FieldCollection* GetInputFields() const override {
-        return dynamic_cast<const Smp::FieldCollection*>(&_targets);
+        return &_targets;
     }
     Smp::Bool IsAutomatic() const override {
         return false;
     }
 private:
-    Collection<Smp::ISimpleArrayField> _targets;
+    Collection<Smp::IField> _targets;
 };
 // --------------------------------------------------------------------
 // ..........................................................
