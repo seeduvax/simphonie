@@ -121,7 +121,6 @@ private:
         auto s=dynamic_cast<T*>(service);
         if (s!=nullptr) {
             _services->DeleteComponent(*target);
-            delete *target;
             *target=s;
         }
     }
