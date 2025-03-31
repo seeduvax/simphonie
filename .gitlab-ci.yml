@@ -72,13 +72,53 @@ sanitize_debian11:
             - execution.log
 
 
+test_mingw:
+    extends: .test_base
+    tags:
+        - debian_12_mingw
+        
 test_debian11:
     extends: .test_base
     tags:
         - debian_11
+        
+test_debian12:
+    extends: .test_base
+    tags:
+        - debian_12
+        
+test_debian12_arm64:
+    extends: .test_base
+    tags:
+        - debian_12_arm64
+
+test_suse15sp5:
+    extends: .test_base
+    tags:
+        - suse_15sp5
+
+
+
+
 
 # Main Deployment job triggered only at new tag push
 deploy_debian11:
     extends: .deploy_base
     tags:
         - debian_11
+
+deploy_debian12:
+    extends: .deploy_base
+    tags:
+        - debian_12
+
+deploy_debian12_arm64:
+    extends: .deploy_base
+    tags:
+        - debian_12_arm64
+
+deploy_suse15sp5:
+    extends: .deploy_base
+    tags:
+        - suse_15sp5
+
