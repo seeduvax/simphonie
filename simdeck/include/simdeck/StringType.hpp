@@ -19,7 +19,7 @@ namespace simdeck {
  *
  */
 class StringType: public Object, virtual public Smp::Publication::IType {
-    typedef Smp::IObject Parent;
+    typedef Object Parent;
 public:
     /**
      * Default constructor.

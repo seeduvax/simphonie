@@ -28,5 +28,5 @@ Smp::PrimitiveTypeKind StringType::GetPrimitiveTypeKind() const {
 // ..........................................................
 Smp::Uuid StringType::GetUuid() const {
     return { 0, 0, 0, { ' ',' ','S','t','r','i','n','g'} };   
-
+}
 } // namespace simdeck
