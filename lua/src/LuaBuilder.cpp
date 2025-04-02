@@ -11,7 +11,11 @@
 #include "Smp/IModel.h"
 #include "Smp/IOutputField.h"
 #include "Smp/Services/IResolver.h"
+#include "Smp/ISimpleField.h"
+#include "Smp/ISimpleArrayField.h"
+#include "Smp/Publication/IType.h"
 
+#include "simdeck/ExInvalidType.hpp"
 namespace simphonie {
 namespace lua {
 // --------------------------------------------------------------------
@@ -62,14 +66,33 @@ void LuaBuilder::connect() {
     // iterate on init data section to set related fields value.
     // iterate on connection section to connect fields (TODO all kind of
     // connection to be handled, not only field to field connections)
+    std::cout<<"Initializations"<<std::endl;
+    sol::table components=_config["components"];
+    for (auto te: components) {
+        //std::string name=te.first;    
+        std::string name=te.first.as<std::string>();
+        sol::table v=te.second;
+        std::string type=v["type"];
+        std::string description=v["description"];
+        auto comp=_sim->GetContainer(Smp::ISimulator::SMP_SimulatorModels)->GetChild(name.c_str());
+        // TODO recursively scan to build child components.
+        auto composite=dynamic_cast<Smp::IComposite*>(comp);
+        if (composite!=nullptr) {
+            initSubComponents(composite,v);
+        }
+    }
+    std::cout<<"Connections"<<std::endl;
     auto resolver=_sim->GetResolver();
-    sol::table components=_config["connections"];
+    components=_config["connections"];
     for (auto cnx: components) {
+
+        
         std::string toPath=cnx.first.as<std::string>();
         std::string fromPath=cnx.second.as<std::string>();
         auto from=dynamic_cast<Smp::IOutputField*>(resolver->ResolveAbsolute(fromPath.c_str()));
         auto to=dynamic_cast<Smp::IField*>(resolver->ResolveAbsolute(toPath.c_str()));
         if (from!=nullptr && to!=nullptr) {
+            std::cout<<from->GetName()<<"=>"<<to->GetName()<<std::endl;
             from->Connect(to);
         }
     }
@@ -132,12 +155,61 @@ Smp::IComponent* LuaBuilder::componentCreateComponent(
     }
     return nullptr;
 }
+
+Smp::AnySimple anyFromLua(Smp::PrimitiveTypeKind ptk, sol::object val){
+    Smp::AnySimple res = Smp::AnySimple(ptk);
+    switch (ptk) {
+        case Smp::PrimitiveTypeKind::PTK_Int8:
+            res.SetValue(ptk,val.as<Smp::Int8>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int16:
+            res.SetValue(ptk,val.as<Smp::Int16>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int32:
+            res.SetValue(ptk,val.as<Smp::Int32>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int64:
+        case Smp::PrimitiveTypeKind::PTK_DateTime:
+        case Smp::PrimitiveTypeKind::PTK_Duration:
+            res.SetValue(ptk,val.as<Smp::Int64>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt8:
+            res.SetValue(ptk,val.as<Smp::UInt8>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt16:
+            res.SetValue(ptk,val.as<Smp::UInt16>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt32:
+            res.SetValue(ptk,val.as<Smp::UInt32>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt64:
+            res.SetValue(ptk,val.as<Smp::UInt64>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Bool:
+            res.SetValue(ptk,val.as<Smp::Bool>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Char8:
+            res.SetValue(ptk,val.as<Smp::Char8>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Float32:
+            res.SetValue(ptk,val.as<Smp::Float32>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Float64:
+            res.SetValue(ptk,val.as<Smp::Float64>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_String8:
+            res.SetValue(ptk,val.as<Smp::String8>());
+            break;
+    }
+    return res;
+}
 // ..........................................................
 void LuaBuilder::addSubComponents(Smp::IComposite* node, sol::table t) {
     for (auto te: t) {
         std::string kName=te.first.as<std::string>();
         if (kName!="type" && kName!="description") {
-            sol::table content=te.second;
+            if(node->GetContainer(kName.c_str()) == nullptr)continue;
+            sol::table content=te.second.as<sol::table>();
             for (auto child: content) {
                 std::string name=child.first.as<std::string>();
                 sol::table v=child.second;
@@ -159,6 +231,46 @@ void LuaBuilder::addSubComponents(Smp::IComposite* node, sol::table t) {
 }
 
 
+void LuaBuilder::initSubComponents(Smp::IComposite* node, sol::table t) {
+    for (auto te: t) {
+        std::string kName=te.first.as<std::string>();
+        if (kName!="type" && kName!="description") {
+            auto c=dynamic_cast<Smp::IComponent*>(node);
+            if (c!=nullptr) {
+                auto field = c->GetField(kName.c_str());
+                if(field!=nullptr){
+                    Smp::PrimitiveTypeKind ptk = field->GetType()->GetPrimitiveTypeKind();
+                    if(ptk==Smp::PrimitiveTypeKind::PTK_None){
+                        throw simdeck::ExInvalidType(field,"No primitive type Found");
+                    }
+                    auto simpleField = dynamic_cast<Smp::ISimpleField*>(field);
+                    if(simpleField!=nullptr){
+                        simpleField->SetValue(anyFromLua(ptk, te.second));
+                    }
+                    auto simpleArrayField = dynamic_cast<Smp::ISimpleArrayField*>(field);
+                    if(simpleArrayField!=nullptr){
+                        sol::table luaArray = te.second;
+                        if(luaArray.size() == simpleArrayField->GetSize()){
+                            for(Smp::UInt64 i=0;i<simpleArrayField->GetSize();i++)
+                            {
+                                simpleArrayField->SetValue(i, anyFromLua(ptk , luaArray[i+1]));
+                            }
+                        }
+                        else{
+                            throw simdeck::ExInvalidType(field,"Lua table size does not match array size");
+                        }
+                    }
+                }
+            }
+            if(node->GetContainer(kName.c_str()) == nullptr)continue;
+            sol::table content=te.second.as<sol::table>();
+            for (auto child: content) {
+                Smp::IObject* childNode = node->GetContainer(kName.c_str())->GetChild(child.first.as<Smp::String8>());
+                initSubComponents(dynamic_cast<Smp::IComposite*>(childNode),child.second);
+            }
+        }
+    }
+}
 
 /*
 // ..........................................................

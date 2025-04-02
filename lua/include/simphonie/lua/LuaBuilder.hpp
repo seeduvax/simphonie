@@ -57,6 +57,7 @@ protected:
     void connect() override;
 private:
     void addSubComponents(Smp::IComposite* node, sol::table t);
+    void initSubComponents(Smp::IComposite* node, sol::table t);
     
     Smp::ISimulator* _sim;
     Smp::Services::IResolver* _resolver;

@@ -264,7 +264,6 @@ Smp::Publication::IType* Publication::getArrayType(Smp::PrimitiveTypeKind ptk, S
 Smp::ISimpleArrayField* Publication::PublishArray(Smp::String8 name, Smp::String8 description, Smp::Int64 count, void* address,
                                Smp::PrimitiveTypeKind type, Smp::ViewKind view, Smp::Bool state, Smp::Bool input,
                                Smp::Bool output) {
-TRACE("!!!!!!!!!!!!!")
     Smp::Publication::IType* t = getArrayType(type, count);
     auto* rf=SimpleArrayField::Create(
                                     name,

@@ -2,5 +2,7 @@ build
 dist
 local*
 .vscode
+.cache
+
 umdl/sampler.csv
 compile_commands.json
