@@ -1,5 +1,8 @@
 #include "SimControlEnd.hpp"
-#include "simphonie/kern/Scheduler.hpp"
+
+#include <Smp/Services/IEventManager.h>
+#include <Smp/Services/ITimeKeeper.h>
+
 #include "simdeck/EntryPoint.hpp"
 #include "simphonie/sys/Logger.hpp"
 
