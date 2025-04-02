@@ -152,6 +152,11 @@ deploy_debian9:
     tags:
         - debian_9
 
+deploy_mingw:
+    extends: .deploy_base
+    tags:
+        - debian_12_mingw
+
 deploy_redhawk7_clang13:
     extends: .deploy_base
     tags:
