@@ -8,6 +8,8 @@
  * $Date$
  */
 #include "simphonie/lua/LuaBuilder.hpp"
+#include <iostream>
+#include <string>
 #include "Smp/IModel.h"
 #include "Smp/IOutputField.h"
 #include "Smp/Services/IResolver.h"
@@ -47,7 +49,7 @@ void LuaBuilder::publish(Smp::IPublication* receiver) {
         std::string name=te.first.as<std::string>();
         sol::table v=te.second;
         std::string type=v["type"];
-        std::string description=v["description"];
+        std::string description=v["description"].get<sol::optional<std::string>>().value_or(std::string(""));
         auto comp=simulatorCreateComponent(_sim, type.c_str(), name.c_str(),
                                  description.c_str());
         // TODO recursively scan to build child components.
@@ -67,26 +69,27 @@ void LuaBuilder::connect() {
     // iterate on connection section to connect fields (TODO all kind of
     // connection to be handled, not only field to field connections)
     std::cout<<"Initializations"<<std::endl;
+    
     sol::table components=_config["components"];
     for (auto te: components) {
         //std::string name=te.first;    
         std::string name=te.first.as<std::string>();
         sol::table v=te.second;
         std::string type=v["type"];
-        std::string description=v["description"];
-        auto comp=_sim->GetContainer(Smp::ISimulator::SMP_SimulatorModels)->GetChild(name.c_str());
-        // TODO recursively scan to build child components.
-        auto composite=dynamic_cast<Smp::IComposite*>(comp);
-        if (composite!=nullptr) {
-            initSubComponents(composite,v);
+        
+        Smp::IObject* comp=_sim->GetContainer(Smp::ISimulator::SMP_SimulatorModels)->GetChild(name.c_str());
+        if(comp==nullptr){
+        std::cout<<"size:"<<_sim->GetContainer(Smp::ISimulator::SMP_SimulatorServices)->GetComponents()->size()<<std::endl;
+            comp=_sim->GetService(name.c_str());
         }
+        std::cout<<comp->GetName()<<std::endl;
+        // TODO recursively scan to build child components.
+        initComponents(comp,v);
     }
     std::cout<<"Connections"<<std::endl;
     auto resolver=_sim->GetResolver();
     components=_config["connections"];
     for (auto cnx: components) {
-
-        
         std::string toPath=cnx.first.as<std::string>();
         std::string fromPath=cnx.second.as<std::string>();
         auto from=dynamic_cast<Smp::IOutputField*>(resolver->ResolveAbsolute(fromPath.c_str()));
@@ -110,6 +113,7 @@ Smp::IComponent* LuaBuilder::simulatorCreateComponent(Smp::ISimulator* sim,
                 auto service=dynamic_cast<Smp::IService*>(comp);
                 if (service!=nullptr) {
                     sim->AddService(service);
+        std::cout<<"size:"<<sim->GetContainer(Smp::ISimulator::SMP_SimulatorServices)->GetComponents()->size()<<std::endl;
                     return comp;
                 }
                 auto model=dynamic_cast<Smp::IModel*>(comp);
@@ -231,7 +235,7 @@ void LuaBuilder::addSubComponents(Smp::IComposite* node, sol::table t) {
 }
 
 
-void LuaBuilder::initSubComponents(Smp::IComposite* node, sol::table t) {
+void LuaBuilder::initComponents(Smp::IObject* node, sol::table t) {
     for (auto te: t) {
         std::string kName=te.first.as<std::string>();
         if (kName!="type" && kName!="description") {
@@ -239,6 +243,8 @@ void LuaBuilder::initSubComponents(Smp::IComposite* node, sol::table t) {
             if (c!=nullptr) {
                 auto field = c->GetField(kName.c_str());
                 if(field!=nullptr){
+                    
+                    std::cout<<field->GetName()<<std::endl;
                     Smp::PrimitiveTypeKind ptk = field->GetType()->GetPrimitiveTypeKind();
                     if(ptk==Smp::PrimitiveTypeKind::PTK_None){
                         throw simdeck::ExInvalidType(field,"No primitive type Found");
@@ -262,11 +268,12 @@ void LuaBuilder::initSubComponents(Smp::IComposite* node, sol::table t) {
                     }
                 }
             }
-            if(node->GetContainer(kName.c_str()) == nullptr)continue;
+            Smp::IComposite* cnode = dynamic_cast<Smp::IComposite*>(node);
+            if(cnode == nullptr || cnode->GetContainer(kName.c_str()) == nullptr)continue;
             sol::table content=te.second.as<sol::table>();
             for (auto child: content) {
-                Smp::IObject* childNode = node->GetContainer(kName.c_str())->GetChild(child.first.as<Smp::String8>());
-                initSubComponents(dynamic_cast<Smp::IComposite*>(childNode),child.second);
+                std::cout<<kName.c_str()<<":"<<child.first.as<Smp::String8>()<<std::endl;
+                initComponents(cnode->GetContainer(kName.c_str())->GetChild(child.first.as<Smp::String8>()),child.second);
             }
         }
     }

@@ -9,16 +9,15 @@
  */
 #include "Smp/ISimulator.h"
 #include "simdeck/Factory.hpp"
-#include "simphonie/esmp/Sampler.hpp"
-#include "simphonie/esmp/SimControl.hpp"
 #include "simphonie/sys/DlDef.h"
+#include "simphonie/colibry/FieldRecorder.hpp"
+#include "simphonie/colibry/FieldRecorderCsv.hpp"
 
 namespace simphonie {
-namespace esmp {
+namespace colibry {
 
 REGISTER_SMP_LIBINIT();
-ADD_SMP_FACTORY("Sampler", Sampler);
-ADD_SMP_FACTORY("SimControl", SimControl);
+ADD_SMP_FACTORY("FieldRecorderCsv", FieldRecorderCsv);
 
-}  // namespace esmp
+}  // namespace colibry
 }  // namespace simph
