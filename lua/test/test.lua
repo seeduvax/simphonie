@@ -2,6 +2,7 @@ s=require "simphonie_lua"
 sim=s.Simphonie.Simulator.new("luaSim")
 sim:setConfiguration({
     components={
+        ctrl={type="simphonie::colibry::SimControl", description=""},
         recorder={type="simphonie::colibry::FieldRecorderCsv", description=""},
         inc1={type="simphonie::umdl::SmpIncrement",description="",
             Children={
