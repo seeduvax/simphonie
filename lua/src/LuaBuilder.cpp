@@ -60,7 +60,35 @@ void LuaBuilder::publish(Smp::IPublication* receiver) {
     }
 }
 
-
+#define TRACE(expr) std::cout << __FILE__ << ":" << __LINE__ << ": " << #expr << " = " << expr << std::endl;
+// ..........................................................
+void LuaBuilder::connect(Smp::String8 fromPath, Smp::String8 toPath) {
+    auto resolver = _sim->GetResolver();
+    std::string msg = "Connecting field ";
+    msg += fromPath;
+    msg += " to ";
+    msg += toPath;
+    _sim->GetLogger()->Log(this, msg.c_str(), Smp::Services::ILogger::LMK_Debug);
+    auto from = dynamic_cast<Smp::IOutputField*>(resolver->ResolveAbsolute(fromPath));
+    auto to = dynamic_cast<Smp::IField*>(resolver->ResolveAbsolute(toPath));
+    if (from != nullptr && to != nullptr) {
+        from->Connect(to);
+    }
+    else {
+        msg = "Can't connect fields";
+        if (from == nullptr) {
+            msg += ", from field ";
+            msg += fromPath;
+            msg += " not found";
+        }
+        if (to == nullptr) {
+            msg += ", to field ";
+            msg += toPath;
+            msg += " not found";
+        }
+        _sim->GetLogger()->Log(this, msg.c_str(), Smp::Services::ILogger::LMK_Error);
+    }
+}
 // ..........................................................
 void LuaBuilder::connect() {
     // iterate on configuration table component section to init data defined
@@ -86,17 +114,20 @@ void LuaBuilder::connect() {
         // TODO recursively scan to build child components.
         initComponents(comp,v);
     }
-    std::cout<<"Connections"<<std::endl;
-    auto resolver=_sim->GetResolver();
+    std::cout << "Connections" << std::endl;
     components=_config["connections"];
     for (auto cnx: components) {
-        std::string toPath=cnx.first.as<std::string>();
-        std::string fromPath=cnx.second.as<std::string>();
-        auto from=dynamic_cast<Smp::IOutputField*>(resolver->ResolveAbsolute(fromPath.c_str()));
-        auto to=dynamic_cast<Smp::IField*>(resolver->ResolveAbsolute(toPath.c_str()));
-        if (from!=nullptr && to!=nullptr) {
-            std::cout<<from->GetName()<<"=>"<<to->GetName()<<std::endl;
-            from->Connect(to);
+        if (cnx.second.is<sol::table>()) {
+            auto target = cnx.first.as<std::string>();
+            for (auto src : cnx.second.as<sol::table>()) {
+                // many elements to connect, despite de left value is
+                // semantically speaking the reciever, the target is funally
+                // the IOutputField on which many Connect are applied.
+                connect(target.c_str(), src.second.as<std::string>().c_str());
+            }
+        }
+        else {
+            connect(cnx.second.as<std::string>().c_str(), cnx.first.as<std::string>().c_str());
         }
     }
 }

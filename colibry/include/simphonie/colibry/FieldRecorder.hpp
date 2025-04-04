@@ -22,9 +22,7 @@ namespace colibry {
  * It implements IOutputField just to benefit the related field connection
  * capability. It knows what field to records according the received connection.
  */
-class FieldRecorder: public simdeck::Service,
-                     virtual simdeck::EntryPointPublisher,
-                     virtual Smp::IOutputField {
+class FieldRecorder : public simdeck::Service, virtual public simdeck::EntryPointPublisher {
     typedef simdeck::Service Parent;
 public:
     /**
@@ -38,22 +36,6 @@ public:
      * Destructor.
      */
     virtual ~FieldRecorder();
-
-
-    // Smp::IOutputField implementation. mostly faked except Connect and
-    // Disconnect
-    void Connect(Smp::IField* field) override;
-    void Disconnect(Smp::IField* field) override;
-    const Smp::FieldCollection* GetInputFields() const override;
-    void Push() override;
-    Smp::Bool IsAutomatic() const override;
-    Smp::ViewKind GetView() const override;
-    Smp::Bool IsState() const override;
-    Smp::Bool IsInput() const override;
-    Smp::Bool IsOutput() const override;
-    const Smp::Publication::IType* GetType() const override;
-    void Restore( Smp::IStorageReader* reader) override;
-    void Store( Smp::IStorageWriter* writer) override;
 
     /**
      * recording sample function.
@@ -70,17 +52,48 @@ public:
 
 
 protected:
+    void publish(Smp::IPublication* receiver);
     Smp::String8 getFilePath() {
         return _filePath.c_str();
+    }
+    inline const Smp::FieldCollection* getInputFields() const {
+        return _fieldHolder.GetInputFields();
     }
 
 private:
     /** recording output file path */
     std::string _filePath;
-    /** list of the fields to be recorded by this recorder */
-    simdeck::Collection<Smp::IField> _recFields; 
+    /**
+     * Wrapper of a field collection as Smp::IOutput field to benefit of
+     * the Connect/Disconnect API.
+     */
+    class FieldHolder : public simdeck::Object, virtual public Smp::IOutputField {
+        typedef simdeck::Object Parent;
 
+    public:
+        FieldHolder(Smp::String8 name, Smp::String8 description, Smp::IObject* parent);
+        virtual ~FieldHolder();
+        // Smp::IOutputField implementation. mostly faked except Connect and
+        // Disconnect
+        void Connect(Smp::IField* field) override;
+        void Disconnect(Smp::IField* field) override;
+        const Smp::FieldCollection* GetInputFields() const override;
+        void Push() override;
+        Smp::Bool IsAutomatic() const override;
+        Smp::ViewKind GetView() const override;
+        Smp::Bool IsState() const override;
+        Smp::Bool IsInput() const override;
+        Smp::Bool IsOutput() const override;
+        const Smp::Publication::IType* GetType() const override;
+        void Restore(Smp::IStorageReader* reader) override;
+        void Store(Smp::IStorageWriter* writer) override;
+
+    private:
+        /** list of the fields to be recorded by this recorder */
+        simdeck::Collection<Smp::IField> _recFields;
+    };
+    /** field connexion port */
+    FieldHolder _fieldHolder;
 };
-
 }} // namespace simphonie::colibry
 #endif // __simphonie_colibry_FieldRecorder_HPP__

@@ -70,6 +70,15 @@ private:
     void loadSchedules(sol::table schedules);
 
     sol::table _config;
+
+    /**
+     * local utility to connect fields by name.
+     * Fields are search using the resolver witrh absolute (from root simulator
+     * node) resolution.
+     * @param fromPath source field path.
+     * @param toPath destition field path.
+     */
+    void connect(Smp::String8 from, Smp::String8 to);
 };
 
 }  // namespace lua

@@ -17,10 +17,8 @@ static simdeck::Type _recorderType(Smp::Uuids::Uuid_Void, Smp::PrimitiveTypeKind
                        "Dummy type for the field recording service as output field.");
 // --------------------------------------------------------------------
 // ..........................................................
-FieldRecorder::FieldRecorder(Smp::String8 name, Smp::String8 description,
-                    Smp::IObject* parent, Smp::String8 fileExt):
-                     Parent(name, description, parent),
-                    _recFields("recFields", "List of fields to record", this) {
+FieldRecorder::FieldRecorder(Smp::String8 name, Smp::String8 description, Smp::IObject* parent, Smp::String8 fileExt)
+    : Parent(name, description, parent), _fieldHolder("port", "Fields to records connexion port", this) {
     _filePath = name;
     // TODO consider adding date and time to the default file name to avoid
     // overwriting.
@@ -32,55 +30,59 @@ FieldRecorder::FieldRecorder(Smp::String8 name, Smp::String8 description,
         _filePath = _filePath + "frec";
     }
     addEP("step","record fields snapshot", this, &FieldRecorder::step);
-    
 }
 // ..........................................................
 FieldRecorder::~FieldRecorder() {
 }
-// --------------------------------------------------------------------
-// IOutput field implementation
 // ..........................................................
-void FieldRecorder::Connect(Smp::IField* field) {
-std::cout<<"!!!!!!!!!!!!!!!!!!!!! "<<field->GetName()<<std::endl; 
+void FieldRecorder::publish(Smp::IPublication* receiver) {
+    receiver->PublishField(&_fieldHolder);
+}
+
+// --------------------------------------------------------------------
+// ..........................................................
+FieldRecorder::FieldHolder::FieldHolder(Smp::String8 name, Smp::String8 description, Smp::IObject* parent)
+    : FieldHolder::Parent(name, description, parent), _recFields("recField", "collection of fields to track", this) {}
+// ..........................................................
+FieldRecorder::FieldHolder::~FieldHolder() {}
+// ..........................................................
+void FieldRecorder::FieldHolder::Connect(Smp::IField* field) {
     _recFields.push_back(field);
 }
 // ..........................................................
-void FieldRecorder::Disconnect(Smp::IField* field) {
+void FieldRecorder::FieldHolder::Disconnect(Smp::IField* field) {
     _recFields.remove(field);
 }
 // ..........................................................
-const Smp::FieldCollection* FieldRecorder::GetInputFields() const {
+const Smp::FieldCollection* FieldRecorder::FieldHolder::GetInputFields() const {
     return &_recFields;
 }
 // -- fake implementation of other IOutputField services --
-void FieldRecorder::Push() {
+void FieldRecorder::FieldHolder::Push() {
     // no rela data to forward.
 }
-Smp::Bool FieldRecorder::IsAutomatic() const {
-    // do not pretend bneing automatic since it does nothing unless its step
+Smp::Bool FieldRecorder::FieldHolder::IsAutomatic() const {
+    // do not pretend being automatic since it does nothing unless its step
     // entry point is published.
     return false;
 }
-Smp::ViewKind FieldRecorder::GetView() const {
+Smp::ViewKind FieldRecorder::FieldHolder::GetView() const {
     return Smp::ViewKind::VK_None;
 }
-Smp::Bool FieldRecorder::IsState() const {
+Smp::Bool FieldRecorder::FieldHolder::IsState() const {
     return false;
 }
-Smp::Bool FieldRecorder::IsInput() const {
+Smp::Bool FieldRecorder::FieldHolder::IsInput() const {
     return false;
 }
-Smp::Bool FieldRecorder::IsOutput() const {
+Smp::Bool FieldRecorder::FieldHolder::IsOutput() const {
+    // not really an output port, but shall pretend to be to let everything
+    // works like it is.
     return true;
 }
-const Smp::Publication::IType* FieldRecorder::GetType() const {
+const Smp::Publication::IType* FieldRecorder::FieldHolder::GetType() const {
     return &_recorderType;
-} 
-void FieldRecorder::Restore(Smp::IStorageReader* reader) {
 }
-void FieldRecorder::Store(Smp::IStorageWriter* writer) {
-}
-
-
-
+void FieldRecorder::FieldHolder::Restore(Smp::IStorageReader* reader) {}
+void FieldRecorder::FieldHolder::Store(Smp::IStorageWriter* writer) {}
 }} // namespace simphonie::colibry

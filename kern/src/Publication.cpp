@@ -208,7 +208,8 @@ Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 descripti
 }
 // ..........................................................
 void Publication::PublishField(Smp::IField* field){
-    LOGE("ObjectsRegistry::PublishField(Smp::IField*) not implemented yet!")}
+    addField(field);
+}
 // ..........................................................
 Smp::Publication::IType* Publication::getArrayType(Smp::PrimitiveTypeKind ptk, Smp::Int64 count) {
     Type* pt = dynamic_cast<Type*>(_typeRegistry->GetType(ptk));

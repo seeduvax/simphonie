@@ -35,7 +35,7 @@ void FieldRecorderCsv::disconnect() {
 // ..........................................................
 void FieldRecorderCsv::step() {
     _file << getSimulator()->GetTimeKeeper()->GetSimulationTime();
-    for (auto f: *GetInputFields()) {
+    for (auto f : *getInputFields()) {
         auto sf=dynamic_cast<Smp::ISimpleField*>(f);
         if (sf!=nullptr) {
             _file << _delim << sf->GetValue();

@@ -73,7 +73,11 @@ void simulatorNewIndex(Smp::ISimulator& th, sol::stack_object k, sol::stack_obje
     }
 }
 
+#define TRACE(expr) std::cout << __FILE__ << ":" << __LINE__ << ": " << #expr << " = " << expr << std::endl;
 sol::object objectIndex(Smp::IObject* obj, Smp::String8 name, sol::this_state L) {
+    TRACE(obj->GetName())
+    TRACE(name)
+    TRACE((void*)obj->GetChild(name))
     return solCastObject(obj->GetChild(name),L);
 }
 

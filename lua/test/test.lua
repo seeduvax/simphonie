@@ -2,6 +2,7 @@ s=require "simphonie_lua"
 sim=s.Simphonie.Simulator.new("luaSim")
 sim:setConfiguration({
     components={
+        recorder={type="simphonie::colibry::FieldRecorderCsv", description=""},
         inc1={type="simphonie::umdl::SmpIncrement",description="",
             Children={
                 inc11={type="simphonie::umdl::SmpIncrement", description=""}
@@ -10,12 +11,17 @@ sim:setConfiguration({
         inc2={type="simphonie::umdl::SmpIncrement",description=""},
     },
     connections={
-        ["inc2/input"]="inc1/output"
+        ["inc2/input"]="inc1/output",
+        ["recorder/port"]={
+            "inc2/input",
+            "inc1/output"
+        }
     }
 })
 sim:Run()
 print("Simulator name: "..sim.Name)
 sim:LoadLibrary("simphonie_umdl",0)
+sim:LoadLibrary("simphonie_colibry",0)
 tk=sim:GetTimeKeeper()
 print("Timekeeper simulation time: "..tk:GetSimulationTime())
 print("Timekeeper state: "..tk.State)
@@ -33,6 +39,10 @@ print("simulator state "..sim.State)
 sim:CreateComponent("simphonie::umdl::SmpIncrement","inc","")
 sim.inc:CreateChild("simphonie::umdl::SmpIncrement","Children","subinc","")
 sim:Publish()
+sim:Configure()
+sim:Connect()
 sim.inc.output:Connect(sim.inc.subinc.input)
-
 sim.Resolver.dump:Execute()
+
+sim.inc.step:Execute()
+sim.recorder.step:Execute()
