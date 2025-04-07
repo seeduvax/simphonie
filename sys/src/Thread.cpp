@@ -14,8 +14,8 @@ namespace sys {
 
 // --------------------------------------------------------------------
 // ..........................................................
-void threadEntryPoint(Thread& th) {
-    th.run();
+void threadEntryPoint(Thread* th) {
+    th->run();
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -33,8 +33,7 @@ void Thread::start() {
     if (_th != nullptr) {
         join();
     }
-    std::thread tmp(threadEntryPoint, std::ref(*this));
-    _th.reset(new std::thread(threadEntryPoint, std::ref(*this)));
+    _th = std::make_unique<std::thread>(threadEntryPoint, this);
 }
 
 }  // namespace sys
