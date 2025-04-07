@@ -139,7 +139,90 @@ on-demand strategy similar to the very common observer/observable patterns or
 publish/subscribe patterns.  
     }
     {section %title=Bundled service
+      {section %title=Motivation and recommendations
+Implementing strictly the ECSS SMP standard is not enough to deliver a full
+featured simulation system. Additional services are needed. Such are omitted
+mostly because it does not engage simulation model interoperability and exchange
+capabilities that are the main purpose of the standard. Even there are no
+constraints at standard level, the implementer in the frame of the simphonie
+project shall consider to rely as much as possible on the standard itself with
+as less as possible coupling on the specific infrastructure design from
+simphonie. This means those service should be package in a library that can be
+loaded into any SMP infrastructure to enrich it the same way than it is as
+bundled with simphonie.
+      }
       {section %title=Simulation stop control
+The simulation stop control service purpose is to let a simulator end the
+simulation by itself when some stop conditions are met.
+{req %id=simph.simctrl.1
+The simulation control service shall request simulator hold (simulation stop) on
+user defined stop condition.
+}
+{req %id=simph.simctrl.2
+The simulation control service shall check the stop condition at least on
+simulation time change.
+}
+That means when many criteria shall evaluated to check the stop condition, it is
+not request to be done at every simulation state change, unless the condition
+include a criteria so transient that it shall be missed if its evaluation is
+delayed to next time change.
+{req %id=simph.simctrl.expr.1
+The stop condition shall be defined from a boolean expression composed of any
+criteria defined as requirements of this section.
+}
+{req %id=simph.simctrl.expr.2
+The stop condition criteria shall accept a maximum simulation time criteria.
+}
+{req %id=simph.simctrl.expr.3
+The stop condition criteria shall accept the occurrence of a simulator event
+(events handled by the simulator's SMP Event Manager - see
+Smp::Srvices::IEventManager)
+}
+{req %id=simph.simctrl.expr.4
+The stop condition criteria shall accept condition on any model's published
+field's value (equality, inequality, greater, lower, etc).
+}
+      }
+      {section %title=Simulation real time synchronization service
+{req %id=simph.sync.1
+The simulation synchronization service shall provide an entry point waiting for
+the Zulu time reaches the simulation time.
+}
+To run the simulation real time, the strategy is to schedule periodically an
+entry point to slow down an as fast as possible simulation to some how start the
+next simulation time only when enough real time as been spent. Since the Zulu
+time is the wall clock time having its absolute value, the purpose when saying
+the zulu time reaches the simulation time is not to wait until the Smp::Duration
+value are equals but rather the elapsed time since the simulation start is the
+same in both reference. This could be defined as wait until simulation time is
+equal to current zulu time minus the zulu time at simulation start.
+{req %id=simph.sync.2
+The simulation synchronization service shall publish an output field for
+synchronization cycle overflow count.
+}
+{req %id=simph.sync.3
+The simulation synchronization service shall increment the cycle overflow count
+each time the expected zulu synchronization time is lesser the current zulu time
+when the synchronisation entry point is activated (leading to no wait).
+}
+{req %id=simph.sync.4
+The simulation synchronization service shall publish a Smp::Duration margin
+output field.
+}
+{req %id=simph.sync.5
+On synchronisation entry point start, the synchronization service shall set its
+margin output value as the difference between expected zulu time and current
+zulu time.
+}
+Monitoring the margin output field let the user track for the CPU load during
+the simulation. Positive values meaning there is time left at the end of the
+cycle, a negative value tells there is a cycle overflow and the amount of the
+time overflow.
+{req %if=simph.sync.6
+The synchronization service shall be configurable or extensible to use any clock
+other than the simulation host computer's operating system's clock to define the
+zulu time reference.
+}
       }
     }
   }
