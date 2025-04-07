@@ -89,7 +89,7 @@ void Publication::addField(Smp::IField* field) {
         delete field;
         throw simdeck::ExDuplicateName(_pubObj, f->GetName());
     }
-    _pubObj->AddChild(field,(Smp::ICollectionBase*)_pubObj->GetFields());
+    _pubObj->AddChild(field,_pubObj->GetFields());
 }
 // ..........................................................
 Smp::IObject* Publication::getChild(Smp::String8 name) const {

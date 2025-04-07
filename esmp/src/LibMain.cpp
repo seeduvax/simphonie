@@ -10,7 +10,6 @@
 #include "Smp/ISimulator.h"
 #include "simdeck/Factory.hpp"
 #include "simphonie/esmp/Sampler.hpp"
-#include "simphonie/esmp/SimControl.hpp"
 #include "simphonie/sys/DlDef.h"
 
 namespace simphonie {
@@ -18,7 +17,6 @@ namespace esmp {
 
 REGISTER_SMP_LIBINIT();
 ADD_SMP_FACTORY("Sampler", Sampler);
-ADD_SMP_FACTORY("SimControl", SimControl);
 
 }  // namespace esmp
 }  // namespace simph
