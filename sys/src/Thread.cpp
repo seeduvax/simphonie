@@ -14,18 +14,17 @@ namespace sys {
 
 // --------------------------------------------------------------------
 // ..........................................................
-void threadEntryPoint(Thread* th) {
-    th->run();
+void threadEntryPoint(Thread& th) {
+    th.run();
 }
 // --------------------------------------------------------------------
 // ..........................................................
-Thread::Thread(std::string name, Runnable* toRun) : _toRun(toRun), _name(name), _th(nullptr) {}
+Thread::Thread(std::string name, Runnable* toRun) : _toRun(toRun), _name(name) {}
 // ..........................................................
 Thread::~Thread() {
     if (_th != nullptr) {
         join();
-        delete _th;
-        _th = nullptr;
+        _th.reset();
     }
 }
 // --------------------------------------------------------------------
@@ -33,9 +32,9 @@ Thread::~Thread() {
 void Thread::start() {
     if (_th != nullptr) {
         join();
-        delete _th;
     }
-    _th = new std::thread(threadEntryPoint, this);
+    std::thread tmp(threadEntryPoint, std::ref(*this));
+    _th.reset(new std::thread(threadEntryPoint, std::ref(*this)));
 }
 
 }  // namespace sys

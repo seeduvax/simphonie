@@ -54,9 +54,9 @@ public:
     }
 
 private:
-    Runnable* _toRun;
+    Runnable* _toRun = nullptr;
     std::string _name;
-    std::thread* _th;
+    std::unique_ptr<std::thread> _th;
 };
 
 }  // namespace sys
