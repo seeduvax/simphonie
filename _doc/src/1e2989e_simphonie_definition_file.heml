@@ -138,7 +138,12 @@ event simulation kernel may then handle computation pipelines according to any
 on-demand strategy similar to the very common observer/observable patterns or
 publish/subscribe patterns.  
     }
+    {section %title=Bundled service
+      {section %title=Simulation stop control
+      }
+    }
   }
+  
   {section %title=Design
     {section %title=Mandatory services bundle
 The kernel library include an implementation for each of the mandatory SMP
