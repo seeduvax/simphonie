@@ -64,7 +64,7 @@ void StringField::Unforce() {
     _forced=false;
 }
 // ..........................................................
-Smp::Bool StringField::IsForced() {
+Smp::Bool StringField::IsForced() const {
     return _forced;
 }
 // ..........................................................

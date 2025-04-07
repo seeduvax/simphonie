@@ -58,13 +58,13 @@ public:
                 Smp::UInt64 startIndex = 0) override;
     Smp::Bool AddChild(
                 Smp::IObject* child,
-                Smp::ICollectionBase* collection) override;
+                const Smp::ICollectionBase* collection) override;
     Smp::Bool RemoveChild(
                 Smp::IObject* child,
-                Smp::ICollectionBase* collection) override;
+                const Smp::ICollectionBase* collection) override;
     Smp::IObject* IsChildInCollection(
                 Smp::String8 child,
-                const Smp::ICollectionBase* collection) override;
+                const Smp::ICollectionBase* collection) const override;
 
 protected:
     Smp::ISimulator* getSimulator();

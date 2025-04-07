@@ -37,7 +37,7 @@ const Smp::IObject* ExInvalidParent::GetParentFound() const noexcept {
     return _found;
 }
 // ..........................................................
-Smp::IObject* ExInvalidParent::GetParentExpected() noexcept {
+const Smp::IObject* ExInvalidParent::GetParentExpected() const noexcept {
     return _expected;
 }
 

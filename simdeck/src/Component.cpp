@@ -177,7 +177,7 @@ void Component::SetSimpleArrayValue(
 // ..........................................................
 Smp::Bool Component::AddChild(
         Smp::IObject* child,
-        Smp::ICollectionBase* collection) {
+        const Smp::ICollectionBase* collection) {
     if ( child==nullptr 
                 || collection==nullptr 
                 || GetChild(child->GetName())!=nullptr 
@@ -212,7 +212,7 @@ Smp::Bool Component::AddChild(
 // ..........................................................
 Smp::Bool Component::RemoveChild(
         Smp::IObject* child,
-        Smp::ICollectionBase* collection) {
+        const Smp::ICollectionBase* collection) {
     if (collection==&_fields) {
         return _fields.remove(dynamic_cast<Smp::IField*>(child));
     }
@@ -237,12 +237,12 @@ Smp::Bool Component::RemoveChild(
 // ..........................................................
 Smp::IObject* Component::IsChildInCollection(
         Smp::String8 child,
-        const Smp::ICollectionBase* collection) {
+        const Smp::ICollectionBase* collection) const {
     if (collection==&_fields) {
         return GetField(child);
     }
     else {
-        auto c=dynamic_cast<Smp::IComposite*>(this);
+        auto c=dynamic_cast<const Smp::IComposite*>(this);
         if (c!=nullptr) {
             for (auto ct: *(c->GetContainers())) {
                 if (ct->GetComponents()==collection) {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="afdb704de38e8dce08b3239067fa2dd6f0225bbdf08bb7460cc144acacf30e83" state="working">
+<cr id="afdb704de38e8dce08b3239067fa2dd6f0225bbdf08bb7460cc144acacf30e83" state="resolved">
 <title>Switch to ecss smp header 20250311</title>
 <reporter>sdevaux</reporter>
 <creation>2025-03-21 21:56:49+01:00</creation>

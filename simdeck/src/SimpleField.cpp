@@ -39,7 +39,7 @@ public:
     void Unforce() override {
         _forced=false;
     }
-    Smp::Bool IsForced() override {
+    Smp::Bool IsForced() const override {
         return _forced;
     }
     void Freeze() override {

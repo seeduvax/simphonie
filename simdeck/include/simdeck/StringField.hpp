@@ -47,7 +47,7 @@ public:
     // Smp::IForcibleField implementation
     void Force(Smp::AnySimple value) override;
     void Unforce() override;
-    Smp::Bool IsForced() override;
+    Smp::Bool IsForced() const override;
     void Freeze() override;
 
     static StringField* Create(

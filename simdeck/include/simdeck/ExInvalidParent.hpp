@@ -30,11 +30,11 @@ public:
     virtual ~ExInvalidParent();
     // Smp::InvalidException implementation
     const Smp::IObject* GetParentFound() const noexcept override;
-    Smp::IObject* GetParentExpected() noexcept override;
+    const Smp::IObject* GetParentExpected() const noexcept override;
 
 private:
     const Smp::IObject* _found;
-    Smp::IObject* _expected;
+    const Smp::IObject* _expected;
 
 };
 
