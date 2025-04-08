@@ -32,6 +32,9 @@ public:
         addEP("step", "", this, &CModel::step);
     }
     virtual ~CModel() {
+        if (_innerModel != nullptr) {
+            GetContainer("sub")->DeleteComponent(_innerModel);
+        }
     }
 
     void step() {
@@ -44,9 +47,13 @@ protected:
     // the simulator.
     void configure() override {
         if (GetParent()==getSimulator()) {
-            GetContainer("sub")->AddComponent(new CModel("childMdl","",this));
+            _innerModel = new CModel("childMdl","",this);
+            GetContainer("sub")->AddComponent(_innerModel);
         }
     }
+
+private:
+    CModel* _innerModel = nullptr;
 };
 
 
