@@ -11,7 +11,6 @@
 #define __simdeck_ArrayField_HPP__
 
 #include <ostream>
-#include "simdeck/Uuid.hpp"
 #include "Smp/IArrayField.h"
 
 namespace simdeck {

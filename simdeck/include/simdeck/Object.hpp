@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_Object_HPP__
 #define __simdeck_Object_HPP__
+
 #include <string>
-#include "simdeck/Uuid.hpp"
 #include "Smp/IObject.h"
 
 namespace simdeck {

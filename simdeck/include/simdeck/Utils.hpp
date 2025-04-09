@@ -10,11 +10,11 @@
 #ifndef __simdeck_Utils_HPP__
 #define __simdeck_Utils_HPP__
 
-#include <simdeck/Uuid.hpp>
 #include <cstdint>
 #include <cstddef>
 #include <string>
 #include <cxxabi.h>
+#include <Smp/Uuid.h>
 
 #define UTILS_MD5_DIGEST_LENGTH 16
 

@@ -9,8 +9,8 @@
  */
 #ifndef __simdeck_Exception_HPP__
 #define __simdeck_Exception_HPP__
+
 #include <string>
-#include "simdeck/Uuid.hpp"
 #include "Smp/Exception.h"
 
 namespace simdeck {
