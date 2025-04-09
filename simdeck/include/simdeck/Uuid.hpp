@@ -10,8 +10,9 @@
 
 #pragma once
 
-#if defined(__clang__) && (__clang_major__ == 13)
-// hack to be able to include Uuid.h with clang-13 without error on hash type.
+#if defined(__clang__) && (__clang_major__ == 13) && defined(_LIBCPP_TEMPLATE_VIS)
+// hack to be able to include Uuid.h with clang-13 on centos7 (llvm13) without error on hash type.
+#ifndef SMP_UUID_H_
 #include <memory>
 namespace Smp {
 struct Uuid;
@@ -34,6 +35,7 @@ namespace std
 #define hash disabled_hash
 #include <Smp/Uuid.h>
 #undef hash
+#endif // SMP_UUID_H_
 
 #else
 
