@@ -27,8 +27,9 @@ StringField::StringField(Smp::String8 name,
                 Smp::Bool isOutput,
                 Smp::IObject* parent):
                     Parent(name, description, viewKind, address, 
-                        sizeof(std::string), type,
+                        sizeof(std::string), type==nullptr?&_stringType:type,
                         isState, isInput, isOutput, parent) {
+    _value=address;
 }
 // ..........................................................
 StringField::~StringField() {

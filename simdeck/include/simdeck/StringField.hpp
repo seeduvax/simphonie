@@ -62,7 +62,7 @@ public:
                 Smp::IObject* parent);
 
 private:
-    std::string* _value;
+    std::string* _value=nullptr;
     std::string _forcedValue="";
     Smp::Bool _forced=false;
 };
