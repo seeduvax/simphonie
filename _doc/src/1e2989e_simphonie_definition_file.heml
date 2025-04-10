@@ -9,21 +9,44 @@
     {edition %version=1 %date=2024-12-27 %%Document creation}
   }
   {section %title=Introduction
+    {references %title=Reference %id=R
+{ref %id=SMP %edition=2 March 2020 %ref=ECSS-E-ST-40-07C %href=https://ecss.nl/standard/ecss-e-st-40-07c-simulation-modelling-platform-2-march-2020/ %%Simulation Modelling Platform (SMP)}
+{ref %id=SYSLOG %authors=R. Gerhards %edition=March 2009 %ref=RFC 5424 %href=https://datatracker.ietf.org/doc/html/rfc5424 %%The Syslog Protocol}
+    }
+    {section %title=Scope
+This document is the definition file of the simphonie project. The purpose of the project is to provide a free simulation infrastructure implementation according the SMP standard {xref SMP}. This definition file includes:
+  - additional requirements to complete the definition from the SMP standard.
+  - the design.
+  - a test plan.
+  - a user's guide, the targeted user being a simulation developer and
+    integrator building its own simulator with SMP.
+    }
+  }
+  {section %title=Requirements
     {section %title=SMP Level 1 features coverage
 In this section, the requirements are defined only to link to SMP level clauses
 subset in order to organize test traceability and provide an overview of the
 SMP features coverage.
-{req %id=simph.smp.obj
-Simphonie shall provide a concrete class for the Smp::IObject interface.
+
+{req %id=simph.smpdk.1
+The simphonie project shall include a SMP development kit aming at providing the
+concrete classes of the SMP interfaces needed to develop some components
+(services and models) libraries.
 }
-{req %id=simph.smp.comp
-Simphonie shall provide a concrete class for the Smp::IComponent interface.
+{req %id=simph.smpdk.2
+The SMP development kit shall provide a concrete class for the Smp::IObject
+interface.
+}
+{req %id=simph.smpdk.3
+The SMP development kit shall provide a concrete class for the Smp::IComponent
+interface.
 }
     }
     {section %title=SMP Level 2 features coverage
-
+SMP L2 is to be considered in further development increment.
     }
     {section %title=Simphonie specific behaviors
+      {section %tite=Scheduler service
 {req %id=simph.sched.1
 The scheduler shall emit an event named {kw Scheduler_PreEventExecute} before
 executing the next scheduled entry point.
@@ -36,6 +59,83 @@ after the execution of each schduled entry point is completed.
 The scheduler shall request simulator to hold simulation when there are no more
 events in the schedule queue.
 }
+      }
+      {section %title=Logging service
+{req %id=simph.log.1
+Logger service Log method implementation shall be thread safe.
+}
+Logging may be requested from many threads, at least:
+ - the simulator main thread for tracing the simulator control operations.
+ - the scheduler thread for tracing events from the scheduled entry points and
+   models.
+
+{req %id=simph.log.cfg.1
+The logger service shall publish a string input field to receive the path of the
+file where to record the log events.
+}
+{req %id=simph.log.cfg.2
+The default configuration of the logger shall be to record in a file named as
+the host simulator and located in the current working directory.
+}
+{req %id=simph.log.cfg.3
+The logger shall publish a boolean input field to configure the console
+(standard output) activation.
+}
+{req %id=simph.log.cfg.4
+The logger shall publish a string input field to define the log events to
+network send configuration.
+}
+{req %id=simph.log.cfg.5
+The logger shall publish an input field to optionally configure a buffered asynchronous event handling (see simp.log.cfg.unsync.1)
+}
+{req %id=simph.log.ev.1
+Each log event shall include a zulu time attribute. Its value is the zulu time
+(as define by the SMP standard) when the event is submitted to the logger
+service.
+}
+{req %id=simph.log.ev.2
+Each log event shall include a simulation time attribute. Its value is the
+current simulation time got from the timekeeper when the event is submitted to
+the logger service.
+}
+{req %id=simph.log.ev.3
+Each log event shall include a severity attribute. Its value is defined from the
+Smp::Services::LogMessageKind argument of the Log method from the Logger
+service. 
+}
+{req %id=simph.log.ev.4
+Each log event shall include a sender identifier attribute. Its value is defined
+from the Smp::IObject* argument of the Log method from the Logger service.
+}
+{req %id=simph.log.ev.5
+Each log event shall include a message attribute. Its value is the string
+argument of the Log method from the logger service.
+}
+{req %id=simph.log.ev.6
+Each log event shall include a thread identifier attribute. Its value identify
+the thread calling the Log method from the Logger service.
+}
+{req %id=simph.log.unsync.1
+When configured asynchronous, The logging service shall send the log event to
+a queue to be consumed by a distinct thread.
+}
+When running real-time simulation, blocking write request to mass memory may
+imply wait states leaving not enough margins to fulfil the real time
+requirements.
+
+{req %id=simph.log.net.1
+When send to network mode is activate, the logging service shall send the event
+to a remote logging service.
+}
+{req %id=simph.log.net.2
+The send to network logging mode shall support the syslog protocol {xref SYSLOG}.
+}
+
+Designer is free to build a composite logging service where all optional
+features are handled by a subcomponent and activated when the related component
+is added to the service.
+
+      }
     }
     {section %title=SMP complements and extension
 Here are defined some extended SMP featured, that are features not defined by
