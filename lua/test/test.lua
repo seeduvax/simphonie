@@ -45,5 +45,6 @@ sim:Connect()
 sim.inc.output:Connect(sim.inc.subinc.input)
 sim.Resolver.dump:Execute()
 
+sim.inc.input.Value=10
 sim.inc.step:Execute()
 sim.recorder.step:Execute()
