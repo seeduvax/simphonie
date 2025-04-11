@@ -19,13 +19,12 @@ void threadEntryPoint(Thread* th) {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-Thread::Thread(std::string name, Runnable* toRun) : _toRun(toRun), _name(name), _th(nullptr) {}
+Thread::Thread(std::string name, Runnable* toRun) : _toRun(toRun), _name(name) {}
 // ..........................................................
 Thread::~Thread() {
     if (_th != nullptr) {
         join();
-        delete _th;
-        _th = nullptr;
+        _th.reset();
     }
 }
 // --------------------------------------------------------------------
@@ -33,9 +32,8 @@ Thread::~Thread() {
 void Thread::start() {
     if (_th != nullptr) {
         join();
-        delete _th;
     }
-    _th = new std::thread(threadEntryPoint, this);
+    _th = std::make_unique<std::thread>(threadEntryPoint, this);
 }
 
 }  // namespace sys

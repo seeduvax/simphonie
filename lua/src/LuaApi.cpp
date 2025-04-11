@@ -8,22 +8,24 @@
  * $Date$
  */
 #include "Smp/IEntryPointPublisher.h"
-#include "Smp/ISimulator.h"
 #include "Smp/IModel.h"
 #include "Smp/IOutputField.h"
+#include "Smp/ISimpleField.h"
+#include "Smp/ISimulator.h"
+#include "simdeck/Utils.hpp"
 #include "simphonie/kern/Resolver.hpp"
 #include "simphonie/kern/Scheduler.hpp"
 #include "simphonie/kern/Simulator.hpp"
 #include "simphonie/lua/LuaBuilder.hpp"
-#include "simdeck/Utils.hpp"
 #include "sol/sol.hpp"
-
 
 // TODO check calling sim.Publish is allowed many times (and simulator
 // implementation shall be robust to that), in order to let services be pre
 // published. May not be required for LuaBuilder since it should finally receive
 // the configuration table through property binding to lua.
 
+// --------------------------------------------------------------------
+// ..........................................................
 
 sol::object solCastObject(Smp::IObject* obj, sol::this_state L) {
     auto ofield=dynamic_cast<Smp::IOutputField*>(obj);
@@ -53,6 +55,8 @@ sol::object solCastObject(Smp::IObject* obj, sol::this_state L) {
     // default, return object as generic SMP::IObject
     return sol::object(L, sol::in_place, obj);
 }
+
+// ..........................................................
 // exemple de meta new_index
 // On ne fait rien, on se content de regarder ce qu'on reçoit en paramètre.
 void simulatorNewIndex(Smp::ISimulator& th, sol::stack_object k, sol::stack_object v, sol::this_state L) {
@@ -73,11 +77,12 @@ void simulatorNewIndex(Smp::ISimulator& th, sol::stack_object k, sol::stack_obje
     }
 }
 
+// ..........................................................
 sol::object objectIndex(Smp::IObject* obj, Smp::String8 name, sol::this_state L) {
     return solCastObject(obj->GetChild(name),L);
 }
 
-
+// ..........................................................
 Smp::Bool componentCreateChild(Smp::IComponent* th, Smp::String8 typeName, Smp::String8 container, Smp::String8 name, Smp::String8 description) {
     auto composite=dynamic_cast<Smp::IComposite*>(th);
     if (composite==nullptr) {
@@ -100,73 +105,127 @@ Smp::Bool componentCreateChild(Smp::IComponent* th, Smp::String8 typeName, Smp::
     return false;
 }
 
-/*
- getData(simphonie::kern::Field* field) {
-     res;
-    if(field == nullptr)
-    {
-        return res;
+// ..........................................................
+sol::object fieldGetValue(Smp::IField* field, sol::this_state L) {
+    sol::object res = sol::nil;
+    auto sf = dynamic_cast<Smp::ISimpleField*>(field);
+    if (sf != nullptr) {
+        // Associate corresponding primitive type
+        switch (sf->GetPrimitiveTypeKind()) {
+            case Smp::PrimitiveTypeKind::PTK_Char8:
+                res = sol::object(L, sol::in_place, (Smp::Char8)(sf->GetValue()));
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Bool:
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Int8:
+                res = sol::object(L, sol::in_place, (Smp::Int8)(sf->GetValue()));
+                break;
+            case Smp::PrimitiveTypeKind::PTK_UInt8:
+                res = sol::object(L, sol::in_place, (Smp::UInt8)(sf->GetValue()));
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Int16:
+                res = sol::object(L, sol::in_place, (Smp::Int16)(sf->GetValue()));
+                break;
+            case Smp::PrimitiveTypeKind::PTK_UInt16:
+                res = sol::object(L, sol::in_place, (Smp::UInt16)(sf->GetValue()));
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Int32:
+                res = sol::object(L, sol::in_place, (Smp::Int32)(sf->GetValue()));
+                break;
+            case Smp::PrimitiveTypeKind::PTK_UInt32:
+                res = sol::object(L, sol::in_place, (Smp::UInt32)(sf->GetValue()));
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Int64:
+                res = sol::object(L, sol::in_place, (Smp::Int64)(sf->GetValue()));
+                break;
+            case Smp::PrimitiveTypeKind::PTK_UInt64:
+                res = sol::object(L, sol::in_place, (Smp::UInt64)(sf->GetValue()));
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Float32:
+                res = sol::object(L, sol::in_place, (Smp::Float32)(sf->GetValue()));
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Float64:
+                res = sol::object(L, sol::in_place, (Smp::Float64)(sf->GetValue()));
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Duration:
+                res = sol::object(L, sol::in_place, (Smp::Duration)(sf->GetValue()));
+                break;
+            case Smp::PrimitiveTypeKind::PTK_DateTime:
+                res = sol::object(L, sol::in_place, (Smp::DateTime)(sf->GetValue()));
+                break;
+            case Smp::PrimitiveTypeKind::PTK_String8:
+                res = sol::object(L, sol::in_place, (Smp::String8)(sf->GetValue()));
+                break;
+            default:
+                std::stringstream ss;
+                ss << "Can't get value, primitive type of" << field->GetName() << " not supported";
+                throw std::runtime_error(ss.str().c_str());
+                break;
+        }
     }
-
-    // Associate corresponding primitive type
-    switch (field->GetPrimitiveTypeKind())
-    {
-    case Smp::PrimitiveTypeKind::PTK_Char8:
-        res = (Smp::Char8)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_Bool:
-        res = (Smp::Bool)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_Int8:
-        res = (Smp::Int8)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_UInt8:
-        res = (Smp::UInt8)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_Int16:
-        res = (Smp::Int16)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_UInt16:
-        res = (Smp::UInt16)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_Int32:
-        res = (Smp::Int32)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_UInt32:
-        res = (Smp::UInt32)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_Int64:
-        res = (Smp::Int64)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_UInt64:
-        res = (Smp::UInt64)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_Float32:
-        res = (Smp::Float32)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_Float64:
-        res = (Smp::Float64)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_Duration:
-        res = (Smp::Duration)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_DateTime:
-        res = (Smp::DateTime)(field->GetValue());
-        break;
-    case Smp::PrimitiveTypeKind::PTK_String8:
-        res = (Smp::String8)(field->GetValue());
-        break;
-    default:
-        std::stringstream ss;
-        ss<< "Primitive type of" << name << "not found";
-        throw std::runtime_error(ss.str().c_str());
-        break;
-    }
-
     return res;
 };
-*/
-
+// ..........................................................
+void fieldSetValue(Smp::IField* field, sol::object value) {
+    auto sf = dynamic_cast<Smp::ISimpleField*>(field);
+    if (sf != nullptr) {
+        auto v = sf->GetValue();
+        auto k = v.GetType();
+        switch (k) {
+            case Smp::PrimitiveTypeKind::PTK_Char8:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_Char8, value.as<Smp::Char8>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Bool:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_Bool, value.as<Smp::Bool>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Int8:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_Int8, value.as<Smp::Int8>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_UInt8:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_UInt8, value.as<Smp::UInt8>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Int16:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_Int16, value.as<Smp::Int16>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_UInt16:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_UInt16, value.as<Smp::UInt16>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Int32:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_Int32, value.as<Smp::Int32>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_UInt32:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_UInt32, value.as<Smp::UInt32>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Int64:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_Int64, value.as<Smp::Int64>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_UInt64:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_UInt64, value.as<Smp::UInt64>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Float32:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_Float32, value.as<Smp::Float32>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Float64:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_Float64, value.as<Smp::Float64>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_Duration:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_Duration, value.as<Smp::Duration>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_DateTime:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_DateTime, value.as<Smp::DateTime>());
+                break;
+            case Smp::PrimitiveTypeKind::PTK_String8:
+                v.SetValue(Smp::PrimitiveTypeKind::PTK_String8, value.as<Smp::String8>());
+                break;
+            default:
+                std::stringstream ss;
+                ss << "Can't set value, primitive type of " << field->GetName() << " not supported";
+                throw std::runtime_error(ss.str().c_str());
+                break;
+        }
+        sf->SetValue(v);
+    }
+}
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -236,6 +295,7 @@ int luaopen_libsimph_lua(lua_State* L) {
     );
     nsSmp.new_usertype<Smp::IField>("IField",
         sol::meta_function::index, &objectIndex,
+        "Value", sol::property(&fieldGetValue, &fieldSetValue), 
         sol::base_classes, sol::bases<Smp::IObject>()
     );
     nsSmp.new_usertype<Smp::IOutputField>("IOutputField",

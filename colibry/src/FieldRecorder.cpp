@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "simphonie/colibry/FieldRecorder.hpp"
+#include "simdeck/StringField.hpp"
 #include "simdeck/Type.hpp"
 
 namespace simphonie {
@@ -37,6 +38,8 @@ FieldRecorder::~FieldRecorder() {
 // ..........................................................
 void FieldRecorder::publish(Smp::IPublication* receiver) {
     receiver->PublishField(&_fieldHolder);
+    receiver->PublishField(simdeck::StringField::Create("filePath", "", Smp::ViewKind::VK_All, &_filePath, nullptr,
+                                                        false, true, false, this));
 }
 
 // --------------------------------------------------------------------

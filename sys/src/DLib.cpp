@@ -11,7 +11,7 @@
 #include "simphonie/sys/Logger.hpp"
 
 #if defined(WIN32) || defined(_WIN32) || defined(__NT__) || defined(_WIN64)
-#include <Windows.h>
+#include <windows.h>
 #define OS_IS_WINDOWS
 #else
 #include <dlfcn.h>

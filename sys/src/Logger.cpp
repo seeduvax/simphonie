@@ -8,7 +8,7 @@
  * $Date$
  */
 #include "simphonie/sys/Logger.hpp"
-#include <time.h>
+#include <ctime>
 #include <iomanip>
 
 namespace simphonie {

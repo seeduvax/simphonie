@@ -32,11 +32,19 @@ SMP features coverage.
 The simphonie project shall include a SMP development kit aming at providing the
 concrete classes of the SMP interfaces needed to develop some components
 (services and models) libraries.
+<<<<<<< HEAD
 }
 {req %id=simph.smpdk.2
 The SMP development kit shall provide a concrete class for the Smp::IObject
 interface.
 }
+=======
+}
+{req %id=simph.smpdk.2
+The SMP development kit shall provide a concrete class for the Smp::IObject
+interface.
+}
+>>>>>>> 7eabe40f4a623c16eaec1048799d383c93fa71f9
 {req %id=simph.smpdk.3
 The SMP development kit shall provide a concrete class for the Smp::IComponent
 interface.
