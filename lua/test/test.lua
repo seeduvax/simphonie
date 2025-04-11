@@ -40,6 +40,8 @@ print("simulator state "..sim.State)
 sim:CreateComponent("simphonie::umdl::SmpIncrement","inc","")
 sim.inc:CreateChild("simphonie::umdl::SmpIncrement","Children","subinc","")
 sim:Publish()
+
+--sim.recorder.filePath.Value="myRecorder.csv"
 sim:Configure()
 sim:Connect()
 sim.inc.output:Connect(sim.inc.subinc.input)

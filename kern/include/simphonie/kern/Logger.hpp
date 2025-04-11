@@ -12,6 +12,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <vector>
 #include "Smp/Services/ILogger.h"
 #include "simdeck/Component.hpp"
 #include "simdeck/Container.hpp"
@@ -40,23 +41,30 @@
 
 namespace simphonie {
 namespace kern {
-using namespace simdeck;
 
-class Logger : public Component, virtual public Smp::Services::ILogger, virtual public AComposite {
+class Logger : public simdeck::Component, virtual public Smp::Services::ILogger, virtual public AComposite {
+    typedef simdeck::Component Parent;
+
 public:
     Logger(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
 
     Smp::Services::LogMessageKind QueryLogMessageKind(Smp::String8 messageKindName) override;
     void Log(const Smp::IObject* sender, Smp::String8 message, Smp::Services::LogMessageKind kind = 0) override;
+    static std::string buildLogString(LoggerEvent& event);
+
+    class Backend : virtual public Smp::IComponent {
+    public:
+        Backend();
+        virtual ~Backend();
+        virtual void Log(LoggerEvent& event) = 0;
+    };
 
 protected:
-    void publish(Smp::IPublication* receiver) override;
-    static std::string buildLogString(LoggerEvent event);
+    void configure() override;
 
 private:
     Smp::ISimulator* _simulator;
-
-    friend
+    std::vector<Backend*> _backends;
 };
 
 } /* namespace kern */
