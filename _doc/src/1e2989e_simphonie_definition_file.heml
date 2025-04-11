@@ -9,21 +9,44 @@
     {edition %version=1 %date=2024-12-27 %%Document creation}
   }
   {section %title=Introduction
+    {references %title=Reference %id=R
+{ref %id=SMP %edition=2 March 2020 %ref=ECSS-E-ST-40-07C %href=https://ecss.nl/standard/ecss-e-st-40-07c-simulation-modelling-platform-2-march-2020/ %%Simulation Modelling Platform (SMP)}
+{ref %id=SYSLOG %authors=R. Gerhards %edition=March 2009 %ref=RFC 5424 %href=https://datatracker.ietf.org/doc/html/rfc5424 %%The Syslog Protocol}
+    }
+    {section %title=Scope
+This document is the definition file of the simphonie project. The purpose of the project is to provide a free simulation infrastructure implementation according the SMP standard {xref SMP}. This definition file includes:
+  - additional requirements to complete the definition from the SMP standard.
+  - the design.
+  - a test plan.
+  - a user's guide, the targeted user being a simulation developer and
+    integrator building its own simulator with SMP.
+    }
+  }
+  {section %title=Requirements
     {section %title=SMP Level 1 features coverage
 In this section, the requirements are defined only to link to SMP level clauses
 subset in order to organize test traceability and provide an overview of the
 SMP features coverage.
-{req %id=simph.smp.obj
-Simphonie shall provide a concrete class for the Smp::IObject interface.
+
+{req %id=simph.smpdk.1
+The simphonie project shall include a SMP development kit aming at providing the
+concrete classes of the SMP interfaces needed to develop some components
+(services and models) libraries.
 }
-{req %id=simph.smp.comp
-Simphonie shall provide a concrete class for the Smp::IComponent interface.
+{req %id=simph.smpdk.2
+The SMP development kit shall provide a concrete class for the Smp::IObject
+interface.
+}
+{req %id=simph.smpdk.3
+The SMP development kit shall provide a concrete class for the Smp::IComponent
+interface.
 }
     }
     {section %title=SMP Level 2 features coverage
-
+SMP L2 is to be considered in further development increment.
     }
     {section %title=Simphonie specific behaviors
+      {section %tite=Scheduler service
 {req %id=simph.sched.1
 The scheduler shall emit an event named {kw Scheduler_PreEventExecute} before
 executing the next scheduled entry point.
@@ -36,6 +59,154 @@ after the execution of each schduled entry point is completed.
 The scheduler shall request simulator to hold simulation when there are no more
 events in the schedule queue.
 }
+      }
+      {section %title=Logging service
+{req %id=simph.log.1
+Logger service Log method implementation shall be thread safe.
+}
+Logging may be requested from many threads, at least:
+ - the simulator main thread for tracing the simulator control operations.
+ - the scheduler thread for tracing events from the scheduled entry points and
+   models.
+
+{req %id=simph.log.cfg.1
+The logger service shall publish a string input field to receive the path of the
+file where to record the log events.
+}
+{req %id=simph.log.cfg.2
+The default configuration of the logger shall be to record in a file named as
+the host simulator and located in the current working directory.
+}
+{req %id=simph.log.cfg.3
+The logger shall publish a boolean input field to configure the console
+(standard output) activation.
+}
+{req %id=simph.log.cfg.4
+The logger shall publish a string input field to define the log events to
+network send configuration.
+}
+{req %id=simph.log.cfg.5
+The logger shall publish an input field to optionally configure a buffered asynchronous event handling (see simp.log.cfg.unsync.1)
+}
+{req %id=simph.log.ev.1
+Each log event shall include a zulu time attribute. Its value is the zulu time
+(as define by the SMP standard) when the event is submitted to the logger
+service.
+}
+{req %id=simph.log.ev.2
+Each log event shall include a simulation time attribute. Its value is the
+current simulation time got from the timekeeper when the event is submitted to
+the logger service.
+}
+{req %id=simph.log.ev.3
+Each log event shall include a severity attribute. Its value is defined from the
+Smp::Services::LogMessageKind argument of the Log method from the Logger
+service. 
+}
+{req %id=simph.log.ev.4
+Each log event shall include a sender identifier attribute. Its value is defined
+from the Smp::IObject* argument of the Log method from the Logger service.
+}
+{req %id=simph.log.ev.5
+Each log event shall include a message attribute. Its value is the string
+argument of the Log method from the logger service.
+}
+{req %id=simph.log.ev.6
+Each log event shall include a thread identifier attribute. Its value identify
+the thread calling the Log method from the Logger service.
+}
+{req %id=simph.log.unsync.1
+When configured asynchronous, The logging service shall send the log event to
+a queue to be consumed by a distinct thread.
+}
+When running real-time simulation, blocking write request to mass memory may
+imply wait states leaving not enough margins to fulfil the real time
+requirements.
+
+{req %id=simph.log.net.1
+When send to network mode is activate, the logging service shall send the event
+to a remote logging service.
+}
+{req %id=simph.log.net.2
+The send to network logging mode shall support the syslog protocol {xref SYSLOG}.
+}
+
+Designer is free to build a composite logging service where all optional
+features are handled by a subcomponent and activated when the related component
+is added to the service.
+
+{fig %src=LoggerArch.png %title=Logger Architecture}
+{#
+@startuml LoggerArch.png
+package Smp {
+  package Services {
+    interface ILogger {}
+
+  }
+}
+package simdeck {
+  class Container {}
+  class Component {}
+}
+package simphonie {
+  package kern {
+    class LoggerEvent <<struct>> {
+      +Smp::String8 senderName
+      +Smp::String8 message
+      +Smp::Services::LogMessageKind kind
+      +Smp::DateTime zuluTime
+      +Smp::Duration simulationTime
+      +std::thread::id threadId
+    }
+    class Logger extends Container implements ILogger {
+      -Smp::ISimulator* _simulator
+      +Logger(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+      +Smp::Services::LogMessageKind QueryLogMessageKind(Smp::String8 messageKindName)
+      +Log(const Smp::IObject* sender, Smp::String8 message, Smp::Services::LogMessageKind kind = 0)
+      #{static} std::string buildLogString(LogerEvent event)
+    }
+    interface ILoggerSpe {
+      +log(LoggerEvent event)
+    }
+    class LoggerStandard extends Component implements ILoggerSpe {
+      -Smp::Bool _useStandardStreams
+      +LoggerStandard(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+      +log(LogerEvent event)
+      -publish(Smp::IPublication* receiver)
+    }
+    class LoggerFile extends Component implements ILoggerSpe {
+      -std::string _filepath
+      -std::ofstream _file
+      +LoggerFile(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+      +~LoggerFile()
+      +log(LogerEvent event)
+      -publish(Smp::IPublication* receiver)
+    }
+    class LoggerNetwork extends Component implements ILoggerSpe {
+      -std::string _networkCfg
+      +LoggerNetwork(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+      +~LoggerNetwork()
+      +log(LogerEvent event)
+      -publish(Smp::IPublication* receiver)
+    }
+    class LoggerAsync extends Component implements ILoggerSpe {
+      -std::queue<LoggerEvent> _eventsBuffer
+      -Smp::Int32 _eventsQueueSize
+      +LoggerAsync(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+      +log(LogerEvent event)
+      +LoggerEvent consume()
+      -publish(Smp::IPublication* receiver)
+    }
+    LoggerStandard .up.> Logger : "child"
+    LoggerFile .up.> Logger : "child"
+    LoggerNetwork .up.> Logger : "child"
+    LoggerAsync .up.> Logger : "child"
+  }
+}
+@enduml
+#}
+
+      }
     }
     {section %title=SMP complements and extension
 Here are defined some extended SMP featured, that are features not defined by
@@ -138,7 +309,95 @@ event simulation kernel may then handle computation pipelines according to any
 on-demand strategy similar to the very common observer/observable patterns or
 publish/subscribe patterns.  
     }
+    {section %title=Bundled service
+      {section %title=Motivation and recommendations
+Implementing strictly the ECSS SMP standard is not enough to deliver a full
+featured simulation system. Additional services are needed. Such are omitted
+mostly because it does not engage simulation model interoperability and exchange
+capabilities that are the main purpose of the standard. Even there are no
+constraints at standard level, the implementer in the frame of the simphonie
+project shall consider to rely as much as possible on the standard itself with
+as less as possible coupling on the specific infrastructure design from
+simphonie. This means those service should be package in a library that can be
+loaded into any SMP infrastructure to enrich it the same way than it is as
+bundled with simphonie.
+      }
+      {section %title=Simulation stop control
+The simulation stop control service purpose is to let a simulator end the
+simulation by itself when some stop conditions are met.
+{req %id=simph.simctrl.1
+The simulation control service shall request simulator hold (simulation stop) on
+user defined stop condition.
+}
+{req %id=simph.simctrl.2
+The simulation control service shall check the stop condition at least on
+simulation time change.
+}
+That means when many criteria shall evaluated to check the stop condition, it is
+not request to be done at every simulation state change, unless the condition
+include a criteria so transient that it shall be missed if its evaluation is
+delayed to next time change.
+{req %id=simph.simctrl.expr.1
+The stop condition shall be defined from a boolean expression composed of any
+criteria defined as requirements of this section.
+}
+{req %id=simph.simctrl.expr.2
+The stop condition criteria shall accept a maximum simulation time criteria.
+}
+{req %id=simph.simctrl.expr.3
+The stop condition criteria shall accept the occurrence of a simulator event
+(events handled by the simulator's SMP Event Manager - see
+Smp::Srvices::IEventManager)
+}
+{req %id=simph.simctrl.expr.4
+The stop condition criteria shall accept condition on any model's published
+field's value (equality, inequality, greater, lower, etc).
+}
+      }
+      {section %title=Simulation real time synchronization service
+{req %id=simph.sync.1
+The simulation synchronization service shall provide an entry point waiting for
+the Zulu time reaches the simulation time.
+}
+To run the simulation real time, the strategy is to schedule periodically an
+entry point to slow down an as fast as possible simulation to some how start the
+next simulation time only when enough real time as been spent. Since the Zulu
+time is the wall clock time having its absolute value, the purpose when saying
+the zulu time reaches the simulation time is not to wait until the Smp::Duration
+value are equals but rather the elapsed time since the simulation start is the
+same in both reference. This could be defined as wait until simulation time is
+equal to current zulu time minus the zulu time at simulation start.
+{req %id=simph.sync.2
+The simulation synchronization service shall publish an output field for
+synchronization cycle overflow count.
+}
+{req %id=simph.sync.3
+The simulation synchronization service shall increment the cycle overflow count
+each time the expected zulu synchronization time is lesser the current zulu time
+when the synchronisation entry point is activated (leading to no wait).
+}
+{req %id=simph.sync.4
+The simulation synchronization service shall publish a Smp::Duration margin
+output field.
+}
+{req %id=simph.sync.5
+On synchronisation entry point start, the synchronization service shall set its
+margin output value as the difference between expected zulu time and current
+zulu time.
+}
+Monitoring the margin output field let the user track for the CPU load during
+the simulation. Positive values meaning there is time left at the end of the
+cycle, a negative value tells there is a cycle overflow and the amount of the
+time overflow.
+{req %if=simph.sync.6
+The synchronization service shall be configurable or extensible to use any clock
+other than the simulation host computer's operating system's clock to define the
+zulu time reference.
+}
+      }
+    }
   }
+  
   {section %title=Design
     {section %title=Mandatory services bundle
 The kernel library include an implementation for each of the mandatory SMP
