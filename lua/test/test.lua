@@ -3,7 +3,8 @@ sim=s.Simphonie.Simulator.new("luaSim")
 sim:setConfiguration({
     components={
         ctrl={type="simphonie::colibry::SimControl", description=""},
-        recorder={type="simphonie::colibry::FieldRecorderCsv", description=""},
+        recorder={type="simphonie::colibry::FieldRecorderCsv", description="",
+            filePath="myRec.csv"},
         inc1={type="simphonie::umdl::SmpIncrement",description="",
             Children={
                 inc11={type="simphonie::umdl::SmpIncrement", description=""}
@@ -13,6 +14,7 @@ sim:setConfiguration({
     },
     connections={
         ["inc2/input"]="inc1/output",
+        ["inc1/input"]="inc1/output", -- loop to really create a counter
         ["recorder/port"]={
             "inc2/input",
             "inc1/output"
@@ -40,8 +42,6 @@ print("simulator state "..sim.State)
 sim:CreateComponent("simphonie::umdl::SmpIncrement","inc","")
 sim.inc:CreateChild("simphonie::umdl::SmpIncrement","Children","subinc","")
 sim:Publish()
-
---sim.recorder.filePath.Value="myRecorder.csv"
 sim:Configure()
 sim:Connect()
 sim.inc.output:Connect(sim.inc.subinc.input)

@@ -8,7 +8,7 @@
  * $Date$
  */
 #include "simphonie/umdl/SmpIncrement.hpp"
-#include "simphonie/sys/Logger.hpp"
+#include "Smp/ISimulator.h"
 
 namespace simphonie {
 namespace umdl {
@@ -20,7 +20,7 @@ SmpIncrement::SmpIncrement(Smp::String8 name, Smp::String8 descr, Smp::IObject* 
 SmpIncrement::~SmpIncrement() {}
 // ..........................................................
 void SmpIncrement::step() {
-    LOGI("calling SmpIncrement::step")
+    getSimulator()->GetLogger()->Log(this,"calling SmpIncrement::step", Smp::Services::ILogger::LMK_Information);
     _output = _input + 1;
 };
 // ..........................................................
