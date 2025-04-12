@@ -8,21 +8,21 @@
  * $Date$
  */
 #include "simphonie/kern/Simulator.hpp"
+
+#include "Smp/IModel.h"
+#include "Smp/IOutputField.h"
+#include "simdeck/ExInvalidComponentState.hpp"
+#include "simdeck/ExInvalidFile.hpp"
 #include "simphonie/kern/EventManager.hpp"
 #include "simphonie/kern/ExDuplicateUuid.hpp"
 #include "simphonie/kern/LinkRegistry.hpp"
 #include "simphonie/kern/Logger.hpp"
 #include "simphonie/kern/Resolver.hpp"
 #include "simphonie/kern/Scheduler.hpp"
+#include "simphonie/kern/StorageWriter.hpp"
 #include "simphonie/kern/TimeKeeper.hpp"
 #include "simphonie/kern/TypeRegistry.hpp"
 #include "simphonie/sys/Synchro.hpp"
-#include "simdeck/ExInvalidComponentState.hpp"
-#include "simdeck/ExInvalidFile.hpp"
-
-#include "Smp/IOutputField.h"
-#include "Smp/IModel.h"
-
 
 // ..........................................................
 namespace simphonie {
@@ -318,8 +318,11 @@ void Simulator::Hold(Smp::Bool immediate) {
 void Simulator::Store(Smp::String8 filename) {
     if (checkState("Store", Smp::SimulatorStateKind::SSK_Standby)) {
         setState(Smp::SimulatorStateKind::SSK_Storing);
-        // TODO serialize models states in file
-        _logger->Log(this, "Simulator::Store(filename) not implemented yet!", Smp::Services::ILogger::LMK_Error);
+        std::ostringstream msg;
+        msg << "Storing simulator state to " << filename;
+        _logger->Log(this, msg.str().c_str(), Smp::Services::ILogger::LMK_Information);
+        StorageWriter writer(this, filename);
+        writer.store();
         setState(Smp::SimulatorStateKind::SSK_Standby);
     }
 }
