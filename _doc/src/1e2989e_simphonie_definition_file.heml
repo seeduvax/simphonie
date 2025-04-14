@@ -86,7 +86,36 @@ The logger shall publish a string input field to define the log events to
 network send configuration.
 }
 {req %id=simph.log.cfg.5
-The logger shall publish an input field to optionally configure a buffered asynchronous event handling (see simp.log.cfg.unsync.1)
+The logger shall publish an input field to optionally configure a buffered
+asynchronous event handling (see simp.log.cfg.unsync.1)
+}
+{req %id=simph.log.fld.1
+The logger shall publish an output field that counts the log events of error
+kind.
+}
+{req %id=simph.log.fld.2
+The logger shall publish an output field that counts the log events of warning
+kind.
+}
+{req %id=simph.log.fld.3
+The logger shall publish an output field that counts the log events of
+information kind.
+}
+{req %id=simph.log.fld.4
+The logger shall publish an output field that counts the log events of debug
+kind.
+}
+{req %id=simph.log.fld.5
+The logger shall publish an output field that counts the log events of event
+kind.
+}
+{req %id=simph.log.fld.6
+The logger shall publish an output field that counts all the log events of any
+kind.
+}
+{req %id=simph.log.fld.7
+The logger shall provide a reset entry point that sets all the log counter to 0
+when executed.
 }
 {req %id=simph.log.ev.1
 Each log event shall include a zulu time attribute. Its value is the zulu time
@@ -130,7 +159,6 @@ to a remote logging service.
 {req %id=simph.log.net.2
 The send to network logging mode shall support the syslog protocol {xref SYSLOG}.
 }
-
 Designer is free to build a composite logging service where all optional
 features are handled by a subcomponent and activated when the related component
 is added to the service.
