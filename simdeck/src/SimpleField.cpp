@@ -11,6 +11,8 @@
 #include "simdeck/Collection.hpp"
 #include "Smp/IOutputField.h"
 #include "simdeck/ExInvalidTarget.hpp"
+#include "Smp/IStorageReader.h"
+#include "Smp/IStorageWriter.h"
 
 
 namespace simdeck {
@@ -46,6 +48,13 @@ public:
         _forcedValue=*_tData;
         _forced=true;
     }
+    void Restore(Smp::IStorageReader* reader) override {
+        reader->Restore(_tData, sizeof(T));
+    }
+    void Store(Smp::IStorageWriter* writer) override {
+        writer->Store(_tData, sizeof(T));
+    }
+
 protected:
     void initType();
 

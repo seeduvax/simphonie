@@ -73,6 +73,20 @@ void StringField::Freeze() {
     _forcedValue=*_value;
     _forced=true;
 }
+// ..........................................................
+void StringField::Restore(Smp::IStorageReader* reader) {
+    Smp::UInt64 size;
+    reader->Restore(&size, sizeof(size));
+    char * buf=new char[size];
+    reader->Restore(buf, size);
+    *_value=std::string(buf,size);
+}
+// ..........................................................
+void StringField::Store(Smp::IStorageWriter* writer) {
+    Smp::UInt64 size=_value->size();
+    writer->Store(&size, sizeof(size));
+    writer->Store(_value->c_str(), size);
+}
 // --------------------------------------------------------------------
 // ..........................................................
 class StringOutputField: public StringField, virtual public Smp::IOutputField {
@@ -122,6 +136,7 @@ public:
     Smp::Bool IsAutomatic() const override {
         return false;
     }
+
 private:
     Collection<Smp::IField> _targets;
 };

@@ -13,6 +13,8 @@
 #include "simdeck/Field.hpp"
 #include "Smp/IForcibleField.h"
 #include "Smp/ISimpleField.h"
+#include "Smp/IStorageReader.h"
+#include "Smp/IStorageWriter.h"
 
 namespace simdeck {
 
@@ -43,6 +45,8 @@ public:
     Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
     Smp::AnySimple GetValue() const override;
     void SetValue(Smp::AnySimple value) override;
+    void Store(Smp::IStorageWriter* writer) override;
+    void Restore(Smp::IStorageReader* reader) override;
 
     // Smp::IForcibleField implementation
     void Force(Smp::AnySimple value) override;

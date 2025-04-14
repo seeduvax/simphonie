@@ -12,6 +12,8 @@
 #include "simdeck/Collection.hpp"
 #include "simdeck/ExInvalidArrayIndex.hpp"
 #include "simdeck/SimpleField.hpp"
+#include "Smp/IStorageReader.h"
+#include "Smp/IStorageWriter.h"
 
 #include <sstream>
 
@@ -91,6 +93,12 @@ public:
              _tData[i] = values[j];
             j++;
         }
+    }
+    void Restore(Smp::IStorageReader* reader) override {
+        reader->Restore(_tData, sizeof(T)*_count);
+    }
+    void Store(Smp::IStorageWriter* writer) override {
+        writer->Store(_tData, sizeof(T)*_count);
     }
 
 private:
