@@ -10,7 +10,7 @@
 #ifndef __simphonie_kern_LoggerEvent_HPP__
 #define __simphonie_kern_LoggerEvent_HPP__
 
-#include <cstring>
+#include <string>
 #include <thread>
 #include "Smp/DateTime.h"
 #include "Smp/Duration.h"

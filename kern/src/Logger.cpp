@@ -24,9 +24,9 @@ const Smp::String8 Logger::_LMK_NamesTable[] = {
     Smp::Services::ILogger::LMK_DebugName};
 
 Logger::Logger(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Component(name, descr, parent) {
-    addContainer("Main Logger Container");
-    GetContainer("Main Logger Container")
-        ->AddComponent(new LoggerOstream("LoggerOstream", "Logger to stdout/stderr/stdlog"));
+    addContainer("Backends");
+    GetContainer("Backends")
+        ->AddComponent(new LoggerOstream("stdout", "Logger to stdout/stderr/stdlog", this));
 }
 
 Smp::Services::LogMessageKind Logger::QueryLogMessageKind(Smp::String8 messageKindName) {
