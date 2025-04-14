@@ -10,8 +10,8 @@
 #ifndef __simphonie_sys_Logger_HPP__
 #define __simphonie_sys_Logger_HPP__
 #include <iostream>
-#include <sstream>
 #include <mutex>
+#include <sstream>
 
 namespace simphonie {
 namespace sys {

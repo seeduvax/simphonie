@@ -47,7 +47,7 @@ protected:
     // the simulator.
     void configure() override {
         if (GetParent()==getSimulator()) {
-            _innerModel = new CModel("childMdl","",this);
+            _innerModel = new CModel("childMdl", "", this);
             GetContainer("sub")->AddComponent(_innerModel);
         }
     }

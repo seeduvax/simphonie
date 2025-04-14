@@ -8,12 +8,11 @@
  * $Date$
  */
 #include "simphonie/colibry/FieldRecorder.hpp"
-#include "simdeck/Type.hpp"
 #include "simdeck/StringField.hpp"
+#include "simdeck/Type.hpp"
 
 namespace simphonie {
 namespace colibry {
-
 
 static simdeck::Type _recorderType(Smp::Uuids::Uuid_Void, Smp::PrimitiveTypeKind::PTK_None, 0, "RecorderType",
                        "Dummy type for the field recording service as output field.");
@@ -39,8 +38,8 @@ FieldRecorder::~FieldRecorder() {
 // ..........................................................
 void FieldRecorder::publish(Smp::IPublication* receiver) {
     receiver->PublishField(&_fieldHolder);
-    receiver->PublishField(simdeck::StringField::Create("filePath","",
-            Smp::ViewKind::VK_All, &_filePath, nullptr, false, true, false,this));
+    receiver->PublishField(simdeck::StringField::Create("filePath", "", Smp::ViewKind::VK_All, &_filePath, nullptr,
+                                                        false, true, false, this));
 }
 
 // --------------------------------------------------------------------

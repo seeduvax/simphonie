@@ -32,11 +32,19 @@ SMP features coverage.
 The simphonie project shall include a SMP development kit aming at providing the
 concrete classes of the SMP interfaces needed to develop some components
 (services and models) libraries.
+<<<<<<< HEAD
 }
 {req %id=simph.smpdk.2
 The SMP development kit shall provide a concrete class for the Smp::IObject
 interface.
 }
+=======
+}
+{req %id=simph.smpdk.2
+The SMP development kit shall provide a concrete class for the Smp::IObject
+interface.
+}
+>>>>>>> 7eabe40f4a623c16eaec1048799d383c93fa71f9
 {req %id=simph.smpdk.3
 The SMP development kit shall provide a concrete class for the Smp::IComponent
 interface.
@@ -134,6 +142,77 @@ The send to network logging mode shall support the syslog protocol {xref SYSLOG}
 Designer is free to build a composite logging service where all optional
 features are handled by a subcomponent and activated when the related component
 is added to the service.
+
+{fig %src=LoggerArch.png %title=Logger Architecture}
+{#
+@startuml LoggerArch.png
+package Smp {
+  package Services {
+    interface ILogger {}
+
+  }
+}
+package simdeck {
+  class Container {}
+  class Component {}
+}
+package simphonie {
+  package kern {
+    class LoggerEvent <<struct>> {
+      +Smp::String8 senderName
+      +Smp::String8 message
+      +Smp::Services::LogMessageKind kind
+      +Smp::DateTime zuluTime
+      +Smp::Duration simulationTime
+      +std::thread::id threadId
+    }
+    class Logger extends Container implements ILogger {
+      -Smp::ISimulator* _simulator
+      +Logger(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+      +Smp::Services::LogMessageKind QueryLogMessageKind(Smp::String8 messageKindName)
+      +Log(const Smp::IObject* sender, Smp::String8 message, Smp::Services::LogMessageKind kind = 0)
+      #{static} std::string buildLogString(LogerEvent event)
+    }
+    interface ILoggerSpe {
+      +log(LoggerEvent event)
+    }
+    class LoggerStandard extends Component implements ILoggerSpe {
+      -Smp::Bool _useStandardStreams
+      +LoggerStandard(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+      +log(LogerEvent event)
+      -publish(Smp::IPublication* receiver)
+    }
+    class LoggerFile extends Component implements ILoggerSpe {
+      -std::string _filepath
+      -std::ofstream _file
+      +LoggerFile(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+      +~LoggerFile()
+      +log(LogerEvent event)
+      -publish(Smp::IPublication* receiver)
+    }
+    class LoggerNetwork extends Component implements ILoggerSpe {
+      -std::string _networkCfg
+      +LoggerNetwork(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+      +~LoggerNetwork()
+      +log(LogerEvent event)
+      -publish(Smp::IPublication* receiver)
+    }
+    class LoggerAsync extends Component implements ILoggerSpe {
+      -std::queue<LoggerEvent> _eventsBuffer
+      -Smp::Int32 _eventsQueueSize
+      +LoggerAsync(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+      +log(LogerEvent event)
+      +LoggerEvent consume()
+      -publish(Smp::IPublication* receiver)
+    }
+    LoggerStandard .up.> Logger : "child"
+    LoggerFile .up.> Logger : "child"
+    LoggerNetwork .up.> Logger : "child"
+    LoggerAsync .up.> Logger : "child"
+  }
+}
+@enduml
+#}
 
       }
     }

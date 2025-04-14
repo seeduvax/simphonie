@@ -8,17 +8,16 @@
  * $Date$
  */
 #include "Smp/IEntryPointPublisher.h"
-#include "Smp/ISimulator.h"
 #include "Smp/IModel.h"
 #include "Smp/IOutputField.h"
 #include "Smp/ISimpleField.h"
+#include "Smp/ISimulator.h"
+#include "simdeck/Utils.hpp"
 #include "simphonie/kern/Resolver.hpp"
 #include "simphonie/kern/Scheduler.hpp"
 #include "simphonie/kern/Simulator.hpp"
 #include "simphonie/lua/LuaBuilder.hpp"
-#include "simdeck/Utils.hpp"
 #include "sol/sol.hpp"
-
 
 // TODO check calling sim.Publish is allowed many times (and simulator
 // implementation shall be robust to that), in order to let services be pre
@@ -83,7 +82,6 @@ sol::object objectIndex(Smp::IObject* obj, Smp::String8 name, sol::this_state L)
     return solCastObject(obj->GetChild(name),L);
 }
 
-
 // ..........................................................
 Smp::Bool componentCreateChild(Smp::IComponent* th, Smp::String8 typeName, Smp::String8 container, Smp::String8 name, Smp::String8 description) {
     auto composite=dynamic_cast<Smp::IComposite*>(th);
@@ -109,9 +107,9 @@ Smp::Bool componentCreateChild(Smp::IComponent* th, Smp::String8 typeName, Smp::
 
 // ..........................................................
 sol::object fieldGetValue(Smp::IField* field, sol::this_state L) {
-    sol::object res=sol::nil;
-    auto sf=dynamic_cast<Smp::ISimpleField*>(field);
-    if(sf != nullptr) {
+    sol::object res = sol::nil;
+    auto sf = dynamic_cast<Smp::ISimpleField*>(field);
+    if (sf != nullptr) {
         // Associate corresponding primitive type
         switch (sf->GetPrimitiveTypeKind()) {
             case Smp::PrimitiveTypeKind::PTK_Char8:
@@ -160,9 +158,7 @@ sol::object fieldGetValue(Smp::IField* field, sol::this_state L) {
                 break;
             default:
                 std::stringstream ss;
-                ss << "Can't get value, primitive type of" 
-                   << field->GetName() 
-                   << " not supported";
+                ss << "Can't get value, primitive type of" << field->GetName() << " not supported";
                 throw std::runtime_error(ss.str().c_str());
                 break;
         }
@@ -173,8 +169,8 @@ sol::object fieldGetValue(Smp::IField* field, sol::this_state L) {
 void fieldSetValue(Smp::IField* field, sol::object value) {
     auto sf = dynamic_cast<Smp::ISimpleField*>(field);
     if (sf != nullptr) {
-        auto v=sf->GetValue();
-        auto k=v.GetType();
+        auto v = sf->GetValue();
+        auto k = v.GetType();
         switch (k) {
             case Smp::PrimitiveTypeKind::PTK_Char8:
                 v.SetValue(Smp::PrimitiveTypeKind::PTK_Char8, value.as<Smp::Char8>());
@@ -223,16 +219,13 @@ void fieldSetValue(Smp::IField* field, sol::object value) {
                 break;
             default:
                 std::stringstream ss;
-                ss << "Can't set value, primitive type of " 
-                   << field->GetName() 
-                   << " not supported";
+                ss << "Can't set value, primitive type of " << field->GetName() << " not supported";
                 throw std::runtime_error(ss.str().c_str());
                 break;
         }
         sf->SetValue(v);
     }
 }
-
 
 // --------------------------------------------------------------------
 // ..........................................................

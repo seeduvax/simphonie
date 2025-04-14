@@ -60,7 +60,6 @@ void LuaBuilder::publish(Smp::IPublication* receiver) {
     }
 }
 
-#define TRACE(expr) std::cout << __FILE__ << ":" << __LINE__ << ": " << #expr << " = " << expr << std::endl;
 // ..........................................................
 void LuaBuilder::connect(Smp::String8 fromPath, Smp::String8 toPath) {
     auto resolver = _sim->GetResolver();
@@ -96,8 +95,6 @@ void LuaBuilder::connect() {
     // iterate on init data section to set related fields value.
     // iterate on connection section to connect fields (TODO all kind of
     // connection to be handled, not only field to field connections)
-    std::cout<<"Initializations"<<std::endl;
-    
     sol::table components=_config["components"];
     for (auto te: components) {
         //std::string name=te.first;    
@@ -107,14 +104,11 @@ void LuaBuilder::connect() {
         
         Smp::IObject* comp=_sim->GetContainer(Smp::ISimulator::SMP_SimulatorModels)->GetChild(name.c_str());
         if(comp==nullptr){
-        std::cout<<"size:"<<_sim->GetContainer(Smp::ISimulator::SMP_SimulatorServices)->GetComponents()->size()<<std::endl;
             comp=_sim->GetService(name.c_str());
         }
-        std::cout<<comp->GetName()<<std::endl;
         // TODO recursively scan to build child components.
         initComponents(comp,v);
     }
-    std::cout << "Connections" << std::endl;
     components=_config["connections"];
     for (auto cnx: components) {
         if (cnx.second.is<sol::table>()) {
@@ -144,7 +138,6 @@ Smp::IComponent* LuaBuilder::simulatorCreateComponent(Smp::ISimulator* sim,
                 auto service=dynamic_cast<Smp::IService*>(comp);
                 if (service!=nullptr) {
                     sim->AddService(service);
-        std::cout<<"size:"<<sim->GetContainer(Smp::ISimulator::SMP_SimulatorServices)->GetComponents()->size()<<std::endl;
                     return comp;
                 }
                 auto model=dynamic_cast<Smp::IModel*>(comp);
@@ -275,7 +268,6 @@ void LuaBuilder::initComponents(Smp::IObject* node, sol::table t) {
                 auto field = c->GetField(kName.c_str());
                 if(field!=nullptr){
                     
-                    std::cout<<field->GetName()<<std::endl;
                     Smp::PrimitiveTypeKind ptk = field->GetType()->GetPrimitiveTypeKind();
                     if(ptk==Smp::PrimitiveTypeKind::PTK_None){
                         throw simdeck::ExInvalidType(field,"No primitive type Found");
@@ -303,7 +295,6 @@ void LuaBuilder::initComponents(Smp::IObject* node, sol::table t) {
             if(cnode == nullptr || cnode->GetContainer(kName.c_str()) == nullptr)continue;
             sol::table content=te.second.as<sol::table>();
             for (auto child: content) {
-                std::cout<<kName.c_str()<<":"<<child.first.as<Smp::String8>()<<std::endl;
                 initComponents(cnode->GetContainer(kName.c_str())->GetChild(child.first.as<Smp::String8>()),child.second);
             }
         }
