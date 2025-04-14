@@ -32,7 +32,7 @@ StorageWriter::~StorageWriter() {
 void StorageWriter::Store(const Smp::Void* address, Smp::UInt64 size) {
     uint8_t* buf = (uint8_t*)address;
     for (int i=0; i<size; i++ ) {
-        _out << _hexDigit[ buf[i] & 0xF0 >> 4 ] << _hexDigit[ buf[i] & 0x0F ];
+        _out << _hexDigit[ (buf[i] & 0xF0) >> 4 ] << _hexDigit[ buf[i] & 0x0F ];
     }
 }
 // ..........................................................
