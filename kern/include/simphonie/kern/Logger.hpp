@@ -12,13 +12,11 @@
 #include <mutex>
 #include <queue>
 #include <thread>
-#include <vector>
 #include "Smp/Services/ILogger.h"
 #include "simdeck/Component.hpp"
 #include "simdeck/Container.hpp"
 #include "simphonie/kern/LoggerEvent.hpp"
 #include "simphonie/kern/Simulator.hpp"
-#include "simphonie/sys/Logger.hpp"
 
 /*
  * simph.log.1: TOFINISH
@@ -37,34 +35,27 @@
  * simph.log.unsync.1: TODO
  * simph.log.net.1: TODO
  * simph.log.net.2: TODO
+ * MISC: sys/Logger
  */
 
 namespace simphonie {
 namespace kern {
+using namespace simdeck;
 
-class Logger : public simdeck::Component, virtual public Smp::Services::ILogger, virtual public AComposite {
-    typedef simdeck::Component Parent;
-
+class Logger : public Component, virtual public Smp::Services::ILogger, virtual public AComposite {
 public:
     Logger(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
 
     Smp::Services::LogMessageKind QueryLogMessageKind(Smp::String8 messageKindName) override;
     void Log(const Smp::IObject* sender, Smp::String8 message, Smp::Services::LogMessageKind kind = 0) override;
-    static std::string buildLogString(LoggerEvent& event);
-
-    class Backend : virtual public Smp::IComponent {
-    public:
-        Backend();
-        virtual ~Backend();
-        virtual void Log(LoggerEvent& event) = 0;
-    };
 
 protected:
-    void configure() override;
+    static const Smp::String8 _LMK_NamesTable[];
 
 private:
-    Smp::ISimulator* _simulator;
-    std::vector<Backend*> _backends;
+    std::mutex _mutex;
+
+    friend LoggerEvent;
 };
 
 } /* namespace kern */
