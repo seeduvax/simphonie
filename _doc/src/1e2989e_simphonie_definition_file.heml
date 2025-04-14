@@ -134,60 +134,6 @@ The send to network logging mode shall support the syslog protocol {xref SYSLOG}
 Designer is free to build a composite logging service where all optional
 features are handled by a subcomponent and activated when the related component
 is added to the service.
-
-{fig %src=LoggerArch.png %title=Logger Architecture}
-{#
-@startuml LoggerArch.png
-class LoggerEvent {
-  +Smp::String8 senderName
-  +Smp::String8 message
-  +Smp::Services::LogMessageKind kind
-  +Smp::DateTime zuluTime
-  +Smp::Duration simulationTime
-  +std::thread::id threadId
-  +{static} std::ostream& operator<<(std::ostream& os, const LoggerEvent& event)
-  +std::string toString()
-  -std::string _string
-}
-class Logger <<Component>> <<AComposite>> {
-  +Logger(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
-  +Smp::Services::LogMessageKind QueryLogMessageKind(Smp::String8 messageKindName)
-  +Log(const Smp::IObject* sender, Smp::String8 message, Smp::Services::LogMessageKind kind = 0)
-}
-interface ILoggerBackend {
-  +log(LoggerEvent event)
-}
-class LoggerOStream <<Component>> implements ILoggerBackend {
-  +LoggerOstream(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
-  +log(LogerEvent event)
-}
-class LoggerFile <<Component>> implements ILoggerBackend {
-  -std::string _filepath
-  -std::ofstream _file
-  +LoggerFile(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
-  +~LoggerFile()
-  +log(LogerEvent event)
-  -publish(Smp::IPublication* receiver)
-}
-class LoggerNetwork <<Component>> implements ILoggerBackend {
-  -std::string _networkCfg
-  +LoggerNetwork(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
-  +~LoggerNetwork()
-  +log(LogerEvent event)
-  -publish(Smp::IPublication* receiver)
-}
-class LoggerAsync <<Component>> <<AComposite>> implements ILoggerBackend {
-  -std::queue<LoggerEvent> _eventsBuffer
-  -Smp::Int32 _eventsQueueSize
-  +LoggerAsync(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
-  +log(LogerEvent event)
-  +LoggerEvent consume()
-  -publish(Smp::IPublication* receiver)
-}
-Logger *.. ILoggerBackend : "child"
-@enduml
-#}
-
       }
     }
     {section %title=SMP complements and extension
@@ -607,7 +553,7 @@ When an entry point execution is completed, each of its owner's output field
 Push method is invoked to forward the possibly updated data to each connected
 input field. 
     }
-    {section %title=aperiodic our out of clock scheduling
+    {section %title=aperiodic out of clock scheduling
       {section %title=Simulation time change triggered by external event
 Implementation strategy does not need a specific scheduler. The aperiodic and
 asynchronous event will synchronized the as fast as possible default scheduler behavior through the following strategy based on two entry points:
@@ -638,6 +584,61 @@ In order to let entry point be activated (and consume CPU ressource) only when r
      - with a period and repetition count.
    - {tbd how to restrict the schedule when many fields are assign to a single entry point and avoid many shcedule of the same entry point at the same time}.
       }
+    }
+    {section %title=Logging service
+{fig %src=LoggerArch_class.png %title=Logger Architecture}
+{#
+@startuml LoggerArch_class.png
+class LoggerEvent {
+  +Smp::String8 senderName
+  +Smp::String8 message
+  +Smp::Services::LogMessageKind kind
+  +Smp::DateTime zuluTime
+  +Smp::Duration simulationTime
+  +std::thread::id threadId
+  +{static} std::ostream& operator<<(std::ostream& os, const LoggerEvent& event)
+  +std::string toString()
+  -std::string _string
+}
+class Logger <<Component>> <<AComposite>> {
+  +Logger(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+  +Smp::Services::LogMessageKind QueryLogMessageKind(Smp::String8 messageKindName)
+  +Log(const Smp::IObject* sender, Smp::String8 message, Smp::Services::LogMessageKind kind = 0)
+}
+interface ILoggerBackend {
+  +log(LoggerEvent event)
+}
+class LoggerOStream <<Component>> implements ILoggerBackend {
+  +LoggerOstream(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+  +log(LogerEvent event)
+}
+class LoggerFile <<Component>> implements ILoggerBackend {
+  -std::string _filepath
+  -std::ofstream _file
+  +LoggerFile(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+  +~LoggerFile()
+  +log(LogerEvent event)
+  -publish(Smp::IPublication* receiver)
+}
+class LoggerNetwork <<Component>> implements ILoggerBackend {
+  -std::string _networkCfg
+  +LoggerNetwork(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+  +~LoggerNetwork()
+  +log(LogerEvent event)
+  -publish(Smp::IPublication* receiver)
+}
+class LoggerAsync <<Component>> <<AComposite>> implements ILoggerBackend {
+  -std::queue<LoggerEvent> _eventsBuffer
+  -Smp::Int32 _eventsQueueSize
+  +LoggerAsync(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
+  +log(LogerEvent event)
+  +LoggerEvent consume()
+  -publish(Smp::IPublication* receiver)
+}
+Logger *.. ILoggerBackend : "child"
+@enduml
+#}
+
     }
   }
 }
