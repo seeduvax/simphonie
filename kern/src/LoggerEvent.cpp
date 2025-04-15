@@ -1,91 +1,68 @@
 /*
  * @file LoggerEvent.cpp
  *
- * Copyright 2025 . All rights reserved.
+ * Copyright 2025. All rights reserved.
  * Use is subject to license terms.
  *
  * $Id$
  * $Date$
  */
 #include "simphonie/kern/LoggerEvent.hpp"
+#include <iomanip>
 #include <sstream>
+#include <string>
 #include "Smp/Services/ILogger.h"
 #include "simphonie/kern/Logger.hpp"
 
 namespace simphonie {
 namespace kern {
 
-LoggerEvent::LoggerEvent() {
-    _senderName = "";
-    _message = "";
-    _kind = Smp::Services::ILogger::LMK_Debug;
-    _zuluTime = 0;
-    _simulationTime = 0;
-    _string = "";
+Smp::String8 LoggerEvent::buildString(const Smp::IObject* sender, const std::string message,
+                                      const Smp::Services::LogMessageKind kind, const Smp::DateTime zuluTime,
+                                      const Smp::Duration simulationTime, const std::thread::id threadId) {
+    std::ostringstream s, s2;
+    char* cstr;
+    s << "[" << zuluTime << " (" << simulationTime << ")] [" << threadId << "] ";
+    s2 << "[" << Logger::_LMKMap.at(kind).name << "]";
+    s << std::setw(13) << s2.str();
+    s << " [" << sender->GetName() << "] " << message << std::endl;
+    cstr = new char[s.str().length() + 1];
+    std::strcpy(cstr, s.str().c_str());
+    return cstr;
 }
 
-void LoggerEvent::setSenderName(Smp::String8 senderName) {
-    _senderName = senderName;
+Smp::String8 LoggerEvent::buildString(const Smp::String8 string) {
+    char* cstr = new char[strlen(string) + 1];
+    strcpy(cstr, string);
+    return cstr;
 }
 
-Smp::String8 LoggerEvent::getSenderName() const {
-    return _senderName;
-}
+LoggerEvent::LoggerEvent(const Smp::DateTime zuluTime, const Smp::Duration simulationTime, const Smp::IObject* sender,
+                         const std::string message, const Smp::Services::LogMessageKind kind)
+    : _threadId(std::this_thread::get_id()),
+      _sender(sender),
+      _message(message),
+      _kind(kind),
+      _zuluTime(zuluTime),
+      _simulationTime(simulationTime),
+      _string(LoggerEvent::buildString(sender, message, kind, zuluTime, simulationTime, _threadId)) {}
 
-void LoggerEvent::setMessage(Smp::String8 message) {
-    _message = message;
-}
+LoggerEvent::LoggerEvent(const LoggerEvent& other)
+    : _sender(other._sender),
+      _message(other._message),
+      _kind(other._kind),
+      _zuluTime(other._zuluTime),
+      _simulationTime(other._simulationTime),
+      _threadId(other._threadId),
+      _string(LoggerEvent::buildString(other._string)) {}
 
-Smp::String8 LoggerEvent::getMessage() const {
-    return _message;
-}
-
-void LoggerEvent::setKind(Smp::Services::LogMessageKind kind) {
-    _kind = kind;
-}
-
-Smp::Services::LogMessageKind LoggerEvent::getKind() const {
-    return _kind;
-}
-
-void LoggerEvent::setZuluTime(Smp::DateTime zuluTime) {
-    _zuluTime = zuluTime;
-}
-
-Smp::DateTime LoggerEvent::getZuluTime() const {
-    return _zuluTime;
-}
-
-void LoggerEvent::setSimulationTime(Smp::Duration simulationTime) {
-    _simulationTime = simulationTime;
-}
-
-Smp::Duration LoggerEvent::getSimulationTime() const {
-    return _simulationTime;
-}
-
-void LoggerEvent::setThreadId(std::thread::id threadId) {
-    _threadId = threadId;
-}
-
-std::thread::id LoggerEvent::getThreadId() const {
-    return _threadId;
-}
-
-void LoggerEvent::build() {
-    std::ostringstream s;
-    s << _zuluTime << "\t" << _simulationTime << "\t" << Logger::_LMK_NamesTable[_kind] << "\t";
-    s << _threadId << "\t" << _senderName << "\t" << _message << std::endl;
-    _string = s.str();
-}
-
-std::string LoggerEvent::getString() const {
-    return _string;
+LoggerEvent::~LoggerEvent() {
+    delete[] _string;
 }
 
 std::ostream& operator<<(std::ostream& os, const LoggerEvent& event) {
-    return os << event.getString() << std::endl;
+    return os << event.getString();
 }
 
 } /* namespace kern */
-}  // namespace simphonie
+} /* namespace simphonie */

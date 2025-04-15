@@ -1,23 +1,22 @@
 /*
- * @file LoggerOstream.cpp
+ * @file LoggerOStream.cpp
  *
- * Copyright 2025 . All rights reserved.
+ * Copyright 2025. All rights reserved.
  * Use is subject to license terms.
  *
  * $Id$
  * $Date$
  */
-
 #include "simphonie/kern/LoggerOStream.hpp"
 #include "simphonie/kern/Logger.hpp"
 
 namespace simphonie {
 namespace kern {
 
-LoggerOstream::LoggerOstream(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
+LoggerOStream::LoggerOStream(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : Component(name, descr, parent) {}
 
-void LoggerOstream::log(LoggerEvent event) {
+void LoggerOStream::log(const LoggerEvent& event) {
     switch (event.getKind()) {
         case Smp::Services::ILogger::LMK_Error:
             std::cerr << event;
@@ -29,4 +28,4 @@ void LoggerOstream::log(LoggerEvent event) {
 }
 
 } /* namespace kern */
-}  // namespace simphonie
+} /* namespace simphonie */

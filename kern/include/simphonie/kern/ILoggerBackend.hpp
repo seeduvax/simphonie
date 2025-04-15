@@ -1,7 +1,7 @@
 /*
  * @file ILoggerBackend.hpp
  *
- * Copyright 2025 . All rights reserved.
+ * Copyright 2025. All rights reserved.
  * Use is subject to license terms.
  *
  * $Id$
@@ -17,9 +17,10 @@ namespace kern {
 
 class ILoggerBackend {
 public:
-    virtual void log(simphonie::kern::LoggerEvent event) = 0;
+    virtual void log(const LoggerEvent& event) = 0;
 };
 
 } /* namespace kern */
-}  // namespace simphonie
+} /* namespace simphonie */
+
 #endif /* __simphonie_kern_ILoggerBackend_HPP__ */

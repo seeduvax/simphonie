@@ -618,52 +618,74 @@ In order to let entry point be activated (and consume CPU ressource) only when r
 {#
 @startuml LoggerArch_class.png
 class LoggerEvent {
-  +Smp::String8 senderName
-  +Smp::String8 message
-  +Smp::Services::LogMessageKind kind
-  +Smp::DateTime zuluTime
-  +Smp::Duration simulationTime
-  +std::thread::id threadId
+  -const Smp::IObject* _sender
+  -const Smp::String8 _message
+  -const Smp::Services::LogMessageKind _kind
+  -const Smp::DateTime _zuluTime
+  -const Smp::Duration _simulationTime
+  -const std::thread::id _threadId
+  -const Smp::String8 _string
+  +LoggerEvent(const Smp::DateTime zuluTime, const Smp::Duration simulationTime, const Smp::IObject* sender, const std::string message, const Smp::Services::LogMessageKind kind)
+  +~LoggerEvent()
+  +LoggerEvent(const LoggerEvent& other)
+  +const Smp::IObject* getSender()
+  +std::string getMessage()
+  +Smp::Services::LogMessageKind getKind()
+  +Smp::DateTime getZuluTime()
+  +Smp::Duration getSimulationTime()
+  +std::thread::id getThreadId()
+  +Smp::String8 getString()
   +{static} std::ostream& operator<<(std::ostream& os, const LoggerEvent& event)
-  +std::string toString()
-  -std::string _string
+  -{static} Smp::String8 buildString(const Smp::IObject* sender, const std::string message, const Smp::Services::LogMessageKind kind, const Smp::DateTime zuluTime, const Smp::Duration simulationTime, const std::thread::id threadId)
+  -{static} Smp::String8 buildString(const Smp::String8 string)
 }
-class Logger <<Component>> <<AComposite>> {
+class Logger <<Component>> <<AComposite>> <<EPPublisher>> {
+  #{static} std::unordered_map<Smp::Services::LogMessageKind, _LMK> _LMKMap
+  #struct _LMK {const Smp::String8 name; const Smp::Services::LogMessageKind kind; Smp::Int32 counter;}
+  -std::mutex _mutex
+  -std::vector<ILoggerBackend*> _backends
   +Logger(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
   +Smp::Services::LogMessageKind QueryLogMessageKind(Smp::String8 messageKindName)
-  +Log(const Smp::IObject* sender, Smp::String8 message, Smp::Services::LogMessageKind kind = 0)
+  +Log(const Smp::IObject* sender, Smp::String8 message, Smp::Services::LogMessageKind kind = Smp::Services::ILogger::LMK_Debug)
+  #configure()
+  #publish(Smp::IPublication* receiver)
 }
 interface ILoggerBackend {
-  +log(LoggerEvent event)
+  +log(const LoggerEvent& event)
 }
 class LoggerOStream <<Component>> implements ILoggerBackend {
   +LoggerOstream(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
-  +log(LogerEvent event)
+  +log(const LoggerEvent& event)
 }
 class LoggerFile <<Component>> implements ILoggerBackend {
   -std::string _filepath
   -std::ofstream _file
   +LoggerFile(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
   +~LoggerFile()
-  +log(LogerEvent event)
-  -publish(Smp::IPublication* receiver)
+  +log(const LoggerEvent& event)
+  #publish(Smp::IPublication* receiver)
+  #configure()
 }
 class LoggerNetwork <<Component>> implements ILoggerBackend {
   -std::string _networkCfg
   +LoggerNetwork(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
   +~LoggerNetwork()
-  +log(LogerEvent event)
-  -publish(Smp::IPublication* receiver)
+  +log(const LoggerEvent& event)
+  #publish(Smp::IPublication* receiver)
 }
 class LoggerAsync <<Component>> <<AComposite>> implements ILoggerBackend {
-  -std::queue<LoggerEvent> _eventsBuffer
-  -Smp::Int32 _eventsQueueSize
+  -std::mutex _mutex
+  -std::condition_variable _cv
+  -std::queue<LoggerEvent> _buffer
+  -Smp::Int32 _bufferSize
   +LoggerAsync(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
-  +log(LogerEvent event)
-  +LoggerEvent consume()
-  -publish(Smp::IPublication* receiver)
+  +log(const LoggerEvent& event)
+  +const LoggerEvent& getEvent()
+  +consumeEvent()
+  #publish(Smp::IPublication* receiver)
 }
 Logger *.. ILoggerBackend : "child"
+note top of LoggerNetwork : Not Implemented
 @enduml
 #}
 

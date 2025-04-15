@@ -1,7 +1,7 @@
 /*
  * @file Logger.cpp
  *
- * Copyright 2025 . All rights reserved.
+ * Copyright 2025. All rights reserved.
  * Use is subject to license terms.
  *
  * $Id$
@@ -9,59 +9,98 @@
  */
 #include "simphonie/kern/Logger.hpp"
 #include <cstring>
+#include <iomanip>
 #include "Smp/ISimulator.h"
 #include "Smp/Services/ITimeKeeper.h"
-#include "simphonie/kern/ILoggerBackend.hpp"
 #include "simphonie/kern/LoggerOStream.hpp"
 #include "simphonie/kern/Publication.hpp"
+
+#define CONTAINER_NAME "Backends"
 
 namespace simphonie {
 namespace kern {
 
-const Smp::String8 Logger::_LMK_NamesTable[] = {
-    Smp::Services::ILogger::LMK_InformationName, Smp::Services::ILogger::LMK_EventName,
-    Smp::Services::ILogger::LMK_WarningName, Smp::Services::ILogger::LMK_ErrorName,
-    Smp::Services::ILogger::LMK_DebugName};
+std::unordered_map<Smp::Services::LogMessageKind, Logger::_LMK> Logger::_LMKMap = {
+    {Smp::Services::ILogger::LMK_Event, {Smp::Services::ILogger::LMK_EventName, Smp::Services::ILogger::LMK_Event, 0}},
+    {Smp::Services::ILogger::LMK_Information,
+     {Smp::Services::ILogger::LMK_InformationName, Smp::Services::ILogger::LMK_Information, 0}},
+    {Smp::Services::ILogger::LMK_Warning,
+     {Smp::Services::ILogger::LMK_WarningName, Smp::Services::ILogger::LMK_Warning, 0}},
+    {Smp::Services::ILogger::LMK_Error, {Smp::Services::ILogger::LMK_ErrorName, Smp::Services::ILogger::LMK_Error, 0}},
+    {Smp::Services::ILogger::LMK_Debug, {Smp::Services::ILogger::LMK_DebugName, Smp::Services::ILogger::LMK_Debug, 0}}};
 
 Logger::Logger(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Component(name, descr, parent) {
-    addContainer("Backends");
-    GetContainer("Backends")
-        ->AddComponent(new LoggerOstream("stdout", "Logger to stdout/stderr/stdlog", this));
+    ILoggerBackend* backend;
+    Smp::IContainer* container;
+
+    container = addContainer(CONTAINER_NAME, "Logger backends");
+    backend = new LoggerOStream("LoggerOStream", "Logger to stdout/stderr/stdlog", this);
+    container->AddComponent(dynamic_cast<Smp::IComponent*>(backend));
+    _backends.push_back(backend);
+
+    addEP("resetCounters", "Reset events' counters", this, &Logger::resetCounters);
+}
+
+void Logger::publish(Smp::IPublication* receiver) {
+    std::ostringstream s;
+
+    for (auto& lmk : _LMKMap) {
+        s.str("");
+        s << lmk.second.name << "Counter";
+        receiver->PublishField(s.str().c_str(), "Counter of logs", &lmk.second.counter, Smp::ViewKind::VK_All, false,
+                               false, true);
+    }
+}
+
+void Logger::configure() {
+    ILoggerBackend* backend;
+    Smp::IContainer* container;
+
+    container = GetContainer(CONTAINER_NAME);
+    for (auto component : *(container->GetComponents())) {
+        backend = dynamic_cast<ILoggerBackend*>(component);
+        if (backend != nullptr) {
+            _backends.push_back(backend);
+        }
+    }
+    if (_backends.size() > 1) {
+        _backends.erase(_backends.begin());
+    }
 }
 
 Smp::Services::LogMessageKind Logger::QueryLogMessageKind(Smp::String8 messageKindName) {
-    for (int i = 0; i <= Smp::Services::ILogger::LMK_Debug; i++) {
-        if (strcmp(messageKindName, _LMK_NamesTable[i]) == 0) {
-            return i;
+    for (const auto& lmk : _LMKMap) {
+        if (strcmp(messageKindName, lmk.second.name) == 0) {
+            return lmk.second.kind;
         }
     }
     return Smp::Services::ILogger::LMK_Debug;
 }
 
 void Logger::Log(const Smp::IObject* sender, Smp::String8 message, Smp::Services::LogMessageKind kind) {
-    LoggerEvent event;
-    ILoggerBackend* logger;
-
     const Smp::Services::ITimeKeeper* time = getSimulator()->GetTimeKeeper();
-    event.setZuluTime(time->GetZuluTime());
-    event.setSimulationTime(time->GetSimulationTime());
-    event.setSenderName(sender->GetName());
-    event.setMessage(message);
-    event.setKind(kind);
-    event.setThreadId(std::this_thread::get_id());
-    event.build();
+    const LoggerEvent event(time->GetZuluTime(), time->GetSimulationTime(), sender, message, kind);
 
-    const std::lock_guard<std::mutex> lock(_mutex);
-
-    for (auto container : *GetContainers()) {
-        for (auto component : *(container->GetComponents())) {
-            logger = dynamic_cast<ILoggerBackend*>(component);
-            if (logger) {
-                logger->log(event);
-            }
+    {
+        const std::lock_guard<std::mutex> lock(_logMutex);
+        for (ILoggerBackend* logger : _backends) {
+            logger->log(event);
         }
+    }
+
+    {
+        const std::lock_guard<std::mutex> lock(_countersMutex);
+        _LMKMap.at(kind).counter++;
+    }
+}
+
+void Logger::resetCounters() {
+    const std::lock_guard<std::mutex> lock(_countersMutex);
+
+    for (auto& lmk : _LMKMap) {
+        lmk.second.counter = 0;
     }
 }
 
 } /* namespace kern */
-}  // namespace simphonie
+} /* namespace simphonie */
