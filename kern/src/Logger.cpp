@@ -30,22 +30,16 @@ std::unordered_map<Smp::Services::LogMessageKind, Logger::_LMK> Logger::_LMKMap 
     {Smp::Services::ILogger::LMK_Debug, {Smp::Services::ILogger::LMK_DebugName, Smp::Services::ILogger::LMK_Debug, 0}}};
 
 Logger::Logger(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Component(name, descr, parent) {
-    ILoggerBackend* backend;
-    Smp::IContainer* container;
-
-    container = addContainer(CONTAINER_NAME, "Logger backends");
-    backend = new LoggerOStream("LoggerOStream", "Logger to stdout/stderr/stdlog", this);
-    container->AddComponent(dynamic_cast<Smp::IComponent*>(backend));
+    ILoggerBackend* backend = new LoggerOStream("LoggerOStream", "Logger to stdout/stderr/stdlog", this);
+    { addContainer(CONTAINER_NAME, "Logger backends")->AddComponent(dynamic_cast<Smp::IComponent*>(backend)); }
     _backends.push_back(backend);
 
     addEP("resetCounters", "Reset events' counters", this, &Logger::resetCounters);
 }
 
 void Logger::publish(Smp::IPublication* receiver) {
-    std::ostringstream s;
-
     for (auto& lmk : _LMKMap) {
-        s.str("");
+        std::ostringstream s;
         s << lmk.second.name << "Counter";
         receiver->PublishField(s.str().c_str(), "Counter of logs", &lmk.second.counter, Smp::ViewKind::VK_All, false,
                                false, true);
@@ -53,17 +47,20 @@ void Logger::publish(Smp::IPublication* receiver) {
 }
 
 void Logger::configure() {
-    ILoggerBackend* backend;
-    Smp::IContainer* container;
+    Smp::IContainer* container = GetContainer(CONTAINER_NAME);
+    Smp::IComponent* defaultLogger = container->GetComponents()->at(static_cast<size_t>(0));
 
-    container = GetContainer(CONTAINER_NAME);
     for (auto component : *(container->GetComponents())) {
-        backend = dynamic_cast<ILoggerBackend*>(component);
+        if (component == defaultLogger)
+            continue;
+        ILoggerBackend* backend = dynamic_cast<ILoggerBackend*>(component);
         if (backend != nullptr) {
             _backends.push_back(backend);
         }
     }
+
     if (_backends.size() > 1) {
+        container->DeleteComponent(defaultLogger);
         _backends.erase(_backends.begin());
     }
 }

@@ -20,20 +20,22 @@ namespace kern {
 Smp::String8 LoggerEvent::buildString(const Smp::IObject* sender, const std::string message,
                                       const Smp::Services::LogMessageKind kind, const Smp::DateTime zuluTime,
                                       const Smp::Duration simulationTime, const std::thread::id threadId) {
-    std::ostringstream s, s2;
-    char* cstr;
+    std::ostringstream s;
     s << "[" << zuluTime << " (" << simulationTime << ")] [" << threadId << "] ";
-    s2 << "[" << Logger::_LMKMap.at(kind).name << "]";
-    s << std::setw(13) << s2.str();
+    {
+        std::ostringstream s2;
+        s2 << "[" << Logger::_LMKMap.at(kind).name << "]";
+        s << std::setw(13) << s2.str();
+    }
     s << " [" << sender->GetName() << "] " << message << std::endl;
-    cstr = new char[s.str().length() + 1];
+    char* cstr = new char[s.str().length() + 1];
     std::strcpy(cstr, s.str().c_str());
     return cstr;
 }
 
 Smp::String8 LoggerEvent::buildString(const Smp::String8 string) {
     char* cstr = new char[strlen(string) + 1];
-    strcpy(cstr, string);
+    cstr = strcpy(cstr, string);
     return cstr;
 }
 

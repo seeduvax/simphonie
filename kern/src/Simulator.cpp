@@ -17,6 +17,9 @@
 #include "simphonie/kern/ExDuplicateUuid.hpp"
 #include "simphonie/kern/LinkRegistry.hpp"
 #include "simphonie/kern/Logger.hpp"
+#include "simphonie/kern/LoggerAsync.hpp"
+#include "simphonie/kern/LoggerFile.hpp"
+#include "simphonie/kern/LoggerOStream.hpp"
 #include "simphonie/kern/Resolver.hpp"
 #include "simphonie/kern/Scheduler.hpp"
 #include "simphonie/kern/StorageWriter.hpp"
@@ -64,6 +67,10 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
     _services->AddComponent(_logger);
     setState(Smp::SimulatorStateKind::SSK_Building);
 
+    RegisterFactory(new simdeck::Factory<Logger>("Logger", "Logger", this));
+    RegisterFactory(new simdeck::Factory<LoggerOStream>("LoggerOStream", "LoggerOStream", this));
+    RegisterFactory(new simdeck::Factory<LoggerFile>("LoggerFile", "LoggerFile", this));
+    RegisterFactory(new simdeck::Factory<LoggerAsync>("LoggerAsync", "LoggerAsync", this));
 }
 // ..........................................................
 Simulator::~Simulator() {

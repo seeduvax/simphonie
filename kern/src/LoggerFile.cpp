@@ -26,8 +26,9 @@ void LoggerFile::configure() {
 }
 
 LoggerFile::~LoggerFile() {
-    if (_file)
+    if (_file) {
         _file.close();
+    }
 }
 
 void LoggerFile::publish(Smp::IPublication* receiver) {
@@ -36,8 +37,10 @@ void LoggerFile::publish(Smp::IPublication* receiver) {
 }
 
 void LoggerFile::log(const LoggerEvent& event) {
-    if (_file)
+    if (_file) {
         _file << event;
+        _file.flush();
+    }
 }
 
 } /* namespace kern */

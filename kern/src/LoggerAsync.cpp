@@ -28,8 +28,9 @@ void LoggerAsync::log(const LoggerEvent& event) {
     if (_bufferSize > 0) {
         std::lock_guard<std::mutex> lock(_mutex);
 
-        while (_buffer.size() > _bufferSize)
+        while (_buffer.size() > _bufferSize) {
             _buffer.pop();
+        }
         _buffer.push(event);
     }
     _cv.notify_one();
@@ -45,8 +46,9 @@ const LoggerEvent& LoggerAsync::getEvent() {
 void LoggerAsync::consumeEvent() {
     std::lock_guard<std::mutex> lock(_mutex);
 
-    if (!_buffer.empty())
+    if (!_buffer.empty()) {
         _buffer.pop();
+    }
 }
 
 } /* namespace kern */

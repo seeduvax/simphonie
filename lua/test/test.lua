@@ -5,6 +5,12 @@ sim:setConfiguration({
         ctrl={type="simphonie::colibry::SimControl", description=""},
         recorder={type="simphonie::colibry::FieldRecorderCsv", description="",
             filePath="myRec.csv"},
+        logger={type="simphonie::kern::Logger", description="",
+            Backends={
+                loggerFile={type="simphonie::kern::LoggerFile", description=""},
+                loggerOStream={type="simphonie::kern::LoggerOStream", description=""}
+            }
+        },
         inc1={type="simphonie::umdl::SmpIncrement",description="",
             Children={
                 inc11={type="simphonie::umdl::SmpIncrement", description=""}
@@ -42,6 +48,7 @@ print("simulator state "..sim.State)
 sim:CreateComponent("simphonie::umdl::SmpIncrement","inc","")
 sim.inc:CreateChild("simphonie::umdl::SmpIncrement","Children","subinc","")
 sim:Publish()
+sim.logger.loggerFile.filePath.Value = "leloggerla.log"
 sim:Configure()
 sim:Connect()
 sim.inc.output:Connect(sim.inc.subinc.input)
@@ -54,3 +61,9 @@ sim.inc1.step:Execute()
 sim.recorder.step:Execute()
 sim.inc1.step:Execute()
 sim.recorder.step:Execute()
+
+print("Nb. of Error logs: "..sim.logger.ErrorCounter.Value)
+print("Nb. of Warning logs: "..sim.logger.WarningCounter.Value)
+print("Nb. of Event logs: "..sim.logger.EventCounter.Value)
+print("Nb. of Information logs: "..sim.logger.InformationCounter.Value)
+print("Nb. of Debug logs: "..sim.logger.DebugCounter.Value)

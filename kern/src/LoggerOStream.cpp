@@ -20,10 +20,13 @@ void LoggerOStream::log(const LoggerEvent& event) {
     switch (event.getKind()) {
         case Smp::Services::ILogger::LMK_Error:
             std::cerr << event;
+            break;
         case Smp::Services::ILogger::LMK_Debug:
             std::clog << event;
+            break;
         default:
             std::cout << event;
+            break;
     }
 }
 
