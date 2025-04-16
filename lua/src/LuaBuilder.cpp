@@ -8,15 +8,18 @@
  * $Date$
  */
 #include "simphonie/lua/LuaBuilder.hpp"
+
 #include <iostream>
 #include <string>
+
+#include "Smp/IEntryPoint.h"
 #include "Smp/IModel.h"
 #include "Smp/IOutputField.h"
-#include "Smp/Services/IResolver.h"
-#include "Smp/ISimpleField.h"
 #include "Smp/ISimpleArrayField.h"
+#include "Smp/ISimpleField.h"
 #include "Smp/Publication/IType.h"
-
+#include "Smp/Services/IResolver.h"
+#include "Smp/Services/IScheduler.h"
 #include "simdeck/ExInvalidType.hpp"
 namespace simphonie {
 namespace lua {
@@ -96,8 +99,7 @@ void LuaBuilder::connect() {
     // iterate on connection section to connect fields (TODO all kind of
     // connection to be handled, not only field to field connections)
     sol::table components=_config["components"];
-    for (auto te: components) {
-        //std::string name=te.first;    
+    for (auto te : components) {
         std::string name=te.first.as<std::string>();
         sol::table v=te.second;
         std::string type=v["type"];
@@ -109,6 +111,8 @@ void LuaBuilder::connect() {
         // TODO recursively scan to build child components.
         initComponents(comp,v);
     }
+
+    // iterate on connections list connect fields.
     components=_config["connections"];
     for (auto cnx: components) {
         if (cnx.second.is<sol::table>()) {
@@ -122,6 +126,44 @@ void LuaBuilder::connect() {
         }
         else {
             connect(cnx.second.as<std::string>().c_str(), cnx.first.as<std::string>().c_str());
+        }
+    }
+
+    // iterate on schedul list to schedule entry points
+    sol::table schedule = _config["schedule"];
+    auto scheduler = _sim->GetScheduler();
+    auto resolver = _sim->GetResolver();
+    for (auto entry : schedule) {
+        sol::table t = entry.second;
+        ;
+        std::string name = t.get_or<std::string>("name", "");
+        if (name == "") {
+            name = entry.first.as<std::string>();
+        }
+        Smp::Duration cycleTime = t.get_or("cycleTime_s", 0.0) * 1000000000ULL;
+        if (cycleTime == 0) {
+            cycleTime = t.get_or("cycleTime_ms", 0.0) * 1000000ULL;
+        }
+        if (cycleTime == 0) {
+            cycleTime = t.get_or("cycleTime_us", 0.0) * 1000ULL;
+        }
+        if (cycleTime == 0) {
+            cycleTime = t.get_or("cycleTime_ns", 0.0);
+        }
+        Smp::Int64 repeat = t.get_or("repeat", -1LL);
+        Smp::Duration time = t.get_or("offset", 0ULL);
+        auto ep = dynamic_cast<Smp::IEntryPoint*>(resolver->ResolveAbsolute(name.c_str()));
+        if (ep != nullptr) {
+            scheduler->AddSimulationTimeEvent(ep, time, cycleTime, repeat);
+            std::ostringstream msg;
+            msg << name << " scheduled cycleTime=" << cycleTime << "ns,  repeat=" << repeat
+                << " simulationTime=" << time << "ns";
+            _sim->GetLogger()->Log(this, msg.str().c_str(), Smp::Services::ILogger::LMK_Debug);
+        }
+        else {
+            std::ostringstream msg;
+            msg << "Can't schedule " << name << ": entry point not found";
+            _sim->GetLogger()->Log(this, msg.str().c_str(), Smp::Services::ILogger::LMK_Error);
         }
     }
 }

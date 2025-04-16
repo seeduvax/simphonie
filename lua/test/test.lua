@@ -2,7 +2,8 @@ s=require "simphonie_lua"
 sim=s.Simphonie.Simulator.new("luaSim")
 sim:setConfiguration({
     components={
-        ctrl={type="simphonie::colibry::SimControl", description=""},
+        ctrl={type="simphonie::colibry::SimControl", description="",
+            stopTime=2000000000},
         recorder={type="simphonie::colibry::FieldRecorderCsv", description="",
             filePath="myRec.csv"},
         logger={type="simphonie::kern::Logger", description="",
@@ -25,6 +26,11 @@ sim:setConfiguration({
             "inc2/input",
             "inc1/output"
         }
+    },
+    schedule={
+        ["inc1/step"]={cycleTime_ms=250},
+        ["inc2/step"]={cycleTime_ms=500},
+        ["recorder/step"]={cycleTime_ms=500}
     }
 })
 sim:Run()
@@ -61,6 +67,8 @@ sim.inc1.step:Execute()
 sim.recorder.step:Execute()
 sim.inc1.step:Execute()
 sim.recorder.step:Execute()
+sim:Run()
+
 
 print("Nb. of Error logs: "..sim.logger.ErrorCounter.Value)
 print("Nb. of Warning logs: "..sim.logger.WarningCounter.Value)
