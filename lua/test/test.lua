@@ -2,22 +2,22 @@ s=require "simphonie_lua"
 sim=s.Simphonie.Simulator.new("luaSim")
 sim:setConfiguration({
     components={
-        ctrl={type="simphonie::colibry::SimControl", description="",
+        ctrl={type="simphonie::colibry::SimControl", description="Auto stop the simulation when stop date is reached.",
             stopTime=2000000000},
-        recorder={type="simphonie::colibry::FieldRecorderCsv", description="",
+        recorder={type="simphonie::colibry::FieldRecorderCsv", 
             filePath="myRec.csv"},
-        logger={type="simphonie::kern::Logger", description="",
+        logger={type="simphonie::kern::Logger",
             Backends={
-                loggerFile={type="simphonie::kern::LoggerFile", description=""},
-                loggerOStream={type="simphonie::kern::LoggerOStream", description=""}
+                loggerFile={type="simphonie::kern::LoggerFile"},
+                loggerOStream={type="simphonie::kern::LoggerOStream"}
             }
         },
-        inc1={type="simphonie::umdl::SmpIncrement",description="",
+        inc1={type="simphonie::umdl::SmpIncrement",
             Children={
-                inc11={type="simphonie::umdl::SmpIncrement", description=""}
+                inc11={type="simphonie::umdl::SmpIncrement", description="to check sub component."}
             }
         },
-        inc2={type="simphonie::umdl::SmpIncrement",description=""},
+        inc2={type="simphonie::umdl::SmpIncrement"},
     },
     connections={
         ["inc2/input"]="inc1/output",
@@ -49,7 +49,6 @@ print("timekeeper state / simulation time:"..tk.State.."/"..tk:GetSimulationTime
 sim.testTK=tk;
 print("scheduler description: "..sim.Scheduler.Description)
 print("scheduler state: "..sim.Scheduler.State)
-print("simulator state "..sim.State)
 
 sim:CreateComponent("simphonie::umdl::SmpIncrement","inc","")
 sim.inc:CreateChild("simphonie::umdl::SmpIncrement","Children","subinc","")
@@ -59,6 +58,7 @@ sim:Configure()
 sim:Connect()
 sim.inc.output:Connect(sim.inc.subinc.input)
 sim.Resolver.dump:Execute()
+print("simulator state "..sim.State)
 
 sim.inc1.input.Value=10
 sim.inc1.step:Execute()
@@ -69,6 +69,10 @@ sim.inc1.step:Execute()
 sim.recorder.step:Execute()
 sim:Run()
 
+-- this is a bad way to wait the simulation is completed.
+-- it is good enough waiting for more specific feature for that.
+while sim.State~=3 do
+end
 
 print("Nb. of Error logs: "..sim.logger.ErrorCounter.Value)
 print("Nb. of Warning logs: "..sim.logger.WarningCounter.Value)

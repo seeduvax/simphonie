@@ -52,7 +52,7 @@ void LuaBuilder::publish(Smp::IPublication* receiver) {
         std::string name=te.first.as<std::string>();
         sol::table v=te.second;
         std::string type=v["type"];
-        std::string description=v["description"].get<sol::optional<std::string>>().value_or(std::string(""));
+        std::string description = v.get_or<std::string>("description", "");
         auto comp=simulatorCreateComponent(_sim, type.c_str(), name.c_str(),
                                  description.c_str());
         // TODO recursively scan to build child components.
@@ -284,7 +284,7 @@ void LuaBuilder::addSubComponents(Smp::IComposite* node, sol::table t) {
                 std::string name=child.first.as<std::string>();
                 sol::table v=child.second;
                 std::string type=v["type"];
-                std::string description=v["description"];
+                std::string description = v.get_or<std::string>("description", "");
                 auto sub = componentCreateComponent(_sim, 
                                                     node,
                                                     type.c_str(),
@@ -343,81 +343,5 @@ void LuaBuilder::initComponents(Smp::IObject* node, sol::table t) {
     }
 }
 
-/*
-// ..........................................................
-void LuaBuilder::loadParameters(sol::table parameters) {
-    for (const auto& obj : parameters) {
-        sol::table value = obj.second;
-        std::string path = value["path"];
-        // FIXME identify value type : bool, float, int, string, uint32...
-        Smp::AnySimple val;
-        // if(value["value"] == false || value["value"] == true){
-        //    val = Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Bool, (bool)value["value"]);
-        //}
-        // else{
-        val = Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float64, (double)value["value"]);
-        //}
-
-//        _builder.AddLoadParamCfg({path, val});
-    }
-}
-// ..........................................................
-void LuaBuilder::loadSchedules(sol::table schedules) {
-    for (const auto& obj : schedules) {
-        sol::table value = obj.second;
-        std::string path = value["path"];
-        auto period = Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_UInt64, (uint32_t)value["period"]);
-//        _builder.AddLoadScheduleCfg({path, period});
-    }
-}
-// ..........................................................
-void LuaBuilder::loadInitializations(sol::table initializations) {
-    for (const auto& obj : initializations) {
-        sol::table value = obj.second;
-        std::string path = value["path"];
-        // TODO identify value type : bool, float, int, string, uint32...
-        auto val = Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Float64, (double)value["value"]);
-//        _builder.AddLoadInitCfg({path, val});
-    }
-}
-// ..........................................................
-void LuaBuilder::loadSamplers(sol::table samplers) {
-    for (const auto& obj : samplers) {
-        sol::table value = obj.second;
-        std::string name = value["name"];
-        std::string description = value["description"];
-        std::string strMode = value["mode"];
-        Smp::AnySimple mode;
-        mode.SetValue(Smp::PrimitiveTypeKind::PTK_Bool, strMode == "csv" ? true : false);
-        std::vector<std::string> fields;
-        sol::table valueFields = value["fields"];
-        for (int field = 1; field <= valueFields.size(); field++) {
-            fields.push_back(valueFields[field]);
-        }
-//        _builder.AddLoadSamplerCfg({name, description, mode, fields});
-    }
-}
-// ..........................................................
-void LuaBuilder::loadConnections(sol::table connections) {
-    for (const auto& obj : connections) {
-        sol::table value = obj.second;
-        std::string from = value["from"];
-        std::string to = value["to"];
-//        _builder.AddLoadConnectionCfg({from, to});
-    }
-}
-// ..........................................................
-void LuaBuilder::loadSmpModels(sol::table models) {
-    for (const auto& obj : models) {
-        sol::table value = obj.second;
-        std::string library = value["library"];
-        std::string type = value["class"];
-        std::string name = value["name"];
-        std::string description = value["description"];
-//        _builder.AddLoadSmpModelCfg({library, type, name, description});
-    }
-}
-// ..........................................................
-*/
 }  // namespace lua
 }  // namespace simph
