@@ -29,20 +29,28 @@ std::unordered_map<Smp::Services::LogMessageKind, Logger::_LMK> Logger::_LMKMap 
     {Smp::Services::ILogger::LMK_Error, {Smp::Services::ILogger::LMK_ErrorName, Smp::Services::ILogger::LMK_Error, 0}},
     {Smp::Services::ILogger::LMK_Debug, {Smp::Services::ILogger::LMK_DebugName, Smp::Services::ILogger::LMK_Debug, 0}}};
 
+Smp::Int32 Logger::_logCounter = 0;
+std::mutex Logger::_countersMutex;
+
 Logger::Logger(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Component(name, descr, parent) {
-    ILoggerBackend* backend = new LoggerOStream("LoggerOStream", "Logger to stdout/stderr/stdlog", this);
-    { addContainer(CONTAINER_NAME, "Logger backends")->AddComponent(dynamic_cast<Smp::IComponent*>(backend)); }
-    _backends.push_back(backend);
+    {
+        ILoggerBackend* backend = new LoggerOStream("LoggerOStream", "Logger to stdout/stderr/stdlog", this);
+        addContainer(CONTAINER_NAME, "Logger backends")->AddComponent(dynamic_cast<Smp::IComponent*>(backend));
+        _backends.push_back(backend);
+    }
 
     addEP("resetCounters", "Reset events' counters", this, &Logger::resetCounters);
 }
 
 void Logger::publish(Smp::IPublication* receiver) {
+    receiver->PublishField("Counter", "Counter of logs", &Logger::_logCounter, Smp::ViewKind::VK_All, false, false,
+                           true);
+
     for (auto& lmk : _LMKMap) {
         std::ostringstream s;
         s << lmk.second.name << "Counter";
-        receiver->PublishField(s.str().c_str(), "Counter of logs", &lmk.second.counter, Smp::ViewKind::VK_All, false,
-                               false, true);
+        receiver->PublishField(s.str().c_str(), "Logs' counter for the specific level", &lmk.second.counter,
+                               Smp::ViewKind::VK_All, false, false, true);
     }
 }
 
@@ -86,17 +94,20 @@ void Logger::Log(const Smp::IObject* sender, Smp::String8 message, Smp::Services
     }
 
     {
-        const std::lock_guard<std::mutex> lock(_countersMutex);
+        const std::lock_guard<std::mutex> lock(Logger::_countersMutex);
         _LMKMap.at(kind).counter++;
+        _logCounter++;
     }
 }
 
 void Logger::resetCounters() {
-    const std::lock_guard<std::mutex> lock(_countersMutex);
+    const std::lock_guard<std::mutex> lock(Logger::_countersMutex);
 
     for (auto& lmk : _LMKMap) {
         lmk.second.counter = 0;
     }
+
+    Logger::_logCounter = 0;
 }
 
 } /* namespace kern */

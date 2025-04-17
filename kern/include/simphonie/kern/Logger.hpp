@@ -51,7 +51,9 @@ protected:
     void configure() override;
 
 private:
-    std::mutex _logMutex, _countersMutex;
+    static Smp::Int32 _logCounter;
+    static std::mutex _countersMutex;
+    std::mutex _logMutex;
     std::vector<ILoggerBackend*> _backends;
 
     void resetCounters();
