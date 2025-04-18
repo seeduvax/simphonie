@@ -643,7 +643,8 @@ class Logger <<Component>> <<AComposite>> <<EPPublisher>> {
   #{static} std::unordered_map<Smp::Services::LogMessageKind, _LMK> _LMKMap
   #struct _LMK {const Smp::String8 name; const Smp::Services::LogMessageKind kind; Smp::Int32 counter;}
   -{static} Smp::Int32 _logCounter
-  -std::mutex _mutex
+  -{static} std::mutex _countersMutex
+  -std::mutex _logMutex
   -std::vector<ILoggerBackend*> _backends
   +Logger(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
   +Smp::Services::LogMessageKind QueryLogMessageKind(Smp::String8 messageKindName)
