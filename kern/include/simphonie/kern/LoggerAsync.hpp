@@ -34,6 +34,7 @@ public:
     void log(const LoggerEvent& event) override;
     const LoggerEvent& getEvent();
     void consumeEvent();
+    Smp::Int32 count();
 
 protected:
     void publish(Smp::IPublication* receiver);

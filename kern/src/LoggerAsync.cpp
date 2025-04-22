@@ -51,5 +51,11 @@ void LoggerAsync::consumeEvent() {
     }
 }
 
+Smp::Int32 LoggerAsync::count() {
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    return _buffer.size();
+}
+
 } /* namespace kern */
 } /* namespace simphonie */
