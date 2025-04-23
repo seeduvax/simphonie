@@ -8,9 +8,12 @@
  * $Date$
  */
 #include "simphonie/colibry/FieldRecorderCsv.hpp"
+#include <string>
 #include "Smp/ISimpleField.h"
+#include "Smp/ISimpleArrayField.h"
 #include "Smp/ISimulator.h"
 #include "Smp/Services/ITimeKeeper.h"
+#include "simphonie/sys/Logger.hpp"
 
 namespace simphonie {
 namespace colibry {
@@ -26,9 +29,34 @@ FieldRecorderCsv::~FieldRecorderCsv() {
 // ..........................................................
 void FieldRecorderCsv::connect() {
     _file.open(getFilePath(), std::ofstream::out);
+    _file << "#time";
+    for (auto f : *getInputFields()) {
+        auto sf=dynamic_cast<Smp::ISimpleField*>(f);
+        std::string absoluteName = f->GetName();
+        Smp::IObject* obj = f->GetParent();
+        while (obj!=static_cast<Smp::IObject*>(getSimulator())) {
+            absoluteName.insert (0,std::string(obj->GetName())+"/");
+            obj=obj->GetParent();
+        }
+        if (sf!=nullptr) {
+            _file << _delim << absoluteName;
+        }
+        auto af=dynamic_cast<Smp::ISimpleArrayField*>(f);
+        if (af!=nullptr) {
+            for(Smp::UInt64 i=0;i<af->GetSize();i++)
+            {
+                _file << _delim << absoluteName << "["<<i<<"]";
+            }
+        }
+    }
+    _file << std::endl;
+
+
 }
 // ..........................................................
 void FieldRecorderCsv::disconnect() {
+    
+    _file << std::flush;
     _file.close();
 }
 // --------------------------------------------------------------------
@@ -40,8 +68,16 @@ void FieldRecorderCsv::step() {
         if (sf!=nullptr) {
             _file << _delim << sf->GetValue();
         }
+        
+        auto af=dynamic_cast<Smp::ISimpleArrayField*>(f);
+        if (af!=nullptr) {
+            for(Smp::UInt64 i=0;i<af->GetSize();i++)
+            {
+                _file << _delim << af->GetValue(i);
+            }
+        }
     }
-    _file << std::endl;
+    _file << "\n";
 }
 
 }} // namespace simphonie::colibry
