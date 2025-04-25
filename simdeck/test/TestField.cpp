@@ -7,8 +7,9 @@
  * $Id$
  * $Date$
  */
-#include <cppunit/extensions/HelperMacros.h>
-#include "simdeck/Field.hpp"
+#include "abs/test.h"
+#include "simdeck/SimpleField.hpp"
+#include "Smp/IOutputField.h"
 
 #include <string>
 #include <iostream>
@@ -18,11 +19,7 @@ using namespace simdeck;
 
 // ----------------------------------------------------------
 // test fixture implementation
-class TestField : public CppUnit::TestFixture {
-    CPPUNIT_TEST_SUITE(TestField);
-    CPPUNIT_TEST(testInt64);
-    CPPUNIT_TEST(testString);
-    CPPUNIT_TEST_SUITE_END();
+ABS_TEST_SUITE_BEGIN( Field )
 
 private:
 public:
@@ -30,24 +27,56 @@ public:
 
     void tearDown() {}
 
-    void testInt64() {
-        // Smp::Int64 intFValue = 42;
-        // TField<Smp::Int64> intF("int64", "", Smp::ViewKind::VK_All, &intFValue, true, false, false, nullptr);
+    ABS_TEST_CASE_BEGIN( Int64 ) {
+        Smp::Int64 intFValue = 42;
+        auto intF=SimpleField::Create("int64", "", Smp::ViewKind::VK_All, &intFValue, true, false, false, nullptr, Smp::Uuids::Uuid_Int64);
+        auto v=intF->GetValue();
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)42,(Smp::Int64)v);
+        intFValue=43;
+        v=intF->GetValue();
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)43,(Smp::Int64)v);
+        delete intF;
     }
+    ABS_TEST_CASE_END
 
-#define TRACE(expr) std::cout << __FILE__ << ":" << __LINE__ << ": " << #expr << "=" << expr << std::endl;
-    void testString() {
-        std::string s="plop";
-        TRACE(sizeof(s));
-        TRACE((void*)s.c_str());
-        std::string t="bidule skdjfh skdjfh skdjfh skjdfh ksjdfh ksjdfh ksjdfh ksdjfh ksjdhfks jdhfksjdh fksjdh fksjdhfksjd fksjdhfk sjdhfksjdhfksjd hfksjdfh ";
-        TRACE(sizeof(t));
-        TRACE((void*)t.c_str());
-        s=t;
-        TRACE(sizeof(s)); 
-        TRACE((void*)s.c_str());
+    ABS_TEST_CASE_BEGIN( Int64Push ) {
+        Smp::Int64 inFValue = 42;
+        Smp::Int64 outFValue = 43;
+        auto inF=SimpleField::Create("in", "", Smp::ViewKind::VK_All, &inFValue, false, true, false, nullptr, Smp::Uuids::Uuid_Int64);
+        auto outF=SimpleField::Create("out", "", Smp::ViewKind::VK_All, &outFValue, false, false, true, nullptr, Smp::Uuids::Uuid_Int64);
+        auto out=dynamic_cast<Smp::IOutputField*>(outF);
+        CPPUNIT_ASSERT(out!=nullptr);
+        out->Connect(inF);
+
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)42,(Smp::Int64)inF->GetValue());
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)43,(Smp::Int64)outF->GetValue());
+        for (uint64_t i=0; i<10000000; i++) {
+            // This is done many times just to get some measurement
+            // of the performance. The absolute value is not meaningful
+            // this is just to see when implementation change brings
+            // performance or not.
+            // Initial Push implementaiton was palying with dynamic_cast 
+            // resulting in more than 2sec for this test. Introduction of
+            // smarter FieldCopy (SimpleField.cpp internal class) let it run
+            // faster, less than 0.5ms, running on the same machine.
+            out->Push();
+        }
+
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)43,(Smp::Int64)inF->GetValue());
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)43,(Smp::Int64)outF->GetValue());
+
+        out->Disconnect(inF);
+        
+        outFValue=44;
+        out->Push();
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)44,(Smp::Int64)outF->GetValue());
+        // no more propagate value change after disconnect.
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)43,(Smp::Int64)inF->GetValue());
+
+        delete outF;
+        delete inF;
     }
-};
+    ABS_TEST_CASE_END
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestField);
+ABS_TEST_SUITE_END
 }  // namespace test
