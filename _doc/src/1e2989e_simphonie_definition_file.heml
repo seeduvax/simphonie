@@ -345,7 +345,7 @@ Monitoring the margin output field let the user track for the CPU load during
 the simulation. Positive values meaning there is time left at the end of the
 cycle, a negative value tells there is a cycle overflow and the amount of the
 time overflow.
-{req %if=simph.sync.6
+{req %id=simph.sync.6
 The synchronization service shall be configurable or extensible to use any clock
 other than the simulation host computer's operating system's clock to define the
 zulu time reference.
