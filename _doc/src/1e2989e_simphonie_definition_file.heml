@@ -12,6 +12,7 @@
     {references %title=Reference %id=R
 {ref %id=SMP %edition=2 March 2020 %ref=ECSS-E-ST-40-07C %href=https://ecss.nl/standard/ecss-e-st-40-07c-simulation-modelling-platform-2-march-2020/ %%Simulation Modelling Platform (SMP)}
 {ref %id=SYSLOG %authors=R. Gerhards %edition=March 2009 %ref=RFC 5424 %href=https://datatracker.ietf.org/doc/html/rfc5424 %%The Syslog Protocol}
+{ref %id=HDF5 %href=https://www.hdfgroup.org/solutions/hdf5/ %%High performance data management and storage suite}
     }
     {section %title=Scope
 This document is the definition file of the simphonie project. The purpose of the project is to provide a free simulation infrastructure implementation according the SMP standard {xref SMP}. This definition file includes:
@@ -46,7 +47,7 @@ interface.
 SMP L2 is to be considered in further development increment.
     }
     {section %title=Simphonie specific behaviors
-      {section %tite=Scheduler service
+      {section %title=Scheduler service
 {req %id=simph.sched.1
 The scheduler shall emit an event named {kw Scheduler_PreEventExecute} before
 executing the next scheduled entry point.
@@ -59,6 +60,31 @@ after the execution of each schduled entry point is completed.
 The scheduler shall request simulator to hold simulation when there are no more
 events in the schedule queue.
 }
+      }
+      {section %title=Smp::ISimulator implementation class design constraint
+{req %id=simph.isim.1
+The simphonie's Smp:ISimulator implementation shall let the simulator integrator
+override the simphonie's implementation of the SMP mandatory services with any
+of its own implementation.
+}
+Of course, such service replacement may alter the way simphonie is working (and
+that is for that purpose), and the simulator integrator shall be aware of some
+constraints to keep its simulation system able to run properly:
+ - some simphonie's services are sharing somehow a contract for a good
+   cooperation. For instance the scheduler and time keeper are cooperating
+   through specific events that are not part of the SMP level 1 standard. Then
+   replacing one of this two service requires the contract is maintained by the
+   replacing service. Or both services that may have their own cooperation 
+   scheme shall be overridden.
+ - The service override is allowed only on the very early stage of the simulator
+   build phase: services shall be added using AddService() method before the
+   Publish step starts. After that the simulator behavior is undefined and the 
+   integrator shall assume the resulting behavior can suit its expectations.
+ - The type registry service is used to load libraries, making possible some
+   types being registered before any service is added, then before a type 
+   registry replacement can be set making possible the loss of the early type
+   registrations.
+
       }
       {section %title=Logging service
 {req %id=simph.log.1
@@ -168,6 +194,7 @@ is added to the service.
 Here are defined some extended SMP featured, that are features not defined by
 the SMP standard but considered to be needed to create a full featured
 simulator.
+      {section %title=Design and implementation constraints
 {req %id=simph.esmp.1
 The extended SMP feature libraries shall not link with the simphonie's kernel
 library.
@@ -178,70 +205,21 @@ interface when interacting with the simulator, models, components and other
 services to be hopefully reusable with any SMP compliant simulation
 infrastructure.
 
-{req %id=simph.esmp.svc.1
-The simphonie's Smp:ISimulator implementation shall let the simulator integrator
-override the simphonie's implementation of the SMP mandatory services with any
-of its own implementation.
-}
-Of course, such service replacement may alter the way simphonie is working (and
-that is for that purpose), and the simulator integrator shall be aware of some
-constraints to keep its simulation system able to run properly:
- - some simphonie's services are sharing somehow a contract for a good
-   cooperation. For instance the scheduler and time keeper are cooperating
-   through specific events that are not part of the SMP level 1 standard. Then
-   replacing one of this two service requires the contract is maintained by the
-   replacing service. Or both services that may have their own cooperation 
-   scheme shall be overridden.
- - The service override is allowed only on the very early stage of the simulator
-   build phase: services shall be added using AddService() method before the
-   Publish step starts. After that the simulator behavior is undefined and the 
-   integrator shall assume the resulting behavior can suit its expectations.
- - The type registry service is used to load libraries, making possible some
-   types being registered before any service is added, then before a type 
-   registry replacement can be set making possible the loss of the early type
-   registrations.
-
-In the next requirements, the service word shall be understood in the extended
-way of set of feature. When deriving from Smp::IService is needed, specific
-requirements will be defined. For a given service, without such explicit
-requirement, the implementer can choose any of the following design:
-  - a single component derived from Smp::IService.
-  - a composite component and sub component with root composite derived from
-    Smp::IService.
-  - a single component derived from Smp::IModel.
-  - a composite component and sub component with root composite derived from
-    Smp::IModel.
-  - any other scheme of object composition  as soon it can be inserted when 
-    into the simulator using the regular Smp::ISimulator interface.
-
-The Smp::IModel or Smp::IService derivation shall be preferred for any component
-to be dynamically loaded through the library loading, factory and component
-instances creation features of the simulator (see Smp::ISimulator), in order to
-let the loaded feature being properly published and retrievable through the 
-resolver service.
-
-{req %id=simph.esmp.hold.1
-The extended SMP library shall provide a service letting control automatic
-transition of the simulator to stand by state.
-}
-{req %id=simph.esmp.hold.2
-The simulator hold control service shall publish a field named
-{kw endSimTime} defining when the simulation shall stop (as a simulation time
-reference).
-}
-{req %id=simph.esmp.hold.3
-The simulator hold control service shall request simulator hold when
-the simulation time reached the current value of its {kw endSimTime} field.
-}
-{req %id=simph.esmp.datarec.1
-The extended SMP library shall provide a data recording service able to record
-in file any data field of the simulator during the simulation.
-}
-{req %id=simph.esmp.datarec.2
-The data recording service shall publish a field named {kw file} to store the
-path of the file where data shall be recorded.
+{req %id=simph.esmp.2
+The SMP complements and extension shall be defined as interface (C++ pure
+virtual class headers)  only as the SMP standard itself is.
 }
 
+{req %id=simph.esmp.3
+The SMP complements and extension shall not derive from the SMP interfaces.
+}
+The implementers shall remain as free as possible for the design, a remains to
+be able to decide when a single class shall implements many interface or add
+the optional extended features by delegation or composition.
+
+
+      }
+      {section %title=On event scheduling
 {req %id=simph.esmp.fsched.1
 Simphonie shall let the simulator integrator define entry point scheduling based
 on field related events.
@@ -263,7 +241,25 @@ The main motivation for such feature is to trigger computation only when
 relevant on external asynchronous and aperiodic stimulation. The SMP discrete
 event simulation kernel may then handle computation pipelines according to any
 on-demand strategy similar to the very common observer/observable patterns or
-publish/subscribe patterns.  
+publish/subscribe patterns.
+      }
+      {section %title=Scheduling and entry point activation monitoring
+{req %id=simph.esmp.msched.1
+the schedule monitoring service shall include a method returning the actual
+state of the scheduler as a schedule list.
+}
+Each entry of the schedul list:
+  - schedule event id.
+  - entry point name or identifier.
+  - schedule parameter (period, count, etc).
+  - actual activation count.
+
+
+It is assumed that the returned shcedule list may be absolete as soon it is
+returned, since when the simulation is running, the scheduler state and its
+internal scheduled event list evolves.
+
+      }
     }
     {section %title=Bundled service
       {section %title=Motivation and recommendations
@@ -350,6 +346,81 @@ The synchronization service shall be configurable or extensible to use any clock
 other than the simulation host computer's operating system's clock to define the
 zulu time reference.
 }
+      }
+      {section %title=Fields data recording service
+The data recording service defined here is a feature and shall not be understood
+as a monolitic component implementing the {kw SMP::IService} interface. All the
+requirements from this section may be provided by many specialized components,
+each handling only a subset of the requirement (basically, each output file
+format handled by a specialized data recording component).
+{req %id=simph.datarec.1
+The extended SMP library shall provide a data recording service able to record
+in file any data field of the simulator during the simulation.
+}
+{req %id=simph.datarec.2
+The data recording service shall publish a field named {kw file} to store the
+path of the file where data shall be recorded.
+}
+{req %id=simph.datarec.3
+The data recording service shall provide a link / connect relationship to define
+what fields shall be recorded.
+}
+{req %id=simph.datarec.4
+The data recording service shall provide an schedulable entry point to record
+when activated one snapshot of the value of each field connected to the 
+recording service.
+}
+{req %id=simph.datarec.5
+the data recording service shall include the current simulation time in each
+snapshot record (as defined in {req simph.datarec.4}).
+}
+{req %id=simph.datarec.6
+When configured so, the data recording service shall record many fields set into
+as many recording files.
+}
+{req %id=simph.datarec.7
+The data recording service shall accept a same field to be part of many data
+recording set.
+}
+{req %id=simph.datarec.8
+The data recording service shall record each data recording set at ist own rate.
+}
+{req %id=simph.datarec.9
+The data recording service shall accept the selection any data set recording
+format distinct from the other formats selected for other data sets (in the
+limit of how many file formats are supported).
+}
+Assuling two file formats A and B are supported, a summary of the few
+requirements above is a simulator integrator shall be able to define a recording
+configuration where for instance:
+ - fields f1, f2 and f3 are recorded at 10Hz using file format A.
+ - fields f1, f3 and f5 are recorded at 20Hz using file format B.
+ - fields f4, f5, f6 and f7 are recorded at 50Hz using file format A.
+
+
+{req %id=simph.datarec.csv.1
+When selected by configuration, the data recording service shall record data
+using CSV text file format.
+}
+{req %id=simph.datarec.csv.2
+The CSV data recording service shall start the output file with a content index
+line, detailing what field is recorded in each column.
+}
+{req %id=simph.datarec.csv.3
+When outputing a numeric field's value, the CSV data recording service shall
+include as much digit than the underlying numeric type can handle.
+}
+The implementer shall take care that the usual 3, 6 or 10 digit truncation or
+rounding frequently included in the default number formating are not activated
+but all digits are streamed. However, this does not mean that extre zero shall
+be added in front or after the last decimal to fill the digit slots. 1.5 remains
+1.5 not 00000001.5 neither 1.50000000.
+
+{req %id=simph.datarec.hdf5.1
+When selected by configuration, the data recording service shall record data
+using the HDF5 file format (see {xref HDF5}).
+}
+
       }
     }
   }
@@ -604,7 +675,11 @@ asynchronous event will synchronized the as fast as possible default scheduler b
     next synchronisation time.
       }
       {section %title=Entry points scheduled on data event
-In order to let entry point be activated (and consume CPU ressource) only when relevent, that is when the computed output shall be refreshed because of the update of an input, some specific Smp::IField subclass shall be implemented to override the SetValue() method. Then when a value is pushed by a connected output field: 
+In order to let entry point be activated (and consume CPU ressource) only when
+relevent, that is when the computed output shall be refreshed because of the
+update of an input, some specific Smp::IField subclass shall be implemented to
+override the SetValue() method. Then when a value is pushed by a connected
+output field: 
    - an assigned entry point is scheduled if any.
    - this schedule is requested on various condition with any valid schedule option
      - only when value is change and not when new value is equel to current value.
