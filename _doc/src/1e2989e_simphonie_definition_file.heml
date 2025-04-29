@@ -189,6 +189,22 @@ Designer is free to build a composite logging service where all optional
 features are handled by a subcomponent and activated when the related component
 is added to the service.
       }
+      {section %title=Design constraints
+{req %id=simph.dsg.1
+The simphonie Smp::ISimulator implementation shall allow to create many instance
+in the same process without side effects from on instance to another.
+}
+This requirement does not forbid to link the many simulator instances together
+as soon it is done on purpose, for instance for:
+ - start/stop the instances together.
+ - synchronize the scheduler of each instances with each other.
+ - propagate data or events from one instance to another.
+On purpose means the many simulator instances shall be explicitly configured to
+do so. The foreseen use cases for such simulator instances linking are,
+multithreaded simulation, co-simulation running composites models of a complex
+system that can't fit a single threaded simulation.
+
+      }
     }
     {section %title=SMP complements and extension
 Here are defined some extended SMP featured, that are features not defined by
@@ -478,7 +494,7 @@ return
     }
     {section %title=Path parsing
 The bundled resolver parses the pathes to be resolved according the following state diagram.
-{fig %src=resolver_path_parse_state.png %title=Pathp arsing state diagram}
+{fig %src=resolver_path_parse_state.png %title=Path parsing state diagram}
 {#
 @startuml resolver_path_parse_state.png
 [*] --> Sep: /
@@ -607,7 +623,7 @@ The scheduler shall:
     and end itw own scheduling thread once the currently executing entry point
     is completed.
 
-{fig %src=SimStartStop_seq.png %title=Scheduler / Time keeper coordination}
+{fig %src=SimStartStop_seq.png %title=Simulation start/stop sequence}
 {#
 @startuml SimStartStop_seq.png
 participant Simulator
