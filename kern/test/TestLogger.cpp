@@ -144,15 +144,8 @@ ABS_TEST_CASE_BEGIN(TestLoggerFileAndContent) {
         _logger->Log(_sim.get(), "TestLoggerFile", Smp::Services::ILogger::LMK_Debug);
 
         std::string line;
-        for (std::streamoff i = 1; i <= file.tellg(); i++) {
-            file.seekg(-i, std::ios::end);
-            char ch;
-            file.get(ch);
-            if (ch == '\n' && i != 1) {
-                break;
-            }
-            line.insert(line.begin(), ch);
-        }
+        std::getline(file, line);
+        std::cout << "Line: " << line << std::endl;
         CPPUNIT_ASSERT(std::string::npos != line.find(Smp::Services::ILogger::LMK_DebugName));
         CPPUNIT_ASSERT(std::string::npos != line.find("TestLoggerFile"));
         CPPUNIT_ASSERT(std::string::npos != line.find(_sim->GetName()));
