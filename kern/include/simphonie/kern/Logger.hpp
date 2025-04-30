@@ -34,6 +34,7 @@ class Logger : public Component,
                virtual public simdeck::EntryPointPublisher {
 public:
     Logger(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
+    ~Logger() override;
 
     Smp::Services::LogMessageKind QueryLogMessageKind(Smp::String8 messageKindName) override;
     void Log(const Smp::IObject* sender, Smp::String8 message,
@@ -54,6 +55,7 @@ private:
     static Smp::Int32 _logCounter;
     static std::mutex _countersMutex;
     std::mutex _logMutex;
+    std::unique_ptr<Component> _defaultLogger;
     std::vector<ILoggerBackend*> _backends;
 
     void resetCounters();

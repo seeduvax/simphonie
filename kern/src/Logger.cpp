@@ -34,13 +34,16 @@ std::mutex Logger::_countersMutex;
 
 Logger::Logger(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Component(name, descr, parent) {
     {
-        ILoggerBackend* backend = new LoggerOStream("LoggerOStream", "Logger to stdout/stderr/stdlog", this);
-        addContainer(CONTAINER_NAME, "Logger backends")->AddComponent(dynamic_cast<Smp::IComponent*>(backend));
-        _backends.push_back(backend);
+        std::unique_ptr<LoggerOStream> defaultLogger(new LoggerOStream("LoggerOStream", "Logger to stdout/stderr/stdlog", this));
+        addContainer(CONTAINER_NAME, "Logger backends")->AddComponent(defaultLogger.get());
+        _backends.push_back(defaultLogger.get());
+        _defaultLogger = std::move(defaultLogger);
     }
 
     addEP("resetCounters", "Reset events' counters", this, &Logger::resetCounters);
 }
+
+Logger::~Logger() {}
 
 void Logger::publish(Smp::IPublication* receiver) {
     receiver->PublishField("Counter", "Counter of logs", &Logger::_logCounter, Smp::ViewKind::VK_All, false, false,
@@ -56,10 +59,8 @@ void Logger::publish(Smp::IPublication* receiver) {
 
 void Logger::configure() {
     Smp::IContainer* container = GetContainer(CONTAINER_NAME);
-    Smp::IComponent* defaultLogger = container->GetComponents()->at(static_cast<size_t>(0));
-
     for (auto component : *(container->GetComponents())) {
-        if (component == defaultLogger)
+        if (component == _defaultLogger.get())
             continue;
         ILoggerBackend* backend = dynamic_cast<ILoggerBackend*>(component);
         if (backend != nullptr) {
@@ -68,7 +69,7 @@ void Logger::configure() {
     }
 
     if (_backends.size() > 1) {
-        container->DeleteComponent(defaultLogger);
+        container->DeleteComponent(_defaultLogger.release());
         _backends.erase(_backends.begin());
     }
 }

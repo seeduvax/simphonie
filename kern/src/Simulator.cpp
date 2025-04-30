@@ -67,10 +67,13 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
     _services->AddComponent(_logger);
     setState(Smp::SimulatorStateKind::SSK_Building);
 
-    RegisterFactory(new simdeck::Factory<Logger>("Logger", "Logger", this));
-    RegisterFactory(new simdeck::Factory<LoggerOStream>("LoggerOStream", "LoggerOStream", this));
-    RegisterFactory(new simdeck::Factory<LoggerFile>("LoggerFile", "LoggerFile", this));
-    RegisterFactory(new simdeck::Factory<LoggerAsync>("LoggerAsync", "LoggerAsync", this));
+    _ownedFactories.emplace_back(new simdeck::Factory<Logger>("Logger", "Logger", this));
+    _ownedFactories.emplace_back(new simdeck::Factory<LoggerOStream>("LoggerOStream", "LoggerOStream", this));
+    _ownedFactories.emplace_back(new simdeck::Factory<LoggerFile>("LoggerFile", "LoggerFile", this));
+    _ownedFactories.emplace_back(new simdeck::Factory<LoggerAsync>("LoggerAsync", "LoggerAsync", this));
+    for (auto& factory : _ownedFactories) {
+        RegisterFactory(factory.get());
+    }
 }
 // ..........................................................
 Simulator::~Simulator() {

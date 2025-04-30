@@ -28,23 +28,26 @@ using namespace simphonie::kern;
 ABS_TEST_SUITE_BEGIN(Logger)
 
 private:
-struct _LMK {
-    Smp::String8 name;
-    Smp::Services::LogMessageKind kind;
-    Smp::Int32 nLogs;
-};
+    struct _LMK {
+        Smp::String8 name;
+        Smp::Services::LogMessageKind kind;
+        Smp::Int32 nLogs;
+    };
 
-Simulator* _sim;
-Logger* _logger;
+    std::unique_ptr<Simulator> _sim;
+    std::unique_ptr<Logger> _ownedLogger;
+    Logger* _logger;
 
 public:
 void setUp() {
-    _sim = new Simulator("simulator", "", nullptr);
-    _logger = new Logger("logger", "", _sim);
+    _sim.reset(new Simulator("simulator", "", nullptr));
+    _ownedLogger.reset(new Logger("logger", "", _sim.get()));
+    _logger = _ownedLogger.get();
 }
 
 void tearDown() {
-    delete _logger;
+    _ownedLogger.reset();
+    _sim.reset();
 }
 
 ABS_TEST_CASE_BEGIN(TestLoggerCounters) {
@@ -70,7 +73,7 @@ ABS_TEST_CASE_BEGIN(TestLoggerCounters) {
          {Smp::Services::ILogger::LMK_DebugName, Smp::Services::ILogger::LMK_Debug, 5}}};
 
     _sim->Initialise();
-    _sim->AddService(_logger);
+    _sim->AddService(_ownedLogger.release());
     _sim->Publish();
 
     _logger->GetEntryPoint("resetCounters")->Execute();
@@ -115,13 +118,13 @@ ABS_TEST_CASE_BEGIN(TestLoggerFileAndContent) {
     ABS_TEST_CASE_REQ(simph.log.ev .5)
     ABS_TEST_CASE_REQ(simph.log.ev .6)
 
-    LoggerFile* loggerFile = new LoggerFile("loggerFile", "", _logger);
-    _logger->GetContainer("Backends")->AddComponent(loggerFile);
+    std::unique_ptr<LoggerFile> loggerFile(new LoggerFile("loggerFile", "", _logger));
+    _logger->GetContainer("Backends")->AddComponent(loggerFile.get());
     _sim->Initialise();
-    _sim->AddService(_logger);
+    _sim->AddService(_ownedLogger.release());
     _sim->Publish();
 
-    auto filepath = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveRelative("filePath", loggerFile));
+    auto filepath = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveRelative("filePath", loggerFile.get()));
     CPPUNIT_ASSERT(nullptr != filepath);
     {
         std::ostringstream s;
@@ -133,12 +136,12 @@ ABS_TEST_CASE_BEGIN(TestLoggerFileAndContent) {
 
     {
         // log to create at least the file if not created.
-        _logger->Log(_sim, "TestCreation", Smp::Services::ILogger::LMK_Information);
+        _logger->Log(_sim.get(), "TestCreation", Smp::Services::ILogger::LMK_Information);
 
         std::ifstream file(filepath->GetValue().value.string8Value, std::ios::ate);
         CPPUNIT_ASSERT(file.good());
 
-        _logger->Log(_sim, "TestLoggerFile", Smp::Services::ILogger::LMK_Debug);
+        _logger->Log(_sim.get(), "TestLoggerFile", Smp::Services::ILogger::LMK_Debug);
 
         std::string line;
         for (std::streamoff i = 1; i <= file.tellg(); i++) {
@@ -157,8 +160,6 @@ ABS_TEST_CASE_BEGIN(TestLoggerFileAndContent) {
         s << std::this_thread::get_id();
         CPPUNIT_ASSERT(std::string::npos != line.find(s.str().c_str()));
     }
-
-    delete loggerFile;
 }
 ABS_TEST_CASE_END
 
@@ -166,16 +167,16 @@ ABS_TEST_CASE_BEGIN(TestLoggerAsync) {
     ABS_TEST_CASE_REQ(simph.log.cfg .5)
     ABS_TEST_CASE_REQ(simph.log.unsync .1)
 
-    LoggerAsync* loggerAsync = new LoggerAsync("loggerAsync", "", _logger);
-    LoggerOStream* loggerOStream = new LoggerOStream("loggerOStream", "", _logger);
-    _logger->GetContainer("Backends")->AddComponent(loggerAsync);
-    _logger->GetContainer("Backends")->AddComponent(loggerOStream);
+    std::unique_ptr<LoggerAsync> loggerAsync(new LoggerAsync("loggerAsync", "", _logger));
+    std::unique_ptr<LoggerOStream> loggerOStream(new LoggerOStream("loggerOStream", "", _logger));
+    _logger->GetContainer("Backends")->AddComponent(loggerAsync.get());
+    _logger->GetContainer("Backends")->AddComponent(loggerOStream.get());
     _sim->Initialise();
-    _sim->AddService(_logger);
+    _sim->AddService(_ownedLogger.release());
     _sim->Publish();
     _sim->Configure();
 
-    auto bufferSize = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveRelative("bufferSize", loggerAsync));
+    auto bufferSize = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveRelative("bufferSize", loggerAsync.get()));
     CPPUNIT_ASSERT(nullptr != bufferSize);
 
     const auto threadId = std::this_thread::get_id();
@@ -186,7 +187,7 @@ ABS_TEST_CASE_BEGIN(TestLoggerAsync) {
 
     std::thread thrd([&] {
         const LoggerEvent& event = loggerAsync->getEvent();
-        CPPUNIT_ASSERT(_sim == event.getSender());
+        CPPUNIT_ASSERT(_sim.get() == event.getSender());
         CPPUNIT_ASSERT(0 == std::strcmp("TestLoggerAsync", event.getMessage().c_str()));
         CPPUNIT_ASSERT_EQUAL(Smp::Services::ILogger::LMK_Debug, event.getKind());
         CPPUNIT_ASSERT(0 == event.getSimulationTime());
@@ -194,11 +195,9 @@ ABS_TEST_CASE_BEGIN(TestLoggerAsync) {
         loggerAsync->consumeEvent();
     });
 
-    _logger->Log(_sim, "TestLoggerAsync", Smp::Services::ILogger::LMK_Debug);
+    _logger->Log(_sim.get(), "TestLoggerAsync", Smp::Services::ILogger::LMK_Debug);
 
     thrd.join();
-
-    delete loggerAsync;
 }
 ABS_TEST_CASE_END
 

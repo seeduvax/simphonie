@@ -76,6 +76,7 @@ private:
     Collection<Smp::IEntryPoint> _initEntryPoints;
     Smp::IContainer* _models;
     Smp::IContainer* _services;
+    std::vector<std::unique_ptr<Smp::IFactory>> _ownedFactories;
     Collection<Smp::IFactory> _compFactories;
     Smp::Services::ILogger* _logger=nullptr;
     Smp::Services::IScheduler* _scheduler=nullptr;

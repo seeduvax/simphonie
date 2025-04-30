@@ -33,8 +33,10 @@ stages:
     only:
         - branches
     artifacts:
+        when: always
         paths:
             - build/unit_test_results/*.xml
+            - execution.log
         reports:
             junit: build/unit_test_results/*.xml
           
@@ -68,6 +70,7 @@ sanitize_debian11:
     tags:
         - debian_11
     artifacts:
+        when: always
         paths:
             - execution.log
 
@@ -96,9 +99,6 @@ test_suse15sp5:
     extends: .test_base
     tags:
         - suse_15sp5
-
-
-
 
 
 # Main Deployment job triggered only at new tag push
