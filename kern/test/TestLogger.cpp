@@ -132,6 +132,9 @@ ABS_TEST_CASE_BEGIN(TestLoggerFileAndContent) {
     _sim->Configure();
 
     {
+        // log to create at least the file if not created.
+        _logger->Log(_sim, "TestCreation", Smp::Services::ILogger::LMK_Information);
+
         std::ifstream file(filepath->GetValue().value.string8Value, std::ios::ate);
         CPPUNIT_ASSERT(file.good());
 

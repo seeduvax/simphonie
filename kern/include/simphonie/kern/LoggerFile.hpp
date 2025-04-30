@@ -25,7 +25,7 @@ using namespace simdeck;
 class LoggerFile : public Component, virtual public ILoggerBackend {
 public:
     LoggerFile(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
-    ~LoggerFile();
+    ~LoggerFile() override;
 
     void log(const LoggerEvent& event) override;
 
