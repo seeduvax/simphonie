@@ -194,15 +194,42 @@ Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 descripti
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, void* address, Smp::Uuid typeUuid,
                                Smp::ViewKind view, Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-    auto type = _typeRegistry->GetType(typeUuid);
-    if (type != nullptr) {
-        return type->Publish(this, name, description, address, view, state, input, output);
-    }
-    else {
-        std::ostringstream d;
-        d << "Can't publish field " << name;
-// TODO find what exception to throw here.
-//        throw XXXXX(this, d.str().c_str());
+Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(typeUuid));
+    
+    if (t != nullptr) {
+        StructureType* st = dynamic_cast<StructureType*>(t);
+        if (st != nullptr) {
+/* TODO restore structure field build.
+            auto f=new StructureField(name, description, view, address, st, state, input, output, _pubObj);
+            addField(f);
+            return f;
+*/
+return nullptr;
+        }
+        else {
+            auto f=SimpleField::Create(name, 
+                                       description, 
+                                       view, 
+                                       address,
+                                       state,
+                                       input,
+                                       output,
+                                       _pubObj,
+                                       typeUuid);
+            if (f!=nullptr) {
+                addField(f);
+                return f;
+            }
+            else {
+/*
+                auto f=
+                    new Field(name, description, view, address, t->getSize(), t, state, input, output, _pubObj);
+                addField(f);
+                return f;
+*/
+            }
+        }
+
     }
     return nullptr;
 }
