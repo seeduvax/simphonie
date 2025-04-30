@@ -21,6 +21,7 @@
 #include "Smp/Services/IResolver.h"
 #include "Smp/Services/IScheduler.h"
 #include "simdeck/ExInvalidType.hpp"
+#include "simphonie/sys/Logger.hpp"
 namespace simphonie {
 namespace lua {
 // --------------------------------------------------------------------
@@ -47,8 +48,7 @@ void LuaBuilder::publish(Smp::IPublication* receiver) {
     // iterate on configuration table component section to create and add
     // components to the simulator.
     sol::table components=_config["components"];
-    for (auto te: components) {
-        //std::string name=te.first;    
+    for (auto te: components) {  
         std::string name=te.first.as<std::string>();
         sol::table v=te.second;
         std::string type=v["type"];
@@ -108,7 +108,6 @@ void LuaBuilder::connect() {
         if(comp==nullptr){
             comp=_sim->GetService(name.c_str());
         }
-        // TODO recursively scan to build child components.
         initComponents(comp,v);
     }
 
@@ -135,7 +134,6 @@ void LuaBuilder::connect() {
     auto resolver = _sim->GetResolver();
     for (auto entry : schedule) {
         sol::table t = entry.second;
-        ;
         std::string name = t.get_or<std::string>("name", "");
         if (name == "") {
             name = entry.first.as<std::string>();
@@ -150,7 +148,7 @@ void LuaBuilder::connect() {
         if (cycleTime == 0) {
             cycleTime = t.get_or("cycleTime_ns", 0.0);
         }
-        Smp::Int64 repeat = t.get_or("repeat", -1LL);
+        Smp::Int64 repeat = t.get_or("repetitions", -1LL);
         Smp::Duration time = t.get_or("offset", 0ULL);
         auto ep = dynamic_cast<Smp::IEntryPoint*>(resolver->ResolveAbsolute(name.c_str()));
         if (ep != nullptr) {
@@ -230,30 +228,30 @@ Smp::AnySimple anyFromLua(Smp::PrimitiveTypeKind ptk, sol::object val){
     Smp::AnySimple res = Smp::AnySimple(ptk);
     switch (ptk) {
         case Smp::PrimitiveTypeKind::PTK_Int8:
-            res.SetValue(ptk,val.as<Smp::Int8>());
+            res.SetValue(ptk,(Smp::Int8)val.as<double>()); // read double to handle scientific notation
             break;
         case Smp::PrimitiveTypeKind::PTK_Int16:
-            res.SetValue(ptk,val.as<Smp::Int16>());
+            res.SetValue(ptk,(Smp::Int16)val.as<double>());
             break;
         case Smp::PrimitiveTypeKind::PTK_Int32:
-            res.SetValue(ptk,val.as<Smp::Int32>());
+            res.SetValue(ptk,(Smp::Int32)val.as<double>());
             break;
         case Smp::PrimitiveTypeKind::PTK_Int64:
         case Smp::PrimitiveTypeKind::PTK_DateTime:
         case Smp::PrimitiveTypeKind::PTK_Duration:
-            res.SetValue(ptk,val.as<Smp::Int64>());
+            res.SetValue(ptk,(Smp::Int64)val.as<double>());
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt8:
-            res.SetValue(ptk,val.as<Smp::UInt8>());
+            res.SetValue(ptk,(Smp::UInt8)val.as<double>());
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt16:
-            res.SetValue(ptk,val.as<Smp::UInt16>());
+            res.SetValue(ptk,(Smp::UInt16)val.as<double>());
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt32:
-            res.SetValue(ptk,val.as<Smp::UInt32>());
+            res.SetValue(ptk,(Smp::UInt32)val.as<double>());
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt64:
-            res.SetValue(ptk,val.as<Smp::UInt64>());
+            res.SetValue(ptk,(Smp::UInt64)val.as<double>());
             break;
         case Smp::PrimitiveTypeKind::PTK_Bool:
             res.SetValue(ptk,val.as<Smp::Bool>());
@@ -309,7 +307,6 @@ void LuaBuilder::initComponents(Smp::IObject* node, sol::table t) {
             if (c!=nullptr) {
                 auto field = c->GetField(kName.c_str());
                 if(field!=nullptr){
-                    
                     Smp::PrimitiveTypeKind ptk = field->GetType()->GetPrimitiveTypeKind();
                     if(ptk==Smp::PrimitiveTypeKind::PTK_None){
                         throw simdeck::ExInvalidType(field,"No primitive type Found");

@@ -11,6 +11,8 @@
 #include "Smp/IModel.h"
 #include "Smp/IOutputField.h"
 #include "Smp/ISimpleField.h"
+#include "Smp/ISimpleArrayField.h"
+#include "Smp/Publication/IType.h"
 #include "Smp/ISimulator.h"
 #include "simdeck/Utils.hpp"
 #include "simphonie/kern/Resolver.hpp"
@@ -105,6 +107,59 @@ Smp::Bool componentCreateChild(Smp::IComponent* th, Smp::String8 typeName, Smp::
     return false;
 }
 
+Smp::AnySimple anyFromLua(Smp::PrimitiveTypeKind ptk, sol::object val){ //TODO: maybe deduplicate from luabuilder
+    Smp::AnySimple res = Smp::AnySimple(ptk);
+    switch (ptk) {
+        case Smp::PrimitiveTypeKind::PTK_Int8:
+            res.SetValue(ptk,(Smp::Int8)val.as<double>()); // read double to handle scientific notation
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int16:
+            res.SetValue(ptk,(Smp::Int16)val.as<double>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int32:
+            res.SetValue(ptk,(Smp::Int32)val.as<double>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int64:
+        case Smp::PrimitiveTypeKind::PTK_DateTime:
+        case Smp::PrimitiveTypeKind::PTK_Duration:
+            res.SetValue(ptk,(Smp::Int64)val.as<double>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt8:
+            res.SetValue(ptk,(Smp::UInt8)val.as<double>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt16:
+            res.SetValue(ptk,(Smp::UInt16)val.as<double>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt32:
+            res.SetValue(ptk,(Smp::UInt32)val.as<double>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt64:
+            res.SetValue(ptk,(Smp::UInt64)val.as<double>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Bool:
+            res.SetValue(ptk,val.as<Smp::Bool>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Char8:
+            res.SetValue(ptk,val.as<Smp::Char8>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Float32:
+            res.SetValue(ptk,val.as<Smp::Float32>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Float64:
+            res.SetValue(ptk,val.as<Smp::Float64>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_String8:
+            res.SetValue(ptk,val.as<Smp::String8>());
+            break;
+        default:
+            std::stringstream ss;
+            ss << "Can't set value, primitive of type" << ptk << " not supported";
+            throw std::runtime_error(ss.str().c_str());
+            break;
+    }
+    return res;
+}
+
 // ..........................................................
 sol::object fieldGetValue(Smp::IField* field, sol::this_state L) {
     sol::object res = sol::nil;
@@ -168,62 +223,25 @@ sol::object fieldGetValue(Smp::IField* field, sol::this_state L) {
 // ..........................................................
 void fieldSetValue(Smp::IField* field, sol::object value) {
     auto sf = dynamic_cast<Smp::ISimpleField*>(field);
+    auto ptk = field->GetType()->GetPrimitiveTypeKind();
     if (sf != nullptr) {
         auto v = sf->GetValue();
-        auto k = v.GetType();
-        switch (k) {
-            case Smp::PrimitiveTypeKind::PTK_Char8:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_Char8, value.as<Smp::Char8>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_Bool:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_Bool, value.as<Smp::Bool>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_Int8:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_Int8, value.as<Smp::Int8>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_UInt8:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_UInt8, value.as<Smp::UInt8>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_Int16:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_Int16, value.as<Smp::Int16>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_UInt16:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_UInt16, value.as<Smp::UInt16>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_Int32:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_Int32, value.as<Smp::Int32>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_UInt32:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_UInt32, value.as<Smp::UInt32>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_Int64:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_Int64, value.as<Smp::Int64>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_UInt64:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_UInt64, value.as<Smp::UInt64>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_Float32:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_Float32, value.as<Smp::Float32>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_Float64:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_Float64, value.as<Smp::Float64>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_Duration:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_Duration, value.as<Smp::Duration>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_DateTime:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_DateTime, value.as<Smp::DateTime>());
-                break;
-            case Smp::PrimitiveTypeKind::PTK_String8:
-                v.SetValue(Smp::PrimitiveTypeKind::PTK_String8, value.as<Smp::String8>());
-                break;
-            default:
-                std::stringstream ss;
-                ss << "Can't set value, primitive type of " << field->GetName() << " not supported";
-                throw std::runtime_error(ss.str().c_str());
-                break;
+        sf->SetValue(anyFromLua(ptk, value));
+    }
+    auto af = dynamic_cast<Smp::ISimpleArrayField*>(field);
+    if (af != nullptr) {
+        sol::table luaArray = value.as<sol::table>();
+        if(luaArray.size() == af->GetSize()){
+            for(Smp::UInt64 i=0;i<af->GetSize();i++)
+            {
+                af->SetValue(i, anyFromLua(ptk , luaArray[i+1]));
+            }
         }
-        sf->SetValue(v);
+        else{
+            std::stringstream ss;
+            ss << "Lua table size "<<luaArray.size()<<" does not match field size " << af->GetSize();
+            throw std::runtime_error(ss.str().c_str());
+        }
     }
 }
 
