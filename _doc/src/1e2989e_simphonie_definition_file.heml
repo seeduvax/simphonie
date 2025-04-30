@@ -705,20 +705,22 @@ output field:
       }
     }
     {section %title=Logging service
-{fig %src=LoggerArch_class.png %title=Logger Architecture}
+The logging service is splitted into a front-end logger (c.f. class named
+Logger) and several back-ends ones. The front-end logger acts as an abstraction
+layer as, regardless of how the log messages are processed, the system has to
+call its log function to log anything. Then, the logs are spread to all the
+back-ends for further handling. The communication between both sides is achieved
+by a standardization of the logs (c.f. class named LoggerEvent). The
+standardization provides an access to the logs' content as well as one of their
+string representation: back-ends can either use this string or build their own
+one.
+Back-ends should be child components of the front-end logger, contained in the
+"Backends" container.
+{fig %src=LoggerFrontArch_class.png %title=Logger Front-end Architecture}
 {#
-@startuml LoggerArch_class.png
+@startuml LoggerFrontArch_class.png
 class LoggerEvent {
-  -const Smp::IObject* _sender
-  -const Smp::String8 _message
-  -const Smp::Services::LogMessageKind _kind
-  -const Smp::DateTime _zuluTime
-  -const Smp::Duration _simulationTime
-  -const std::thread::id _threadId
-  -const Smp::String8 _string
-  +LoggerEvent(const Smp::DateTime zuluTime, const Smp::Duration simulationTime, const Smp::IObject* sender, const std::string message, const Smp::Services::LogMessageKind kind)
-  +~LoggerEvent()
-  +LoggerEvent(const LoggerEvent& other)
+  +LoggerEvent(//omitted for clarity//)
   +const Smp::IObject* getSender()
   +std::string getMessage()
   +Smp::Services::LogMessageKind getKind()
@@ -726,57 +728,39 @@ class LoggerEvent {
   +Smp::Duration getSimulationTime()
   +std::thread::id getThreadId()
   +Smp::String8 getString()
-  +{static} std::ostream& operator<<(std::ostream& os, const LoggerEvent& event)
-  -{static} Smp::String8 buildString(const Smp::IObject* sender, const std::string message, const Smp::Services::LogMessageKind kind, const Smp::DateTime zuluTime, const Smp::Duration simulationTime, const std::thread::id threadId)
-  -{static} Smp::String8 buildString(const Smp::String8 string)
 }
 class Logger <<Component>> <<AComposite>> <<EPPublisher>> {
-  #{static} std::unordered_map<Smp::Services::LogMessageKind, _LMK> _LMKMap
-  #struct _LMK {const Smp::String8 name; const Smp::Services::LogMessageKind kind; Smp::Int32 counter;}
-  -{static} Smp::Int32 _logCounter
-  -{static} std::mutex _countersMutex
-  -std::mutex _logMutex
-  -std::vector<ILoggerBackend*> _backends
   +Logger(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
   +Smp::Services::LogMessageKind QueryLogMessageKind(Smp::String8 messageKindName)
-  +Log(const Smp::IObject* sender, Smp::String8 message, Smp::Services::LogMessageKind kind = Smp::Services::ILogger::LMK_Debug)
-  #configure()
-  #publish(Smp::IPublication* receiver)
+  +Log(const Smp::IObject* sender, Smp::String8 message, Smp::Services::LogMessageKind kind)
 }
+@enduml
+#}
+Simphonie provides four differents back-ends:
+  - LoggerOStream: push error logs to stderr, debug ones to stdlog, and the
+    others to stdout.
+  - LoggerFile: save the logging events to a file. The filepath is published as
+    an input field.
+  - LoggerNetwork: send the logs to a remote logging service that support the
+    Syslog Protocol {xref SYSLOG}. Connection configuration is published as an 
+    input field. This back-end is not yet implemented.
+  - LoggerAsync: store the logs in a buffer to be consumed later. Buffer's size
+    is published as an input field.
+
+Users can create their own back-ends by implementing the ILoggerBackend
+interface. Moreover, users are free to use whatever they want as back-ends'
+can be duplicated or can stay unused. 
+{fig %src=LoggerBackArch_class.png %title=Logger Back-end Architecture}
+{#
+@startuml LoggerBackArch_class.png
+class Logger <<Component>> <<AComposite>> <<EPPublisher>> {}
 interface ILoggerBackend {
   +log(const LoggerEvent& event)
 }
-class LoggerOStream <<Component>> implements ILoggerBackend {
-  +LoggerOstream(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
-  +log(const LoggerEvent& event)
-}
-class LoggerFile <<Component>> implements ILoggerBackend {
-  -std::string _filepath
-  -std::ofstream _file
-  +LoggerFile(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
-  +~LoggerFile()
-  +log(const LoggerEvent& event)
-  #publish(Smp::IPublication* receiver)
-  #configure()
-}
-class LoggerNetwork <<Component>> implements ILoggerBackend {
-  -std::string _networkCfg
-  +LoggerNetwork(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
-  +~LoggerNetwork()
-  +log(const LoggerEvent& event)
-  #publish(Smp::IPublication* receiver)
-}
-class LoggerAsync <<Component>> <<AComposite>> implements ILoggerBackend {
-  -std::mutex _mutex
-  -std::condition_variable _cv
-  -std::queue<LoggerEvent> _buffer
-  -Smp::Int32 _bufferSize
-  +LoggerAsync(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
-  +log(const LoggerEvent& event)
-  +const LoggerEvent& getEvent()
-  +consumeEvent()
-  #publish(Smp::IPublication* receiver)
-}
+class LoggerOStream <<Component>> implements ILoggerBackend {}
+class LoggerFile <<Component>> implements ILoggerBackend {}
+class LoggerNetwork <<Component>> implements ILoggerBackend {}
+class LoggerAsync <<Component>> <<AComposite>> implements ILoggerBackend {}
 Logger *.. ILoggerBackend : "child"
 note top of LoggerNetwork : Not Implemented
 @enduml
