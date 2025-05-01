@@ -64,31 +64,50 @@ void LuaBuilder::publish(Smp::IPublication* receiver) {
 }
 
 // ..........................................................
-void LuaBuilder::connect(Smp::String8 fromPath, Smp::String8 toPath) {
+void LuaBuilder::connect(Smp::String8 fromPath, Smp::String8 toPath, bool bulk) {
     auto resolver = _sim->GetResolver();
-    std::string msg = "Connecting field ";
-    msg += fromPath;
-    msg += " to ";
-    msg += toPath;
-    _sim->GetLogger()->Log(this, msg.c_str(), Smp::Services::ILogger::LMK_Debug);
-    auto from = dynamic_cast<Smp::IOutputField*>(resolver->ResolveAbsolute(fromPath));
-    auto to = dynamic_cast<Smp::IField*>(resolver->ResolveAbsolute(toPath));
-    if (from != nullptr && to != nullptr) {
-        from->Connect(to);
+
+    // bulk connection of fields is reversed, to let special fields
+    // receiving many connection being published as output field to
+    // benefit the Connect interface.  This is used for instance to
+    // connect many fields (whatever inputs or outputs to on field
+    // recorder, see FieldRecorder in colibry module).
+    auto fromField = dynamic_cast<Smp::IOutputField*>(resolver->ResolveAbsolute(bulk ? toPath : fromPath));
+    auto toField = dynamic_cast<Smp::IField*>(resolver->ResolveAbsolute(bulk ? fromPath : toPath));
+    if (fromField != nullptr && toField != nullptr) {
+        std::string msg = "Connecting field ";
+        msg += fromPath;
+        msg += " to ";
+        msg += toPath;
+        _sim->GetLogger()->Log(this, msg.c_str(), Smp::Services::ILogger::LMK_Debug);
+        fromField->Connect(toField);
     }
     else {
-        msg = "Can't connect fields";
-        if (from == nullptr) {
-            msg += ", from field ";
+        auto fromComp = dynamic_cast<Smp::IComponent*>(resolver->ResolveAbsolute(fromPath));
+        auto toComp = dynamic_cast<Smp::IComponent*>(resolver->ResolveAbsolute(toPath));
+        if (fromComp != nullptr && toComp != nullptr) {
+            std::string msg = "Linking component ";
             msg += fromPath;
-            msg += " not found";
-        }
-        if (to == nullptr) {
-            msg += ", to field ";
+            msg += " to ";
             msg += toPath;
-            msg += " not found";
+            _sim->GetLogger()->Log(this, msg.c_str(), Smp::Services::ILogger::LMK_Debug);
+            auto linkReg = _sim->GetLinkRegistry();
+            linkReg->AddLink(fromComp, toComp);
         }
-        _sim->GetLogger()->Log(this, msg.c_str(), Smp::Services::ILogger::LMK_Error);
+        else {
+            std::string msg = "Can't connect fields or add components link";
+            if (fromField == nullptr && fromComp == nullptr) {
+                msg += ", from object ";
+                msg += fromPath;
+                msg += " not found";
+            }
+            if (toField == nullptr && toComp == nullptr) {
+                msg += ", to object ";
+                msg += toPath;
+                msg += " not found";
+            }
+            _sim->GetLogger()->Log(this, msg.c_str(), Smp::Services::ILogger::LMK_Error);
+        }
     }
 }
 // ..........................................................
@@ -117,10 +136,7 @@ void LuaBuilder::connect() {
         if (cnx.second.is<sol::table>()) {
             auto target = cnx.first.as<std::string>();
             for (auto src : cnx.second.as<sol::table>()) {
-                // many elements to connect, despite de left value is
-                // semantically speaking the reciever, the target is funally
-                // the IOutputField on which many Connect are applied.
-                connect(target.c_str(), src.second.as<std::string>().c_str());
+                connect(src.second.as<std::string>().c_str(), target.c_str(), true);
             }
         }
         else {

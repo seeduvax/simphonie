@@ -12,6 +12,8 @@
 
 namespace simphonie {
 namespace kern {
+static const Collection<Smp::IComponent> _emptyCompCollection("emptyCompCollection", "Dummy empty component collection",
+                                                              nullptr);
 // --------------------------------------------------------------------
 // ..........................................................
 LinkRegistry::LinkRegistry(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
@@ -31,7 +33,7 @@ Smp::UInt32 LinkRegistry::GetLinkCount(const Smp::IComponent* source, const Smp:
     auto it = _links.find(target);
     if (it != _links.end()) {
         for (auto t : it->second) {
-            if (t == target) {
+            if (t == source) {
                 count++;
             }
         }
@@ -51,7 +53,7 @@ Smp::Bool LinkRegistry::RemoveLink(Smp::IComponent* source, const Smp::IComponen
 // ..........................................................
 const Smp::ComponentCollection* LinkRegistry::GetLinkSources(const Smp::IComponent* target) const {
     auto it = _links.find(target);
-    return it != _links.end() ? &it->second : nullptr;
+    return it != _links.end() ? &it->second : &_emptyCompCollection;
 }
 // ..........................................................
 Smp::Bool LinkRegistry::CanRemove(const Smp::IComponent* target) {

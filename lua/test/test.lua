@@ -25,7 +25,8 @@ sim:setConfiguration({
         ["recorder/port"]={
             "inc2/input",
             "inc1/output"
-        }
+        },
+        inc2 = "inc1" -- just ro test link registry
     },
     schedule={
         ["inc1/step"]={cycleTime_ms=250},

@@ -78,7 +78,7 @@ private:
      * @param fromPath source field path.
      * @param toPath destition field path.
      */
-    void connect(Smp::String8 from, Smp::String8 to);
+    void connect(Smp::String8 from, Smp::String8 to, bool bulk = false);
 };
 
 }  // namespace lua

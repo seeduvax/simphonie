@@ -42,14 +42,15 @@ public:
     Smp::IObject* ResolveAbsolute(Smp::String8 absolutePath) override;
     Smp::IObject* ResolveRelative(Smp::String8 relativePath, Smp::IObject* sender) override;
 
-    void dump() const;
+    void dump() /* const [TODO restore when simdeck is OK for that]*/;
 
 protected:
     void connect() override;
+    std::string getFullName(Smp::IObject* o) const;
 
 private:
     Smp::IObject* _root;
-    void dumpObj(const Smp::IObject* from, int level=0) const;
+    void dumpObj(const Smp::IObject* from, int level = 0) /* const [TODO restore when simdeck is OK for that]*/;
 };
 
 }  // namespace kern

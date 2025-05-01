@@ -51,11 +51,20 @@ Smp::IObject* Resolver::ResolveRelative(Smp::String8 relativePath, Smp::IObject*
 }
 // --------------------------------------------------------------------
 // ..........................................................
-void Resolver::dump() const {
+std::string Resolver::getFullName(Smp::IObject* o) const {
+    if (o == _root || o == nullptr) {
+        return "";
+    }
+    else {
+        return getFullName(o->GetParent()) + "/" + o->GetName();
+    }
+}
+// ..........................................................
+void Resolver::dump() {
     dumpObj(_root);
 }
 // ..........................................................
-void Resolver::dumpObj(const Smp::IObject* from, int level) const {
+void Resolver::dumpObj(const Smp::IObject* from, int level) {
     for (int i=0; i<level; i++) {
         std::cout << "    ";
     }
@@ -83,7 +92,7 @@ void Resolver::dumpObj(const Smp::IObject* from, int level) const {
                 for (int i=0; i<level; i++) {
                     std::cout << "    ";
                 }
-                std::cout << "    -> " << in->GetParent()->GetName() << "/" << in->GetName();
+                std::cout << "    -> " << getFullName(in);
             }
         }
     }
@@ -121,10 +130,17 @@ void Resolver::dumpObj(const Smp::IObject* from, int level) const {
     }   
     auto c=dynamic_cast<const Smp::IComponent*>(from);
     if (c!=nullptr) {
+        auto lr = getSimulator()->GetLinkRegistry();
+        for (auto source : *(lr->GetLinkSources(c))) {
+            for (int i = 0; i < level; i++) {
+                std::cout << "    ";
+            }
+            std::cout << "    <-[" << lr->GetLinkCount(source, c) << "]- " << getFullName(source) << std::endl;
+        }
         for (auto f: *(c->GetFields())) {
             dumpObj(f,l);
         } 
-    }   
+    }
 }
 
 }  // namespace kern
