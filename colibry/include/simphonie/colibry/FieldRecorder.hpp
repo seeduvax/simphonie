@@ -52,7 +52,9 @@ public:
 
 
 protected:
-    void publish(Smp::IPublication* receiver);
+    virtual void flush() = 0;
+    void publish(Smp::IPublication* receiver) override;
+    void connect() override;
     Smp::String8 getFilePath() {
         return _filePath.c_str();
     }

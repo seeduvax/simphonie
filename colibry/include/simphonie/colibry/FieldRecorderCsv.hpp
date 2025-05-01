@@ -36,6 +36,7 @@ public:
     void step() override;
 
 protected:
+    void flush() override;
     // Component specialization to open/close file on simulator connect/disconnect
     void connect() override;
     void disconnect() override;

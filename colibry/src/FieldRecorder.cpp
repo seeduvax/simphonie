@@ -8,6 +8,9 @@
  * $Date$
  */
 #include "simphonie/colibry/FieldRecorder.hpp"
+
+#include "Smp/ISimulator.h"
+#include "Smp/Services/IEventManager.h"
 #include "simdeck/StringField.hpp"
 #include "simdeck/Type.hpp"
 
@@ -31,6 +34,7 @@ FieldRecorder::FieldRecorder(Smp::String8 name, Smp::String8 description, Smp::I
         _filePath = _filePath + "frec";
     }
     addEP("step","record fields snapshot", this, &FieldRecorder::step);
+    addEP("flush", "Flush record file", this, &FieldRecorder::flush);
 }
 // ..........................................................
 FieldRecorder::~FieldRecorder() {
@@ -40,6 +44,11 @@ void FieldRecorder::publish(Smp::IPublication* receiver) {
     receiver->PublishField(&_fieldHolder);
     receiver->PublishField(simdeck::StringField::Create("filePath", "", Smp::ViewKind::VK_All, &_filePath, nullptr,
                                                         false, true, false, this));
+}
+// ..........................................................
+void FieldRecorder::connect() {
+    getSimulator()->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId,
+                                                 GetEntryPoint("flush"));
 }
 
 // --------------------------------------------------------------------

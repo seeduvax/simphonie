@@ -28,7 +28,9 @@ FieldRecorderCsv::~FieldRecorderCsv() {
 // --------------------------------------------------------------------
 // ..........................................................
 void FieldRecorderCsv::connect() {
+    FieldRecorder::connect();
     _file.open(getFilePath(), std::ofstream::out);
+    _file.precision(std::numeric_limits<double>::max_digits10 - 1);
     _file << "#time";
     for (auto f : *getInputFields()) {
         auto sf=dynamic_cast<Smp::ISimpleField*>(f);
@@ -50,14 +52,16 @@ void FieldRecorderCsv::connect() {
         }
     }
     _file << std::endl;
-
-
 }
 // ..........................................................
 void FieldRecorderCsv::disconnect() {
     
     _file << std::flush;
     _file.close();
+}
+// ..........................................................
+void FieldRecorderCsv::flush() {
+    _file << std::flush;
 }
 // --------------------------------------------------------------------
 // ..........................................................
