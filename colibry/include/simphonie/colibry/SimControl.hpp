@@ -1,32 +1,42 @@
-#ifndef __test_SimControl_hpp
-#define __test_SimControl_hpp
+/*
+ * @file SimControl.hpp
+ *
+ * Copyright 2025 . All rights reserved.
+ * Use is subject to license terms.
+ *
+ * $Id$
+ * $Date$
+ */
+#ifndef __simphonie_colibry_SimControl_HPP__
+#define __simphonie_colibry_SimControl_HPP__
+
+#include <memory>
 #include "Smp/ISimulator.h"
 #include "simdeck/EntryPointPublisher.hpp"
 #include "simdeck/Service.hpp"
+#include "sxeval/SXEval.hpp"
 
 namespace simphonie {
 namespace colibry {
 
-/**
- * Service to control spontaneous stop of simulator.
- * At the moment the only stop criteria is when simulation time has reached
- * the stop time.
- */
 class SimControl : public simdeck::Service, virtual public simdeck::EntryPointPublisher {
 public:
     SimControl(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
-    virtual ~SimControl();
-    // Service specialization.
+    ~SimControl() = default;
+
+protected:
     void publish(Smp::IPublication* receiver) override;
     void connect() override;
 
 private:
-    void checkStopCondition();
-    /** Host simulator */
-    Smp::ISimulator* _sim = nullptr;
-    /** Max simulation time. */
-    Smp::Duration _stopTime;
+    typedef double T;
+
+    void _checkStopCondition();
+
+    std::string _condition;
+    std::unique_ptr<sxeval::SXEval<T> > _evaluator;
 };
-}  // namespace colibry
-}  // namespace simphonie
-#endif
+
+} /* namespace colibry */
+} /* namespace simphonie */
+#endif /* __simphonie_colibry_SimControl_HPP__ */

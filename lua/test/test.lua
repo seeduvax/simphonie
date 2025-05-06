@@ -2,9 +2,8 @@ s=require "simphonie_lua"
 sim=s.Simphonie.Simulator.new("luaSim")
 sim:setConfiguration({
     components={
-        ctrl={type="simphonie::colibry::SimControl", description="Auto stop the simulation when stop date is reached.",
-            stopTime=2000000000},
-        recorder={type="simphonie::colibry::FieldRecorderCsv", 
+        ctrl={type="simphonie::colibry::SimControl", description="Auto stop the simulation when stop date is reached."},
+        recorder={type="simphonie::colibry::FieldRecorderCsv",
             filePath="myRec.csv"},
         logger={type="simphonie::kern::Logger",
             Backends={
@@ -54,7 +53,8 @@ print("scheduler state: "..sim.Scheduler.State)
 sim:CreateComponent("simphonie::umdl::SmpIncrement","inc","")
 sim.inc:CreateChild("simphonie::umdl::SmpIncrement","Children","subinc","")
 sim:Publish()
-sim.logger.loggerFile.filePath.Value = "leloggerla.log"
+sim.logger.loggerFile.filePath.Value = "myLogger.log"
+sim.ctrl.condition.Value='(and (> (sqrt /TimeKeeper/simTime) 1234.0) (> /inc1/output 30.0))'
 sim:Configure()
 sim:Connect()
 sim.inc.output:Connect(sim.inc.subinc.input)
