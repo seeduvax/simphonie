@@ -41,10 +41,13 @@ LuaBuilder::~LuaBuilder() {}
 // ..........................................................
 void LuaBuilder::setConfiguration(sol::table config) {
     _config=config;
-}
-// --------------------------------------------------------------------
-// ..........................................................
-void LuaBuilder::publish(Smp::IPublication* receiver) {
+    // Load libraries
+    sol::table libraries = _config["libraries"];
+    for (auto te : libraries) {
+        std::string libName = te.second.as<std::string>();
+        _sim->LoadLibrary(libName.c_str(), Smp::LibraryLoadingFlag::LLF_Auto);
+    }
+
     // iterate on configuration table component section to create and add
     // components to the simulator.
     sol::table components=_config["components"];
@@ -62,6 +65,9 @@ void LuaBuilder::publish(Smp::IPublication* receiver) {
         }
     }
 }
+// --------------------------------------------------------------------
+// ..........................................................
+void LuaBuilder::publish(Smp::IPublication* receiver) {}
 
 // ..........................................................
 void LuaBuilder::connect(Smp::String8 fromPath, Smp::String8 toPath, bool bulk) {

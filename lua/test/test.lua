@@ -1,6 +1,7 @@
 s=require "simphonie_lua"
-sim=s.Simphonie.Simulator.new("luaSim")
-sim:setConfiguration({
+sim=s.CreateSimulator({
+    name="MySim",
+    lib="simphonie_kern",
     libraries={
         "simphonie_umdl",
         "simphonie_colibry"
@@ -43,8 +44,6 @@ sim:setConfiguration({
 })
 sim:Run()
 print("Simulator name: "..sim.Name)
-sim:LoadLibrary("simphonie_umdl",0)
-sim:LoadLibrary("simphonie_colibry",0)
 tk=sim:GetTimeKeeper()
 print("Timekeeper simulation time: "..tk:GetSimulationTime())
 print("Timekeeper state: "..tk.State)

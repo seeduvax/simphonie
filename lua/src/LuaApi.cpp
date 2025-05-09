@@ -10,15 +10,16 @@
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/IModel.h"
 #include "Smp/IOutputField.h"
-#include "Smp/ISimpleField.h"
 #include "Smp/ISimpleArrayField.h"
-#include "Smp/Publication/IType.h"
+#include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
+#include "Smp/Publication/IType.h"
 #include "simdeck/Utils.hpp"
 #include "simphonie/kern/Resolver.hpp"
 #include "simphonie/kern/Scheduler.hpp"
 #include "simphonie/kern/Simulator.hpp"
 #include "simphonie/lua/LuaBuilder.hpp"
+#include "simphonie/sys/DLib.hpp"
 #include "sol/sol.hpp"
 
 // TODO check calling sim.Publish is allowed many times (and simulator
@@ -245,6 +246,30 @@ void fieldSetValue(Smp::IField* field, sol::object value) {
     }
 }
 
+sol::object CreateSimulator(sol::lua_table cfg, sol::this_state L) {
+    // charger symbol CreateSimulator
+    std::string libName = cfg["lib"];
+    std::string simName = cfg.get_or<std::string>("name", "simulator");
+    std::string descr = cfg.get_or<std::string>("description", "");
+    try {
+        simphonie::sys::DLib simLib(libName.c_str());
+        auto createSim =
+            simLib.getEntry<Smp::ISimulator* (*)(Smp::String8 name, Smp::String8 description, Smp::IObject * parent)>(
+                "CreateSimulator");
+        if (createSim != nullptr) {
+            Smp::ISimulator* sim = createSim(simName.c_str(), descr.c_str(), nullptr);
+            auto b = new simphonie::lua::LuaBuilder("LuaBuilder", "Simulation builder from lua script", sim);
+            sim->AddService(b);
+            b->setConfiguration(cfg);
+            return sol::object(L, sol::in_place, sim);
+        }
+    }
+    catch (std::runtime_error& ex) {
+        std::cerr << "Can't create simulator: " << ex.what() << std::endl;
+    }
+    return sol::nil;
+}
+
 // --------------------------------------------------------------------
 // ..........................................................
 extern "C" {
@@ -254,6 +279,7 @@ int luaopen_libsimph_lua(lua_State* L) {
     auto t = lua.create_table();
     t["Uuid"] = [](std::string c) { return Smp::Uuid(c.c_str()); };
     t["GenerateUuid"] = [](std::string c) { return simdeck::Utils::GenerateUuid(c.c_str()); };
+    t["CreateSimulator"] = [](sol::lua_table cfg, sol::this_state LS) { return CreateSimulator(cfg, LS); };
     auto nsSmp = t["Smp"].get_or_create<sol::table>();
 
     // clang-format off
@@ -328,6 +354,7 @@ int luaopen_libsimph_lua(lua_State* L) {
     );
     nsSmp.new_usertype<Smp::ISimulator>("ISimulator",
         sol::meta_function::index, &objectIndex,
+        sol::meta_function::new_index, simulatorNewIndex,
         "State", sol::property(&Smp::ISimulator::GetState),
         "Publish", &Smp::ISimulator::Publish,
         "Configure", &Smp::ISimulator::Configure,
@@ -367,34 +394,6 @@ int luaopen_libsimph_lua(lua_State* L) {
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
     );
 
-    auto nsSimphonie = t["Simphonie"].get_or_create<sol::table>();
-    nsSimphonie.new_usertype<simphonie::kern::Simulator>("Simulator",
-        sol::constructors<simphonie::kern::Simulator()>(),
-        sol::meta_function::construct, [](std::string name) {
-            return new simphonie::kern::Simulator(name.c_str());
-        },
-        sol::meta_function::index, &objectIndex,
-// TODO bind those services to addition SMP service or helpers that are provided 
-// with the lua binding. Meaning it shall work on any SMP complient ISimulator
-// implementation.
-        sol::meta_function::new_index, simulatorNewIndex,
-//        "connect", &simphonie::kern::Simulator::connect,
-//        "schedule", &simphonie::kern::Simulator::schedule,
-//        "setValue", &simphonie::kern::Simulator::setValue,
-//        "createSmpModel", &simphonie::kern::Simulator::createSmpModel,
-        "setConfiguration",[](Smp::ISimulator* s, sol::object o) {
-            auto b = new simphonie::lua::LuaBuilder("LuaBuilder", "Simulation builder from lua script", s);
-            s->AddService(b);
-            b->setConfiguration(o);
-            return b;
-        },
-        sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite, Smp::ISimulator>()
-    );
-
-    
-
-// TODO, neeed something to bind entry points and published operations to 
-// to lua.
     t.push();
     return 1;
 }

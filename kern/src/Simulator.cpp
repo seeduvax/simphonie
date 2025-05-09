@@ -623,3 +623,9 @@ void Simulator::epStop() {
 // ..........................................................
 }  // namespace kern
 }  // namespace simph
+
+extern "C" {
+Smp::ISimulator* CreateSimulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) {
+    return new simphonie::kern::Simulator(name, descr, parent);
+};
+}
