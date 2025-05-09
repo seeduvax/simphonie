@@ -49,11 +49,14 @@ protected:
      */
     void publish(Smp::IPublication* receiver) override;
     /**
+     * Configure specialization.
+     * shall trig component fields initiatization.
+     */
+    void configure() override;
+    /**
      * Connect specialization.
-     * Shall:
-     *  - init data.
-     *  - apply connections.
-     */  
+     * Shall apply fields connections and components links.
+     */
     void connect() override;
 private:
     void addSubComponents(Smp::IComposite* node, sol::table t);

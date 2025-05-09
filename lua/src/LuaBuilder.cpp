@@ -111,7 +111,7 @@ void LuaBuilder::connect(Smp::String8 fromPath, Smp::String8 toPath, bool bulk) 
     }
 }
 // ..........................................................
-void LuaBuilder::connect() {
+void LuaBuilder::configure() {
     // iterate on configuration table component section to init data defined
     // at that level to set related fields value.
     // iterate on init data section to set related fields value.
@@ -129,10 +129,12 @@ void LuaBuilder::connect() {
         }
         initComponents(comp,v);
     }
-
+}
+// ..........................................................
+void LuaBuilder::connect() {
     // iterate on connections list connect fields.
-    components=_config["connections"];
-    for (auto cnx: components) {
+    sol::table connections = _config["connections"];
+    for (auto cnx : connections) {
         if (cnx.second.is<sol::table>()) {
             auto target = cnx.first.as<std::string>();
             for (auto src : cnx.second.as<sol::table>()) {
