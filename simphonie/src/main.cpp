@@ -12,6 +12,13 @@ int main(int argc, char** argv) {
             lua.safe_script("print(\"plop\")");
             lua.safe_script_file(argv[i]);
         }
+        lua.safe_script(
+            "local prompt = require 'prompt'\n"
+            "prompt.name = 'simphonie'\n"
+            "prompt.prompts = {'>  ', '>> '}\n"
+            "prompt.colorize = true\n"
+            "prompt.history = os.getenv('HOME') .. '/.lua_history'\n"
+            "prompt.enter()\n");
     }
     catch (const sol::error& e) {
         std::cerr << "Lua execution error: " << e.what() << std::endl;

@@ -5,10 +5,10 @@ sim=s.CreateSimulator({
     libraries={
         "simphonie_umdl",
         "simphonie_colibry",
-        "simphonie_rest",
+--        "simphonie_rest",
     },
     components={
-        webserver={type="simphonie::rest::RestService"},
+--        webserver={type="simphonie::rest::RestService"},
         ctrl={type="simphonie::colibry::SimControl",
             description="Auto stop the simulation when stop condition is reached.",
             condition="(and (> (sqrt /TimeKeeper/simTime) 1234.0) (> /inc1/output 30.0))"
