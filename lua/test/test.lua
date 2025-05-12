@@ -5,6 +5,7 @@ sim=s.CreateSimulator({
     libraries={
         "simphonie_umdl",
         "simphonie_colibry",
+        "simphonie_lua",
 --        "simphonie_rest",
     },
     components={
@@ -28,6 +29,7 @@ sim=s.CreateSimulator({
             }
         },
         inc2={type="simphonie::umdl::SmpIncrement"},
+        ["MyLuaModel=test/model.lua"]={type="simphonie::lua::LuaModel"}
     },
     connections={
         ["inc2/input"]="inc1/output",
