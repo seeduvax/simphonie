@@ -42,8 +42,7 @@ private:
     std::string _scriptPath;
 
     std::string buildName(Smp::String8 spec);
-
-
+    void call(const char* name);
 };
 
 }} // namespace simphonie::lua

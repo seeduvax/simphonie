@@ -1,11 +1,14 @@
 model={
-    publish=function()
-        print(":::::: Publish form lua") 
+    publish=function(self)
+        print(":::::: Publish form lua ")
+        print(type(self)) 
+        print(self.Name) 
+        print("plop")
     end,
     configure=function()
-        print(":::::: Configure form lua") 
+        print(":::::: Configure from lua") 
     end,
     connect=function()
-        print(":::::: Connect form lua") 
+        print(":::::: Connect from lua") 
     end,
 }

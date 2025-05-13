@@ -19,6 +19,7 @@
 #include "Smp/Services/ITimeKeeper.h"
 #include "simdeck/Utils.hpp"
 #include "simphonie/lua/LuaBuilder.hpp"
+#include "simphonie/lua/LuaModel.hpp"
 #include "simphonie/sys/DLib.hpp"
 #include "sol/sol.hpp"
 
@@ -391,6 +392,10 @@ int luaopen_libsimph_lua(lua_State* L) {
         sol::meta_function::index, &objectIndex,
         "ResolveAbsolute", &Smp::Services::IResolver::ResolveAbsolute,
         "ResolveRelative", &Smp::Services::IResolver::ResolveRelative,
+        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
+    );
+    nsSmp.new_usertype<simphonie::lua::LuaModel>("LuaModel", 
+        sol::meta_function::index, &objectIndex,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
     );
 

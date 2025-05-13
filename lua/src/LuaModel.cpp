@@ -9,6 +9,8 @@
  */
 #include "simphonie/lua/LuaModel.hpp"
 
+#include "Smp/ISimulator.h"
+
 namespace simphonie {
 namespace lua {
 // --------------------------------------------------------------------
@@ -24,6 +26,7 @@ LuaModel::LuaModel(Smp::String8 name, Smp::String8 description, Smp::IObject* pa
     _lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::os, sol::lib::math,
                        sol::lib::table, sol::lib::debug);
     _lua.safe_script_file(_scriptPath.c_str());
+    _lua.safe_script("Smp=require 'simphonie_lua'");
     sol::table g=_lua.globals();
     _luaModel=g["model"];
 }
@@ -33,25 +36,27 @@ LuaModel::~LuaModel() {
 
 // --------------------------------------------------------------------
 // ..........................................................
-void LuaModel::publish(Smp::IPublication* receiver) {
-    sol::function pub=_luaModel["publish"];
-    if ( pub != sol::nil ) {
-        pub();
+void LuaModel::call(const char* name) {
+    sol::protected_function pf = _luaModel[name];
+    if (pf != sol::nil) {
+        auto res = pf(sol::object(_lua, sol::in_place, this));
+        if (!res.valid()) {
+            sol::error err = res;
+            getSimulator()->GetLogger()->Log(this, err.what(), Smp::Services::ILogger::LMK_Error);
+        }
     }
+}
+// ..........................................................
+void LuaModel::publish(Smp::IPublication* receiver) {
+    call("publish");
 }
 // ..........................................................
 void LuaModel::configure() {
-    sol::function cfg=_luaModel["configure"];
-    if ( cfg != sol::nil ) {
-        cfg();
-    }
+    call("configure");
 }
 // ..........................................................
 void LuaModel::connect() {
-    sol::function cnx=_luaModel["connect"];
-    if ( cnx != sol::nil ) {
-        cnx();
-    }
+    call("connect");
 }
 
 // --------------------------------------------------------------------
