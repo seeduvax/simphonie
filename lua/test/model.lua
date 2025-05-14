@@ -4,6 +4,9 @@ model={
         print(type(self)) 
         print(self.Name) 
         print("plop")
+        self:AddEntryPoint("step", "main model step",function (self)
+            print(":::::: model step from lua model "..self.Name)
+        end)
     end,
     configure=function()
         print(":::::: Configure from lua") 

@@ -8,15 +8,49 @@
  * $Date$
  */
 #include "simphonie/lua/LuaModel.hpp"
-
 #include "Smp/ISimulator.h"
+#include "simdeck/EntryPoint.hpp"
+
+
+
 
 namespace simphonie {
 namespace lua {
+
+class LuaModel::EntryPoint: public simdeck::EntryPoint {
+    typedef simdeck::EntryPoint Parent;
+public:
+    EntryPoint(Smp::String8 name, Smp::String8 description, 
+                sol::protected_function luaEP,
+                sol::object self, LuaModel* parent):
+            Parent(name, description, parent), 
+            _luaEP(luaEP),
+            _self(self),
+            _owner(parent) {
+    }
+    ~EntryPoint() {
+    }
+
+    void Execute() const override {
+        auto res=_luaEP(_self);
+        if (!res.valid()) {
+            sol::error err = res;
+            _owner->getSimulator()->GetLogger()->Log(this, err.what(), Smp::Services::ILogger::LMK_Error);
+        }
+    }
+
+
+private:
+    sol::protected_function _luaEP;
+    sol::object _self;
+    LuaModel* _owner;
+};
+
 // --------------------------------------------------------------------
 // ..........................................................
 LuaModel::LuaModel(Smp::String8 name, Smp::String8 description, Smp::IObject* parent):
-        Parent(buildName(name).c_str(), description, parent) {
+        Parent(buildName(name).c_str(), description, parent),
+        _epList("epList", "Entry point list", this) {
     std::string s=name;
     auto loc=s.find('=');
     if ( loc != std::string::npos ) {
@@ -57,6 +91,22 @@ void LuaModel::configure() {
 // ..........................................................
 void LuaModel::connect() {
     call("connect");
+}
+
+// --------------------------------------------------------------------
+// ..........................................................
+const Smp::EntryPointCollection* LuaModel::GetEntryPoints() const {
+    return &_epList;
+}
+// ..........................................................
+Smp::IEntryPoint* LuaModel::GetEntryPoint(Smp::String8 name) const {
+    return _epList.at(name);
+}
+// ..........................................................
+void LuaModel::addEntryPoint(Smp::String8 name, Smp::String8 description, sol::protected_function func) {
+     _epList.push_back(new LuaModel::EntryPoint(name, description, 
+                func,
+                sol::object(_lua, sol::in_place, this), this));
 }
 
 // --------------------------------------------------------------------

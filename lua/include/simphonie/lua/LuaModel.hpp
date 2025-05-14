@@ -10,8 +10,9 @@
 #ifndef __simphonie_lua_LuaModel_HPP__
 #define __simphonie_lua_LuaModel_HPP__
 
-#include "simdeck/EPPModel.hpp"
+#include "simdeck/Model.hpp"
 #include "sol/sol.hpp"
+#include "Smp/IEntryPointPublisher.h"
 
 namespace simphonie {
 namespace lua {
@@ -19,8 +20,8 @@ namespace lua {
 /**
  *
  */
-class LuaModel: public simdeck::EPPModel {
-    typedef EPPModel Parent;
+class LuaModel: public simdeck::Model, virtual public Smp::IEntryPointPublisher {
+    typedef simdeck::Model Parent;
 public:
     /**
      * Default constructor.
@@ -31,6 +32,11 @@ public:
      */
     virtual ~LuaModel();
 
+    // Smp::IEntryPointPublisher implementation
+    const Smp::EntryPointCollection* GetEntryPoints() const override;
+    Smp::IEntryPoint* GetEntryPoint(Smp::String8 name) const override;
+
+    void addEntryPoint(Smp::String8, Smp::String8 name, sol::protected_function func);
 protected:
     void publish(Smp::IPublication* receiver) override;
     void configure() override;
@@ -43,6 +49,9 @@ private:
 
     std::string buildName(Smp::String8 spec);
     void call(const char* name);
+    simdeck::OwnedCollection<Smp::IEntryPoint> _epList;
+
+    class EntryPoint;
 };
 
 }} // namespace simphonie::lua

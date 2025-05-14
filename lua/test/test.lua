@@ -43,7 +43,8 @@ sim=s.CreateSimulator({
     schedule={
         ["inc1/step"]={cycleTime_ms=250},
         ["inc2/step"]={cycleTime_ms=500},
-        ["recorder/step"]={cycleTime_ms=500}
+        ["recorder/step"]={cycleTime_ms=500},
+        ["MyLuaModel/step"]={cycleTime_ms=500}
     }
 })
 sim:Run()
