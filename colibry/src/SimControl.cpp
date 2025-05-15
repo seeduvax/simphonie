@@ -33,6 +33,7 @@ SimControl::SimControl(Smp::String8 name, Smp::String8 descr, Smp::IObject* pare
     _evaluator = nullptr;
     addEP(CHECK_EP_NAME, "Check stop condition and request simulation hold when condition is met.", this,
           &SimControl::_checkStopCondition);
+    addEP("applyCondition", "Apply the stopping s-expression condition.", this, &SimControl::_applyCondition);
 }
 
 void SimControl::publish(Smp::IPublication* receiver) {
@@ -41,19 +42,11 @@ void SimControl::publish(Smp::IPublication* receiver) {
         Smp::ViewKind::VK_All, &_condition, nullptr, false, true, false, this));
 }
 
-void SimControl::_checkStopCondition() {
-    const T val = _evaluator->evaluate();
-    if (std::abs(val) > std::numeric_limits<T>::epsilon()) {
-        getSimulator()->GetLogger()->Log(this, "Request simulation stop", Smp::Services::ILogger::LMK_Information);
-        getSimulator()->Hold(true);
-    }
-}
-
-void SimControl::connect() {
+void SimControl::_applyCondition() {
     auto resolver = [&](const char* name) -> std::function<T(void)> {
         Smp::IObject* obj = getSimulator()->GetResolver()->ResolveAbsolute(name);
         if (obj == nullptr) {
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << "Path \"" << name << "\" led to nothing";
             throw simdeck::ExInvalidFieldName(this, ss.str().c_str());
         }
@@ -62,7 +55,7 @@ void SimControl::connect() {
             field = dynamic_cast<Smp::ISimpleField*>(obj);
         }
         catch (const std::exception& e) {
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << "Failed to convert to Smp::ISimpleField: " << name << ": " << e.what();
             throw simdeck::ExInvalidFieldName(this, ss.str().c_str());
         }
@@ -118,14 +111,29 @@ void SimControl::connect() {
     };
 
     try {
+        _evaluator.reset();
         _evaluator = std::make_unique<sxeval::SXEval<T> >(const_cast<char*>(_condition.c_str()), resolver);
+        std::ostringstream ss;
+        ss << "Condition updated to \"" << _condition << "\"";
+        logInfo(ss.str().c_str());
     }
     catch (const std::exception& e) {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "Fatal error during SimControl::_evaluator's instanciation: " << e.what();
-        getSimulator()->GetLogger()->Log(this, ss.str().c_str(), Smp::Services::ILogger::LMK_Error);
         throw simdeck::Exception(this, ss.str().c_str());
     }
+}
+
+void SimControl::_checkStopCondition() {
+    const T val = _evaluator->evaluate();
+    if (std::abs(val) > std::numeric_limits<T>::epsilon()) {
+        logInfo("Request simulation stop");
+        getSimulator()->Hold(true);
+    }
+}
+
+void SimControl::connect() {
+    _applyCondition();
 
     getSimulator()->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_PostSimTimeChangeId,
                                                  GetEntryPoint(CHECK_EP_NAME));

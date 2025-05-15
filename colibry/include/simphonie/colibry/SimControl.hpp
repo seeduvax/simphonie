@@ -12,6 +12,7 @@
 
 #include <memory>
 #include "Smp/ISimulator.h"
+#include "Smp/String8.h"
 #include "simdeck/EntryPointPublisher.hpp"
 #include "simdeck/Service.hpp"
 #include "sxeval/SXEval.hpp"
@@ -31,6 +32,11 @@ protected:
 private:
     typedef double T;
 
+    /**
+     * TODO
+     * Not thread safe! Should not be called during a check.
+     */
+    void _applyCondition();
     void _checkStopCondition();
 
     std::string _condition;
