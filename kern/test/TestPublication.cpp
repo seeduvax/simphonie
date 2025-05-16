@@ -37,7 +37,8 @@ public:
 
     void testPublishField() {
         std::unique_ptr<simdeck::Component> component(new simdeck::Component("testObj", "dummy object for testing", nullptr));
-        Publication pub(component.get(), nullptr);
+        TypeRegistry treg("TypeRegistry", "", nullptr);
+        Publication pub(component.get(), &treg);
 
         Smp::Char8 testChar = 'A';
         pub.PublishField("Char", "char8 test pub", &testChar);

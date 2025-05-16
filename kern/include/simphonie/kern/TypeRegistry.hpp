@@ -76,8 +76,7 @@ public:
                                                Smp::Uuid baseClassUuid) override;
 
 private:
-    Collection<Smp::Publication::IType> _types;
-    std::vector<std::unique_ptr<Smp::Publication::IType>> _ownedTypes;
+    OwnedCollection<Smp::Publication::IType> _types;
 };
 
 }  // namespace kern
