@@ -71,12 +71,11 @@ void StructureType::setup(StructureField* sf) {
             auto f=SimpleField::Create(
                                  fd.name, 
                                  fd.description,
-                                 fd.view, (Smp::Char8*)address,
+                                 fd.view, t, (Smp::Char8*)address,
                                  sf->IsState(),
                                  sf->IsInput(),
                                  sf->IsOutput(),
-                                 sf,
-                                 fd.uuid);
+                                 sf);
             if (f!=nullptr) {
                 sf->addField(f);
             }

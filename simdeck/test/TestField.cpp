@@ -17,11 +17,15 @@
 namespace test {
 using namespace simdeck;
 
+    static Type _int64Type(Smp::Uuids::Uuid_Int64, Smp::PrimitiveTypeKind::PTK_Int64, sizeof(Smp::Int64), "Int64",
+                       "Eight bytes signed int data type");
+
 // ----------------------------------------------------------
 // test fixture implementation
 ABS_TEST_SUITE_BEGIN( Field )
 
 private:
+
 public:
     void setUp() {}
 
@@ -29,7 +33,7 @@ public:
 
     ABS_TEST_CASE_BEGIN( Int64 ) {
         Smp::Int64 intFValue = 42;
-        auto intF=SimpleField::Create("int64", "", Smp::ViewKind::VK_All, &intFValue, true, false, false, nullptr, Smp::Uuids::Uuid_Int64);
+        auto intF=SimpleField::Create("int64", "", Smp::ViewKind::VK_All, &_int64Type, &intFValue, true, false, false, nullptr);
         auto v=intF->GetValue();
         CPPUNIT_ASSERT_EQUAL((Smp::Int64)42,(Smp::Int64)v);
         intFValue=43;
@@ -42,8 +46,8 @@ public:
     ABS_TEST_CASE_BEGIN( Int64Push ) {
         Smp::Int64 inFValue = 42;
         Smp::Int64 outFValue = 43;
-        auto inF=SimpleField::Create("in", "", Smp::ViewKind::VK_All, &inFValue, false, true, false, nullptr, Smp::Uuids::Uuid_Int64);
-        auto outF=SimpleField::Create("out", "", Smp::ViewKind::VK_All, &outFValue, false, false, true, nullptr, Smp::Uuids::Uuid_Int64);
+        auto inF=SimpleField::Create("in", "", Smp::ViewKind::VK_All, &_int64Type, &inFValue, false, true, false, nullptr);
+        auto outF=SimpleField::Create("out", "", Smp::ViewKind::VK_All, &_int64Type, &outFValue, false, false, true, nullptr);
         auto out=dynamic_cast<Smp::IOutputField*>(outF);
         CPPUNIT_ASSERT(out!=nullptr);
         out->Connect(inF);

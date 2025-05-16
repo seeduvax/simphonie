@@ -26,7 +26,7 @@ template <typename T>
 class TSimpleArrayField: public SimpleArrayField {
 public:
     TSimpleArrayField(Smp::String8 name, Smp::String8 description, Smp::UInt64 count, void* address,
-                     Smp::PrimitiveTypeKind ptype, Smp::ViewKind viewKind, Smp::Publication::IType* type,
+                     Smp::Publication::IType* ptype, Smp::ViewKind viewKind, Smp::Publication::IType* type,
                      Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput, Smp::IObject* parent)
         : SimpleArrayField(name, description, count, address,
                           sizeof(T), viewKind, type,
@@ -42,12 +42,12 @@ public:
                                             s.str().c_str(),
                                             "",
                                             viewKind,
+                                            ptype,
                                             &(_tData[i]),
                                             isState,
                                             isInput,
                                             isOutput,
-                                            this,
-                                            SimpleField::GetPrimitiveUuid<T>());
+                                            this);
         }
     }
     virtual ~TSimpleArrayField() {
@@ -118,7 +118,7 @@ public:
                             Smp::String8 description,
                             Smp::UInt64 count,
                             T* address,
-                            Smp::PrimitiveTypeKind ptype,
+                            Smp::Publication::IType* ptype,
                             Smp::ViewKind viewKind,
                             Smp::Publication::IType* type,
                             Smp::Bool isState,
@@ -244,7 +244,7 @@ Smp::ISimpleArrayField* SimpleArrayField::Create(
                             Smp::String8 description,
                             Smp::UInt64 count,
                             T* address,
-                            Smp::PrimitiveTypeKind ptype,
+                            Smp::Publication::IType* ptype,
                             Smp::ViewKind viewKind,
                             Smp::Publication::IType* type,
                             Smp::Bool isState,
@@ -270,110 +270,101 @@ Smp::ISimpleArrayField* SimpleArrayField::Create(
                             Smp::String8 description,
                             Smp::UInt64 count,
                             void* address,
-                            Smp::PrimitiveTypeKind ptype,
+                            Smp::Publication::IType* ptype,
                             Smp::ViewKind viewKind,
                             Smp::Publication::IType* type,
                             Smp::Bool isState,
                             Smp::Bool isInput,
                             Smp::Bool isOutput,
                             Smp::IObject* parent) {
-    if (ptype == Smp::PrimitiveTypeKind::PTK_Bool) {
-        auto f=SimpleArrayField::Create(name, description, count, 
-                                    (Smp::Bool*)address,
-                                    ptype, viewKind, type,
-                                    isState, isInput, isOutput,
-                                    parent);
-        return f;
+    Smp::ISimpleArrayField* f=nullptr;
+    switch (ptype->GetPrimitiveTypeKind()) {
+        case Smp::PrimitiveTypeKind::PTK_Bool:
+             f=SimpleArrayField::Create(name, description, count, 
+                                        (Smp::Bool*)address,
+                                        ptype, viewKind, type,
+                                        isState, isInput, isOutput,
+                                        parent);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Char8:
+            f=SimpleArrayField::Create(name, description, count,
+                                        (Smp::Char8*)address,
+                                        ptype, viewKind, type,
+                                        isState, isInput, isOutput,
+                                        parent);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int8:
+            f=SimpleArrayField::Create(name, description, count,
+                                        (Smp::Int8*)address,
+                                        ptype, viewKind, type,
+                                        isState, isInput, isOutput,
+                                        parent);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int16:
+            f=SimpleArrayField::Create(name, description, count,
+                                        (Smp::Int16*)address,
+                                        ptype, viewKind, type,
+                                        isState, isInput, isOutput,
+                                        parent);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int32:
+            f=SimpleArrayField::Create(name, description, count,
+                                        (Smp::Int32*)address,
+                                        ptype, viewKind, type,
+                                        isState, isInput, isOutput,
+                                        parent);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int64:
+            f=SimpleArrayField::Create(name, description, count,
+                                        (Smp::Int64*)address,
+                                        ptype, viewKind, type,
+                                        isState, isInput, isOutput,
+                                        parent);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt8:
+            f=SimpleArrayField::Create(name, description, count,
+                                        (Smp::UInt8*)address,
+                                        ptype, viewKind, type,
+                                        isState, isInput, isOutput,
+                                        parent);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt16:
+            f=SimpleArrayField::Create(name, description, count,
+                                        (Smp::UInt16*)address,
+                                        ptype, viewKind, type,
+                                        isState, isInput, isOutput,
+                                        parent);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt32:
+            f=SimpleArrayField::Create(name, description, count,
+                                        (Smp::UInt32*)address,
+                                        ptype, viewKind, type,
+                                        isState, isInput, isOutput,
+                                        parent);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt64:
+            f=SimpleArrayField::Create(name, description, count,
+                                        (Smp::UInt64*)address,
+                                        ptype, viewKind, type,
+                                        isState, isInput, isOutput,
+                                        parent);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Float32:
+            f=SimpleArrayField::Create(name, description, count,
+                                        (Smp::Float32*)address,
+                                        ptype, viewKind, type,
+                                        isState, isInput, isOutput,
+                                        parent);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Float64:
+            f=SimpleArrayField::Create(name, description, count,
+                                        (Smp::Float64*)address,
+                                        ptype, viewKind, type,
+                                        isState, isInput, isOutput,
+                                        parent);
+            break;
     }
-    else if (ptype == Smp::PrimitiveTypeKind::PTK_Char8) {
-        auto f=SimpleArrayField::Create(name, description, count,
-                                    (Smp::Char8*)address,
-                                    ptype, viewKind, type,
-                                    isState, isInput, isOutput,
-                                    parent);
-        return f;
-    }
-    else if (ptype == Smp::PrimitiveTypeKind::PTK_Int8) {
-        auto f=SimpleArrayField::Create(name, description, count,
-                                    (Smp::Int8*)address,
-                                    ptype, viewKind, type,
-                                    isState, isInput, isOutput,
-                                    parent);
-        return f;
-    }
-    else if (ptype == Smp::PrimitiveTypeKind::PTK_Int16) {
-        auto f=SimpleArrayField::Create(name, description, count,
-                                    (Smp::Int16*)address,
-                                    ptype, viewKind, type,
-                                    isState, isInput, isOutput,
-                                    parent);
-        return f;
-    }
-    else if (ptype == Smp::PrimitiveTypeKind::PTK_Int32) {
-        auto f=SimpleArrayField::Create(name, description, count,
-                                    (Smp::Int32*)address,
-                                    ptype, viewKind, type,
-                                    isState, isInput, isOutput,
-                                    parent);
-        return f;
-    }
-    else if (ptype == Smp::PrimitiveTypeKind::PTK_Int64) {
-        auto f=SimpleArrayField::Create(name, description, count,
-                                    (Smp::Int64*)address,
-                                    ptype, viewKind, type,
-                                    isState, isInput, isOutput,
-                                    parent);
-        return f;
-    }
-    else if (ptype == Smp::PrimitiveTypeKind::PTK_UInt8) {
-        auto f=SimpleArrayField::Create(name, description, count,
-                                    (Smp::UInt8*)address,
-                                    ptype, viewKind, type,
-                                    isState, isInput, isOutput,
-                                    parent);
-        return f;
-    }
-    else if (ptype == Smp::PrimitiveTypeKind::PTK_UInt16) {
-        auto f=SimpleArrayField::Create(name, description, count,
-                                    (Smp::UInt16*)address,
-                                    ptype, viewKind, type,
-                                    isState, isInput, isOutput,
-                                    parent);
-        return f;
-    }
-    else if (ptype == Smp::PrimitiveTypeKind::PTK_UInt32) {
-        auto f=SimpleArrayField::Create(name, description, count,
-                                    (Smp::UInt32*)address,
-                                    ptype, viewKind, type,
-                                    isState, isInput, isOutput,
-                                    parent);
-        return f;
-    }
-    else if (ptype == Smp::PrimitiveTypeKind::PTK_UInt64) {
-        auto f=SimpleArrayField::Create(name, description, count,
-                                    (Smp::UInt64*)address,
-                                    ptype, viewKind, type,
-                                    isState, isInput, isOutput,
-                                    parent);
-        return f;
-    }
-    else if (ptype == Smp::PrimitiveTypeKind::PTK_Float32) {
-        auto f=SimpleArrayField::Create(name, description, count,
-                                    (Smp::Float32*)address,
-                                    ptype, viewKind, type,
-                                    isState, isInput, isOutput,
-                                    parent);
-        return f;
-    }
-    else if (ptype == Smp::PrimitiveTypeKind::PTK_Float64) {
-        auto f=SimpleArrayField::Create(name, description, count,
-                                    (Smp::Float64*)address,
-                                    ptype, viewKind, type,
-                                    isState, isInput, isOutput,
-                                    parent);
-        return f;
-    }
-    return nullptr;
+    return f;
 }
 
 

@@ -51,9 +51,6 @@ protected:
     Field(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, void* address, unsigned int dataSize,
           Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
           Smp::IObject* parent);
-    inline void setType(Smp::Publication::IType* type) {
-        _type = type;
-    }
     inline const void* getDataPtr() {
         return _data;
     }
@@ -105,6 +102,7 @@ private:
 // --------------------------------------------------------------------
 // Primitive type instanciation
 // ..........................................................
+/*
 static Type _char8Type(Smp::Uuids::Uuid_Char8, Smp::PrimitiveTypeKind::PTK_Char8, sizeof(Smp::Char8), "Char8",
                        "One byte char data type");
 static Type _boolType(Smp::Uuids::Uuid_Bool, Smp::PrimitiveTypeKind::PTK_Bool, sizeof(Smp::Bool), "Bool",
@@ -129,6 +127,6 @@ static Type _float32Type(Smp::Uuids::Uuid_Float32, Smp::PrimitiveTypeKind::PTK_F
                          "Four bytes float data type");
 static Type _float64Type(Smp::Uuids::Uuid_Float64, Smp::PrimitiveTypeKind::PTK_Float64, sizeof(Smp::Float64), "Float64",
                          "Eight bytes float data type");
-
+*/
 }  // namespace simdeck
 #endif  // __simdeck_Field_HPP__

@@ -24,14 +24,14 @@ public:
     static Smp::ISimpleArrayField* Create(
                       Smp::String8 name, Smp::String8 description,
                       Smp::UInt64 count, T* address,
-                      Smp::PrimitiveTypeKind ptype, Smp::ViewKind viewKind,
+                      Smp::Publication::IType* ptype, Smp::ViewKind viewKind,
                       Smp::Publication::IType* type,
                       Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
                       Smp::IObject* parent);
     static Smp::ISimpleArrayField* Create(
                       Smp::String8 name, Smp::String8 description,
                       Smp::UInt64 count, void* address,
-                      Smp::PrimitiveTypeKind ptype, Smp::ViewKind viewKind,
+                      Smp::Publication::IType* ptype, Smp::ViewKind viewKind,
                       Smp::Publication::IType* type,
                       Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
                       Smp::IObject* parent);

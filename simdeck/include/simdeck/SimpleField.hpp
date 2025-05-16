@@ -18,14 +18,14 @@ namespace simdeck {
 class SimpleField : public Field, virtual public Smp::IForcibleField {
 public:
     static Smp::ISimpleField* Create(  Smp::String8 name,
-                            Smp::String8 description,
-                            Smp::ViewKind viewKind,
-                            void* address,
-                            Smp::Bool isState,
-                            Smp::Bool isInput,
-                            Smp::Bool isOutput,
-                            Smp::IObject* parent,
-                            Smp::Uuid typeUuid);
+                        Smp::String8 description,
+                        Smp::ViewKind viewKind,
+                        Smp::Publication::IType* type,
+                        void* address,
+                        Smp::Bool isState,
+                        Smp::Bool isInput,
+                        Smp::Bool isOutput,
+                        Smp::IObject* parent);
     /**
      * Destructor.
      */
@@ -50,7 +50,8 @@ private:
                             Smp::Bool isState,
                             Smp::Bool isInput,
                             Smp::Bool isOutput,
-                            Smp::IObject* parent);
+                            Smp::IObject* parent,
+                            Smp::Publication::IType* type);
 };
 
 std::ostream& toprint(std::ostream& os, const Smp::ISimpleField& obj);
