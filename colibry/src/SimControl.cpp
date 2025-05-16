@@ -23,6 +23,7 @@
 #include "simphonie/kern/Resolver.hpp"
 
 #define CHECK_EP_NAME "checkStop"
+#define CONTAINER_NAME "EventHandlers"
 
 namespace simphonie {
 namespace colibry {
@@ -34,6 +35,13 @@ SimControl::SimControl(Smp::String8 name, Smp::String8 descr, Smp::IObject* pare
     addEP(CHECK_EP_NAME, "Check stop condition and request simulation hold when condition is met.", this,
           &SimControl::_checkStopCondition);
     addEP("applyCondition", "Apply the stopping s-expression condition.", this, &SimControl::_applyCondition);
+    addContainer(CONTAINER_NAME, "Internal use only.");
+}
+
+SimControl::~SimControl() {
+    for (auto& e : _eventHandlers) {
+        GetContainer(CONTAINER_NAME)->DeleteComponent(e.release());
+    }
 }
 
 void SimControl::publish(Smp::IPublication* receiver) {
@@ -43,7 +51,7 @@ void SimControl::publish(Smp::IPublication* receiver) {
 }
 
 void SimControl::_applyCondition() {
-    auto resolver = [&](const char* name) -> std::function<T(void)> {
+    auto encapsulatedResolver = [&](const char* name) -> std::function<T(void)> {
         Smp::IObject* obj = getSimulator()->GetResolver()->ResolveAbsolute(name);
         if (obj == nullptr) {
             std::ostringstream ss;
@@ -110,9 +118,24 @@ void SimControl::_applyCondition() {
         }
     };
 
+    auto ownResolver = [&](const char* name) -> T& {
+        {
+            Smp::IObject* obj = getSimulator()->GetResolver()->ResolveAbsolute(name);
+            if (obj != nullptr) {
+                /* throw an error to force encapsulated variable resolution */
+                throw std::runtime_error("This is a field (encapsulated variable) instead of an event.");
+            }
+        }
+        const auto eventId = getSimulator()->GetEventManager()->QueryEventId(name);
+        _eventHandlers.push_back(std::make_unique<_EventHandler>(name, "Internal use only.", this, eventId));
+        GetContainer(CONTAINER_NAME)->AddComponent(_eventHandlers.back().get());
+        return _eventHandlers.back()->get();
+    };
+
     try {
         _evaluator.reset();
-        _evaluator = std::make_unique<sxeval::SXEval<T> >(const_cast<char*>(_condition.c_str()), resolver);
+        _evaluator = std::make_unique<sxeval::SXEval<T> >(const_cast<char*>(_condition.c_str()), ownResolver,
+                                                          encapsulatedResolver);
         std::ostringstream ss;
         ss << "Condition updated to \"" << _condition << "\"";
         logInfo(ss.str().c_str());
@@ -137,6 +160,13 @@ void SimControl::connect() {
 
     getSimulator()->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_PostSimTimeChangeId,
                                                  GetEntryPoint(CHECK_EP_NAME));
+}
+
+SimControl::_EventHandler::_EventHandler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent,
+                                         Smp::Services::EventId eventId)
+    : Component(name, descr, parent), _counter(0) {
+    addEP("handler", "Internal use only.", this, &_EventHandler::handle);
+    dynamic_cast<SimControl*>(parent)->getSimulator()->GetEventManager()->Subscribe(eventId, GetEntryPoint("handler"));
 }
 
 } /* namespace colibry */
