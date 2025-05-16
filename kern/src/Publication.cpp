@@ -209,8 +209,7 @@ Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 descripti
 // ..........................................................
 Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 description, void* address, Smp::Uuid typeUuid,
                                Smp::ViewKind view, Smp::Bool state, Smp::Bool input, Smp::Bool output) {
-Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(typeUuid));
-    
+    Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(typeUuid));
     if (t != nullptr) {
         StructureType* st = dynamic_cast<StructureType*>(t);
         if (st != nullptr) {
@@ -222,7 +221,16 @@ Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(typeUuid));
 return nullptr;
         }
         else {
-            auto f = SimpleField::Create(name, description, view, t, address, state, input, output, _pubObj);
+            auto at = dynamic_cast<Smp::Publication::IArrayType*>(t);
+            Smp::IField* f = nullptr;
+            if (at != nullptr) {
+                Smp::Publication::IType* pt = _typeRegistry->GetType(t->GetPrimitiveTypeKind());
+                f = SimpleArrayField::Create(name, description, at->GetSize(), address, pt, view, t, state, input,
+                                             output, _pubObj);
+            }
+            else {
+                f = SimpleField::Create(name, description, view, t, address, state, input, output, _pubObj);
+            }
             if (f!=nullptr) {
                 addField(f);
                 return f;
@@ -271,6 +279,7 @@ Smp::Publication::IType* Publication::getArrayType(Smp::PrimitiveTypeKind ptk, S
 Smp::ISimpleArrayField* Publication::PublishArray(Smp::String8 name, Smp::String8 description, Smp::Int64 count, void* address,
                                Smp::PrimitiveTypeKind type, Smp::ViewKind view, Smp::Bool state, Smp::Bool input,
                                Smp::Bool output) {
+    std::cout << "!!!!!!!!!!!!!! " << name << std::endl;
     Smp::Publication::IType* t = getArrayType(type, count);
     Smp::Publication::IType* pt = _typeRegistry->GetType(type);
     auto* rf = SimpleArrayField::Create(name, description, count, address, pt, view, t, state, input, output, _pubObj);
