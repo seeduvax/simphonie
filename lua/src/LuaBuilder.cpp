@@ -18,10 +18,13 @@
 #include "Smp/ISimpleArrayField.h"
 #include "Smp/ISimpleField.h"
 #include "Smp/Publication/IType.h"
+#include "Smp/Services/IEventManager.h"
 #include "Smp/Services/IResolver.h"
 #include "Smp/Services/IScheduler.h"
 #include "simdeck/ExInvalidType.hpp"
+#include "simdeck/smpext/ISchedulerOnEvent.hpp"
 #include "simphonie/sys/Logger.hpp"
+
 namespace simphonie {
 namespace lua {
 // --------------------------------------------------------------------
@@ -156,31 +159,79 @@ void LuaBuilder::connect() {
     sol::table schedule = _config["schedule"];
     auto scheduler = _sim->GetScheduler();
     auto resolver = _sim->GetResolver();
+    auto evntMgr = _sim->GetEventManager();
     for (auto entry : schedule) {
-        sol::table t = entry.second;
+        const sol::table t = entry.second;
         std::string name = t.get_or<std::string>("name", "");
         if (name == "") {
             name = entry.first.as<std::string>();
         }
-        Smp::Duration cycleTime = t.get_or("cycleTime_s", 0.0) * 1000000000ULL;
-        if (cycleTime == 0) {
-            cycleTime = t.get_or("cycleTime_ms", 0.0) * 1000000ULL;
-        }
-        if (cycleTime == 0) {
-            cycleTime = t.get_or("cycleTime_us", 0.0) * 1000ULL;
-        }
-        if (cycleTime == 0) {
-            cycleTime = t.get_or("cycleTime_ns", 0.0);
-        }
-        Smp::Int64 repeat = t.get_or("repetitions", -1LL);
-        Smp::Duration time = t.get_or("offset", 0ULL);
-        auto ep = dynamic_cast<Smp::IEntryPoint*>(resolver->ResolveAbsolute(name.c_str()));
+        const auto ep = dynamic_cast<Smp::IEntryPoint*>(resolver->ResolveAbsolute(name.c_str()));
         if (ep != nullptr) {
-            scheduler->AddSimulationTimeEvent(ep, time, cycleTime, repeat);
             std::ostringstream msg;
-            msg << name << " scheduled cycleTime=" << cycleTime << "ns,  repeat=" << repeat
-                << " simulationTime=" << time << "ns";
-            _sim->GetLogger()->Log(this, msg.str().c_str(), Smp::Services::ILogger::LMK_Debug);
+            Smp::Services::EventId eventId;
+            {
+                Smp::Duration cycleTime = t.get_or("cycleTime_s", 0.0) * 1000000000ULL;
+                if (cycleTime == 0) {
+                    cycleTime = t.get_or("cycleTime_ms", 0.0) * 1000000ULL;
+                }
+                if (cycleTime == 0) {
+                    cycleTime = t.get_or("cycleTime_us", 0.0) * 1000ULL;
+                }
+                if (cycleTime == 0) {
+                    cycleTime = t.get_or("cycleTime_ns", 0.0);
+                }
+                Smp::Duration time = t.get_or("offset_s", 0.0) * 1000000000ULL;
+                if (time == 0) {
+                    time = t.get_or("offset_ms", 0.0) * 1000000ULL;
+                }
+                if (time == 0) {
+                    time = t.get_or("offset_us", 0.0) * 1000ULL;
+                }
+                if (time == 0) {
+                    time = t.get_or("offset_ns", 0.0);
+                }
+                const Smp::Int64 repeat = t.get_or("repetitions", -1LL);
+                eventId = scheduler->AddSimulationTimeEvent(ep, time, cycleTime, repeat);
+                msg << "scheduled " << name << ": cycleTime=" << cycleTime << "ns, repeat=" << repeat
+                    << ", simulationTime=" << time << "ns";
+            }
+            {
+                auto onEventScheduler = dynamic_cast<simdeck::smpext::ISchedulerOnEvent*>(scheduler);
+                if (onEventScheduler != nullptr) {
+                    {
+                        const std::string onEventStartName = t.get_or<std::string>("startOnEvent", "");
+                        if (onEventStartName != "") {
+                            const auto triggerEventId = evntMgr->QueryEventId(onEventStartName.c_str());
+                            if (triggerEventId >= 0) {
+                                onEventScheduler->SetEventStartOnEvent(eventId, triggerEventId);
+                                msg << ", startOnEvent=" << onEventStartName;
+                            }
+                            else {
+                                std::ostringstream oss;
+                                oss << "Event " << onEventStartName << " is not scheduled";
+                                logWarning(oss.str().c_str());
+                            }
+                        }
+                    }
+                    {
+                        const std::string onEventStopName = t.get_or<std::string>("stopOnEvent", "");
+                        if (onEventStopName != "") {
+                            const auto triggerEventId = evntMgr->QueryEventId(onEventStopName.c_str());
+                            if (triggerEventId >= 0) {
+                                onEventScheduler->SetEventStopOnEvent(eventId, triggerEventId);
+                                msg << ", stopOnEvent=" << onEventStopName;
+                            }
+                            else {
+                                std::ostringstream oss;
+                                oss << "Event " << onEventStopName << " is not scheduled";
+                                logWarning(oss.str().c_str());
+                            }
+                        }
+                    }
+                }
+            }
+            logDebug(msg.str().c_str());
         }
         else {
             std::ostringstream msg;
