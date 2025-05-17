@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="917e68059903ce9359283f6a018ba8a6fb57edea43430fc62d2a2ae99b3b9f84" state="working">
+<cr id="917e68059903ce9359283f6a018ba8a6fb57edea43430fc62d2a2ae99b3b9f84" state="closed" delivered="simphonie-1.0.5">
 <title>Publication and resolver using Add/GetChild</title>
 <reporter>sdevaux</reporter>
 <creation>2025-01-03 12:44:53+01:00</creation>

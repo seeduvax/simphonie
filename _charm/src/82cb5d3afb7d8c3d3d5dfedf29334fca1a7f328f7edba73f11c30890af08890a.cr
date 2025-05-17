@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="82cb5d3afb7d8c3d3d5dfedf29334fca1a7f328f7edba73f11c30890af08890a" state="working">
+<cr id="82cb5d3afb7d8c3d3d5dfedf29334fca1a7f328f7edba73f11c30890af08890a" state="closed" delivered="simphonie-1.0.5">
 <title>namespace / branch name / application name discrepency</title>
 <reporter>sdevaux</reporter>
 <creation>2025-02-18 22:18:04+01:00</creation>

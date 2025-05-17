@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cr id="871f47cde3162ca135d4d1761de548ed199d0df5cef7b324423766ad463e256e" state="working">
+<cr id="871f47cde3162ca135d4d1761de548ed199d0df5cef7b324423766ad463e256e" state="closed" delivered="simphonie-1.0.5">
 <title>Simulation start/stop management</title>
 <reporter>sdevaux</reporter>
 <creation>2024-12-27 19:09:20+01:00</creation>
