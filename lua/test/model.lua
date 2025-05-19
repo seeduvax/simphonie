@@ -6,12 +6,16 @@ model={
         print("plop")
         self:AddEntryPoint("step", "main model step",function (self)
             print(":::::: model step from lua model "..self.Name)
+            print(self.plopVar)
         end)
+        self:PublishInt("plopVar")
+        self.plopVar=42
     end,
-    configure=function()
+    configure=function(self)
         print(":::::: Configure from lua") 
+        print(self.plopVar)
     end,
-    connect=function()
+    connect=function(self)
         print(":::::: Connect from lua") 
     end,
 }
