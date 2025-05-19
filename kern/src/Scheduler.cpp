@@ -36,7 +36,8 @@ Scheduler::Scheduler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
       _mutex(),
       _th(),
       _currentSchedule(nullptr),
-      _scheduled() {
+      _scheduled(),
+      _activableCount(0) {
     _epEnterExecuting=EntryPoint::Create("enterExecuting",
                                 "simulation enter execute event entry point", 
                                 this, &Scheduler::epEnterExecuting);
@@ -61,12 +62,21 @@ void Scheduler::schedule(Schedule* s) {
     {
         Synchronized(_mutex);
         _scheduled.insert(s);
+        if (!s->isWaiting()) {
+            _activableCount++;
+        }
     }
     for (auto observer : _observers) {
         observer->notifyScheduled(s);
     }
     _monitor.notify_all();
 }
+
+void Scheduler::publish(Smp::IPublication* receiver) {
+    receiver->PublishField("activableCount", "Number of activable event in the scheduled queue.", &_activableCount,
+                           Smp::ViewKind::VK_All, false, false, true);
+}
+
 // ..........................................................
 void Scheduler::connect() {
     _timeKeeper = getSimulator()->GetTimeKeeper();
@@ -118,6 +128,9 @@ Schedule* Scheduler::findSchedule(Smp::Services::EventId event, bool remove) {
                 res = *it;
                 if (remove) {
                     _scheduled.erase(it);
+                    if (!res->isWaiting()) {
+                        _activableCount--;
+                    }
                 }
             }
         }
@@ -255,11 +268,8 @@ Smp::Services::EventId Scheduler::GetCurrentEventId() const {
 }
 // ..........................................................
 inline Smp::Duration Scheduler::getNextScheduledEventTime() const {
-    if (!_scheduled.empty()) {
-        const auto s = *_scheduled.begin();
-        if (!s->isWaiting()) {
-            return s->GetTime();
-        }
+    if (_activableCount > 0) {
+        return (*_scheduled.begin())->GetTime();
     }
     return DURATION_MAX;
 }
@@ -323,6 +333,7 @@ void Scheduler::step() {
         if (_run && getNextScheduledEventTime() <= _timeKeeper->GetSimulationTime()) {
             _currentSchedule = *_scheduled.begin();
             _scheduled.erase(_scheduled.begin());
+            _activableCount--;
             toRun = _currentSchedule;
         }
     }

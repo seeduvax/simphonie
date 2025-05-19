@@ -82,6 +82,7 @@ public:
     void run() override;
 
 protected:
+    void publish(Smp::IPublication* receiver);
     void connect() override;
 
     Smp::Services::EventId schedule(const Smp::IEntryPoint* entryPoint, Smp::Duration absoluteSimTime,
@@ -116,6 +117,7 @@ private:
      */
     ScheduledQueue _scheduled;
     Schedule* _currentSchedule;
+    Smp::Int64 _activableCount;
     /**
      * search for a schedule by evnet id.
      * This method also optionnaly remove the ound schedule to avoid having
