@@ -30,6 +30,11 @@ public:
     SimControl(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
     ~SimControl();
 
+    inline void setCondition(Smp::String8 condition) {
+        _condition = condition;
+    }
+    void applyCondition();
+
 protected:
     void publish(Smp::IPublication* receiver) override;
     void connect() override;
@@ -51,11 +56,6 @@ private:
         T _counter;
     };
 
-    /**
-     * TODO
-     * Not thread safe! Should not be called during a check.
-     */
-    void _applyCondition();
     void _checkStopCondition();
 
     std::string _condition;

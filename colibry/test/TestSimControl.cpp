@@ -7,38 +7,114 @@
  * $Id$
  * $Date$
  */
+#include <exception>
+#include "Smp/IPublication.h"
 #include "abs/test.h"
+#include "simdeck/EPPModel.hpp"
+#include "simdeck/StringField.hpp"
 #include "simphonie/colibry/SimControl.hpp"
+#include "simphonie/kern/EventManager.hpp"
+#include "simphonie/kern/Scheduler.hpp"
+#include "simphonie/kern/Simulator.hpp"
 
 namespace test {
 using namespace simphonie::colibry;
 
 // ----------------------------------------------------------
-// test suite implementation
+// test fixture implementation
 ABS_TEST_SUITE_BEGIN( SimControl )
-// uncomment and complete next line for test suite description
-// ABS_TEST_DESCR(test description)
 
 private:
+    class _ModelCounter : public simdeck::EPPModel {
+    public:
+        inline _ModelCounter(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
+            : EPPModel(name, descr, parent), _counter(0) {
+            addEP("step", "Main model entry point", this, &_ModelCounter::step);
+        }
+        inline void step() {
+            logInfo("call");
+            _counter++;
+            _evntMgr->Emit(_eventId);
+        };
+        inline Smp::Int64 getCounter() const {
+            return _counter;
+        }
+
+    private:
+        inline void connect() {
+            _evntMgr = getSimulator()->GetEventManager();
+            _eventId = _evntMgr->QueryEventId("TheEvent");
+            getSimulator()->GetScheduler()->AddSimulationTimeEvent(GetEntryPoint("step"), 0, 10, -1);
+        }
+        inline void publish(Smp::IPublication* receiver) {
+            receiver->PublishField("counter", "", &_counter, Smp::ViewKind::VK_All, false, false, true);
+        }
+
+        Smp::Services::IEventManager* _evntMgr;
+        Smp::Services::EventId _eventId;
+        Smp::Int64 _counter;
+    };
+
+    simphonie::kern::Simulator* _sim;
+    SimControl* _ctrl;
+    _ModelCounter* _incr;
 
 public:
     void setUp() {
+        _sim = new simphonie::kern::Simulator("TestSimControlSimu", "", nullptr);
+        _ctrl = new SimControl("TestSimControlSimCtrl", "", _sim);
+        _incr = new _ModelCounter("TestSimControlMdlCounter", "", _sim);
+
+        _sim->Initialise();
+        _sim->AddService(_ctrl);
+        _sim->AddModel(_incr);
+        _sim->Publish();
+        _sim->Configure();
+        _sim->Connect();
     }
 
     void tearDown() {
+        delete _sim;
     }
 
-/* Test case template, uncomment and complete according this pattern for each test case
-    ABS_TEST_CASE_BEGIN(NameOfTestCase) {
-        ABS_TEST_DESCR(Test case description)
-        ABS_TEST_CASE_REQ(req.id) // one entry for each requirement checked by this case
-        // init/call service / function to be tested and collect results
+    ABS_TEST_CASE_BEGIN(SimControlSimTime) {
+        ABS_TEST_CASE_REQ(simph.simctrl .1)
+        ABS_TEST_CASE_REQ(simph.expr .1)
+        ABS_TEST_CASE_REQ(simph.expr .2)
 
-        // check results with cppunit asserts
-        CPPUNIT_ASSERT( bool expr);
-        CPPUNIT_ASSERT_EQUAL(expected_value,computed_value);
+        _ctrl->setCondition("(>= /TimeKeeper/simTime 80)");
+        _ctrl->applyCondition();
+        _sim->Run();
+        while (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing) {}
+        CPPUNIT_ASSERT_EQUAL(80L, _sim->GetTimeKeeper()->GetSimulationTime());
     }
     ABS_TEST_CASE_END
-*/
-ABS_TEST_SUITE_END
-} // namespace test
+
+    ABS_TEST_CASE_BEGIN(SimControlEvent) {
+        ABS_TEST_CASE_REQ(simph.simctrl .1)
+        ABS_TEST_CASE_REQ(simph.expr .1)
+        ABS_TEST_CASE_REQ(simph.expr .3)
+
+        _ctrl->setCondition("(= TheEvent 10)");
+        _ctrl->applyCondition();
+        _sim->Run();
+        while (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing) {}
+        CPPUNIT_ASSERT_EQUAL(10L, _incr->getCounter());
+    }
+    ABS_TEST_CASE_END
+
+    ABS_TEST_CASE_BEGIN(SimControlField) {
+        ABS_TEST_CASE_REQ(simph.simctrl .1)
+        ABS_TEST_CASE_REQ(simph.expr .1)
+        ABS_TEST_CASE_REQ(simph.expr .4)
+
+        _ctrl->setCondition("(> /TestSimControlMdlCounter/counter 5)");
+        _ctrl->applyCondition();
+        _sim->Run();
+        while (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing) {}
+        CPPUNIT_ASSERT_EQUAL(6L, _incr->getCounter());
+    }
+    ABS_TEST_CASE_END
+
+    ABS_TEST_SUITE_END
+    } /* namespace test */

@@ -34,7 +34,7 @@ SimControl::SimControl(Smp::String8 name, Smp::String8 descr, Smp::IObject* pare
     _evaluator = nullptr;
     addEP(CHECK_EP_NAME, "Check stop condition and request simulation hold when condition is met.", this,
           &SimControl::_checkStopCondition);
-    addEP("applyCondition", "Apply the stopping s-expression condition.", this, &SimControl::_applyCondition);
+    addEP("applyCondition", "Apply the stopping s-expression condition.", this, &SimControl::applyCondition);
     addContainer(CONTAINER_NAME, "Internal use only.");
 }
 
@@ -50,7 +50,7 @@ void SimControl::publish(Smp::IPublication* receiver) {
         Smp::ViewKind::VK_All, &_condition, nullptr, false, true, false, this));
 }
 
-void SimControl::_applyCondition() {
+void SimControl::applyCondition() {
     auto encapsulatedResolver = [&](const char* name) -> std::function<T(void)> {
         Smp::IObject* obj = getSimulator()->GetResolver()->ResolveAbsolute(name);
         if (obj == nullptr) {
@@ -156,8 +156,7 @@ void SimControl::_checkStopCondition() {
 }
 
 void SimControl::connect() {
-    _applyCondition();
-
+    applyCondition();
     getSimulator()->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_PostSimTimeChangeId,
                                                  GetEntryPoint(CHECK_EP_NAME));
 }
