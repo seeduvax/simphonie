@@ -34,15 +34,17 @@ class Schedule : public simdeck::Object,
 public:
     static constexpr Smp::Services::EventId NO_EVENTID = -1L;
 
-    Schedule(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent,
-        const Smp::IEntryPoint* ep,
-        const std::vector<Smp::IOutputField*>& fields,
-        Smp::Duration simTime, Smp::Duration period = 0, Smp::Int64 repeat = 0);
+    Schedule(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, const Smp::IEntryPoint* ep,
+             const std::vector<Smp::IOutputField*>& fields, Smp::Duration simTime, Smp::Duration period = 0,
+             Smp::Int64 repeat = 0, Smp::UInt64 priority = 0);
 
     inline Smp::Services::EventId GetId() const override { return _id; }
     inline Smp::Duration GetTime() const override { return _simTime; }
     inline Smp::Duration GetPeriod() const override { return _period; }
     inline Smp::Int64 GetRepeat() const override { return _repeat; }
+    inline Smp::UInt64 GetPriority() const {
+        return _priority;
+    } /* TODO add to simdeck::smpext::ISchedule */
     inline Smp::Int64 GetActivationCounter() const override {
         return _counterActivation; }
     inline Smp::Services::EventId GetStartEventId() const override {
@@ -56,6 +58,7 @@ public:
     void setTime(Smp::Duration simTime, Smp::Bool updateScheduler = true);
     inline void setPeriod(Smp::Duration period) { _period = period; }
     inline void setRepeat(Smp::Int64 repeat) { _repeat = repeat; }
+    void setPriority(Smp::UInt64 priority, Smp::Bool updateScheduler = true);
     void setStartEventId(Smp::Services::EventId startEventId);
     void setStopEventId(Smp::Services::EventId stopEventId);
 
@@ -72,8 +75,13 @@ public:
         if (other.isWaiting() && !_isWaiting) {
             return true;
         }
-        return _simTime < other.GetTime()
-            || (_simTime == other.GetTime() && _id < other.GetId());
+        if (_simTime != other.GetTime()) {
+            return _simTime < other.GetTime();
+        }
+        if (_priority != other.GetPriority()) {
+            return _priority > other.GetPriority();
+        }
+        return _id < other.GetId();
     }
 
 private:
@@ -87,6 +95,7 @@ private:
     Smp::Duration _simTime;
     Smp::Duration _period;
     Smp::Int64 _repeat;
+    Smp::UInt64 _priority;
     Smp::Services::EventId _id;
     Smp::Bool _completed;
     Smp::Int64 _counterActivation;

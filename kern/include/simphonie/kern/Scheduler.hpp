@@ -57,8 +57,9 @@ public:
     void SetEventZuluTime(Smp::Services::EventId eventId, Smp::DateTime zuluTime) override;
     void SetEventCycleTime(Smp::Services::EventId event, Smp::Duration cycleTime) override;
     void SetEventRepeat(Smp::Services::EventId event, Smp::Int64 repeat) override;
-    void SetEventStartOnEvent(Smp::Services::EventId eventId, Smp::Services::EventId triggerEventId);
-    void SetEventStopOnEvent(Smp::Services::EventId eventId, Smp::Services::EventId triggerEventId);
+    void SetEventPriority(Smp::Services::EventId event, Smp::UInt64 priority); /* TODO add to simdeck::smpext::? */
+    void SetEventStartOnEvent(Smp::Services::EventId eventId, Smp::Services::EventId triggerEventId) override;
+    void SetEventStopOnEvent(Smp::Services::EventId eventId, Smp::Services::EventId triggerEventId) override;
     void RemoveEvent(Smp::Services::EventId event) override;
     Smp::Services::EventId GetCurrentEventId() const override;
     Smp::Duration GetNextScheduledEventTime() const override;
@@ -84,7 +85,7 @@ protected:
     void connect() override;
 
     Smp::Services::EventId schedule(const Smp::IEntryPoint* entryPoint, Smp::Duration absoluteSimTime,
-                                    Smp::Duration cycleTime = 0, Smp::Int64 repeat = 0);
+                                    Smp::Duration cycleTime = 0, Smp::Int64 repeat = 0, Smp::UInt64 priority = 0);
     void schedule(Smp::Services::EventId event, Smp::Duration absoluteSimTime);
 
     void updateSchedule(Smp::Services::EventId eventId);

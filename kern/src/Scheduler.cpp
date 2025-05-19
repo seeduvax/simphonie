@@ -60,13 +60,6 @@ Scheduler::~Scheduler() {
 void Scheduler::schedule(Schedule* s) {
     {
         Synchronized(_mutex);
-        if (s->GetTime() == 0) {
-            // 0 schedule time is a marker of schedule through AddImmediateEvent,
-            // restore the "now" schedule time to ensure next AddImmediateEvent
-            // will also be insert front in schedule queue, and finally leave the
-            // schedule in a consistent state before its execution.
-            s->setTime(_timeKeeper->GetSimulationTime(), false);
-        }
         _scheduled.insert(s);
     }
     for (auto observer : _observers) {
@@ -88,12 +81,11 @@ void Scheduler::connect() {
 
 // ..........................................................
 Smp::Services::EventId Scheduler::AddImmediateEvent(const Smp::IEntryPoint* entryPoint) {
-    // Use 0 as schedule time to "force" insert in front of the schedule queue.
-    return schedule(entryPoint, 0, 0, 0);
+    return schedule(entryPoint, _timeKeeper->GetSimulationTime(), 0, 0, -1);
 }
 // ..........................................................
 Smp::Services::EventId Scheduler::schedule(const Smp::IEntryPoint* entryPoint, Smp::Duration absoluteSimTime,
-                                           Smp::Duration cycleTime, Smp::Int64 repeat) {
+                                           Smp::Duration cycleTime, Smp::Int64 repeat, Smp::UInt64 priority) {
     std::vector<Smp::IOutputField*> flowFields;
     auto resolver = dynamic_cast<Resolver*>(getSimulator()->GetResolver());
     auto obj = dynamic_cast<Smp::IComponent*>(entryPoint->GetParent());
@@ -108,8 +100,8 @@ Smp::Services::EventId Scheduler::schedule(const Smp::IEntryPoint* entryPoint, S
             }
         }
     }
-    auto mySchedule =
-        new Schedule(entryPoint->GetName(), "", this, entryPoint, flowFields, absoluteSimTime, cycleTime, repeat);
+    auto mySchedule = new Schedule(entryPoint->GetName(), "", this, entryPoint, flowFields, absoluteSimTime, cycleTime,
+                                   repeat, priority);
     schedule(mySchedule);
     return mySchedule->GetId();
 }
@@ -209,7 +201,6 @@ void Scheduler::SetEventZuluTime(Smp::Services::EventId event, Smp::DateTime zul
 }
 // ..........................................................
 void Scheduler::SetEventCycleTime(Smp::Services::EventId event, Smp::Duration cycleTime) {
-    Synchronized(_mutex);
     auto s = findSchedule(event);
     if (s) {
         s->setPeriod(cycleTime);
@@ -217,7 +208,6 @@ void Scheduler::SetEventCycleTime(Smp::Services::EventId event, Smp::Duration cy
 }
 // ..........................................................
 void Scheduler::SetEventRepeat(Smp::Services::EventId event, Smp::Int64 repeat) {
-    Synchronized(_mutex);
     auto s = findSchedule(event);
     if (s) {
         s->setRepeat(repeat);
@@ -225,19 +215,24 @@ void Scheduler::SetEventRepeat(Smp::Services::EventId event, Smp::Int64 repeat) 
 }
 
 void Scheduler::SetEventStartOnEvent(Smp::Services::EventId eventId, Smp::Services::EventId triggerEventId) {
-    Schedule* s = findSchedule(eventId);
-    if (s == nullptr) {
-        throw ExInvalidEventId(this, eventId);
+    auto s = findSchedule(eventId);
+    if (s) {
+        s->setStartEventId(triggerEventId);
     }
-    s->setStartEventId(triggerEventId);
 }
 
 void Scheduler::SetEventStopOnEvent(Smp::Services::EventId eventId, Smp::Services::EventId triggerEventId) {
-    Schedule* s = findSchedule(eventId);
-    if (s == nullptr) {
-        throw ExInvalidEventId(this, eventId);
+    auto s = findSchedule(eventId);
+    if (s) {
+        s->setStopEventId(triggerEventId);
     }
-    s->setStopEventId(triggerEventId);
+}
+
+void Scheduler::SetEventPriority(Smp::Services::EventId eventId, Smp::UInt64 priority) {
+    auto s = findSchedule(eventId);
+    if (s) {
+        s->setPriority(priority);
+    }
 }
 
 // ..........................................................
@@ -321,8 +316,7 @@ void Scheduler::step() {
     }
     _eventMgr->Emit(_preEventExecuteId);
     {
-        Synchronized(
-            _mutex); /* TODO claiming the mutex after the PRE event emission might be an issue for time profiling */
+        Synchronized(_mutex);
         // after event emit, timekeeper should have updated current time,
         // run next event only if its scheduled time is not ahead the new
         // current simulation time.

@@ -16,16 +16,22 @@
 namespace simphonie {
 namespace kern {
 
-Schedule::Schedule(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent,
-    const Smp::IEntryPoint* ep,
-    const std::vector<Smp::IOutputField*>& fields,
-    Smp::Duration simTime, Smp::Duration period,
-    Smp::Int64 repeat) : Object(name, descr, parent), _scheduler(
-        dynamic_cast<Scheduler*>(parent)), _ep(ep),
-    _fields(fields), _simTime(simTime), _period(period),
-    _repeat(repeat), _completed(false), _counterActivation(0),
-    _startEventId(NO_EVENTID), _stopEventId(NO_EVENTID), _isWaiting(false)
-{
+Schedule::Schedule(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, const Smp::IEntryPoint* ep,
+                   const std::vector<Smp::IOutputField*>& fields, Smp::Duration simTime, Smp::Duration period,
+                   Smp::Int64 repeat, Smp::UInt64 priority)
+    : Object(name, descr, parent),
+      _scheduler(dynamic_cast<Scheduler*>(parent)),
+      _ep(ep),
+      _fields(fields),
+      _simTime(simTime),
+      _period(period),
+      _repeat(repeat),
+      _priority(priority),
+      _completed(false),
+      _counterActivation(0),
+      _startEventId(NO_EVENTID),
+      _stopEventId(NO_EVENTID),
+      _isWaiting(false) {
     if (_scheduler == nullptr) {
         throw simdeck::ExInvalidParent(this, GetParent(), nullptr);
     }
@@ -44,6 +50,13 @@ void Schedule::setTime(Smp::Duration simTime, Smp::Bool updateScheduler) {
 
 void Schedule::setIsWaiting(Smp::Bool isWaiting, Smp::Bool updateScheduler) {
     _isWaiting = isWaiting;
+    if (updateScheduler) {
+        _scheduler->updateSchedule(_id);
+    }
+}
+
+void Schedule::setPriority(Smp::UInt64 priority, Smp::Bool updateScheduler) {
+    _priority = priority;
     if (updateScheduler) {
         _scheduler->updateSchedule(_id);
     }
