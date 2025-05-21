@@ -59,7 +59,7 @@ protected:
         return _filePath.c_str();
     }
     inline const Smp::FieldCollection* getInputFields() const {
-        return _fieldHolder.GetInputFields();
+        return _fieldHolder!=nullptr ? _fieldHolder->GetInputFields(): nullptr;
     }
 
 private:
@@ -95,7 +95,7 @@ private:
         simdeck::Collection<Smp::IField> _recFields;
     };
     /** field connexion port */
-    FieldHolder _fieldHolder;
+    FieldHolder* _fieldHolder;
 };
 }} // namespace simphonie::colibry
 #endif // __simphonie_colibry_FieldRecorder_HPP__

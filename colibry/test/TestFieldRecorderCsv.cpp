@@ -34,7 +34,7 @@ public:
     ABS_TEST_CASE_BEGIN(RecordSimpleFields) {
         ABS_TEST_DESCR(Chack FieldRecorderCsv can record few simple fields )
         simphonie::kern::Simulator sim("TestSim");
-        auto recorder=new FieldRecorderCsv("testfrec", "", &sim);
+        FieldRecorderCsv* recorder=new FieldRecorderCsv("testfrec", "", &sim);
         sim.AddService(recorder);
         sim.Publish();
         sim.Configure();

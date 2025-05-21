@@ -22,7 +22,8 @@ static simdeck::Type _recorderType(Smp::Uuids::Uuid_Void, Smp::PrimitiveTypeKind
 // --------------------------------------------------------------------
 // ..........................................................
 FieldRecorder::FieldRecorder(Smp::String8 name, Smp::String8 description, Smp::IObject* parent, Smp::String8 fileExt)
-    : Parent(name, description, parent), _fieldHolder("port", "Fields to records connexion port", this) {
+    : Parent(name, description, parent) {
+    _fieldHolder=nullptr;
     _filePath = name;
     // TODO consider adding date and time to the default file name to avoid
     // overwriting.
@@ -38,10 +39,14 @@ FieldRecorder::FieldRecorder(Smp::String8 name, Smp::String8 description, Smp::I
 }
 // ..........................................................
 FieldRecorder::~FieldRecorder() {
+    // do not delete field holder as soon it is published since it shall
+    // be inserted as child field from component inheritence and shall not be
+    // deleted twice.
 }
 // ..........................................................
 void FieldRecorder::publish(Smp::IPublication* receiver) {
-    receiver->PublishField(&_fieldHolder);
+    _fieldHolder=new FieldHolder("port", "Fields to records connexion port", this);
+    receiver->PublishField(_fieldHolder);
     receiver->PublishField(simdeck::StringField::Create("filePath", "", Smp::ViewKind::VK_All, &_filePath, nullptr,
                                                         false, true, false, this));
 }

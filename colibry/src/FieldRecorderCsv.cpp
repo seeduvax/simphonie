@@ -55,7 +55,6 @@ void FieldRecorderCsv::connect() {
 }
 // ..........................................................
 void FieldRecorderCsv::disconnect() {
-    
     _file << std::flush;
     _file.close();
 }
