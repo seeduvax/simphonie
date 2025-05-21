@@ -119,5 +119,50 @@ std::string LuaModel::buildName(Smp::String8 spec) {
     }
     return "LuaModel";
 }
-
+// --------------------------------------------------------------------
+// ..........................................................
+void LuaModel::publishFields(sol::table fields) {}
+// ..........................................................
+sol::object LuaModel::getValue(Smp::String8 name, sol::this_state L) {
+    sol::object res = sol::nil;
+    auto simpleValue = this->GetSimpleValue(name);
+    switch (simpleValue.GetType()) {
+        case Smp::PrimitiveTypeKind::PTK_Bool:
+            res = sol::object(L, (Smp::Bool)simpleValue);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int8:
+            res = sol::object(L, (Smp::Int8)simpleValue);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int16:
+            res = sol::object(L, (Smp::Int16)simpleValue);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int32:
+            res = sol::object(L, (Smp::Int32)simpleValue);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int64:
+            res = sol::object(L, (Smp::Int64)simpleValue);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt8:
+            res = sol::object(L, (Smp::UInt8)simpleValue);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt16:
+            res = sol::object(L, (Smp::UInt16)simpleValue);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt32:
+            res = sol::object(L, (Smp::UInt32)simpleValue);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt64:
+            res = sol::object(L, (Smp::UInt64)simpleValue);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Float32:
+            res = sol::object(L, (Smp::Float32)simpleValue);
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Float64:
+            res = sol::object(L, (Smp::Float64)simpleValue);
+            break;
+    }
+    return res;
+}
+// ..........................................................
+void LuaModel::setValue(Smp::String8 name, sol::object value) {}
 }} // namespace simphonie::lua

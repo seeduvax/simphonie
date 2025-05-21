@@ -40,15 +40,9 @@ public:
 
     void addEntryPoint(Smp::String8, Smp::String8 name, sol::protected_function func);
 
-    void publishInt(Smp::String8 name) {
-        _datas[name] = new int;
-    }
-    int getValue(Smp::String8 name) {
-        return *(_datas[name]);
-    }
-    void setValue(Smp::String8 name, int value) {
-        *(_datas[name]) = value;
-    }
+    void publishFields(sol::table fields);
+    sol::object getValue(Smp::String8 name, sol::this_state L);
+    void setValue(Smp::String8 name, sol::object value);
 
 protected:
     void publish(Smp::IPublication* receiver) override;
@@ -65,8 +59,6 @@ private:
     simdeck::OwnedCollection<Smp::IEntryPoint> _epList;
 
     Smp::IPublication* _pub;
-    std::map<std::string, int*> _datas;
-
     class EntryPoint;
 };
 

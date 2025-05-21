@@ -413,11 +413,10 @@ int luaopen_libsimph_lua(lua_State* L) {
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
     );
     nsSmp.new_usertype<simphonie::lua::LuaModel>("LuaModel", 
-//        sol::meta_function::index, &objectIndex,
         sol::meta_function::new_index, &simphonie::lua::LuaModel::setValue,
         sol::meta_function::index, &simphonie::lua::LuaModel::getValue,
         "AddEntryPoint", &simphonie::lua::LuaModel::addEntryPoint,
-        "PublishInt", &simphonie::lua::LuaModel::publishInt,
+        "Publish", &simphonie::lua::LuaModel::publishFields,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
     );
 

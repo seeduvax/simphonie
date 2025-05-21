@@ -1,15 +1,13 @@
 model={
     publish=function(self)
-        print(":::::: Publish form lua ")
-        print(type(self)) 
-        print(self.Name) 
-        print("plop")
+        self:Publish({
+            dblvectin={type="float64", input=true, size=3},
+            cpt={type="int64", output=true, } 
+        })
+        self.cpt=42
         self:AddEntryPoint("step", "main model step",function (self)
-            print(":::::: model step from lua model "..self.Name)
-            print(self.plopVar)
+            self.cpt = self.cpt + 1
         end)
-        self:PublishInt("plopVar")
-        self.plopVar=42
     end,
     configure=function(self)
         print(":::::: Configure from lua") 
@@ -17,5 +15,5 @@ model={
     end,
     connect=function(self)
         print(":::::: Connect from lua") 
-    end,
+    end
 }
