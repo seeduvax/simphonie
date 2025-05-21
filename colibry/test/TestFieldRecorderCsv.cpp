@@ -9,6 +9,7 @@
  */
 #include "abs/test.h"
 #include "simphonie/colibry/FieldRecorderCsv.hpp"
+#include "simphonie/kern/Simulator.hpp"
 
 #include "simdeck/SimpleField.hpp"
 
@@ -32,31 +33,33 @@ public:
 
     ABS_TEST_CASE_BEGIN(RecordSimpleFields) {
         ABS_TEST_DESCR(Chack FieldRecorderCsv can record few simple fields )
-        FieldRecorderCsv recorder("testfrec","",nullptr);
-        recorder.Publish(nullptr);
-        recorder.Configure(nullptr);
-        recorder.Connect((Smp::ISimulator*)nullptr);
+        simphonie::kern::Simulator sim("TestSim");
+        auto recorder=new FieldRecorderCsv("testfrec", "", &sim);
+        sim.AddService(recorder);
+        sim.Publish();
+        sim.Configure();
+        sim.Connect();
+
+        simdeck::Type _float64Type(Smp::Uuids::Uuid_Int64, Smp::PrimitiveTypeKind::PTK_Float64, sizeof(Smp::Float64), "Float64",
+                       "Eight bytes signed float data type");
+        simdeck::Type _int32Type(Smp::Uuids::Uuid_Int32, Smp::PrimitiveTypeKind::PTK_Int32, sizeof(Smp::Int32), "Int32",
+                       "Four bytes signed int data type");
 
         Smp::Float64 dblV=42.0;
         Smp::Int32 intV=42;
         auto dblF=simdeck::SimpleField::Create("dbl","",Smp::ViewKind::VK_None, 
-                                          &dblV, false, false, false, nullptr,
-                                          Smp::Uuids::Uuid_Float64);
+                                          &_float64Type, &dblV, false, false, false, nullptr);
         auto intF=simdeck::SimpleField::Create("int32","",Smp::ViewKind::VK_None, 
-                                          &intV, false, false, false, nullptr,
-                                          Smp::Uuids::Uuid_Int32);
-        recorder.Connect(dblF);
-        recorder.Connect(intF);
+                                          &_int32Type, &intV, false, false, false, nullptr);
+        auto port=dynamic_cast<Smp::IOutputField*>(recorder->GetChild("port"));
+        CPPUNIT_ASSERT(port!=nullptr);
+        port->Connect(dblF);
+        port->Connect(intF);
     
-        recorder.step();
+        recorder->step();
         dblV-=1.1;
         intV++;
-        recorder.step();
-
-        // Do not disconect really because since the test does not used a full
-        // featured ISimulator instance on Connect, actual component
-        // implementation is failing when cleaning linkks of LinkRegistry.
-        // recorder.Disconnect();
+        recorder->step();
     }
     ABS_TEST_CASE_END
 ABS_TEST_SUITE_END
