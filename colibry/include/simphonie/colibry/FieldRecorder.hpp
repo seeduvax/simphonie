@@ -59,7 +59,7 @@ protected:
         return _filePath.c_str();
     }
     inline const Smp::FieldCollection* getInputFields() const {
-        return _fieldHolder!=nullptr ? _fieldHolder->GetInputFields(): nullptr;
+        return _fieldHolder != nullptr ? _fieldHolder->GetInputFields() : nullptr;
     }
 
 private:
