@@ -8,14 +8,15 @@
  * $Date$
  */
 #include "simphonie/kern/Resolver.hpp"
-#include "Smp/IArrayField.h"
-#include "Smp/IComposite.h"
+
 #include "Smp/IComponent.h"
+#include "Smp/IComposite.h"
+#include "Smp/IModel.h"
+#include "Smp/IOutputField.h"
+#include "Smp/IService.h"
+#include "Smp/ISimpleArrayField.h"
 #include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
-#include "Smp/IOutputField.h"
-#include "Smp/IModel.h"
-#include "Smp/IService.h"
 #include "Smp/Publication/IType.h"
 #include "simphonie/kern/Publication.hpp"
 #include "simphonie/sys/Callback.hpp"
@@ -84,7 +85,12 @@ void Resolver::dumpObj(const Smp::IObject* from, int level) {
         if (f->IsOutput()) {
             std::cout << ":out";
         }
-        std::cout << ":" << f->GetType()->GetPrimitiveTypeKind() << "]";
+        std::cout << ":" << f->GetType()->GetPrimitiveTypeKind();
+        auto af = dynamic_cast<const Smp::ISimpleArrayField*>(from);
+        if (af != nullptr) {
+            std::cout << "[" << af->GetSize() << "]";
+        }
+        std::cout << "]";
         auto of=dynamic_cast<const Smp::IOutputField*>(f);
         if (of!=nullptr) {
             for (auto in: *(of->GetInputFields())) {

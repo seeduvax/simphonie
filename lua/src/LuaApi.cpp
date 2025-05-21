@@ -81,10 +81,19 @@ void simulatorNewIndex(Smp::ISimulator& th, sol::stack_object k, sol::stack_obje
         }
     }
 }
-
 // ..........................................................
-sol::object objectIndex(Smp::IObject* obj, Smp::String8 name, sol::this_state L) {
-    return solCastObject(obj->GetChild(name),L);
+sol::object objectIndex(Smp::IObject* obj, sol::stack_object k, sol::this_state L) {
+    std::string kstr;
+    if (k.is<std::string>()) {
+        kstr = k.as<std::string>();
+    }
+    else if (k.is<int>()) {
+        std::ostringstream oss;
+        int i = k.as<int>() - 1;  // -1 because lua index arrays from 1 not 0.
+        oss << "[" << i << "]";
+        kstr = oss.str();
+    }
+    return solCastObject(obj->GetChild(kstr.c_str()), L);
 }
 
 // ..........................................................
