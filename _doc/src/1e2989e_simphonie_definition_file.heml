@@ -765,7 +765,53 @@ Logger *.. ILoggerBackend : "child"
 note top of LoggerNetwork : Not Implemented
 @enduml
 #}
+}
+{section %title=Scheduling Service
+{fig %src=Scheduler_class.png %title=Scheduler Architecture}
+{#
+@startuml Scheduler_class.png
+package simphonie::kern {
+class Scheduler <<Component>> <<Runnable>> <<EntryPointPublisher>> <<IScheduler>> {
 
-    }
+}
+class Schedule <<Object>> {
+
+}
+}
+package simdeck::smpext {
+interface IObservableScheduler <<IComponent>> {
+  +RegisterObserver(observer : ISchedulerObserver*)
+  +RemoveObserver(observer : ISchedulerObserver*)
+  +GetSchedule() : const ISchedule*
+}
+interface ISchedulerObserver {
+  +NotifySheduled(event : const ISchedule*)
+  +NotifyCompleted(eventId : Smp::Services::EventId)
+  +NotifyCanceled(eventId : Smp::Services::EventId)
+}
+interface ISchedule <<IObject>> {
+  +GetId() : Smp::Services::EventId
+  +GetEP() : const Smp::IEntryPoint*
+  +GetTime() : Smp::Duration
+  +GetStartEventId() : Smp::Services::EventId
+  +GetStopEventId() : Smp::Services::EventId
+  +GetPeriod() : Smp::Duration
+  +GetRepeat() : Smp::Int64
+  +GetActivationCounter() : Smp::Int64
+  +IsCompleted() : Smp::Bool
+}
+interface ISchedulerOnEvent {
+  +SetEventStartOnEvent(eventId : Smp::Services::EventId, triggerEventId : Smp::Services::EventId)
+  +SetEventStopOnEvent(eventId : Smp::Services::EventId, triggerEventId : Smp::Services::EventId)
+}
+}
+Scheduler .up.|> IObservableScheduler
+Scheduler .up.|> ISchedulerOnEvent
+Scheduler *.up. ISchedulerObserver : "child"
+Schedule .up.|> ISchedule
+Scheduler *.. Schedule : "0..*"
+@enduml
+#}
+}
   }
 }

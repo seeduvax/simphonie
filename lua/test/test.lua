@@ -12,7 +12,7 @@ sim=s.CreateSimulator({
 --        webserver={type="simphonie::rest::RestService"},
         ctrl={type="simphonie::colibry::SimControl",
             description="Auto stop the simulation when stop condition is reached.",
-            condition="(and (> (sqrt /TimeKeeper/simTime) 1234.0) (> /inc1/output 30.0))"
+            condition="(> SmpIncrementEvent 20)"
         },
         recorder={type="simphonie::colibry::FieldRecorderCsv",
             filePath="myRec.csv"},
@@ -23,12 +23,15 @@ sim=s.CreateSimulator({
                 loggerOStream={type="simphonie::kern::LoggerOStream"}
             }
         },
+        schedulerTracker={type="simphonie::colibry::SchedulerTracker"},
         inc1={type="simphonie::umdl::SmpIncrement",
             Children={
                 inc11={type="simphonie::umdl::SmpIncrement", description="to check sub component."}
             }
         },
         inc2={type="simphonie::umdl::SmpIncrement"},
+        inc3={type="simphonie::umdl::SmpIncrement"},
+        inc4={type="simphonie::umdl::SmpIncrement"},
         ["MyLuaModel=test/model.lua"]={type="simphonie::lua::LuaModel"}
     },
     connections={
@@ -41,10 +44,11 @@ sim=s.CreateSimulator({
         inc2 = "inc1" -- just ro test link registry
     },
     schedule={
-        ["inc1/step"]={cycleTime_ms=250},
-        ["inc2/step"]={cycleTime_ms=500},
-        ["recorder/step"]={cycleTime_ms=500},
-        ["MyLuaModel/step"]={cycleTime_ms=500}
+        {name="inc1/step", cycleTime_ms=250, offset_ms=200},
+        {name="inc2/step", stopOnEvent="TheEvent", cycleTime_ms=500},
+        {name="recorder/step", cycleTime_ms=500},
+        ["MyLuaModel/step"]={cycleTime_ms=500},
+        ["inc4/step"]={startOnEvent="TheEvent", cycleTime_ms=300, offset_ms=200}
     }
 })
 sim:Run()
@@ -59,8 +63,8 @@ print("plop")
 print("resolver name: "..res.Name)
 print("timekeeper state / simulation time:"..tk.State.."/"..tk:GetSimulationTime())
 sim.testTK=tk;
-print("scheduler description: "..sim.Scheduler.Description)
-print("scheduler state: "..sim.Scheduler.State)
+print("scheduler description: "..sim:GetScheduler().Description)
+print("scheduler state: "..sim:GetScheduler().State)
 
 sim:CreateComponent("simphonie::umdl::SmpIncrement","inc","")
 sim.inc:CreateChild("simphonie::umdl::SmpIncrement","Children","subinc","")
@@ -85,6 +89,17 @@ sim:Run()
 while sim.State~=3 do
 end
 
+sim.ctrl.condition.Value = "(and (> (sqrt /TimeKeeper/simTime) 1234.0) (> /inc1/output 30.0))"
+sim.ctrl.applyCondition:Execute()
+eventId=sim:GetEventManager():QueryEventId("TheEvent")
+sim:GetEventManager():Emit(eventId, true)
+
+sim:Run()
+
+while sim.State~=3 do
+end
+
+sim.schedulerTracker.logStats:Execute()
 print("Nb. of Error logs: "..sim.logger.ErrorCounter.Value)
 print("Nb. of Warning logs: "..sim.logger.WarningCounter.Value)
 print("Nb. of Event logs: "..sim.logger.EventCounter.Value)

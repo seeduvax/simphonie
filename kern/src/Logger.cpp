@@ -35,7 +35,7 @@ std::mutex Logger::_countersMutex;
 Logger::Logger(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Component(name, descr, parent) {
     {
         std::unique_ptr<LoggerOStream> defaultLogger(new LoggerOStream("LoggerOStream", "Logger to stdout/stderr/stdlog", this));
-        addContainer(CONTAINER_NAME, "Logger backends")->AddComponent(defaultLogger.get());
+        addContainer(CONTAINER_NAME, "Logger's backends")->AddComponent(defaultLogger.get());
         _backends.push_back(defaultLogger.get());
         _defaultLogger = std::move(defaultLogger);
     }

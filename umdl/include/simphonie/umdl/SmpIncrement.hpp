@@ -11,6 +11,8 @@
 #define __simphonie_umdl_SmpIncrement_HPP__
 
 #include <Smp/IPublication.h>
+#include "Smp/Services/EventId.h"
+#include "Smp/Services/IEventManager.h"
 #include "simphonie/umdl/AStepMdl.hpp"
 
 namespace simphonie {
@@ -24,8 +26,11 @@ public:
     void step() override;
 
 private:
+    void connect();
     void publish(Smp::IPublication* receiver);
 
+    Smp::Services::IEventManager* _evntMgr;
+    Smp::Services::EventId _eventId;
     Smp::Float64 _input;
     Smp::Float64 _output;
 };

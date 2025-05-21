@@ -65,7 +65,6 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
     _services->AddComponent(_resolver);
     // add logger at the end to be sure it will be the last removed. (after scheduler at least)
     _services->AddComponent(_logger);
-    setState(Smp::SimulatorStateKind::SSK_Building);
 
     _ownedFactories.emplace_back(new simdeck::Factory<Logger>("Logger", "Logger", this));
     _ownedFactories.emplace_back(new simdeck::Factory<LoggerOStream>("LoggerOStream", "LoggerOStream", this));
@@ -74,6 +73,8 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
     for (auto& factory : _ownedFactories) {
         RegisterFactory(factory.get());
     }
+
+    setState(Smp::SimulatorStateKind::SSK_Building);
 }
 // ..........................................................
 Simulator::~Simulator() {

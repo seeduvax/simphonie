@@ -14,6 +14,7 @@
 #include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
 #include "Smp/Publication/IType.h"
+#include "Smp/Services/IEventManager.h"
 #include "Smp/Services/IResolver.h"
 #include "Smp/Services/IScheduler.h"
 #include "Smp/Services/ITimeKeeper.h"
@@ -381,6 +382,7 @@ int luaopen_libsimph_lua(lua_State* L) {
         "AddService", &Smp::ISimulator::AddService,
         "GetScheduler", &Smp::ISimulator::GetScheduler,
         "GetResolver", &Smp::ISimulator::GetResolver,
+        "GetEventManager", &Smp::ISimulator::GetEventManager,
         "CreateComponent", &simphonie::lua::LuaBuilder::simulatorCreateComponent,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite>()
     );
@@ -401,6 +403,13 @@ int luaopen_libsimph_lua(lua_State* L) {
         sol::meta_function::index, &objectIndex,
         "ResolveAbsolute", &Smp::Services::IResolver::ResolveAbsolute,
         "ResolveRelative", &Smp::Services::IResolver::ResolveRelative,
+        sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
+    );
+    // IEventManager binding
+    nsSmp.new_usertype<Smp::Services::IEventManager>("IEventManager",
+        sol::meta_function::index, &objectIndex,
+        "Emit", &Smp::Services::IEventManager::Emit,
+        "QueryEventId", &Smp::Services::IEventManager::QueryEventId,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
     );
     nsSmp.new_usertype<simphonie::lua::LuaModel>("LuaModel", 
