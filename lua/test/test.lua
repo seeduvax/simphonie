@@ -48,7 +48,7 @@ sim=s.CreateSimulator({
         {name="inc2/step", stopOnEvent="TheEvent", cycleTime_ms=500},
         {name="recorder/step", cycleTime_ms=500},
         ["MyLuaModel/step"]={cycleTime_ms=500},
-        ["inc4/step"]={startOnEvent="TheEvent", cycleTime_ms=300, offset_ms=200}
+  --      ["inc4/step"]={startOnEvent="TheEvent", cycleTime_ms=300, offset_ms=200}
     }
 })
 sim:Run()

@@ -81,10 +81,19 @@ void simulatorNewIndex(Smp::ISimulator& th, sol::stack_object k, sol::stack_obje
         }
     }
 }
-
 // ..........................................................
-sol::object objectIndex(Smp::IObject* obj, Smp::String8 name, sol::this_state L) {
-    return solCastObject(obj->GetChild(name),L);
+sol::object objectIndex(Smp::IObject* obj, sol::stack_object k, sol::this_state L) {
+    std::string kstr;
+    if (k.is<std::string>()) {
+        kstr = k.as<std::string>();
+    }
+    else if (k.is<int>()) {
+        std::ostringstream oss;
+        int i = k.as<int>() - 1;  // -1 because lua index arrays from 1 not 0.
+        oss << "[" << i << "]";
+        kstr = oss.str();
+    }
+    return solCastObject(obj->GetChild(kstr.c_str()), L);
 }
 
 // ..........................................................
@@ -404,8 +413,11 @@ int luaopen_libsimph_lua(lua_State* L) {
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
     );
     nsSmp.new_usertype<simphonie::lua::LuaModel>("LuaModel", 
-        sol::meta_function::index, &objectIndex,
+//        sol::meta_function::index, &objectIndex,
+        sol::meta_function::new_index, &simphonie::lua::LuaModel::setValue,
+        sol::meta_function::index, &simphonie::lua::LuaModel::getValue,
         "AddEntryPoint", &simphonie::lua::LuaModel::addEntryPoint,
+        "PublishInt", &simphonie::lua::LuaModel::publishInt,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
     );
 
