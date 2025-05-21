@@ -10,6 +10,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <unistd.h>
 #include <memory>
+#include "abs/test.h"
 #include "simphonie/kern/Scheduler.hpp"
 #include "simphonie/kern/Simulator.hpp"
 #include "simphonie/sys/Callback.hpp"
@@ -22,12 +23,7 @@ using namespace simphonie::sys;
 
 // ----------------------------------------------------------
 // test fixture implementation
-class TestScheduler : public CppUnit::TestFixture {
-    CPPUNIT_TEST_SUITE(TestScheduler);
-    CPPUNIT_TEST(testSchedule);
-    CPPUNIT_TEST(testSchedule2);
-    CPPUNIT_TEST(testScheduleLongTask);
-    CPPUNIT_TEST_SUITE_END();
+ABS_TEST_SUITE_BEGIN(Scheduler)
 
 private:
     class EPSet: public Object {
@@ -108,9 +104,7 @@ public:
         }
     }
 
-
-
-    void testSchedule() {
+    ABS_TEST_CASE_BEGIN(TestSchedule) {
         std::vector<Smp::Duration> scheduledTime;
         _epset->_vv=&scheduledTime;
         auto ep = EntryPoint::Create("cb","",_epset, &EPSet::epRecSimTime);
@@ -127,8 +121,9 @@ public:
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)20, scheduledTime[2]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)30, scheduledTime[3]);
     }
+    ABS_TEST_CASE_END
 
-    void testSchedule2() {
+    ABS_TEST_CASE_BEGIN(TestSchedule2) {
         std::vector<Smp::Duration> scheduledTime;
         _epset->_vv=&scheduledTime;
         auto epcb = EntryPoint::Create("cb","",_epset, &EPSet::epRecSimTime);
@@ -160,8 +155,9 @@ _scheduler->SetEventStartOnEvent(ev, 3);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)10, scheduledTime[2]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)10, scheduledTime[3]);
     }
+    ABS_TEST_CASE_END
 
-    void testScheduleLongTask() {
+    ABS_TEST_CASE_BEGIN(TestScheduleLongTask) {
         auto ep = EntryPoint::Create("cb","",_epset, &EPSet::epDelay);
 
         _scheduler->AddSimulationTimeEvent(ep, 10);
@@ -178,7 +174,7 @@ _scheduler->SetEventStartOnEvent(ev, 3);
         TRACE("recorded duration = " << duration_ms << " ms")
         CPPUNIT_ASSERT(duration_ms - 500 < 20);  // 20ms margin for an expected 500ms execution time
     }
-};
+    ABS_TEST_CASE_END
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestScheduler);
+    ABS_TEST_SUITE_END
 }  // namespace test

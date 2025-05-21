@@ -117,25 +117,25 @@ Smp::Services::EventId Scheduler::schedule(const Smp::IEntryPoint* entryPoint, S
 }
 // ..........................................................
 Schedule* Scheduler::findSchedule(Smp::Services::EventId event, bool remove) {
-    Schedule* res = nullptr;
     Synchronized(_mutex);
     if (_currentSchedule != nullptr && _currentSchedule->GetId() == event) {
-        res = _currentSchedule;
+        return _currentSchedule;
     }
     else {
-        for (auto it = _scheduled.begin(); res == nullptr && it != _scheduled.end(); ++it) {
+        for (auto it = _scheduled.begin(); it != _scheduled.end(); ++it) {
             if ((*it)->GetId() == event) {
-                res = *it;
+                auto res = *it;
                 if (remove) {
                     _scheduled.erase(it);
                     if (!res->isWaiting()) {
                         _activableCount--;
                     }
                 }
+                return res;
             }
         }
     }
-    return res;
+    return nullptr;
 }
 // ..........................................................
 void Scheduler::schedule(Smp::Services::EventId event, Smp::Duration absoluteSimTime) {
@@ -317,6 +317,7 @@ void Scheduler::step() {
     {
         Synchronized(_mutex);
         while (_run && getNextScheduledEventTime() >= DURATION_MAX) {
+            logInfo("No activable event left. The scheduler has been paused.");
             MonitorWait(_monitor);
         }
         if (!_run) {
