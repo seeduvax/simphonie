@@ -14,8 +14,10 @@ sim=s.CreateSimulator({
             description="Auto stop the simulation when stop condition is reached.",
             condition="(> SmpIncrementEvent 20)"
         },
-        recorder={type="simphonie::colibry::FieldRecorderCsv",
+        recorderCsv={type="simphonie::colibry::FieldRecorderCsv",
             filePath="myRec.csv"},
+        recorderH5={type="simphonie::colibry::FieldRecorderHDF5",
+            filePath="myRec.h5"},
         logger={type="simphonie::kern::Logger",
             Backends={
                 loggerFile={type="simphonie::kern::LoggerFile",
@@ -37,7 +39,11 @@ sim=s.CreateSimulator({
     connections={
         ["inc2/input"]="inc1/output",
         ["inc1/input"]="inc1/output", -- loop to really create a counter
-        ["recorder/port"]={
+        ["recorderCsv/port"]={
+            "inc2/input",
+            "inc1/output"
+        },
+        ["recorderH5/port"]={
             "inc2/input",
             "inc1/output"
         },
@@ -45,10 +51,11 @@ sim=s.CreateSimulator({
     },
     schedule={
         {name="inc1/step", cycleTime_ms=250, offset_ms=200},
-        {name="inc2/step", stopOnEvent="TheEvent", cycleTime_ms=500},
-        {name="recorder/step", cycleTime_ms=500},
+        {name="inc2/step", startOnEvent="TheEvent", cycleTime_ms=500},
+        {name="recorderCsv/step", cycleTime_ms=500},
+        {name="recorderH5/step", cycleTime_ms=500},
         ["MyLuaModel/step"]={cycleTime_ms=500},
-  --      ["inc4/step"]={startOnEvent="TheEvent", cycleTime_ms=300, offset_ms=200}
+        ["inc4/step"]={startOnEvent="TheEvent", cycleTime_ms=300, offset_ms=200}
     }
 })
 sim:Run()
@@ -77,11 +84,14 @@ print("simulator state "..sim.State)
 
 sim.inc1.input.Value=10
 sim.inc1.step:Execute()
-sim.recorder.step:Execute()
+sim.recorderCsv.step:Execute()
+sim.recorderH5.step:Execute()
 sim.inc1.step:Execute()
-sim.recorder.step:Execute()
+sim.recorderCsv.step:Execute()
+sim.recorderH5.step:Execute()
 sim.inc1.step:Execute()
-sim.recorder.step:Execute()
+sim.recorderCsv.step:Execute()
+sim.recorderH5.step:Execute()
 sim:Run()
 
 -- this is a bad way to wait the simulation is completed.
