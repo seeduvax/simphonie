@@ -11,6 +11,7 @@
 #include "simdeck/Factory.hpp"
 #include "simphonie/colibry/FieldRecorder.hpp"
 #include "simphonie/colibry/FieldRecorderCsv.hpp"
+#include "simphonie/colibry/FieldRecorderHDF5.hpp"
 #include "simphonie/colibry/SchedulerTracker.hpp"
 #include "simphonie/colibry/SimControl.hpp"
 #include "simphonie/sys/DlDef.h"
@@ -20,6 +21,7 @@ namespace colibry {
 
 REGISTER_SMP_LIBINIT();
 ADD_SMP_FACTORY("FieldRecorderCsv", FieldRecorderCsv);
+ADD_SMP_FACTORY("FieldRecorderHDF5", FieldRecorderHDF5);
 ADD_SMP_FACTORY("SimControl", SimControl);
 ADD_SMP_FACTORY("SchedulerTracker", SchedulerTracker);
 
