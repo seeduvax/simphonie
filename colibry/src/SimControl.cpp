@@ -14,13 +14,13 @@
 #include <string>
 #include "Smp/IPublication.h"
 #include "Smp/ISimpleField.h"
+#include "Smp/Services/IEventManager.h"
+#include "Smp/Services/IResolver.h"
 #include "simdeck/EntryPoint.hpp"
 #include "simdeck/ExInvalidAnyType.hpp"
 #include "simdeck/ExInvalidFieldName.hpp"
 #include "simdeck/Exception.hpp"
 #include "simdeck/StringField.hpp"
-#include "simphonie/kern/EventManager.hpp"
-#include "simphonie/kern/Resolver.hpp"
 
 #define CHECK_EP_NAME "checkStop"
 #define CONTAINER_NAME "EventHandlers"

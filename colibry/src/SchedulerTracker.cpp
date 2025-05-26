@@ -8,11 +8,11 @@
  * $Date$
  */
 #include "simphonie/colibry/SchedulerTracker.hpp"
-#include "simphonie/kern/Simulator.hpp"
-#include "simphonie/kern/EventManager.hpp"
-#include "simphonie/kern/Scheduler.hpp"
-#include "simdeck/Exception.hpp"
 #include <sstream>
+#include "Smp/ISimulator.h"
+#include "Smp/Services/IEventManager.h"
+#include "Smp/Services/IScheduler.h"
+#include "simdeck/Exception.hpp"
 
 #define PRE_EP "preEventHandler"
 #define POST_EP "postEventHandler"

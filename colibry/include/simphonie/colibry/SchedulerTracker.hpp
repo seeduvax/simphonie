@@ -28,7 +28,7 @@ public:
     ~SchedulerTracker() = default;
 
 protected:
-    void connect();
+    void connect() override;
 
 private:
     struct _Event {

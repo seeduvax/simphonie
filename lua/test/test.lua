@@ -12,7 +12,7 @@ sim=s.CreateSimulator({
 --        webserver={type="simphonie::rest::RestService"},
         ctrl={type="simphonie::colibry::SimControl",
             description="Auto stop the simulation when stop condition is reached.",
-            condition="(> SmpIncrementEvent 20)"
+            condition="(> SmpIncrementEvent 10)"
         },
         recorderCsv={type="simphonie::colibry::FieldRecorderCsv",
             filePath="myRec.csv"},
@@ -26,6 +26,7 @@ sim=s.CreateSimulator({
             }
         },
         schedulerTracker={type="simphonie::colibry::SchedulerTracker"},
+        sync={type="simphonie::colibry::Synchronizer", period=25000000},
         inc1={type="simphonie::umdl::SmpIncrement",
             Children={
                 inc11={type="simphonie::umdl::SmpIncrement", description="to check sub component."}
@@ -50,12 +51,12 @@ sim=s.CreateSimulator({
         inc2 = "inc1" -- just ro test link registry
     },
     schedule={
-        {name="inc1/step", cycleTime_ms=250, offset_ms=200},
-        {name="inc2/step", startOnEvent="TheEvent", cycleTime_ms=500},
-        {name="recorderCsv/step", cycleTime_ms=500},
-        {name="recorderH5/step", cycleTime_ms=500},
-        ["MyLuaModel/step"]={cycleTime_ms=500},
-        ["inc4/step"]={startOnEvent="TheEvent", cycleTime_ms=300, offset_ms=200}
+        {name="inc1/step", cycleTime_ms=25, offset_ms=20},
+        {name="inc2/step", startOnEvent="TheEvent", cycleTime_ms=50},
+        {name="recorderCsv/step", cycleTime_ms=50},
+        {name="recorderH5/step", cycleTime_ms=50},
+        ["MyLuaModel/step"]={cycleTime_ms=50},
+        ["inc4/step"]={startOnEvent="TheEvent", cycleTime_ms=30, offset_ms=20}
     }
 })
 sim:Run()
@@ -99,7 +100,7 @@ sim:Run()
 while sim.State~=3 do
 end
 
-sim.ctrl.condition.Value = "(and (> (sqrt /TimeKeeper/simTime) 1234.0) (> /inc1/output 30.0))"
+sim.ctrl.condition.Value = "(and (> (sqrt /TimeKeeper/simTime) 1234.0) (> /inc1/output 20.0))"
 sim.ctrl.applyCondition:Execute()
 eventId=sim:GetEventManager():QueryEventId("TheEvent")
 sim:GetEventManager():Emit(eventId, true)

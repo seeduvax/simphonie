@@ -1,7 +1,7 @@
 /*
  * @file FieldRecorderHDF5.cpp
  *
- * Copyright RANK0RANK5 . All rights reserved.
+ * Copyright 2025 . All rights reserved.
  * Use is subject to license terms.
  *
  * $Id$
@@ -10,10 +10,10 @@
 #include "simphonie/colibry/FieldRecorderHDF5.hpp"
 #include "Smp/ISimpleArrayField.h"
 #include "Smp/ISimpleField.h"
+#include "Smp/ISimulator.h"
 #include "Smp/Publication/IType.h"
 #include "Smp/Services/ITimeKeeper.h"
 #include "simdeck/ExInvalidPrimitiveType.hpp"
-#include "simphonie/kern/Simulator.hpp"
 
 namespace simphonie {
 namespace colibry {

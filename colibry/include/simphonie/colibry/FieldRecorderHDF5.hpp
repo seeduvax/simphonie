@@ -23,7 +23,7 @@ namespace colibry {
 
 class FieldRecorderHDF5 : public FieldRecorder {
 public:
-    FieldRecorderHDF5(Smp::String8 name, Smp::String8 description, Smp::IObject* parent);
+    FieldRecorderHDF5(Smp::String8 name, Smp::String8 description = "", Smp::IObject* parent = nullptr);
     ~FieldRecorderHDF5();
     void step() override;
 

@@ -86,7 +86,7 @@ protected:
     void connect() override;
 
     Smp::Services::EventId schedule(const Smp::IEntryPoint* entryPoint, Smp::Duration absoluteSimTime,
-                                    Smp::Duration cycleTime = 0, Smp::Int64 repeat = 0, Smp::UInt64 priority = 0);
+                                    Smp::Duration cycleTime = 0, Smp::Int64 repeat = 0, Smp::UInt64 priority = 18);
     void schedule(Smp::Services::EventId event, Smp::Duration absoluteSimTime);
 
     void updateSchedule(Smp::Services::EventId eventId);
