@@ -60,6 +60,7 @@ private:
 
     Smp::IPublication* _pub;
     class EntryPoint;
+    void publishFieldsImpl(sol::table fields, bool isInput, bool isOutput, bool isState);
 };
 
 }} // namespace simphonie::lua

@@ -8,11 +8,10 @@
  * $Date$
  */
 #include "simphonie/lua/LuaModel.hpp"
+
+#include "Smp/IPublication.h"
 #include "Smp/ISimulator.h"
 #include "simdeck/EntryPoint.hpp"
-
-
-
 
 namespace simphonie {
 namespace lua {
@@ -66,6 +65,7 @@ LuaModel::LuaModel(Smp::String8 name, Smp::String8 description, Smp::IObject* pa
 }
 // ..........................................................
 LuaModel::~LuaModel() {
+    // TODO delete allocated memory for published fields.
 }
 
 // --------------------------------------------------------------------
@@ -121,7 +121,65 @@ std::string LuaModel::buildName(Smp::String8 spec) {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-void LuaModel::publishFields(sol::table fields) {}
+void LuaModel::publishFieldsImpl(sol::table fields, bool isInput, bool isOutput, bool isState) {
+    for (auto f : fields) {
+        std::string name = f.first.as<std::string>();
+        sol::object elem;
+        sol::table v = sol::nil;
+        size_t vsize = 1;
+        if (f.second.is<sol::table>()) {
+            v = f.second;
+            elem = v[0];  // TODO is 1st element [1] ?
+            vsize = v.size();
+        }
+        else {
+            elem = f.second;
+        }
+        if (elem.is<int64_t>()) {
+            int64_t* data = new int64_t[vsize];
+            if (vsize == 1) {
+                data[0] = elem.as<int64_t>();
+                _pub->PublishField(name.c_str(), "", data, Smp::ViewKind::VK_All, isState, isInput, isOutput);
+            }
+            else {
+                for (int i = 0; i < vsize; i++) {
+                    data[i] = v[i];
+                }
+                _pub->PublishArray(name.c_str(), "", vsize, data, Smp::PrimitiveTypeKind::PTK_Int64,
+                                   Smp::ViewKind::VK_All, isState, isInput, isOutput);
+            }
+        }
+        else if (elem.is<double>()) {
+            double* data = new double[vsize];
+            if (vsize == 1) {
+                data[0] = elem.as<double>();
+                _pub->PublishField(name.c_str(), "", data, Smp::ViewKind::VK_All, isState, isInput, isOutput);
+            }
+            else {
+                for (int i = 0; i < vsize; i++) {
+                    data[i] = v[i];
+                }
+                _pub->PublishArray(name.c_str(), "", vsize, data, Smp::PrimitiveTypeKind::PTK_Float64,
+                                   Smp::ViewKind::VK_All, isState, isInput, isOutput);
+            }
+        }
+    }
+}
+// ..........................................................
+void LuaModel::publishFields(sol::table fields) {
+    sol::table t = fields["input"];
+    if (t != sol::nil) {
+        publishFieldsImpl(t, true, false, false);
+    }
+    t = fields["output"];
+    if (t != sol::nil) {
+        publishFieldsImpl(t, false, true, false);
+    }
+    t = fields["state"];
+    if (t != sol::nil) {
+        publishFieldsImpl(t, false, false, true);
+    }
+}
 // ..........................................................
 sol::object LuaModel::getValue(Smp::String8 name, sol::this_state L) {
     sol::object res = sol::nil;
