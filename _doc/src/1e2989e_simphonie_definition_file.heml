@@ -813,5 +813,64 @@ Scheduler *.. Schedule : "0..*"
 @enduml
 #}
 }
+{section %title=Storing System
+{fig %src=StorageReader_state.png %title=StorageReader State Machine}
+{#
+@startuml StorageReader_state.png
+note as NoteDico
+  **skip**: [ \n\r\t]
+  **name**: [0-9a-zA-Z]
+  **value**: [0-9a-f]
+end note
+[*] --> ENTRY
+ENTRY --> ENTRY : skip
+ENTRY --> [*] : EOF
+ENTRY --> CONT_NAME : name
+CONT_NAME --> CONT_NAME : name
+CONT_NAME --> CONT_EQUAL : skip
+CONT_EQUAL --> CONT_EQUAL : skip
+CONT_EQUAL --> CONT_LBRACE : =
+CONT_LBRACE --> CONT_LBRACE : skip
+CONT_LBRACE --> COMP_CONTENT : {
+COMP_CONTENT --> COMP_CONTENT : skip
+COMP_CONTENT --> ENTRY : }
+COMP_CONTENT --> COMP_NAME : name
+COMP_NAME --> COMP_NAME : name
+COMP_NAME --> COMP_EQUAL : skip
+COMP_EQUAL --> COMP_EQUAL : skip
+COMP_EQUAL --> COMP_LBRACE : =
+COMP_LBRACE --> COMP_LBRACE : skip
+COMP_LBRACE --> FIELDS_F : {
+FIELDS_F --> CONT_CONTENT : }
+FIELDS_F --> FIELDS_i : F
+FIELDS_F --> CONT_NAME : name/F
+FIELDS_i --> FIELDS_e : i
+FIELDS_i --> CONT_NAME : name/i
+FIELDS_e --> FIELDS_l : e
+FIELDS_e --> CONT_NAME : name/e
+FIELDS_l --> FIELDS_d : l
+FIELDS_l --> CONT_NAME : name/l
+FIELDS_d --> FIELDS_s : d
+FIELDS_d --> CONT_NAME : name/d
+FIELDS_s --> FIELDS_EQUAL : s
+FIELDS_s --> CONT_NAME : name/s
+FIELDS_EQUAL --> FIELDS_EQUAL : skip
+FIELDS_EQUAL --> FIELDS_LBRACE : =
+FIELDS_LBRACE --> FIELDS_LBRACE : skip
+FIELDS_LBRACE --> FIELDS_CONTENT : {
+FIELDS_CONTENT --> FIELDS_CONTENT : skip
+FIELDS_CONTENT --> FIELDS_F : }
+FIELDS_CONTENT --> FIELD_NAME : name
+FIELD_NAME --> FIELD_NAME : name
+FIELD_NAME --> FIELD_EQUAL : skip
+FIELD_EQUAL --> FIELD_EQUAL : skip
+FIELD_EQUAL --> FIELD_CONTENT : =
+FIELD_CONTENT --> FIELD_CONTENT : skip
+FIELD_CONTENT --> FIELD_VALUE : value
+FIELD_VALUE --> FIELD_VALUE : value
+FIELD_VALUE --> FIELDS_CONTENT : skip
+@enduml
+#}
+}
   }
 }

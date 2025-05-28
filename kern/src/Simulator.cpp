@@ -22,6 +22,7 @@
 #include "simphonie/kern/LoggerOStream.hpp"
 #include "simphonie/kern/Resolver.hpp"
 #include "simphonie/kern/Scheduler.hpp"
+#include "simphonie/kern/StorageReader.hpp"
 #include "simphonie/kern/StorageWriter.hpp"
 #include "simphonie/kern/TimeKeeper.hpp"
 #include "simphonie/kern/TypeRegistry.hpp"
@@ -366,8 +367,11 @@ void Simulator::Store(Smp::String8 filename) {
 void Simulator::Restore(Smp::String8 filename) {
     if (checkState("Restore", Smp::SimulatorStateKind::SSK_Standby)) {
         setState(Smp::SimulatorStateKind::SSK_Restoring);
-        // TODO deserialize models states from file
-        SMPLOGE("Simulator::Restore(filename) not implemented yet!");
+        std::ostringstream msg;
+        msg << "Restoring simulator state from " << filename;
+        SMPLOGI(msg.str().c_str());
+        StorageReader reader(this, filename, "StorageReader");
+        reader.restore();
         setState(Smp::SimulatorStateKind::SSK_Standby);
     }
 }
