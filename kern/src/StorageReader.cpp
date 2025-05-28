@@ -115,6 +115,19 @@ std::vector<StorageReader::_Container> StorageReader::_parse() {
                 CASE_SKIP('{', CONT_LBRACE, CONT_CONTENT)
             case CONT_CONTENT:
                 if (c == '}') {
+                    /* TODO issue here */
+                    /**
+                     * Potential fixes:
+                     * - Add an in-between node
+                     * - Hierarchical state machine
+                     * - Two branches
+                     */
+                    /**
+                     * Orignally:
+                     * parents.pop_back();
+                     * state = ENTRY;
+                     * break;
+                     */
                     parents.pop_back();
                     if (parents.size() == 0) {
                         state = ENTRY;
