@@ -41,7 +41,7 @@ public:
     void addEntryPoint(Smp::String8, Smp::String8 name, sol::protected_function func);
 
     void publishFields(sol::table fields);
-    sol::object getValue(Smp::String8 name, sol::this_state L);
+    sol::lua_value getValue(Smp::String8 name, sol::this_state L);
     void setValue(Smp::String8 name, sol::object value);
 
 protected:

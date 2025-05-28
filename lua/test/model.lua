@@ -1,17 +1,24 @@
 model={
     publish=function(self)
+        print(":::: pub 1")
         self:Publish({
-            dblvectin={type="float64", input=true, size=3},
-            cpt={type="int64", output=true, } 
+            input={
+                dblvect={1.0, 2.0, 3.0}
+            },
+            output={
+                cpt=0
+            }
         })
-        self.cpt=42
+        print(":::: pub 2")
         self:AddEntryPoint("step", "main model step",function (self)
+            print("::::: lua model step")
             self.cpt = self.cpt + 1
+            print(self.cpt)
         end)
+        print(":::: pub 3")
     end,
     configure=function(self)
         print(":::::: Configure from lua") 
-        print(self.plopVar)
     end,
     connect=function(self)
         print(":::::: Connect from lua") 
