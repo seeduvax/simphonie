@@ -32,19 +32,21 @@ public:
     Smp::String8 GetStateVectorFileName() const override;
     Smp::String8 GetStateVectorFilePath() const override;
 
-protected:
-    void connect();
-
 private:
     enum _State {
-        ENTRY,
+        NEXT_IS_CONT,
+
         CONT_NAME,
         CONT_EQUAL,
         CONT_LBRACE,
         CONT_CONTENT,
+
+        NEXT_IS_COMP,
+
         COMP_NAME,
         COMP_EQUAL,
         COMP_LBRACE,
+
         FIELDS_F,
         FIELDS_i,
         FIELDS_e,
@@ -54,6 +56,7 @@ private:
         FIELDS_EQUAL,
         FIELDS_LBRACE,
         FIELDS_CONTENT,
+
         FIELD_NAME,
         FIELD_EQUAL,
         FIELD_CONTENT,
@@ -89,10 +92,9 @@ private:
     }
     std::vector<_Container> _parse();
     void _restoreComponent(Smp::IContainer* parent, const _Component& comp);
-    void _restoreContainer(Smp::IContainer* parent, const _Container& cont);
+    void _restoreContainer(Smp::IComposite* parent, const _Container& cont);
 
     Smp::ISimulator* _sim;
-    Smp::Services::IResolver* _resolver;
     std::ifstream _in;
     std::string _filePath;
     std::string _subFilePath;

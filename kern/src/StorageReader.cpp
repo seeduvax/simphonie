@@ -15,26 +15,27 @@
 #define SKIP_CHARS      \
     if (_isSkipChar(c)) \
         break;
-#define CASE_FIELDS(token, from, to)                                                 \
-    case from:                                                                       \
-        if (c == token) {                                                            \
-            state = to;                                                              \
-            break;                                                                   \
-        }                                                                            \
-        if (_isNameChar(c)) {                                                        \
-            parents.back()->components.back().containers.push_back(_Container());    \
-            parents.push_back(&parents.back()->components.back().containers.back()); \
-            parents.back()->name += c;                                               \
-            state = CONT_NAME;                                                       \
-            break;                                                                   \
-        }
-#define CASE_SKIP(token, from, to) \
-    case from:                     \
-        if (c == token) {          \
-            state = to;            \
-            break;                 \
-        }                          \
-        SKIP_CHARS
+#define FIELDS(token, to)  \
+    s += c;                \
+    if (c == token) {      \
+        state = to;        \
+        break;             \
+    }                      \
+    if (_isNameChar(c)) {  \
+        state = CONT_NAME; \
+        break;             \
+    }
+#define WAIT_TOKEN(token, to) \
+    if (c == token) {         \
+        state = to;           \
+        break;                \
+    }                         \
+    SKIP_CHARS
+#define LOOP_NAME         \
+    if (_isNameChar(c)) { \
+        s += c;           \
+        break;            \
+    }
 
 namespace simphonie {
 namespace kern {
@@ -47,6 +48,7 @@ StorageReader::StorageReader(Smp::ISimulator* sim, Smp::String8 filePath, Smp::S
 
 void StorageReader::Restore(Smp::Void* address, Smp::UInt64 size) {
     uint8_t* buf = (uint8_t*)address;
+    __asm("int $3");
     for (int i = 0; i < size; i++) {
         char highChar, lowChar;
         _in >> highChar >> lowChar;
@@ -64,14 +66,11 @@ Smp::String8 StorageReader::GetStateVectorFilePath() const {
     return _subFilePath.c_str();
 }
 
-void StorageReader::connect() {
-    _resolver = _sim->GetResolver();
-}
-
 std::vector<StorageReader::_Container> StorageReader::_parse() {
-    std::vector<_Container> root;
-    std::vector<_Container*> parents;
-    _State state = ENTRY;
+    _Component root;
+    std::vector<_Component*> parents = {&root};
+    _State state = NEXT_IS_CONT;
+    std::string s = "";
 
     size_t iLine = 1;
 
@@ -84,80 +83,75 @@ std::vector<StorageReader::_Container> StorageReader::_parse() {
         }
 
         switch (state) {
-            case ENTRY:
+            case NEXT_IS_CONT:
                 if (_in.eof()) {
-                    return root;
+                    return root.containers;
                 }
                 if (_isNameChar(c)) {
-                    if (parents.size() == 0) {
-                        root.push_back(_Container());
-                        parents.push_back(&root.back());
-                    }
-                    else {
-                        parents.back()->components.back().containers.push_back(_Container());
-                        parents.push_back(&parents.back()->components.back().containers.back());
-                    }
-                    parents.back()->name += c;
+                    s += c;
                     state = CONT_NAME;
+                    break;
+                }
+                if (c == '}') {
+                    parents.pop_back();
+                    state = NEXT_IS_COMP;
                     break;
                 }
                 SKIP_CHARS
             case CONT_NAME:
-                if (_isNameChar(c)) {
-                    parents.back()->name += c;
-                    break;
-                }
+                LOOP_NAME
                 if (_isSkipChar(c)) {
+                    parents.back()->containers.push_back(_Container());
+                    parents.back()->containers.back().name = s;
+                    s = "";
                     state = CONT_EQUAL;
                     break;
                 }
-                CASE_SKIP('=', CONT_EQUAL, CONT_LBRACE)
-                CASE_SKIP('{', CONT_LBRACE, CONT_CONTENT)
+            case CONT_EQUAL:
+                WAIT_TOKEN('=', CONT_LBRACE)
+            case CONT_LBRACE:
+                WAIT_TOKEN('{', CONT_CONTENT)
             case CONT_CONTENT:
                 if (c == '}') {
-                    /* TODO issue here */
-                    /**
-                     * Potential fixes:
-                     * - Add an in-between node
-                     * - Hierarchical state machine
-                     * - Two branches
-                     */
-                    /**
-                     * Orignally:
-                     * parents.pop_back();
-                     * state = ENTRY;
-                     * break;
-                     */
-                    parents.pop_back();
-                    if (parents.size() == 0) {
-                        state = ENTRY;
-                    }
-                    else {
-                        parents.back()->components.push_back(_Component());
-                        state = COMP_NAME;
-                    }
+                    s = "";
+                    state = NEXT_IS_CONT;
                     break;
                 }
                 if (_isNameChar(c)) {
-                    parents.back()->components.push_back(_Component());
-                    parents.back()->components.back().name += c;
+                    s += c;
                     state = COMP_NAME;
                     break;
                 }
                 SKIP_CHARS
-            case COMP_NAME:
+            case NEXT_IS_COMP:
                 if (_isNameChar(c)) {
-                    parents.back()->components.back().name += c;
+                    s += c;
+                    state = COMP_NAME;
                     break;
                 }
+                if (c == '}') {
+                    state = NEXT_IS_CONT;
+                    break;
+                }
+                SKIP_CHARS
+            case COMP_NAME:
+                LOOP_NAME
                 if (_isSkipChar(c)) {
+                    parents.back()->containers.back().components.push_back(_Component());
+                    parents.push_back(&parents.back()->containers.back().components.back());
+                    parents.back()->name = s;
+                    s = "";
                     state = COMP_EQUAL;
                     break;
                 }
-                CASE_SKIP('=', COMP_EQUAL, COMP_LBRACE)
-                CASE_SKIP('{', COMP_LBRACE, FIELDS_F)
+            case COMP_EQUAL:
+                WAIT_TOKEN('=', COMP_LBRACE)
+            case COMP_LBRACE:
+                WAIT_TOKEN('{', FIELDS_F)
             case FIELDS_F:
                 if (c == '}') {
+                    s = "";
+                    parents.pop_back();
                     state = CONT_CONTENT;
                     break;
                 }
@@ -166,55 +160,64 @@ std::vector<StorageReader::_Container> StorageReader::_parse() {
                     break;
                 }
                 if (_isNameChar(c)) {
-                    parents.back()->components.back().containers.push_back(_Container());
-                    parents.push_back(&parents.back()->components.back().containers.back());
-                    parents.back()->name += c;
+                    s += c;
                     state = CONT_NAME;
                     break;
                 }
                 SKIP_CHARS
-                CASE_FIELDS('i', FIELDS_i, FIELDS_e)
-                CASE_FIELDS('e', FIELDS_e, FIELDS_l)
-                CASE_FIELDS('l', FIELDS_l, FIELDS_d)
-                CASE_FIELDS('d', FIELDS_d, FIELDS_s)
-                CASE_FIELDS('s', FIELDS_s, FIELDS_EQUAL)
-                CASE_SKIP('=', FIELDS_EQUAL, FIELDS_LBRACE)
-                CASE_SKIP('{', FIELDS_LBRACE, FIELDS_CONTENT)
+            case FIELDS_i:
+                FIELDS('i', FIELDS_e)
+            case FIELDS_e:
+                FIELDS('e', FIELDS_l)
+            case FIELDS_l:
+                FIELDS('l', FIELDS_d)
+            case FIELDS_d:
+                FIELDS('d', FIELDS_s)
+            case FIELDS_s:
+                FIELDS('s', FIELDS_EQUAL)
+            case FIELDS_EQUAL:
+                if (c == '=') {
+                    s = "";
+                    state = FIELDS_LBRACE;
+                    break;
+                }
+                SKIP_CHARS
+            case FIELDS_LBRACE:
+                WAIT_TOKEN('{', FIELDS_CONTENT)
             case FIELDS_CONTENT:
                 if (c == '}') {
                     state = FIELDS_F;
                     break;
                 }
                 if (_isNameChar(c)) {
-                    parents.back()->components.back().fields.push_back(_Component::_Field());
-                    parents.back()->components.back().fields.back().name += c;
+                    s += c;
                     state = FIELD_NAME;
                     break;
                 }
                 SKIP_CHARS
             case FIELD_NAME:
-                if (_isNameChar(c)) {
-                    parents.back()->components.back().fields.back().name += c;
-                    break;
-                }
+                LOOP_NAME
                 if (_isSkipChar(c)) {
+                    parents.back()->fields.push_back(_Component::_Field());
+                    parents.back()->fields.back().name = s;
+                    s = "";
                     state = FIELD_EQUAL;
                     break;
                 }
-                CASE_SKIP('=', FIELD_EQUAL, FIELD_CONTENT)
+            case FIELD_EQUAL:
+                WAIT_TOKEN('=', FIELD_CONTENT)
             case FIELD_CONTENT:
                 if (_isValueChar(c)) {
-                    parents.back()->components.back().fields.back().value += c;
+                    s += c;
                     state = FIELD_VALUE;
                     break;
                 }
                 SKIP_CHARS
             case FIELD_VALUE:
-                if (_isValueChar(c)) {
-                    parents.back()->components.back().fields.back().value += c;
-                    break;
-                }
+                LOOP_NAME
                 if (_isSkipChar(c)) {
+                    parents.back()->fields.back().value = s;
+                    s = "";
                     state = FIELDS_CONTENT;
                     break;
                 }
@@ -245,38 +248,34 @@ std::vector<StorageReader::_Container> StorageReader::_parse() {
 }
 
 void StorageReader::_restoreComponent(Smp::IContainer* parent, const _Component& comp) {
-    std::cout << "COMP " << comp.name << std::endl;
-    auto component = parent->GetComponent(comp.name.c_str());
-    // for (auto& fld : comp.fields) {
-    //     auto field = dynamic_cast<Smp::IPersist*>(_resolver
-    //         ->ResolveRelative(fld.name.c_str(), component));
-    //     if (!field) {
-    //         std::ostringstream oss;
-    //         oss << "Field '" << fld.name << "' of component '" << comp.name
-    //             << "' is not valid" << std::endl;
-    //         throw simdeck::Exception(this, oss.str().c_str());
-    //     }
-    //     field->Restore(this);
-    // }
+    const auto component = parent->GetComponent(comp.name.c_str());
+    for (auto& fld : comp.fields) {
+        auto field = dynamic_cast<Smp::IPersist*>(_sim->GetResolver()->ResolveRelative(fld.name.c_str(), component));
+        if (!field) {
+            std::ostringstream oss;
+            oss << "Field '" << fld.name << "' of component '" << comp.name << "' is not valid" << std::endl;
+            throw simdeck::Exception(this, oss.str().c_str());
+        }
+        field->Restore(this);
+    }
     for (auto& cont : comp.containers) {
-        auto container = _sim->GetContainer(cont.name.c_str());
-        _restoreContainer(container, cont);
+        const auto composite = dynamic_cast<Smp::IComposite*>(component);
+        _restoreContainer(composite, cont);
     }
 }
 
-void StorageReader::_restoreContainer(Smp::IContainer* parent, const _Container& cont) {
-    std::cout << "CONT " << cont.name << std::endl;
+void StorageReader::_restoreContainer(Smp::IComposite* parent, const _Container& cont) {
+    const auto container = parent->GetContainer(cont.name.c_str());
     for (auto& comp : cont.components) {
-        _restoreComponent(parent, comp);
+        _restoreComponent(container, comp);
     }
 }
 
 void StorageReader::restore() {
-    const std::vector<_Container> containers = _parse();
-
-    for (auto& cont : containers) {
-        auto container = _sim->GetContainer(cont.name.c_str());
-        _restoreContainer(container, cont);
+    const auto containers = _parse();
+    const auto composite = dynamic_cast<Smp::IComposite*>(_sim);
+    for (const auto cont : containers) {
+        _restoreContainer(composite, cont);
     }
 }
 
