@@ -42,11 +42,15 @@ sim=s.CreateSimulator({
         ["inc1/input"]="inc1/output", -- loop to really create a counter
         ["recorderCsv/port"]={
             "inc2/input",
-            "inc1/output"
+            "inc1/output",
+            "MyLuaModel/dblvect",
+            "MyLuaModel/cpt"
         },
         ["recorderH5/port"]={
             "inc2/input",
-            "inc1/output"
+            "inc1/output",
+            "MyLuaModel/dblvect",
+            "MyLuaModel/cpt"
         },
         inc2 = "inc1" -- just ro test link registry
     },
@@ -55,7 +59,7 @@ sim=s.CreateSimulator({
         {name="inc2/step", startOnEvent="TheEvent", cycleTime_ms=50},
         {name="recorderCsv/step", cycleTime_ms=50},
         {name="recorderH5/step", cycleTime_ms=50},
-        ["MyLuaModel/step"]={cycleTime_ms=50},
+        {name="MyLuaModel/step", cycleTime_ms=50},
         ["inc4/step"]={startOnEvent="TheEvent", cycleTime_ms=30, offset_ms=20}
     }
 })

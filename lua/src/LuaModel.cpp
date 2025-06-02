@@ -82,6 +82,7 @@ void LuaModel::call(const char* name) {
 }
 // ..........................................................
 void LuaModel::publish(Smp::IPublication* receiver) {
+    _pub = receiver;
     call("publish");
 }
 // ..........................................................
@@ -129,7 +130,7 @@ void LuaModel::publishFieldsImpl(sol::table fields, bool isInput, bool isOutput,
         size_t vsize = 1;
         if (f.second.is<sol::table>()) {
             v = f.second;
-            elem = v[0];  // TODO is 1st element [1] ?
+            elem = v[1];  // TODO is 1st element [1] ?
             vsize = v.size();
         }
         else {
@@ -157,17 +158,18 @@ void LuaModel::publishFieldsImpl(sol::table fields, bool isInput, bool isOutput,
             }
             else {
                 for (int i = 0; i < vsize; i++) {
-                    data[i] = v[i];
+                    data[i] = v[i + 1];
                 }
-                _pub->PublishArray(name.c_str(), "", vsize, data, Smp::PrimitiveTypeKind::PTK_Float64,
+                _pub->PublishArray(name.c_str(), "", vsize, (void*)data, Smp::PrimitiveTypeKind::PTK_Float64,
                                    Smp::ViewKind::VK_All, isState, isInput, isOutput);
             }
         }
+        else {}
     }
 }
 // ..........................................................
 void LuaModel::publishFields(sol::table fields) {
-    sol::table t = fields["input"];
+    sol::object t = fields["input"];
     if (t != sol::nil) {
         publishFieldsImpl(t, true, false, false);
     }
@@ -181,46 +183,88 @@ void LuaModel::publishFields(sol::table fields) {
     }
 }
 // ..........................................................
-sol::object LuaModel::getValue(Smp::String8 name, sol::this_state L) {
-    sol::object res = sol::nil;
+sol::lua_value LuaModel::getValue(Smp::String8 name, sol::this_state L) {
+    // TODO quite bad to do this way shall register "casters" when publishing data
+    // and reuse it here.
+    sol::lua_value res = sol::lua_value(L, 0);
     auto simpleValue = this->GetSimpleValue(name);
     switch (simpleValue.GetType()) {
         case Smp::PrimitiveTypeKind::PTK_Bool:
-            res = sol::object(L, (Smp::Bool)simpleValue);
+            res = sol::lua_value(L, (Smp::Bool)simpleValue);
             break;
         case Smp::PrimitiveTypeKind::PTK_Int8:
-            res = sol::object(L, (Smp::Int8)simpleValue);
+            res = sol::lua_value(L, (Smp::Int8)simpleValue);
             break;
         case Smp::PrimitiveTypeKind::PTK_Int16:
-            res = sol::object(L, (Smp::Int16)simpleValue);
+            res = sol::lua_value(L, (Smp::Int16)simpleValue);
             break;
         case Smp::PrimitiveTypeKind::PTK_Int32:
-            res = sol::object(L, (Smp::Int32)simpleValue);
+            res = sol::lua_value(L, (Smp::Int32)simpleValue);
             break;
         case Smp::PrimitiveTypeKind::PTK_Int64:
-            res = sol::object(L, (Smp::Int64)simpleValue);
+            res = sol::lua_value(L, (Smp::Int64)simpleValue);
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt8:
-            res = sol::object(L, (Smp::UInt8)simpleValue);
+            res = sol::lua_value(L, (Smp::UInt8)simpleValue);
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt16:
-            res = sol::object(L, (Smp::UInt16)simpleValue);
+            res = sol::lua_value(L, (Smp::UInt16)simpleValue);
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt32:
-            res = sol::object(L, (Smp::UInt32)simpleValue);
+            res = sol::lua_value(L, (Smp::UInt32)simpleValue);
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt64:
-            res = sol::object(L, (Smp::UInt64)simpleValue);
+            res = sol::lua_value(L, (Smp::UInt64)simpleValue);
             break;
         case Smp::PrimitiveTypeKind::PTK_Float32:
-            res = sol::object(L, (Smp::Float32)simpleValue);
+            res = sol::lua_value(L, (Smp::Float32)simpleValue);
             break;
         case Smp::PrimitiveTypeKind::PTK_Float64:
-            res = sol::object(L, (Smp::Float64)simpleValue);
+            res = sol::lua_value(L, (Smp::Float64)simpleValue);
             break;
     }
     return res;
 }
 // ..........................................................
-void LuaModel::setValue(Smp::String8 name, sol::object value) {}
+void LuaModel::setValue(Smp::String8 name, sol::object value) {
+    // TODO quite bad to do this way shall register "casters" when publishing data
+    // and reuse it here.
+    auto simpleValue = this->GetSimpleValue(name);
+    switch (simpleValue.GetType()) {
+        case Smp::PrimitiveTypeKind::PTK_Bool:
+            simpleValue.SetValue(simpleValue.GetType(), value.as<Smp::Bool>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int8:
+            simpleValue.SetValue(simpleValue.GetType(), value.as<Smp::Int8>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int16:
+            simpleValue.SetValue(simpleValue.GetType(), value.as<Smp::Int16>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int32:
+            simpleValue.SetValue(simpleValue.GetType(), value.as<Smp::Int32>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Int64:
+            simpleValue.SetValue(simpleValue.GetType(), value.as<Smp::Int64>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt8:
+            simpleValue.SetValue(simpleValue.GetType(), value.as<Smp::UInt8>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt16:
+            simpleValue.SetValue(simpleValue.GetType(), value.as<Smp::UInt16>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt32:
+            simpleValue.SetValue(simpleValue.GetType(), value.as<Smp::UInt32>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_UInt64:
+            simpleValue.SetValue(simpleValue.GetType(), value.as<Smp::UInt64>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Float32:
+            simpleValue.SetValue(simpleValue.GetType(), value.as<Smp::Float32>());
+            break;
+        case Smp::PrimitiveTypeKind::PTK_Float64:
+            simpleValue.SetValue(simpleValue.GetType(), value.as<Smp::Float64>());
+            break;
+    }
+    this->SetSimpleValue(name, simpleValue);
+}
 }} // namespace simphonie::lua
