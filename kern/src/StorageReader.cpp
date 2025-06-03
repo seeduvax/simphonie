@@ -48,7 +48,6 @@ StorageReader::StorageReader(Smp::ISimulator* sim, Smp::String8 filePath, Smp::S
 
 void StorageReader::Restore(Smp::Void* address, Smp::UInt64 size) {
     uint8_t* buf = (uint8_t*)address;
-    __asm("int $3");
     for (int i = 0; i < size; i++) {
         char highChar, lowChar;
         _in >> highChar >> lowChar;
