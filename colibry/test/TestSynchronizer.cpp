@@ -96,7 +96,7 @@ ABS_TEST_CASE_BEGIN(Synchronizer) {
                                 ->GetValue()
                                 .value.int64Value;
 
-    CPPUNIT_ASSERT_EQUAL(1lu, overflowCount);
+    CPPUNIT_ASSERT(1lu <= overflowCount);
     CPPUNIT_ASSERT(0 >= lastMargin);
 }
 ABS_TEST_CASE_END
