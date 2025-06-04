@@ -8,8 +8,6 @@
  * $Date$
  */
 #include "simphonie/colibry/Synchronizer.hpp"
-#include <chrono>
-#include <thread>
 #include "Smp/ISimulator.h"
 #include "Smp/Services/IEventManager.h"
 #include "Smp/Services/IScheduler.h"
@@ -19,11 +17,13 @@
 #define INIT_EP_NAME "init"
 #define STEP_EP_NAME "step"
 
+#define NSEC_PER_SEC 1000000000L
+
 namespace simphonie {
 namespace colibry {
 
 Synchronizer::Synchronizer(Smp::String8 name, Smp::String8 description, Smp::IObject* parent)
-    : simdeck::Component(name, description, parent), _periodSmp(0), _overflowCount(0), _margin(0) {
+    : simdeck::Component(name, description, parent), _periodSmp(0), _overflowCount(0), _margin(0), _startSec(true) {
     addEP(INIT_EP_NAME, "Internal use only.", this, &Synchronizer::_init);
     addEP(STEP_EP_NAME, "Internal use only.", this, &Synchronizer::step);
 }
@@ -34,7 +34,7 @@ void Synchronizer::connect() {
     const auto eventId =
         getSimulator()->GetScheduler()->AddSimulationTimeEvent(GetEntryPoint(STEP_EP_NAME), 0L, _periodSmp, -1L);
     dynamic_cast<simphonie::kern::Scheduler*>(getSimulator()->GetScheduler())->SetEventPriority(eventId, 0);
-    _period = _Duration(_periodSmp);
+    _period = {_periodSmp / NSEC_PER_SEC, _periodSmp % NSEC_PER_SEC};
 }
 
 void Synchronizer::publish(Smp::IPublication* receiver) {
@@ -44,27 +44,41 @@ void Synchronizer::publish(Smp::IPublication* receiver) {
                            false, false, true);
     receiver->PublishField("period", "Cycling period in nanoseconds.", &_periodSmp, Smp::ViewKind::VK_All, false, true,
                            false);
+    receiver->PublishField("startSec", "true to start on the next second.", &_startSec, Smp::ViewKind::VK_All, false,
+                           true, false);
 }
 
 void Synchronizer::_init() {
-    _goal = _Clock::now() + _period;
+    clock_gettime(CLOCK_MONOTONIC, &_goal);
+    if (_startSec) {
+        struct timespec rt;
+        clock_gettime(CLOCK_REALTIME, &rt);
+        _goal.tv_nsec += NSEC_PER_SEC - rt.tv_nsec;
+        _goal.tv_sec += _goal.tv_nsec / NSEC_PER_SEC;
+        _goal.tv_nsec %= NSEC_PER_SEC;
+    }
+    _updateGoal();
+}
+
+void Synchronizer::_updateGoal() {
+    _goal.tv_nsec += _period.tv_nsec;
+    _goal.tv_sec += _period.tv_sec + _goal.tv_nsec / NSEC_PER_SEC;
+    _goal.tv_nsec %= NSEC_PER_SEC;
 }
 
 void Synchronizer::step() {
-    const auto goal = _goal;
-    _goal += _period;
     {
-        const auto time = std::chrono::duration_cast<_Duration>(_Clock::now().time_since_epoch());
-        _margin = (goal.time_since_epoch() - time).count();
-        if (_margin < 0) {
-            _overflowCount++;
-        }
+        struct timespec now;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        _margin = now.tv_sec * NSEC_PER_SEC + now.tv_nsec - (_goal.tv_sec * NSEC_PER_SEC + _goal.tv_nsec);
+    }
+    if (_margin < 0) {
+        _overflowCount++;
     }
     {
-        std::mutex mutex;
-        std::unique_lock<std::mutex> lock(mutex);
-        std::condition_variable cv;
-        cv.wait_until(lock, goal);
+        const struct timespec goal = _goal;
+        _updateGoal();
+        while (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &goal, NULL)) {}
     }
 }
 

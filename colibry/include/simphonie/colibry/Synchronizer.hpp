@@ -10,8 +10,7 @@
 #ifndef __simphonie_colibry_Synchronization_HPP__
 #define __simphonie_colibry_Synchronization_HPP__
 
-#include <condition_variable>
-#include <mutex>
+#include <time.h>
 #include "Smp/IPublication.h"
 #include "Smp/IService.h"
 #include "Smp/Services/ITimeKeeper.h"
@@ -35,17 +34,14 @@ protected:
     void publish(Smp::IPublication* receiver) override;
 
 private:
-    /* Clock and duration used by the Synchronizer class */
-    typedef std::chrono::steady_clock _Clock;
-    typedef std::chrono::nanoseconds _Duration;
-
     void _init();
+    void _updateGoal();
 
-    std::chrono::time_point<_Clock, _Duration> _goal;
-    _Duration _period;
+    struct timespec _goal, _period;
     Smp::Duration _periodSmp;
     Smp::UInt64 _overflowCount;
     Smp::Duration _margin;
+    Smp::Bool _startSec;
 };
 
 } /* namespace colibry */
