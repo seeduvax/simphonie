@@ -48,7 +48,7 @@ void FieldRecorder::publish(Smp::IPublication* receiver) {
     _fieldHolder = new FieldHolder("port", "Fields to records connexion port", this);
     receiver->PublishField(_fieldHolder);
     receiver->PublishField(simdeck::StringField::Create("filePath", "", Smp::ViewKind::VK_All, &_filePath, nullptr,
-                                                        true, true, false, this));
+                                                        false, true, false, this));
 }
 // ..........................................................
 void FieldRecorder::connect() {

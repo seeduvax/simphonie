@@ -39,12 +39,12 @@ void Synchronizer::connect() {
 
 void Synchronizer::publish(Smp::IPublication* receiver) {
     receiver->PublishField("margin", "Difference between the expected and current zulu time values", &_margin,
-                           Smp::ViewKind::VK_All, true, false, true);
+                           Smp::ViewKind::VK_All, false, false, true);
     receiver->PublishField("overflowCounter", "Counter of cycling overflow.", &_overflowCount, Smp::ViewKind::VK_All,
-                           true, false, true);
-    receiver->PublishField("period", "Cycling period in nanoseconds.", &_periodSmp, Smp::ViewKind::VK_All, true, true,
+                           false, false, true);
+    receiver->PublishField("period", "Cycling period in nanoseconds.", &_periodSmp, Smp::ViewKind::VK_All, false, true,
                            false);
-    receiver->PublishField("startSec", "true to start on the next second.", &_startSec, Smp::ViewKind::VK_All, true,
+    receiver->PublishField("startSec", "true to start on the next second.", &_startSec, Smp::ViewKind::VK_All, false,
                            true, false);
 }
 

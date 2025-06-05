@@ -74,7 +74,7 @@ void Scheduler::schedule(Schedule* s) {
 
 void Scheduler::publish(Smp::IPublication* receiver) {
     receiver->PublishField("activableCount", "Number of activable event in the scheduled queue.", &_activableCount,
-                           Smp::ViewKind::VK_All, true, false, true);
+                           Smp::ViewKind::VK_All, false, false, true);
 }
 
 // ..........................................................

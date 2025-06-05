@@ -47,7 +47,7 @@ SimControl::~SimControl() {
 void SimControl::publish(Smp::IPublication* receiver) {
     receiver->PublishField(simdeck::StringField::Create(
         "condition", "S-expression condition. Service shall stop simulation when the condition is no longer false.",
-        Smp::ViewKind::VK_All, &_condition, nullptr, true, true, false, this));
+        Smp::ViewKind::VK_All, &_condition, nullptr, false, true, false, this));
 }
 
 void SimControl::applyCondition() {
