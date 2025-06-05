@@ -100,6 +100,15 @@ Smp::Bool FieldRecorder::FieldHolder::IsOutput() const {
 const Smp::Publication::IType* FieldRecorder::FieldHolder::GetType() const {
     return &_recorderType;
 }
-void FieldRecorder::FieldHolder::Restore(Smp::IStorageReader* reader) {}
-void FieldRecorder::FieldHolder::Store(Smp::IStorageWriter* writer) {}
+void FieldRecorder::FieldHolder::Store(Smp::IStorageWriter* writer) {
+    // Make storage writer happy with writing one dummy byte.
+    uint8_t b=0;
+    writer->Store(&b,1);
+}
+void FieldRecorder::FieldHolder::Restore(Smp::IStorageReader* reader) {
+    // Make storage reader happy with reading one dummy byte. Consistently with
+    // Store() implementation
+    uint8_t b=0;
+    reader->Restore(&b,1);
+}
 }} // namespace simphonie::colibry
