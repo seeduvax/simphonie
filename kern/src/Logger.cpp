@@ -46,14 +46,14 @@ Logger::Logger(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Co
 Logger::~Logger() {}
 
 void Logger::publish(Smp::IPublication* receiver) {
-    receiver->PublishField("Counter", "Counter of logs", &Logger::_logCounter, Smp::ViewKind::VK_All, false, false,
+    receiver->PublishField("Counter", "Counter of logs", &Logger::_logCounter, Smp::ViewKind::VK_All, true, false,
                            true);
 
     for (auto& lmk : _LMKMap) {
         std::ostringstream s;
         s << lmk.second.name << "Counter";
         receiver->PublishField(s.str().c_str(), "Logs' counter for the specific level", &lmk.second.counter,
-                               Smp::ViewKind::VK_All, false, false, true);
+                               Smp::ViewKind::VK_All, true, false, true);
     }
 }
 

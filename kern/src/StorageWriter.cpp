@@ -56,10 +56,12 @@ void StorageWriter::storeComponent(Smp::IComponent* component) {
     _out << "Fields = {" << std::endl;
     _indent++;
     for (auto field : *(component->GetFields())) {
-        indent();
-        _out << field->GetName() << " = ";
-        field->Store(this);
-        _out << std::endl;
+        if (field->IsState()) {
+            indent();
+            _out << field->GetName() << " = ";
+            field->Store(this);
+            _out << std::endl;
+        }
     }
     _indent--;
     indent();

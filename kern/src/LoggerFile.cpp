@@ -33,7 +33,7 @@ LoggerFile::~LoggerFile() {
 
 void LoggerFile::publish(Smp::IPublication* receiver) {
     receiver->PublishField(simdeck::StringField::Create("filePath", "", Smp::ViewKind::VK_All, &_filepath, nullptr,
-                                                        false, true, false, this));
+                                                        true, true, false, this));
 }
 
 void LoggerFile::log(const LoggerEvent& event) {

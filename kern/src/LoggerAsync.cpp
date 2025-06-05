@@ -20,7 +20,7 @@ LoggerAsync::LoggerAsync(Smp::String8 name, Smp::String8 descr, Smp::IObject* pa
 }
 
 void LoggerAsync::publish(Smp::IPublication* receiver) {
-    receiver->PublishField("bufferSize", "Size of the events' buffer", &_bufferSize, Smp::ViewKind::VK_All, false, true,
+    receiver->PublishField("bufferSize", "Size of the events' buffer", &_bufferSize, Smp::ViewKind::VK_All, true, true,
                            false);
 }
 
