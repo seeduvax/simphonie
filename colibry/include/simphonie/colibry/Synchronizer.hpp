@@ -10,12 +10,14 @@
 #ifndef __simphonie_colibry_Synchronization_HPP__
 #define __simphonie_colibry_Synchronization_HPP__
 
+#include <chrono>
 #include <time.h>
 #include "Smp/IPublication.h"
 #include "Smp/IService.h"
 #include "Smp/Services/ITimeKeeper.h"
 #include "simdeck/Component.hpp"
 #include "simdeck/EntryPointPublisher.hpp"
+#include "simphonie/sys/Synchro.hpp"
 
 namespace simphonie {
 namespace colibry {
@@ -37,11 +39,17 @@ private:
     void _init();
     void _updateGoal();
 
-    struct timespec _goal, _period;
+//    struct timespec _goal, _period;
     Smp::Duration _periodSmp;
+
+
     Smp::UInt64 _overflowCount;
-    Smp::Duration _margin;
+    Smp::Int64 _margin;
     Smp::Bool _startSec;
+
+    std::chrono::time_point<std::chrono::system_clock> _goal;
+    std::mutex _mutex;
+    std::condition_variable _monitor;
 };
 
 } /* namespace colibry */

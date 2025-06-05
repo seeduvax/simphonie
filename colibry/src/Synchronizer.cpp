@@ -11,8 +11,9 @@
 #include "Smp/ISimulator.h"
 #include "Smp/Services/IEventManager.h"
 #include "Smp/Services/IScheduler.h"
+#include <thread>
 
-#include "simphonie/kern/Scheduler.hpp" /* TODO use #include "simdeck/smpext/?.hpp" instead */
+//#include "simphonie/kern/Scheduler.hpp" /* TODO use #include "simdeck/smpext/?.hpp" instead */
 
 #define INIT_EP_NAME "init"
 #define STEP_EP_NAME "step"
@@ -22,21 +23,23 @@
 namespace simphonie {
 namespace colibry {
 
+// --------------------------------------------------------------------
+// ..........................................................
 Synchronizer::Synchronizer(Smp::String8 name, Smp::String8 description, Smp::IObject* parent)
     : simdeck::Component(name, description, parent), _periodSmp(0), _overflowCount(0), _margin(0), _startSec(true) {
     addEP(INIT_EP_NAME, "Internal use only.", this, &Synchronizer::_init);
     addEP(STEP_EP_NAME, "Internal use only.", this, &Synchronizer::step);
 }
 
+// ..........................................................
 void Synchronizer::connect() {
     getSimulator()->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_EnterExecutingId,
                                                  GetEntryPoint(INIT_EP_NAME));
     const auto eventId =
         getSimulator()->GetScheduler()->AddSimulationTimeEvent(GetEntryPoint(STEP_EP_NAME), 0L, _periodSmp, -1L);
-    dynamic_cast<simphonie::kern::Scheduler*>(getSimulator()->GetScheduler())->SetEventPriority(eventId, 0);
-    _period = {_periodSmp / NSEC_PER_SEC, _periodSmp % NSEC_PER_SEC};
 }
 
+// ..........................................................
 void Synchronizer::publish(Smp::IPublication* receiver) {
     receiver->PublishField("margin", "Difference between the expected and current zulu time values", &_margin,
                            Smp::ViewKind::VK_All, false, false, true);
@@ -48,37 +51,33 @@ void Synchronizer::publish(Smp::IPublication* receiver) {
                            true, false);
 }
 
+// ..........................................................
 void Synchronizer::_init() {
-    clock_gettime(CLOCK_MONOTONIC, &_goal);
+    auto now = std::chrono::system_clock::now();
     if (_startSec) {
-        struct timespec rt;
-        clock_gettime(CLOCK_REALTIME, &rt);
-        _goal.tv_nsec += NSEC_PER_SEC - rt.tv_nsec;
-        _goal.tv_sec += _goal.tv_nsec / NSEC_PER_SEC;
-        _goal.tv_nsec %= NSEC_PER_SEC;
+        auto sec=std::chrono::time_point_cast<std::chrono::seconds>(now);
+        sec+=std::chrono::seconds(1);
+        _goal=std::chrono::system_clock::time_point(sec) + std::chrono::nanoseconds(_periodSmp);
+        std::this_thread::sleep_until(sec);
     }
-    _updateGoal();
+    else {
+        _goal = now + std::chrono::nanoseconds(_periodSmp);
+    }
 }
 
-void Synchronizer::_updateGoal() {
-    _goal.tv_nsec += _period.tv_nsec;
-    _goal.tv_sec += _period.tv_sec + _goal.tv_nsec / NSEC_PER_SEC;
-    _goal.tv_nsec %= NSEC_PER_SEC;
-}
-
+// ..........................................................
 void Synchronizer::step() {
     {
-        struct timespec now;
-        clock_gettime(CLOCK_MONOTONIC, &now);
-        _margin = now.tv_sec * NSEC_PER_SEC + now.tv_nsec - (_goal.tv_sec * NSEC_PER_SEC + _goal.tv_nsec);
-    }
-    if (_margin < 0) {
-        _overflowCount++;
-    }
-    {
-        const struct timespec goal = _goal;
-        _updateGoal();
-        while (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &goal, NULL)) {}
+        auto timeLeft=_goal - std::chrono::system_clock::now();
+        _margin=std::chrono::duration_cast<std::chrono::nanoseconds>(timeLeft).count();
+        // TODO set overflow threshold configurable
+        if (_margin > 1000) {
+            std::this_thread::sleep_until(_goal);
+        }
+        else {
+            _overflowCount++;
+        }
+        _goal = _goal + std::chrono::nanoseconds(_periodSmp);
     }
 }
 
