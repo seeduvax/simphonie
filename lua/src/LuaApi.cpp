@@ -7,6 +7,7 @@
  * $Id$
  * $Date$
  */
+#include <cstdint>
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/IModel.h"
 #include "Smp/IOutputField.h"
@@ -299,6 +300,9 @@ int luaopen_libsimph_lua(lua_State* L) {
         "Description", sol::property(&Smp::IObject::GetDescription),
         "Parent", sol::property([](Smp::IObject* o,sol::this_state L) { 
                 return solCastObject(o->GetParent(),L);
+        }),
+        "RawPtr", sol::property([](Smp::IObject* o,sol::this_state L) { 
+                return uint64_t(o);
         }),
         "Type", sol::property([](Smp::IObject* o) { return typeid(*o).name(); }),  // TODO add some demangling here
         sol::meta_function::index, &objectIndex 

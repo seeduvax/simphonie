@@ -279,7 +279,6 @@ Smp::Publication::IType* Publication::getArrayType(Smp::PrimitiveTypeKind ptk, S
 Smp::ISimpleArrayField* Publication::PublishArray(Smp::String8 name, Smp::String8 description, Smp::Int64 count, void* address,
                                Smp::PrimitiveTypeKind type, Smp::ViewKind view, Smp::Bool state, Smp::Bool input,
                                Smp::Bool output) {
-    std::cout << "!!!!!!!!!!!!!! " << name << std::endl;
     Smp::Publication::IType* t = getArrayType(type, count);
     Smp::Publication::IType* pt = _typeRegistry->GetType(type);
     auto* rf = SimpleArrayField::Create(name, description, count, address, pt, view, t, state, input, output, _pubObj);
