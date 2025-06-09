@@ -90,6 +90,13 @@ test_debian12:
     tags:
         - debian_12
         
+test_debian11_lua-5.3.5.1:
+    extends: .test_base
+    tags:
+        - debian_11
+    variables:
+        TASK_OPTVAR: "$USER_TASK_OPTVAR LUA_VERSION=5.3.5.1 ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST WORKSPACE_IS_TAG=true"
+
 test_debian12_lua-5.3.5.1:
     extends: .test_base
     tags:
@@ -118,6 +125,13 @@ deploy_debian12:
     extends: .deploy_base
     tags:
         - debian_12
+
+deploy_debian11_lua-5.3.5.1:
+    extends: .deploy_base
+    tags:
+        - debian_11
+    variables:
+        TASK_OPTVAR: "$USER_TASK_OPTVAR LUA_VERSION=5.3.5.1 MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST WORKSPACE_IS_TAG=true"
 
 deploy_debian12_lua-5.3.5.1:
     extends: .deploy_base
