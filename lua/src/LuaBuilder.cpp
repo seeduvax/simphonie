@@ -314,7 +314,11 @@ Smp::AnySimple anyFromLua(Smp::PrimitiveTypeKind ptk, sol::object val){
         case Smp::PrimitiveTypeKind::PTK_Int64:
         case Smp::PrimitiveTypeKind::PTK_DateTime:
         case Smp::PrimitiveTypeKind::PTK_Duration:
-            res.SetValue(ptk,(Smp::Int64)val.as<double>());
+            if (val.is<Smp::IObject*>()) {
+                res.SetValue(ptk,(Smp::Int64)val.as<Smp::IObject*>());
+            } else {
+                res.SetValue(ptk,(Smp::Int64)val.as<double>());
+            }
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt8:
             res.SetValue(ptk,(Smp::UInt8)val.as<double>());
@@ -375,7 +379,7 @@ void LuaBuilder::addSubComponents(Smp::IComposite* node, sol::table t) {
 
 
 void LuaBuilder::initComponents(Smp::IObject* node, sol::table t) {
-    for (auto te: t) {
+        for (auto te: t) {
         std::string kName=te.first.as<std::string>();
         if (kName!="type" && kName!="description") {
             auto c=dynamic_cast<Smp::IComponent*>(node);

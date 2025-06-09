@@ -1,4 +1,24 @@
 s=require "simphonie_lua"
+sim2=s.CreateSimulator({
+    name="MySim2",
+    lib="simphonie_kern",
+    libraries={
+        "simphonie_umdl",
+        "simphonie_colibry",
+        "simphonie_lua",
+        "simphonie_mt",
+    },
+    components={
+        inc1Slave={type="simphonie::umdl::SmpIncrement"},
+        slave={type="simphonie::mt::SimSyncSlave"},
+    },
+    connections={
+    },
+    schedule={
+        {name="inc1Slave/step", cycleTime_ms=25, offset_ms=20},
+        {name="slave/sync", cycleTime_ms=25, offset_ms=20},
+    }
+})
 sim=s.CreateSimulator({
     name="MySim",
     lib="simphonie_kern",
@@ -6,7 +26,8 @@ sim=s.CreateSimulator({
         "simphonie_umdl",
         "simphonie_colibry",
         "simphonie_lua",
---        "simphonie_rest",
+        "simphonie_mt",
+        --        "simphonie_rest",
     },
     components={
 --        webserver={type="simphonie::rest::RestService"},
@@ -27,6 +48,7 @@ sim=s.CreateSimulator({
         },
         schedulerTracker={type="simphonie::colibry::SchedulerTracker"},
         sync={type="simphonie::colibry::Synchronizer", period=25000000},
+        master={type="simphonie::mt::SimSyncMaster", slaves={sim2.slave}},
         inc1={type="simphonie::umdl::SmpIncrement",
             Children={
                 inc11={type="simphonie::umdl::SmpIncrement", description="to check sub component."}
@@ -59,6 +81,7 @@ sim=s.CreateSimulator({
         {name="inc2/step", startOnEvent="TheEvent", cycleTime_ms=50},
         {name="recorderCsv/step", cycleTime_ms=50},
         {name="recorderH5/step", cycleTime_ms=50},
+        {name="master/sync", cycleTime_ms=50, offset_ms=20},
         {name="MyLuaModel/step", cycleTime_ms=50},
         ["inc4/step"]={startOnEvent="TheEvent", cycleTime_ms=30, offset_ms=20}
     }
@@ -113,6 +136,9 @@ sim:Run()
 
 while sim.State~=3 do
 end
+
+sim:Store("mySimu.cp")
+-- sim:Restore("mySimu.cp")
 
 sim.schedulerTracker.logStats:Execute()
 print("Nb. of Error logs: "..sim.logger.ErrorCounter.Value)

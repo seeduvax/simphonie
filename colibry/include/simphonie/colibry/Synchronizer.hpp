@@ -37,7 +37,6 @@ protected:
 
 private:
     void _init();
-    void _updateGoal();
 
 //    struct timespec _goal, _period;
     Smp::Duration _periodSmp;
