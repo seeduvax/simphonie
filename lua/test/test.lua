@@ -48,7 +48,7 @@ sim=s.CreateSimulator({
         },
         schedulerTracker={type="simphonie::colibry::SchedulerTracker"},
         sync={type="simphonie::colibry::Synchronizer", period=25000000},
-        master={type="simphonie::mt::SimSyncMaster", slaves={sim2.slave}},
+        master={type="simphonie::mt::SimSyncMaster", slave=sim2.slave},
         inc1={type="simphonie::umdl::SmpIncrement",
             Children={
                 inc11={type="simphonie::umdl::SmpIncrement", description="to check sub component."}

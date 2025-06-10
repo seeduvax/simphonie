@@ -39,8 +39,8 @@ private:
     void exit();
     void abort();
 
-    simphonie::mt::SimSyncSlave* _slavesAddr[1];
-    std::vector<SimSyncSlave*> _slaves;
+    Smp::UInt64 _slaveAddr;
+    SimSyncSlave* _slave;
     simphonie::sys::Barrier _barrier;
 
 };

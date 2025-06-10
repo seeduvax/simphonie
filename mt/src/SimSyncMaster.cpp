@@ -13,8 +13,6 @@
 #include "Smp/Services/IScheduler.h"
 #include "Smp/Services/IEventManager.h"
 
-#include <thread>
-
 #define EP_SYNC "sync"
 #define EP_INIT "init"
 #define EP_STORE "store"
@@ -28,8 +26,7 @@ namespace simphonie {
 namespace mt {
 
 SimSyncMaster::SimSyncMaster(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : simdeck::Service(name, descr, parent)
-{
+    : simdeck::Service(name, descr, parent), _barrier(2) {
     addEP(EP_SYNC, "Simulators' synchronization function. Blocks until every slaveulators are waiting to then share data among them.", this, &SimSyncMaster::sync);
     addEP(EP_INIT, "Internal use only.", this, &SimSyncMaster::init);
     addEP(EP_STORE, "Internal use only.", this, &SimSyncMaster::store);
@@ -41,26 +38,17 @@ SimSyncMaster::SimSyncMaster(Smp::String8 name, Smp::String8 descr, Smp::IObject
 }
 
 void SimSyncMaster::publish(Smp::IPublication* receiver) {
-    receiver->PublishArray("slaves", "Sub-simulators", 1, _slavesAddr, Smp::PrimitiveTypeKind::PTK_Int64,
-        Smp::ViewKind::VK_All, false, true, false); /* assuming 64bits long pointers */
+    receiver->PublishField("slave", "Sub-simulator", &_slaveAddr, Smp::ViewKind::VK_All, false, true, false);
 }
 
 void SimSyncMaster::configure() {
-    for (size_t i = 0; i < 1; ++i) {
-        const auto slave = dynamic_cast<SimSyncSlave*>(_slavesAddr[i]);
-        if (slave) {
-            _slaves.push_back(slave);
-            slave->setBarrier(&_barrier);
-           slave->getSim()->Configure();
-        }
-    }
-    _barrier.setThreshold(_slaves.size() + 1);
+    _slave = reinterpret_cast<SimSyncSlave*>(static_cast<uintptr_t>(_slaveAddr));
+    _slave->setBarrier(&_barrier);
+    _slave->getSim()->Configure();
 }
 
 void SimSyncMaster::connect() {
-    for (const auto slave : _slaves) {
-        slave->getSim()->Connect();
-    }
+    _slave->getSim()->Connect();
     getSimulator()->AddInitEntryPoint(GetEntryPoint(EP_INIT));
     getSimulator()->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_EnterStoringId, GetEntryPoint(EP_STORE));
     getSimulator()->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_EnterRestoringId, GetEntryPoint(EP_RESTORE));
@@ -71,68 +59,53 @@ void SimSyncMaster::connect() {
 }
 
 void SimSyncMaster::init() {
-    for (const auto slave : _slaves) {
-        slave->getSim()->Initialise();
-    }
+    _slave->getSim()->Initialise();
 }
 
 void SimSyncMaster::store() {
-    for (const auto slave : _slaves) {
-        std::ostringstream oss;
-        oss << slave->getSim()->GetName() << ".cp";
-        slave->getSim()->Store(oss.str().c_str()); /* TODO filename, maybe same file as the master one */
-    }
+    std::ostringstream oss;
+    oss << _slave->getSim()->GetName() << ".cp";
+    _slave->getSim()->Store(oss.str().c_str()); /* TODO filename, maybe same file as the master one */
 }
 
 void SimSyncMaster::restore() {
-    for (const auto slave : _slaves) {
-        std::ostringstream oss;
-        oss << slave->getSim()->GetName() << ".cp";
-        slave->getSim()->Restore(oss.str().c_str()); /* TODO filename, maybe same file as the master one */
-    }
+    std::ostringstream oss;
+    oss << _slave->getSim()->GetName() << ".cp";
+    _slave->getSim()->Restore(oss.str().c_str()); /* TODO filename, maybe same file as the master one */
 }
 
 void SimSyncMaster::sync() {
+    const auto start = std::chrono::system_clock::now();
     if (_barrier.wait()) {
+        const auto end = std::chrono::system_clock::now();
+        std::ostringstream oss;
+        oss << (end - start).count();
+        logDebug(oss.str().c_str());
         /* Share data here */
     }
 }
 
 void SimSyncMaster::run() {
     _barrier.reset();
-    for (const auto slave : _slaves) {
-        slave->getSim()->Run();
-    }
+    _slave->getSim()->Run();
 }
 
 void SimSyncMaster::leaverun() {
-    for (const auto slave : _slaves) {
-        slave->setExitFlag(SimSyncSlave::exitFlags::HOLD);
-    }
+    _slave->setExitFlag(SimSyncSlave::exitFlags::HOLD);
     _barrier.cancel();
-    for (const auto slave : _slaves) {
-        while (slave->getSim()->GetState() != Smp::SimulatorStateKind::SSK_Standby) {}
-    }
+    while (_slave->getSim()->GetState() != Smp::SimulatorStateKind::SSK_Standby) {}
 }
 
 void SimSyncMaster::exit() {
-    for (const auto slave : _slaves) {
-        slave->setExitFlag(SimSyncSlave::exitFlags::EXIT);
-    }
+    _slave->setExitFlag(SimSyncSlave::exitFlags::EXIT);
     _barrier.cancel();
-    for (const auto slave : _slaves) {
-        while (slave->getSim()->GetState() != Smp::SimulatorStateKind::SSK_Standby) {}
-    }
+    while (_slave->getSim()->GetState() != Smp::SimulatorStateKind::SSK_Standby) {}
 }
 
 void SimSyncMaster::abort() {
-    for (const auto slave : _slaves) {
-        slave->setExitFlag(SimSyncSlave::exitFlags::ABORT);
-    }
+    _slave->setExitFlag(SimSyncSlave::exitFlags::ABORT);
     _barrier.cancel();
-    for (const auto slave : _slaves) {
-        while (slave->getSim()->GetState() != Smp::SimulatorStateKind::SSK_Standby) {}
-    }
+    while (_slave->getSim()->GetState() != Smp::SimulatorStateKind::SSK_Standby) {}
 }
 
 }  /* namespace mt */

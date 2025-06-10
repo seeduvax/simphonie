@@ -314,11 +314,7 @@ Smp::AnySimple anyFromLua(Smp::PrimitiveTypeKind ptk, sol::object val){
         case Smp::PrimitiveTypeKind::PTK_Int64:
         case Smp::PrimitiveTypeKind::PTK_DateTime:
         case Smp::PrimitiveTypeKind::PTK_Duration:
-            if (val.is<Smp::IObject*>()) {
-                res.SetValue(ptk,(Smp::Int64)val.as<Smp::IObject*>());
-            } else {
-                res.SetValue(ptk,(Smp::Int64)val.as<double>());
-            }
+            res.SetValue(ptk, (Smp::Int64)val.as<double>());
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt8:
             res.SetValue(ptk,(Smp::UInt8)val.as<double>());
@@ -330,7 +326,12 @@ Smp::AnySimple anyFromLua(Smp::PrimitiveTypeKind ptk, sol::object val){
             res.SetValue(ptk,(Smp::UInt32)val.as<double>());
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt64:
-            res.SetValue(ptk,(Smp::UInt64)val.as<double>());
+            if (val.is<Smp::IObject*>()) {
+                res.SetValue(ptk, (Smp::UInt64)val.as<Smp::IObject*>());
+            }
+            else {
+                res.SetValue(ptk, (Smp::UInt64)val.as<double>());
+            }
             break;
         case Smp::PrimitiveTypeKind::PTK_Bool:
             res.SetValue(ptk,val.as<Smp::Bool>());
