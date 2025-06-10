@@ -47,5 +47,5 @@ void SimSyncSlave::sync() {
     }
 }
 
-}  /* namespace mt */
-}  /* namespace simphonie */
+} /* namespace mt */
+} /* namespace simphonie */

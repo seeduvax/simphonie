@@ -39,6 +39,6 @@ private:
 
 };
 
-}  /* namespace mt */
-}  /* namespace simphonie */
-#endif  /* __simphonie_mt_SimSyncSlave_HPP__ */
+} /* namespace mt */
+} /* namespace simphonie */
+#endif /* __simphonie_mt_SimSyncSlave_HPP__ */

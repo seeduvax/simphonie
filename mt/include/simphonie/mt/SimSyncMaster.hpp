@@ -10,9 +10,10 @@
 #ifndef __simphonie_mt_SimSyncMaster_HPP__
 #define __simphonie_mt_SimSyncMaster_HPP__
 
+#include <condition_variable>
 #include "Smp/ISimulator.h"
-#include "simdeck/Service.hpp"
 #include "simdeck/EntryPointPublisher.hpp"
+#include "simdeck/Service.hpp"
 #include "simphonie/mt/SimSyncSlave.hpp"
 #include "simphonie/sys/Barrier.hpp"
 
@@ -30,6 +31,8 @@ protected:
     void connect() override;
 
 private:
+    void waitSlaveStandby();
+    void slavestby();
     void sync();
     void init();
     void store();
@@ -42,9 +45,9 @@ private:
     Smp::UInt64 _slaveAddr;
     SimSyncSlave* _slave;
     simphonie::sys::Barrier _barrier;
-
+    std::condition_variable _condvar;
 };
 
-}  /* namespace mt */
-}  /* namespace simphonie */
-#endif  /* __simphonie_mt_SimSyncMaster_HPP__ */
+} /* namespace mt */
+} /* namespace simphonie */
+#endif /* __simphonie_mt_SimSyncMaster_HPP__ */

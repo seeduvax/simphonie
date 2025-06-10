@@ -21,6 +21,7 @@
 #define EP_LEAVERUN "leaverun"
 #define EP_EXIT "exit"
 #define EP_ABORT "abort"
+#define EP_SLAVESTBY "slavestdby"
 
 namespace simphonie {
 namespace mt {
@@ -35,6 +36,7 @@ SimSyncMaster::SimSyncMaster(Smp::String8 name, Smp::String8 descr, Smp::IObject
     addEP(EP_LEAVERUN, "Internal use only.", this, &SimSyncMaster::leaverun);
     addEP(EP_EXIT, "Internal use only.", this, &SimSyncMaster::exit);
     addEP(EP_ABORT, "Internal use only.", this, &SimSyncMaster::abort);
+    addEP(EP_SLAVESTBY, "Internal use only.", this, &SimSyncMaster::slavestby);
 }
 
 void SimSyncMaster::publish(Smp::IPublication* receiver) {
@@ -90,23 +92,37 @@ void SimSyncMaster::run() {
     _slave->getSim()->Run();
 }
 
+void SimSyncMaster::waitSlaveStandby() {
+    _slave->getSim()->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_EnterStandbyId,
+                                                   GetEntryPoint(EP_SLAVESTBY));
+    std::mutex mutex;
+    std::unique_lock lock(mutex);
+    _condvar.wait(lock, [&] { return _slave->getSim()->GetState() == Smp::SimulatorStateKind::SSK_Standby; });
+    _slave->getSim()->GetEventManager()->Unsubscribe(Smp::Services::IEventManager::SMP_EnterStandbyId,
+                                                     GetEntryPoint(EP_SLAVESTBY));
+}
+
+void SimSyncMaster::slavestby() {
+    _condvar.notify_one();
+}
+
 void SimSyncMaster::leaverun() {
     _slave->setExitFlag(SimSyncSlave::exitFlags::HOLD);
     _barrier.cancel();
-    while (_slave->getSim()->GetState() != Smp::SimulatorStateKind::SSK_Standby) {}
+    waitSlaveStandby();
 }
 
 void SimSyncMaster::exit() {
     _slave->setExitFlag(SimSyncSlave::exitFlags::EXIT);
     _barrier.cancel();
-    while (_slave->getSim()->GetState() != Smp::SimulatorStateKind::SSK_Standby) {}
+    waitSlaveStandby();
 }
 
 void SimSyncMaster::abort() {
     _slave->setExitFlag(SimSyncSlave::exitFlags::ABORT);
     _barrier.cancel();
-    while (_slave->getSim()->GetState() != Smp::SimulatorStateKind::SSK_Standby) {}
+    waitSlaveStandby();
 }
 
-}  /* namespace mt */
-}  /* namespace simphonie */
+} /* namespace mt */
+} /* namespace simphonie */
