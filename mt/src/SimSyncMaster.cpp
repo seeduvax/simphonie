@@ -7,11 +7,11 @@
  * $Id$
  * $Date$
  */
-#include <sstream>
 #include "simphonie/mt/SimSyncMaster.hpp"
 #include "Smp/IPublication.h"
-#include "Smp/Services/IScheduler.h"
 #include "Smp/Services/IEventManager.h"
+#include "Smp/Services/IScheduler.h"
+#include "simdeck/ExInvalidFieldName.hpp"
 
 #define EP_SYNC "sync"
 #define EP_INIT "init"
@@ -39,13 +39,20 @@ SimSyncMaster::SimSyncMaster(Smp::String8 name, Smp::String8 descr, Smp::IObject
     addEP(EP_SLAVESTBY, "Internal use only.", this, &SimSyncMaster::slavestby);
 }
 
+SimSyncDataShare::DataType SimSyncMaster::sendData() {
+    std::unique_lock<std::mutex> lock(_dataMtx);
+    return _data;
+}
+
 void SimSyncMaster::publish(Smp::IPublication* receiver) {
     receiver->PublishField("slave", "Sub-simulator", &_slaveAddr, Smp::ViewKind::VK_All, false, true, false);
+    _dataShare.publish(this, receiver);
 }
 
 void SimSyncMaster::configure() {
     _slave = reinterpret_cast<SimSyncSlave*>(static_cast<uintptr_t>(_slaveAddr));
     _slave->setBarrier(&_barrier);
+    _slave->setSendDataFunc(std::bind(&SimSyncMaster::sendData, this));
     _slave->getSim()->Configure();
 }
 
@@ -58,6 +65,7 @@ void SimSyncMaster::connect() {
     getSimulator()->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId, GetEntryPoint(EP_LEAVERUN));
     getSimulator()->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_EnterExitingId, GetEntryPoint(EP_EXIT));
     getSimulator()->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_EnterAbortingId, GetEntryPoint(EP_ABORT));
+    _resolver = getSimulator()->GetResolver();
 }
 
 void SimSyncMaster::init() {
@@ -77,13 +85,14 @@ void SimSyncMaster::restore() {
 }
 
 void SimSyncMaster::sync() {
-    const auto start = std::chrono::system_clock::now();
+    {
+        const auto data = _dataShare.retrieveData();
+        std::unique_lock<std::mutex> lock(_dataMtx);
+        _data = data;
+    }
     if (_barrier.wait()) {
-        const auto end = std::chrono::system_clock::now();
-        std::ostringstream oss;
-        oss << (end - start).count();
-        logDebug(oss.str().c_str());
-        /* Share data here */
+        const auto data = _slave->sendData();
+        _dataShare.loadData(data);
     }
 }
 
@@ -96,7 +105,7 @@ void SimSyncMaster::waitSlaveStandby() {
     _slave->getSim()->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_EnterStandbyId,
                                                    GetEntryPoint(EP_SLAVESTBY));
     std::mutex mutex;
-    std::unique_lock lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex);
     _condvar.wait(lock, [&] { return _slave->getSim()->GetState() == Smp::SimulatorStateKind::SSK_Standby; });
     _slave->getSim()->GetEventManager()->Unsubscribe(Smp::Services::IEventManager::SMP_EnterStandbyId,
                                                      GetEntryPoint(EP_SLAVESTBY));

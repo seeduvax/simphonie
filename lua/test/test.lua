@@ -10,13 +10,28 @@ sim2=s.CreateSimulator({
     },
     components={
         inc1Slave={type="simphonie::umdl::SmpIncrement"},
+        inc2Slave={type="simphonie::umdl::SmpIncrement"},
+        recorder={type="simphonie::colibry::FieldRecorderHDF5",
+            filePath="myRecSim2.h5"},
         slave={type="simphonie::mt::SimSyncSlave"},
     },
     connections={
+        ["recorder/port"]={
+            "inc1Slave/input",
+            "inc2Slave/output",
+        },
+        ["slave/inputs"]={
+            "inc1Slave/input",
+        },
+        ["slave/outputs"]={
+            "inc2Slave/output",
+        },
     },
     schedule={
         {name="inc1Slave/step", cycleTime_ms=25, offset_ms=20},
-        {name="slave/sync", cycleTime_ms=25, offset_ms=20},
+        {name="inc2Slave/step", cycleTime_ms=50},
+        {name="recorder/step", cycleTime_ms=25},
+        {name="slave/sync", cycleTime_ms=25},
     }
 })
 sim=s.CreateSimulator({
@@ -73,6 +88,12 @@ sim=s.CreateSimulator({
             "inc1/output",
             "MyLuaModel/dblvect",
             "MyLuaModel/cpt"
+        },
+        ["master/inputs"]={
+            "inc2/input",
+        },
+        ["master/outputs"]={
+            "inc1/output",
         },
         inc2 = "inc1" -- just ro test link registry
     },
@@ -133,6 +154,7 @@ eventId=sim:GetEventManager():QueryEventId("TheEvent")
 sim:GetEventManager():Emit(eventId, true)
 
 sim:Run()
+-- sim:wait(EnterStandBy)
 
 while sim.State~=3 do
 end

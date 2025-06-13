@@ -11,9 +11,16 @@
 #define __simphonie_mt_SimSyncMaster_HPP__
 
 #include <condition_variable>
+#include <functional>
+#include <sstream>
+#include "Smp/Bool.h"
+#include "Smp/IField.h"
+#include "Smp/IOutputField.h"
 #include "Smp/ISimulator.h"
+#include "Smp/Services/IResolver.h"
 #include "simdeck/EntryPointPublisher.hpp"
 #include "simdeck/Service.hpp"
+#include "simphonie/mt/SimSyncDataShare.hpp"
 #include "simphonie/mt/SimSyncSlave.hpp"
 #include "simphonie/sys/Barrier.hpp"
 
@@ -24,6 +31,8 @@ class SimSyncMaster : public simdeck::Service, public simdeck::EntryPointPublish
 public:
     SimSyncMaster(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent);
     ~SimSyncMaster() = default;
+
+    SimSyncDataShare::DataType sendData();
 
 protected:
     void publish(Smp::IPublication* receiver) override;
@@ -42,10 +51,14 @@ private:
     void exit();
     void abort();
 
+    Smp::Services::IResolver* _resolver;
     Smp::UInt64 _slaveAddr;
     SimSyncSlave* _slave;
     simphonie::sys::Barrier _barrier;
     std::condition_variable _condvar;
+    SimSyncDataShare _dataShare;
+    std::mutex _dataMtx;
+    SimSyncDataShare::DataType _data;
 };
 
 } /* namespace mt */

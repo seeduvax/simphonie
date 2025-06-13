@@ -9,13 +9,19 @@
  */
 #ifndef __simphonie_mt_SimSyncSlave_HPP__
 #define __simphonie_mt_SimSyncSlave_HPP__
+
+#include <functional>
+#include <mutex>
 #include "Smp/ISimulator.h"
-#include "simdeck/Service.hpp"
 #include "simdeck/EntryPointPublisher.hpp"
+#include "simdeck/Service.hpp"
+#include "simphonie/mt/SimSyncDataShare.hpp"
 #include "simphonie/sys/Barrier.hpp"
 
 namespace simphonie {
 namespace mt {
+
+class SimSyncMaster;
 
 class SimSyncSlave : public simdeck::Service, public simdeck::EntryPointPublisher {
 public:
@@ -28,15 +34,26 @@ public:
     SimSyncSlave(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
     ~SimSyncSlave() = default;
 
+    inline void setSendDataFunc(std::function<SimSyncDataShare::DataType(void)> masterSendData) {
+        _masterSendData = masterSendData;
+    }
     inline Smp::ISimulator* getSim() { return getSimulator(); }
     inline void setBarrier(simphonie::sys::Barrier *barrier) { _barrier = barrier; }
     inline void setExitFlag(exitFlags flag) { _exitFlag = flag; }
+    SimSyncDataShare::DataType sendData();
+
+protected:
+    void publish(Smp::IPublication* receiver);
 
 private:
     void sync();
+
     simphonie::sys::Barrier *_barrier;
     exitFlags _exitFlag;
-
+    SimSyncDataShare _dataShare;
+    std::mutex _dataMtx;
+    SimSyncDataShare::DataType _data;
+    std::function<SimSyncDataShare::DataType(void)> _masterSendData;
 };
 
 } /* namespace mt */

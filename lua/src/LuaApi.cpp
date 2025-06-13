@@ -22,6 +22,7 @@
 #include "simdeck/Utils.hpp"
 #include "simphonie/lua/LuaBuilder.hpp"
 #include "simphonie/lua/LuaModel.hpp"
+#include "simphonie/mt/SimSyncMaster.hpp"
 #include "simphonie/sys/DLib.hpp"
 #include "sol/sol.hpp"
 

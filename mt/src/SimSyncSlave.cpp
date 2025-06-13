@@ -10,8 +10,6 @@
 #include "simphonie/mt/SimSyncSlave.hpp"
 #include "simdeck/ExInvalidParent.hpp"
 
-#include <sstream>
-
 namespace simphonie {
 namespace mt {
 
@@ -24,15 +22,26 @@ SimSyncSlave::SimSyncSlave(Smp::String8 name, Smp::String8 descr, Smp::IObject* 
           this, &SimSyncSlave::sync);
 }
 
+SimSyncDataShare::DataType SimSyncSlave::sendData() {
+    std::unique_lock<std::mutex> lock(_dataMtx);
+    return _data;
+}
+
+void SimSyncSlave::publish(Smp::IPublication* receiver) {
+    _dataShare.publish(this, receiver);
+}
+
 void SimSyncSlave::sync() {
-    const auto start = std::chrono::system_clock::now();
+    {
+        const auto data = _dataShare.retrieveData();
+        std::unique_lock<std::mutex> lock(_dataMtx);
+        _data = data;
+    }
     if (_barrier->wait()) {
-        const auto end = std::chrono::system_clock::now();
-        std::ostringstream oss;
-        oss << (end - start).count();
-        logDebug(oss.str().c_str());
-        /* Share data here */
-    } else { 
+        const auto data = _masterSendData();
+        _dataShare.loadData(data);
+    }
+    else {
         switch (_exitFlag) {
         case HOLD:
             getSimulator()->Hold(true);
