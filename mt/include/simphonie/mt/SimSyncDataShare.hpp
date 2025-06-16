@@ -55,10 +55,9 @@ private:
 
     FieldHolder* _inputs;
     FieldHolder* _outputs;
-    Smp::Services::IResolver* _resolver;
     DataType _buf;
 };
 
-}  // namespace mt
-}  // namespace simphonie
+} /* namespace mt */
+} /* namespace simphonie */
 #endif /* __simphonie_mt_SimSyncDataShare_HPP__ */
