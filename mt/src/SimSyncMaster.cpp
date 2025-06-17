@@ -28,7 +28,10 @@ namespace mt {
 
 SimSyncMaster::SimSyncMaster(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : simdeck::Service(name, descr, parent), _barrier(2) {
-    addEP(EP_SYNC, "Simulators' synchronization function. Blocks until every slaveulators are waiting to then share data among them.", this, &SimSyncMaster::sync);
+    addEP(EP_SYNC,
+          "Simulators' synchronization function. Blocks until every simulators are waiting to then share data among "
+          "them.",
+          this, &SimSyncMaster::sync);
     addEP(EP_INIT, "Internal use only.", this, &SimSyncMaster::init);
     addEP(EP_STORE, "Internal use only.", this, &SimSyncMaster::store);
     addEP(EP_RESTORE, "Internal use only.", this, &SimSyncMaster::restore);
@@ -85,12 +88,14 @@ void SimSyncMaster::restore() {
 }
 
 void SimSyncMaster::sync() {
+    logInfo("wait");
     {
         const auto data = _dataShare.retrieveData();
         std::unique_lock<std::mutex> lock(_dataMtx);
         _data = data;
     }
     if (_barrier.wait()) {
+        logInfo("go");
         const auto data = _slave->sendData();
         _dataShare.loadData(data);
     }
