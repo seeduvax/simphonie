@@ -42,10 +42,10 @@ sim=s.CreateSimulator({
         "simphonie_colibry",
         "simphonie_lua",
         "simphonie_mt",
-        --        "simphonie_rest",
+        "simphonie_rest",
     },
     components={
---        webserver={type="simphonie::rest::RestService"},
+        webserver={type="simphonie::rest::RestService"},
         ctrl={type="simphonie::colibry::SimControl",
             description="Auto stop the simulation when stop condition is reached.",
             condition="(> SmpIncrementEvent 10)"
@@ -154,9 +154,9 @@ eventId=sim:GetEventManager():QueryEventId("TheEvent")
 sim:GetEventManager():Emit(eventId, true)
 
 sim:Run()
--- sim:wait(EnterStandBy)
 
-while sim.State~=3 do
+while true do
+    -- while sim.State~=3 do
 end
 
 sim:Store("mySimu.cp")

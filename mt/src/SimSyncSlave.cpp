@@ -32,19 +32,16 @@ void SimSyncSlave::publish(Smp::IPublication* receiver) {
 }
 
 void SimSyncSlave::sync() {
-    logInfo("wait");
     {
         const auto data = _dataShare.retrieveData();
         std::unique_lock<std::mutex> lock(_dataMtx);
         _data = data;
     }
     if (_barrier->wait()) {
-        logInfo("go");
         const auto data = _masterSendData();
         _dataShare.loadData(data);
     }
     else {
-        logInfo("exit");
         switch (_exitFlag) {
         case HOLD:
             getSimulator()->Hold(true);

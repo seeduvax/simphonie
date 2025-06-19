@@ -88,14 +88,12 @@ void SimSyncMaster::restore() {
 }
 
 void SimSyncMaster::sync() {
-    logInfo("wait");
     {
         const auto data = _dataShare.retrieveData();
         std::unique_lock<std::mutex> lock(_dataMtx);
         _data = data;
     }
     if (_barrier.wait()) {
-        logInfo("go");
         const auto data = _slave->sendData();
         _dataShare.loadData(data);
     }
