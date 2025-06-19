@@ -61,7 +61,7 @@ void StructureType::AddField(
     }
 }
 // ..........................................................
-void StructureType::setup(StructureField* sf) {
+void StructureType::setup(StructureField* sf) const {
     for (auto fd : _fields) {
         // TODO make better pointer arithmetic than this ugly hack to
         // make it quicly compile.

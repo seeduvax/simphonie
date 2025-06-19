@@ -43,7 +43,7 @@ public:
      * Setup structure field according to this structure type definition.
      * @param sf StructureField to setup
      */
-    void setup(StructureField* sf);
+    void setup(StructureField* sf) const;
 
 private:
     struct FieldDescr {

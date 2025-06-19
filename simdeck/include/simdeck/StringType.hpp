@@ -20,6 +20,10 @@ namespace simdeck {
  */
 class StringType: public Object, virtual public Smp::Publication::IType {
     typedef Object Parent;
+    
+public:
+    static const Smp::Uuid UuidString;
+
 public:
     /**
      * Default constructor.
@@ -33,8 +37,6 @@ public:
     // Type specialization
     Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
     Smp::Uuid GetUuid() const override;
-private:
-
 };
 
 } // namespace simdeck

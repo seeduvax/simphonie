@@ -36,7 +36,7 @@ public:
 };
 Field::Field(Smp::String8 name, Smp::String8 description,
              Smp::ViewKind viewKind, void* address, unsigned int dataSize,
-             Smp::Publication::IType* type, Smp::Bool isState,
+             const Smp::Publication::IType* type, Smp::Bool isState,
              Smp::Bool isInput, Smp::Bool isOutput,
              Smp::IObject* parent)
     : Persist(name, description, parent,true),
@@ -97,10 +97,10 @@ const Smp::Publication::IType* Field::GetType() const {
 // StructureField
 // ..........................................................
 StructureField::StructureField(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, void* address,
-                               Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+                               const Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
                                Smp::IObject* parent)
     : Field(name, description, viewKind, address, 0, type, isState, isInput, isOutput, parent) {
-    auto st = dynamic_cast<StructureType*>(type);
+    auto st = dynamic_cast<const StructureType*>(type);
     if (st != nullptr) {
         st->setup(this);
     }

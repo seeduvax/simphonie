@@ -49,7 +49,7 @@ protected:
      * @param isOutput output flag.
      */
     Field(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, void* address, unsigned int dataSize,
-          Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+          const Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
           Smp::IObject* parent);
     inline const void* getDataPtr() {
         return _data;
@@ -80,7 +80,7 @@ private:
 class StructureField : public Field {
 public:
     StructureField(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, void* address,
-                   Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+                   const Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
                    Smp::IObject* parent);
     virtual ~StructureField();
     void addField(Smp::IField* f);

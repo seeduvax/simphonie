@@ -12,22 +12,24 @@
 #include "Smp/IOutputField.h"
 #include "Smp/Publication/IType.h"
 
+#include "simdeck/StringType.hpp"
+
 namespace simdeck {
-static Smp::Uuid _uuidString  = { 0, 0, 0, { ' ',' ','S','t','r','i','n','g'} };
-static Type _stringType(_uuidString, Smp::PrimitiveTypeKind::PTK_String8, sizeof(std::string), "String", "C++ String");
+static const Type _StringType(StringType::UuidString, Smp::PrimitiveTypeKind::PTK_String8, sizeof(std::string), "String", "C++ String");
 // --------------------------------------------------------------------
 // ..........................................................
 StringField::StringField(Smp::String8 name,
                 Smp::String8 description,
                 Smp::ViewKind viewKind,
                 std::string* address,
-                Smp::Publication::IType* type,
+                const Smp::Publication::IType* type,
                 Smp::Bool isState,
                 Smp::Bool isInput,
                 Smp::Bool isOutput,
                 Smp::IObject* parent):
                     Parent(name, description, viewKind, address, 
-                        sizeof(std::string), type==nullptr?&_stringType:type,
+                        sizeof(std::string), 
+                        type == nullptr ? &_StringType : type,
                         isState, isInput, isOutput, parent) {
     _value=address;
 }

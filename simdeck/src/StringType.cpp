@@ -10,6 +10,8 @@
 #include "simdeck/StringType.hpp"
 
 namespace simdeck {
+    
+const Smp::Uuid StringType::UuidString(0, 0, 0, { ' ',' ','S','t','r','i','n','g'});
 // --------------------------------------------------------------------
 // ..........................................................
 StringType::StringType(Smp::IObject* parent): 
@@ -27,6 +29,6 @@ Smp::PrimitiveTypeKind StringType::GetPrimitiveTypeKind() const {
 
 // ..........................................................
 Smp::Uuid StringType::GetUuid() const {
-    return { 0, 0, 0, { ' ',' ','S','t','r','i','n','g'} };   
+    return StringType::UuidString;   
 }
 } // namespace simdeck

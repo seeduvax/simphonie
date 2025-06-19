@@ -9,6 +9,7 @@
  */
 #include "abs/test.h"
 #include "simdeck/StringField.hpp"
+#include "simdeck/StringType.hpp"
 
 namespace test {
 using namespace simdeck;
@@ -39,7 +40,7 @@ public:
         auto value=sf->GetValue();
 
         CPPUNIT_ASSERT_EQUAL(Smp::PrimitiveTypeKind::PTK_String8, sf->GetType()->GetPrimitiveTypeKind());
-        Smp::Uuid expUuid={ 0, 0, 0, { ' ',' ','S','t','r','i','n','g'} };
+        Smp::Uuid expUuid = simdeck::StringType::UuidString;
         CPPUNIT_ASSERT_EQUAL(expUuid, sf->GetType()->GetUuid());
         std::string exp=DUMMY_STR;
         std::string vstr=(Smp::String8)value;
