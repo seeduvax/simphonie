@@ -11,6 +11,7 @@
 #define __simphonie_rest_RestService_HPP__
 
 #include "Smp/ISimulator.h"
+#include "Smp/Services/IResolver.h"
 #include "Smp/Services/ITimeKeeper.h"
 #include "simdeck/Service.hpp"
 #include "wfrest/HttpServer.h"
@@ -28,26 +29,25 @@ public:
 
 private:
     void connect();
+    static std::string extractLastElemPath(std::string& path);
     Json::Object parseTimestamp() const;
-    Json::Object parseUuid(const Smp::Uuid& uuid) const;
-    Json::Object parseType(const Smp::Publication::IType* type) const;
+    static Json::Object parseUuid(const Smp::Uuid& uuid);
+    static Json::Object parseType(const Smp::Publication::IType* type);
     template <typename T>
-    Json::Object parseKind(const T& kind) const;
-    Json::Object parseField(const Smp::IField* field) const;
-    Json::Object parseEP(const Smp::IEntryPoint* ep) const;
-    Json::Array parseFields(const Smp::IComponent* Component) const;
-    Json::Array parseEPs(const Smp::IComponent* Component) const;
-    Json::Object parseComponent(const Smp::IComponent* component) const;
-    Json::Array parseContainer(const Smp::IContainer* container) const;
+    static Json::Object parseKind(const T& kind);
+    static Json::Object parseField(const Smp::IField* field);
+    static Json::Object parseEP(const Smp::IEntryPoint* ep);
+    static Json::Array parseFields(const Smp::IComponent* Component);
+    static Json::Array parseEPs(const Smp::IComponent* Component);
+    static Json::Object parseComponent(const Smp::IComponent* component, bool recursive);
+    static Json::Array parseContainer(const Smp::IContainer* container, bool recursive);
     void getSimulator(const HttpReq* req, HttpResp* resp) const;
     void getState(const HttpReq* req, HttpResp* resp) const;
-    void getField(const HttpReq* req, HttpResp* resp) const;
-    void getEP(const HttpReq* req, HttpResp* resp) const;
-    void getComponent(const HttpReq* req, HttpResp* resp) const;
-    void getContainer(const HttpReq* req, HttpResp* resp) const;
+    void defaultGetHandler(const HttpReq* req, HttpResp* resp) const;
 
     HttpServer _server;
     const Smp::ISimulator* _sim;
+    Smp::Services::IResolver* _rslv;
     Smp::Services::ITimeKeeper* _tk;
 };
 
