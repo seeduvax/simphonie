@@ -1,7 +1,7 @@
 /*
  * @file RestService.cpp
  *
- * Copyright 2025 Sebastien Devaux. All rights reserved.
+ * Copyright 2025. All rights reserved.
  * Use is subject to license terms.
  *
  * $Id$
@@ -11,6 +11,7 @@
 #include <string>
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/Publication/IType.h"
+#include "Smp/Services/IScheduler.h"
 #include "Smp/SimulatorStateKind.h"
 #include "Smp/ViewKind.h"
 #include "simdeck/ExInvalidParent.hpp"
@@ -32,6 +33,8 @@ RestService::RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* pa
         _server.GET(root + "/state", [=](const HttpReq* req, HttpResp* resp) { this->getState(req, resp); });
         _server.GET(root + "/*", [=](const HttpReq* req, HttpResp* resp) { this->defaultGetHandler(req, resp); });
         _server.POST(root + "/state", [=](const HttpReq* req, HttpResp* resp) { this->postState(req, resp); });
+        _server.POST(root + "/schedulelist",
+                     [=](const HttpReq* req, HttpResp* resp) { this->postScheduleList(req, resp); });
         _server.POST(root + "/*", [=](const HttpReq* req, HttpResp* resp) { this->defaultPostHandler(req, resp); });
         _server.start(8080); /* TODO add config params */
     }
@@ -90,6 +93,7 @@ void RestService::_FieldHandler::Restore(Smp::Void* address, Smp::UInt64 size) {
 void RestService::connect() {
     _tk = _sim->GetTimeKeeper();
     _rslv = _sim->GetResolver();
+    _schdl = _sim->GetScheduler();
 }
 
 std::string RestService::extractLastElemPath(std::string& path) {
@@ -236,6 +240,86 @@ void RestService::getState(const HttpReq* req, HttpResp* resp) const {
     auto json = parseKind(_sim->GetState());
     json.push_back("timestamp", parseTimestamp());
     resp->Json(json);
+}
+
+void RestService::postScheduleList(const HttpReq* req, HttpResp* resp) {
+    const auto json = Json::parse(req->body());
+    /* req->json() is better but it requires the content-type to be set to app/json */
+    if (!json.is_valid()) {
+        resp->String("Invalid json.");
+        resp->set_status_code("422");
+        return;
+    }
+
+    Smp::IEntryPoint* entrypoint;
+    try {
+        const auto path = json["entrypoint"].get<std::string>();
+        const auto obj = _rslv->ResolveAbsolute(path.c_str());
+        entrypoint = dynamic_cast<Smp::IEntryPoint*>(obj);
+        if (!entrypoint) {
+            throw std::exception();
+        }
+    }
+    catch (...) {
+        resp->String("Invalid entrypoint.");
+        resp->set_status_code("422");
+        return;
+    }
+
+    if (json.has("immediate") && json["immediate"].get<Smp::Bool>()) {
+        _schdl->AddImmediateEvent(entrypoint);
+        return;
+    }
+
+    Smp::Duration period = 0;
+    if (json.has("cycleTime_s")) {
+        period = json["cycleTime_s"].get<Smp::Duration>() * 1000000000ULL;
+    }
+    else {
+        if (json.has("cycleTime_ms")) {
+            period = json["cycleTime_ms"].get<Smp::Duration>() * 1000000ULL;
+        }
+        else {
+            if (json.has("cycleTime_us")) {
+                period = json["cycleTime_us"].get<Smp::Duration>() * 1000ULL;
+            }
+            else {
+                if (json.has("cycleTime_ns")) {
+                    period = json["cycleTime_ns"].get<Smp::Duration>();
+                }
+            }
+        }
+    }
+
+    Smp::Duration time = 0;
+    if (json.has("offset_s")) {
+        time = json["offset_s"].get<Smp::Duration>() * 1000000000ULL;
+    }
+    else {
+        if (json.has("offset_ms")) {
+            time = json["offset_ms"].get<Smp::Duration>() * 1000000ULL;
+        }
+        else {
+            if (json.has("offset_us")) {
+                time = json["offset_us"].get<Smp::Duration>() * 1000ULL;
+            }
+            else {
+                if (json.has("offset_ns")) {
+                    time = json["offset_ns"].get<Smp::Duration>();
+                }
+            }
+        }
+    }
+
+    const auto repeat = json.has("repetitions") ? json["repetitions"].get<Smp::Int64>() : -1LL;
+
+    try {
+        _schdl->AddSimulationTimeEvent(entrypoint, time, period, repeat);
+    }
+    catch (...) {
+        resp->String("Scheduling failed.");
+        resp->set_status_code("422");
+    }
 }
 
 void RestService::postState(const HttpReq* req, HttpResp* resp) {

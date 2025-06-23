@@ -72,6 +72,7 @@ private:
     Json::Array parseContainer(const Smp::IContainer* container, bool recursive);
     void getSimulator(const HttpReq* req, HttpResp* resp);
     void getState(const HttpReq* req, HttpResp* resp) const;
+    void postScheduleList(const HttpReq* req, HttpResp* resp);
     void postState(const HttpReq* req, HttpResp* resp);
     void defaultGetHandler(const HttpReq* req, HttpResp* resp);
     void defaultPostHandler(const HttpReq* req, HttpResp* resp);
@@ -80,6 +81,7 @@ private:
     Smp::ISimulator* _sim;
     Smp::Services::IResolver* _rslv;
     Smp::Services::ITimeKeeper* _tk;
+    Smp::Services::IScheduler* _schdl;
 };
 
 } /* namespace rest */
