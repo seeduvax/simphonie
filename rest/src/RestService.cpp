@@ -8,8 +8,10 @@
  * $Date$
  */
 #include "simphonie/rest/RestService.hpp"
+#include <string>
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/Publication/IType.h"
+#include "Smp/SimulatorStateKind.h"
 #include "Smp/ViewKind.h"
 #include "simdeck/ExInvalidParent.hpp"
 #include "wfrest/ErrorCode.h"
@@ -19,6 +21,8 @@ namespace rest {
 
 using namespace wfrest;
 
+const char* _hexDigit = "0123456789abcdef";
+
 RestService::RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : simdeck::Service(name, descr, parent), _sim(dynamic_cast<Smp::ISimulator*>(parent)) {
     if (_sim != nullptr) {
@@ -27,6 +31,8 @@ RestService::RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* pa
         _server.GET(root, [=](const HttpReq* req, HttpResp* resp) { this->getSimulator(req, resp); });
         _server.GET(root + "/state", [=](const HttpReq* req, HttpResp* resp) { this->getState(req, resp); });
         _server.GET(root + "/*", [=](const HttpReq* req, HttpResp* resp) { this->defaultGetHandler(req, resp); });
+        _server.POST(root + "/state", [=](const HttpReq* req, HttpResp* resp) { this->postState(req, resp); });
+        _server.POST(root + "/*", [=](const HttpReq* req, HttpResp* resp) { this->defaultPostHandler(req, resp); });
         _server.start(8080); /* TODO add config params */
     }
     else {
@@ -39,6 +45,25 @@ RestService::RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* pa
 
 RestService::~RestService() {
     _server.stop();
+}
+
+void RestService::Store(const Smp::Void* address, Smp::UInt64 size) {
+    auto addr = reinterpret_cast<const uint8_t*>(address);
+    for (Smp::UInt64 i = 0; i < size; ++i) {
+        _buf.push_back(_hexDigit[(addr[i] & 0xF0) >> 4]);
+        _buf.push_back(_hexDigit[addr[i] & 0x0F]);
+    }
+}
+
+void RestService::Restore(Smp::Void* address, Smp::UInt64 size) {
+    auto addr = reinterpret_cast<uint8_t*>(address);
+    for (Smp::UInt64 i = 0; i < size; ++i) {
+        const auto high = getHexPos(_buf.front());
+        _buf.erase(_buf.begin());
+        const auto low = getHexPos(_buf.front());
+        _buf.erase(_buf.begin());
+        addr[i] = (high << 4) | low;
+    }
 }
 
 void RestService::connect() {
@@ -101,11 +126,25 @@ Json::Object RestService::parseKind(const T& kind) {
     };
 }
 
-Json::Object RestService::parseField(const Smp::IField* field) {
+Json::Object RestService::parseField(Smp::IField* field) {
+    std::string value;
+    {
+        std::unique_lock<std::mutex> lock(_bufMtx);
+        _bufCovar.wait(lock, [&] { return _buf.empty(); });
+
+        field->Store(this);
+        value = std::string(_buf.data(), _buf.size());
+        _buf.clear();
+        _bufCovar.notify_one();
+    }
     return Json::Object{
-        {"name", field->GetName()},      {"viewKind", static_cast<Smp::Int32>(field->GetView())},
-        {"isState", field->IsState()},   {"isInput", field->IsInput()},
-        {"isOutput", field->IsOutput()}, {"type", parseType(field->GetType())},
+        {"name", field->GetName()},
+        {"viewKind", static_cast<Smp::Int32>(field->GetView())},
+        {"isState", field->IsState()},
+        {"isInput", field->IsInput()},
+        {"isOutput", field->IsOutput()},
+        {"type", parseType(field->GetType())},
+        {"value", value},
     };
 }
 
@@ -118,7 +157,7 @@ Json::Object RestService::parseEP(const Smp::IEntryPoint* ep) {
 
 Json::Array RestService::parseFields(const Smp::IComponent* component) {
     Json::Array json;
-    for (const auto field : *(component->GetFields())) {
+    for (auto field : *(component->GetFields())) {
         json.push_back(parseField(field));
     }
     return json;
@@ -193,7 +232,55 @@ void RestService::getState(const HttpReq* req, HttpResp* resp) const {
     resp->Json(json);
 }
 
-void RestService::getSimulator(const HttpReq* req, HttpResp* resp) const {
+void RestService::postState(const HttpReq* req, HttpResp* resp) {
+    try {
+        const auto json = Json::parse(req->body());
+        /* req->json() is better but it requires the content-type to be set to app/json */
+        if (!json.is_valid()) {
+            throw std::invalid_argument("Invalid json found in the body request");
+        }
+        const auto id = json["id"].get<Smp::Int32>();
+        const auto ssk = static_cast<Smp::SimulatorStateKind>(id);
+        switch (ssk) {
+            case Smp::SimulatorStateKind::SSK_Building:
+                _sim->Publish();
+                _sim->Configure();
+                break;
+            case Smp::SimulatorStateKind::SSK_Initialising:
+                _sim->Initialise();
+                break;
+            case Smp::SimulatorStateKind::SSK_Connecting:
+                _sim->Connect();
+                break;
+            case Smp::SimulatorStateKind::SSK_Executing:
+                _sim->Run();
+                break;
+            case Smp::SimulatorStateKind::SSK_Standby:
+                _sim->Hold(true);
+                break;
+            case Smp::SimulatorStateKind::SSK_Storing: {
+                const auto filename = json["filename"].get<std::string>();
+                _sim->Store(filename.c_str());
+            } break;
+            case Smp::SimulatorStateKind::SSK_Restoring: {
+                const auto filename = json["filename"].get<std::string>();
+                _sim->Restore(filename.c_str());
+            } break;
+            case Smp::SimulatorStateKind::SSK_Exiting:
+                _sim->Exit();
+                break;
+            case Smp::SimulatorStateKind::SSK_Aborting:
+                _sim->Abort();
+                break;
+        }
+    }
+    catch (...) {
+        resp->String("Invalid json.");
+        resp->set_status_code("422");
+    }
+}
+
+void RestService::getSimulator(const HttpReq* req, HttpResp* resp) {
     Json::Object json;
     json.push_back("name", _sim->GetName());
     json.push_back("description", _sim->GetDescription());
@@ -217,7 +304,7 @@ void RestService::getSimulator(const HttpReq* req, HttpResp* resp) const {
     resp->Json(json);
 }
 
-void RestService::defaultGetHandler(const HttpReq* req, HttpResp* resp) const {
+void RestService::defaultGetHandler(const HttpReq* req, HttpResp* resp) {
     const auto path = "/" + req->match_path();
 
     auto objPath = path;
@@ -247,7 +334,7 @@ void RestService::defaultGetHandler(const HttpReq* req, HttpResp* resp) const {
             }
             else {
                 if (prelastElem == "fields") {
-                    const auto field = comp->GetField(lastElem.c_str());
+                    auto field = comp->GetField(lastElem.c_str());
                     json = parseField(field);
                 }
                 else {
@@ -258,6 +345,46 @@ void RestService::defaultGetHandler(const HttpReq* req, HttpResp* resp) const {
         json.push_back("timestamp", parseTimestamp());
         resp->Json(json);
     }
+}
+
+void RestService::defaultPostHandler(const HttpReq* req, HttpResp* resp) {
+    Smp::IField* field;
+    {
+        const auto path = "/" + req->match_path();
+
+        auto objPath = path;
+        const auto lastElem = extractLastElemPath(objPath);
+        const auto fields = extractLastElemPath(objPath);
+        if (fields != "fields") {
+            const std::string msg = "POST request does not lead to a field.";
+            resp->Error(ErrorCode::StatusNotFound, msg);
+            return;
+        }
+        const auto comp = dynamic_cast<Smp::IComponent*>(_rslv->ResolveAbsolute(objPath.c_str()));
+        if (!comp) {
+            const std::string msg = "the path '" + objPath + "' does not lead to a component.";
+            resp->Error(ErrorCode::StatusNotFound, msg);
+            return;
+        }
+        field = comp->GetField(lastElem.c_str());
+    }
+    std::string value;
+    {
+        const auto json = Json::parse(req->body());
+        /* req->json() is better but it requires the content-type to be set to app/json */
+        if (!json.is_valid()) {
+            resp->String("Invalid json found in the body request.");
+            resp->set_status_code("422");
+            return;
+        }
+        value = json["value"].get<std::string>();
+    }
+    std::unique_lock<std::mutex> lock(_bufMtx);
+    _bufCovar.wait(lock, [&] { return _buf.empty(); });
+    _buf = std::vector<char>(value.begin(), value.end());
+    field->Restore(this);
+    _buf.clear(); /* to make sure it is empty */
+    _bufCovar.notify_one();
 }
 
 } /* namespace rest */

@@ -9,8 +9,12 @@
  */
 #ifndef __simphonie_rest_RestService_HPP__
 #define __simphonie_rest_RestService_HPP__
-
+#include <condition_variable>
+#include <mutex>
+#include <vector>
 #include "Smp/ISimulator.h"
+#include "Smp/IStorageReader.h"
+#include "Smp/IStorageWriter.h"
 #include "Smp/Services/IResolver.h"
 #include "Smp/Services/ITimeKeeper.h"
 #include "simdeck/Service.hpp"
@@ -22,10 +26,19 @@ namespace rest {
 
 using namespace wfrest;
 
-class RestService : public simdeck::Service {
+class RestService : public simdeck::Service, virtual public Smp::IStorageWriter, virtual public Smp::IStorageReader {
 public:
     RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent);
     ~RestService();
+
+    void Store(const Smp::Void* address, Smp::UInt64 size) override;
+    void Restore(Smp::Void* address, Smp::UInt64 size) override;
+    Smp::String8 GetStateVectorFileName() const override {
+        return nullptr;
+    };
+    Smp::String8 GetStateVectorFilePath() const override {
+        return nullptr;
+    };
 
 private:
     void connect();
@@ -35,20 +48,28 @@ private:
     static Json::Object parseType(const Smp::Publication::IType* type);
     template <typename T>
     static Json::Object parseKind(const T& kind);
-    static Json::Object parseField(const Smp::IField* field);
+    Json::Object parseField(Smp::IField* field);
     static Json::Object parseEP(const Smp::IEntryPoint* ep);
-    static Json::Array parseFields(const Smp::IComponent* Component);
+    Json::Array parseFields(const Smp::IComponent* Component);
     static Json::Array parseEPs(const Smp::IComponent* Component);
-    static Json::Object parseComponent(const Smp::IComponent* component, bool recursive);
-    static Json::Array parseContainer(const Smp::IContainer* container, bool recursive);
-    void getSimulator(const HttpReq* req, HttpResp* resp) const;
+    Json::Object parseComponent(const Smp::IComponent* component, bool recursive);
+    Json::Array parseContainer(const Smp::IContainer* container, bool recursive);
+    void getSimulator(const HttpReq* req, HttpResp* resp);
     void getState(const HttpReq* req, HttpResp* resp) const;
-    void defaultGetHandler(const HttpReq* req, HttpResp* resp) const;
+    void postState(const HttpReq* req, HttpResp* resp);
+    void defaultGetHandler(const HttpReq* req, HttpResp* resp);
+    void defaultPostHandler(const HttpReq* req, HttpResp* resp);
+    static inline uint8_t getHexPos(char c) {
+        return (c <= '9') ? c - '0' : c - 'a' + 10;
+    }
 
     HttpServer _server;
-    const Smp::ISimulator* _sim;
+    Smp::ISimulator* _sim;
     Smp::Services::IResolver* _rslv;
     Smp::Services::ITimeKeeper* _tk;
+    std::vector<char> _buf;
+    std::mutex _bufMtx;
+    std::condition_variable _bufCovar;
 };
 
 } /* namespace rest */
