@@ -47,7 +47,28 @@ RestService::~RestService() {
     _server.stop();
 }
 
-void RestService::Store(const Smp::Void* address, Smp::UInt64 size) {
+void RestService::_FieldHandler::setValue(const std::string& value) {
+    std::unique_lock<std::mutex> lock(_bufMtx);
+    _bufCovar.wait(lock, [&] { return _buf.empty(); });
+    _buf = std::vector<char>(value.begin(), value.end());
+    field->Restore(this);
+    _buf.clear(); /* to make sure it is empty */
+    _bufCovar.notify_one();
+}
+
+std::string RestService::_FieldHandler::getValue() {
+    std::unique_lock<std::mutex> lock(_bufMtx);
+    _bufCovar.wait(lock, [&] { return _buf.empty(); });
+
+    field->Store(this);
+    const auto value = std::string(_buf.data(), _buf.size());
+    _buf.clear();
+    _bufCovar.notify_one();
+
+    return value;
+}
+
+void RestService::_FieldHandler::Store(const Smp::Void* address, Smp::UInt64 size) {
     auto addr = reinterpret_cast<const uint8_t*>(address);
     for (Smp::UInt64 i = 0; i < size; ++i) {
         _buf.push_back(_hexDigit[(addr[i] & 0xF0) >> 4]);
@@ -55,7 +76,7 @@ void RestService::Store(const Smp::Void* address, Smp::UInt64 size) {
     }
 }
 
-void RestService::Restore(Smp::Void* address, Smp::UInt64 size) {
+void RestService::_FieldHandler::Restore(Smp::Void* address, Smp::UInt64 size) {
     auto addr = reinterpret_cast<uint8_t*>(address);
     for (Smp::UInt64 i = 0; i < size; ++i) {
         const auto high = getHexPos(_buf.front());
@@ -92,22 +113,15 @@ Json::Object RestService::parseTimestamp() const {
     };
 }
 
-Json::Object RestService::parseUuid(const Smp::Uuid& uuid) {
-    std::string name;
+Json::Object RestService::parseType(const Smp::Publication::IType* type) {
+    std::string uuid;
     {
         std::ostringstream oss;
-        oss << uuid;
-        name = oss.str();
+        oss << type->GetUuid();
+        uuid = oss.str();
     }
     return Json::Object{
-        {"uint32", uuid.Data1},
-        {"string", name},
-    };
-}
-
-Json::Object RestService::parseType(const Smp::Publication::IType* type) {
-    return Json::Object{
-        {"uuid", parseUuid(type->GetUuid())},
+        {"uuid", uuid},
         {"primitive", parseKind(type->GetPrimitiveTypeKind())},
     };
 }
@@ -127,24 +141,12 @@ Json::Object RestService::parseKind(const T& kind) {
 }
 
 Json::Object RestService::parseField(Smp::IField* field) {
-    std::string value;
-    {
-        std::unique_lock<std::mutex> lock(_bufMtx);
-        _bufCovar.wait(lock, [&] { return _buf.empty(); });
-
-        field->Store(this);
-        value = std::string(_buf.data(), _buf.size());
-        _buf.clear();
-        _bufCovar.notify_one();
-    }
+    _FieldHandler fldhdl(field);
     return Json::Object{
-        {"name", field->GetName()},
-        {"viewKind", static_cast<Smp::Int32>(field->GetView())},
-        {"isState", field->IsState()},
-        {"isInput", field->IsInput()},
-        {"isOutput", field->IsOutput()},
-        {"type", parseType(field->GetType())},
-        {"value", value},
+        {"name", field->GetName()},      {"viewKind", static_cast<Smp::Int32>(field->GetView())},
+        {"isState", field->IsState()},   {"isInput", field->IsInput()},
+        {"isOutput", field->IsOutput()}, {"type", parseType(field->GetType())},
+        {"value", fldhdl.getValue()},
     };
 }
 
@@ -179,7 +181,11 @@ Json::Object RestService::parseComponent(const Smp::IComponent* component, bool 
     Json::Object json;
     json.push_back("name", component->GetName());
     json.push_back("description", component->GetDescription());
-    json.push_back("uuid", parseUuid(component->GetUuid()));
+    {
+        std::ostringstream oss;
+        oss << component->GetUuid();
+        json.push_back("uuid", oss.str());
+    }
     json.push_back("state", parseKind(component->GetState()));
     if (recursive) {
         {
@@ -379,12 +385,8 @@ void RestService::defaultPostHandler(const HttpReq* req, HttpResp* resp) {
         }
         value = json["value"].get<std::string>();
     }
-    std::unique_lock<std::mutex> lock(_bufMtx);
-    _bufCovar.wait(lock, [&] { return _buf.empty(); });
-    _buf = std::vector<char>(value.begin(), value.end());
-    field->Restore(this);
-    _buf.clear(); /* to make sure it is empty */
-    _bufCovar.notify_one();
+    _FieldHandler fldhdl(field);
+    fldhdl.setValue(value);
 }
 
 } /* namespace rest */

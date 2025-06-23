@@ -26,25 +26,41 @@ namespace rest {
 
 using namespace wfrest;
 
-class RestService : public simdeck::Service, virtual public Smp::IStorageWriter, virtual public Smp::IStorageReader {
+class RestService : public simdeck::Service {
 public:
     RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent);
     ~RestService();
 
-    void Store(const Smp::Void* address, Smp::UInt64 size) override;
-    void Restore(Smp::Void* address, Smp::UInt64 size) override;
-    Smp::String8 GetStateVectorFileName() const override {
-        return nullptr;
-    };
-    Smp::String8 GetStateVectorFilePath() const override {
-        return nullptr;
+private:
+    class _FieldHandler : virtual public Smp::IStorageWriter, virtual public Smp::IStorageReader {
+    public:
+        inline _FieldHandler(Smp::IField* field) : field(field) {}
+
+        std::string getValue();
+        void setValue(const std::string& value);
+        void Store(const Smp::Void* address, Smp::UInt64 size) override;
+        void Restore(Smp::Void* address, Smp::UInt64 size) override;
+        inline Smp::String8 GetStateVectorFileName() const override {
+            return nullptr;
+        };
+        inline Smp::String8 GetStateVectorFilePath() const override {
+            return nullptr;
+        };
+
+    private:
+        static inline uint8_t getHexPos(char c) {
+            return (c <= '9') ? c - '0' : c - 'a' + 10;
+        }
+
+        Smp::IField* field;
+        std::vector<char> _buf;
+        std::mutex _bufMtx;
+        std::condition_variable _bufCovar;
     };
 
-private:
     void connect();
     static std::string extractLastElemPath(std::string& path);
     Json::Object parseTimestamp() const;
-    static Json::Object parseUuid(const Smp::Uuid& uuid);
     static Json::Object parseType(const Smp::Publication::IType* type);
     template <typename T>
     static Json::Object parseKind(const T& kind);
@@ -59,17 +75,11 @@ private:
     void postState(const HttpReq* req, HttpResp* resp);
     void defaultGetHandler(const HttpReq* req, HttpResp* resp);
     void defaultPostHandler(const HttpReq* req, HttpResp* resp);
-    static inline uint8_t getHexPos(char c) {
-        return (c <= '9') ? c - '0' : c - 'a' + 10;
-    }
 
     HttpServer _server;
     Smp::ISimulator* _sim;
     Smp::Services::IResolver* _rslv;
     Smp::Services::ITimeKeeper* _tk;
-    std::vector<char> _buf;
-    std::mutex _bufMtx;
-    std::condition_variable _bufCovar;
 };
 
 } /* namespace rest */
