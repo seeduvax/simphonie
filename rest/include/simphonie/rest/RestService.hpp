@@ -11,7 +11,10 @@
 #define __simphonie_rest_RestService_HPP__
 #include <condition_variable>
 #include <mutex>
+#include <sstream>
 #include <vector>
+#include "Smp/IField.h"
+#include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
 #include "Smp/IStorageReader.h"
 #include "Smp/IStorageWriter.h"
@@ -34,10 +37,19 @@ public:
 private:
     class _FieldHandler : virtual public Smp::IStorageWriter, virtual public Smp::IStorageReader {
     public:
-        inline _FieldHandler(Smp::IField* field) : field(field) {}
+        inline _FieldHandler(Smp::IField* field)
+            : _field(field), _simplefield(dynamic_cast<Smp::ISimpleField*>(_field)) {}
 
-        std::string getValue();
-        void setValue(const std::string& value);
+        std::string getBinValue();
+        inline bool isSimpleField() const {
+            return _simplefield != nullptr;
+        }
+        inline std::string getStrValue() {
+            std::ostringstream oss;
+            oss << _simplefield->GetValue();
+            return oss.str();
+        }
+        void setBinValue(const std::string& value);
         void Store(const Smp::Void* address, Smp::UInt64 size) override;
         void Restore(Smp::Void* address, Smp::UInt64 size) override;
         inline Smp::String8 GetStateVectorFileName() const override {
@@ -52,7 +64,8 @@ private:
             return (c <= '9') ? c - '0' : c - 'a' + 10;
         }
 
-        Smp::IField* field;
+        Smp::IField* _field;
+        const Smp::ISimpleField* _simplefield;
         std::vector<char> _buf;
         std::mutex _bufMtx;
         std::condition_variable _bufCovar;
@@ -64,12 +77,12 @@ private:
     static Json::Object parseType(const Smp::Publication::IType* type);
     template <typename T>
     static Json::Object parseKind(const T& kind);
-    Json::Object parseField(Smp::IField* field);
+    static Json::Object parseField(Smp::IField* field);
     static Json::Object parseEP(const Smp::IEntryPoint* ep);
-    Json::Array parseFields(const Smp::IComponent* Component);
+    static Json::Array parseFields(const Smp::IComponent* Component);
     static Json::Array parseEPs(const Smp::IComponent* Component);
-    Json::Object parseComponent(const Smp::IComponent* component, bool recursive);
-    Json::Array parseContainer(const Smp::IContainer* container, bool recursive);
+    static Json::Object parseComponent(const Smp::IComponent* component, bool recursive);
+    static Json::Array parseContainer(const Smp::IContainer* container, bool recursive);
     void getSimulator(const HttpReq* req, HttpResp* resp);
     void getState(const HttpReq* req, HttpResp* resp) const;
     void postScheduleList(const HttpReq* req, HttpResp* resp);

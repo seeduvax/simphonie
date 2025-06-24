@@ -50,20 +50,20 @@ RestService::~RestService() {
     _server.stop();
 }
 
-void RestService::_FieldHandler::setValue(const std::string& value) {
+void RestService::_FieldHandler::setBinValue(const std::string& value) {
     std::unique_lock<std::mutex> lock(_bufMtx);
     _bufCovar.wait(lock, [&] { return _buf.empty(); });
     _buf = std::vector<char>(value.begin(), value.end());
-    field->Restore(this);
+    _field->Restore(this);
     _buf.clear(); /* to make sure it is empty */
     _bufCovar.notify_one();
 }
 
-std::string RestService::_FieldHandler::getValue() {
+std::string RestService::_FieldHandler::getBinValue() {
     std::unique_lock<std::mutex> lock(_bufMtx);
     _bufCovar.wait(lock, [&] { return _buf.empty(); });
 
-    field->Store(this);
+    _field->Store(this);
     const auto value = std::string(_buf.data(), _buf.size());
     _buf.clear();
     _bufCovar.notify_one();
@@ -146,11 +146,20 @@ Json::Object RestService::parseKind(const T& kind) {
 
 Json::Object RestService::parseField(Smp::IField* field) {
     _FieldHandler fldhdl(field);
+    Json::Object value{
+        {"bin", fldhdl.getBinValue()},
+    };
+    if (fldhdl.isSimpleField()) {
+        value.push_back("string", fldhdl.getStrValue());
+    }
     return Json::Object{
-        {"name", field->GetName()},      {"viewKind", static_cast<Smp::Int32>(field->GetView())},
-        {"isState", field->IsState()},   {"isInput", field->IsInput()},
-        {"isOutput", field->IsOutput()}, {"type", parseType(field->GetType())},
-        {"value", fldhdl.getValue()},
+        {"name", field->GetName()},
+        {"viewKind", static_cast<Smp::Int32>(field->GetView())},
+        {"isState", field->IsState()},
+        {"isInput", field->IsInput()},
+        {"isOutput", field->IsOutput()},
+        {"type", parseType(field->GetType())},
+        {"value", value},
     };
 }
 
@@ -327,7 +336,7 @@ void RestService::postState(const HttpReq* req, HttpResp* resp) {
         const auto json = Json::parse(req->body());
         /* req->json() is better but it requires the content-type to be set to app/json */
         if (!json.is_valid()) {
-            throw std::invalid_argument("Invalid json found in the body request");
+            throw std::exception();
         }
         const auto id = json["id"].get<Smp::Int32>();
         const auto ssk = static_cast<Smp::SimulatorStateKind>(id);
@@ -470,7 +479,7 @@ void RestService::defaultPostHandler(const HttpReq* req, HttpResp* resp) {
         value = json["value"].get<std::string>();
     }
     _FieldHandler fldhdl(field);
-    fldhdl.setValue(value);
+    fldhdl.setBinValue(value);
 }
 
 } /* namespace rest */

@@ -155,8 +155,7 @@ sim:GetEventManager():Emit(eventId, true)
 
 sim:Run()
 
-while true do
-    -- while sim.State~=3 do
+while sim.State~=3 do
 end
 
 sim:Store("mySimu.cp")
