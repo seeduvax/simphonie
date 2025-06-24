@@ -16,7 +16,7 @@ Barrier::Barrier(size_t threshold) : _thresh(threshold), _generation(0),
     _waiting(0), _released(0), _triggered(false), _canceled(false) {}
 
 void Barrier::setThreshold(size_t threshold) {
-    std::unique_lock<std::mutex> lock(_mutex);
+    std::lock_guard<std::mutex> lock(_mutex);
     _thresh = threshold;
     if (_waiting >= _thresh) {
         _waiting = 0;
@@ -49,13 +49,13 @@ bool Barrier::wait() {
 }
 
 void Barrier::cancel() {
-    std::unique_lock<std::mutex> lock(_mutex);
+    std::lock_guard<std::mutex> lock(_mutex);
     _canceled = true;
     _cond.notify_all();
 }
 
-void Barrier::reset() { 
-    std::unique_lock<std::mutex> lock(_mutex);
+void Barrier::reset() {
+    std::lock_guard<std::mutex> lock(_mutex);
     _canceled = false;
     _triggered = false;
     _waiting = 0;

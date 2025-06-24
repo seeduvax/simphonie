@@ -155,6 +155,9 @@ void Scheduler::updateSchedule(Smp::Services::EventId eventId) {
     if (s != nullptr) {
         schedule(s);
     }
+    for (auto observer : _observers) {
+        observer->notifyUpdated(eventId);
+    }
 }
 
 // ..........................................................

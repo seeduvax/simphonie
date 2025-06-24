@@ -43,7 +43,7 @@ SimSyncMaster::SimSyncMaster(Smp::String8 name, Smp::String8 descr, Smp::IObject
 }
 
 SimSyncDataShare::DataType SimSyncMaster::sendData() {
-    std::unique_lock<std::mutex> lock(_dataMtx);
+    std::lock_guard<std::mutex> lock(_dataMtx);
     return _data;
 }
 
@@ -90,7 +90,7 @@ void SimSyncMaster::restore() {
 void SimSyncMaster::sync() {
     {
         const auto data = _dataShare.retrieveData();
-        std::unique_lock<std::mutex> lock(_dataMtx);
+        std::lock_guard<std::mutex> lock(_dataMtx);
         _data = data;
     }
     if (_barrier.wait()) {

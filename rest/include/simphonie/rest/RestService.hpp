@@ -21,6 +21,8 @@
 #include "Smp/Services/IResolver.h"
 #include "Smp/Services/ITimeKeeper.h"
 #include "simdeck/Service.hpp"
+#include "simdeck/smpext/ISchedule.hpp"
+#include "simdeck/smpext/ISchedulerObserver.hpp"
 #include "wfrest/HttpServer.h"
 #include "wfrest/Json.h"
 
@@ -29,10 +31,15 @@ namespace rest {
 
 using namespace wfrest;
 
-class RestService : public simdeck::Service {
+class RestService : public simdeck::Service, virtual public simdeck::smpext::ISchedulerObserver {
 public:
     RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent);
     ~RestService();
+
+    void notifyScheduled(const simdeck::smpext::ISchedule* event) override;
+    void notifyUpdated(Smp::Services::EventId eventId) override;
+    void notifyCompleted(Smp::Services::EventId eventId) override;
+    void notifyCanceled(Smp::Services::EventId eventId) override;
 
 private:
     class _FieldHandler : virtual public Smp::IStorageWriter, virtual public Smp::IStorageReader {
@@ -71,6 +78,10 @@ private:
         std::condition_variable _bufCovar;
     };
 
+    struct _compareSchedule {
+        bool operator()(const simdeck::smpext::ISchedule* a, const simdeck::smpext::ISchedule* b) const;
+    };
+
     void connect();
     static std::string extractLastElemPath(std::string& path);
     Json::Object parseTimestamp() const;
@@ -79,14 +90,16 @@ private:
     static Json::Object parseKind(const T& kind);
     static Json::Object parseField(Smp::IField* field);
     static Json::Object parseEP(const Smp::IEntryPoint* ep);
+    static Json::Object parseSchedule(const simdeck::smpext::ISchedule* schedule);
     static Json::Array parseFields(const Smp::IComponent* Component);
     static Json::Array parseEPs(const Smp::IComponent* Component);
     static Json::Object parseComponent(const Smp::IComponent* component, bool recursive);
     static Json::Array parseContainer(const Smp::IContainer* container, bool recursive);
     void getSimulator(const HttpReq* req, HttpResp* resp);
     void getState(const HttpReq* req, HttpResp* resp) const;
-    void postScheduleList(const HttpReq* req, HttpResp* resp);
+    void getScheduleQueue(const HttpReq* req, HttpResp* resp);
     void postState(const HttpReq* req, HttpResp* resp);
+    void postScheduleQueue(const HttpReq* req, HttpResp* resp);
     void defaultGetHandler(const HttpReq* req, HttpResp* resp);
     void defaultPostHandler(const HttpReq* req, HttpResp* resp);
 
@@ -95,6 +108,8 @@ private:
     Smp::Services::IResolver* _rslv;
     Smp::Services::ITimeKeeper* _tk;
     Smp::Services::IScheduler* _schdl;
+    std::mutex _schdlMutex;
+    std::multiset<const simdeck::smpext::ISchedule*, _compareSchedule> _scheduleQueue;
 };
 
 } /* namespace rest */
