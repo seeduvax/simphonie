@@ -21,6 +21,7 @@ public:
     virtual ~ISchedulerObserver() noexcept = default;
 
     virtual void notifyScheduled(const ISchedule *event) = 0;
+    virtual void notifyUpdated(Smp::Services::EventId eventId) = 0;
     virtual void notifyCompleted(Smp::Services::EventId eventId) = 0;
     virtual void notifyCanceled(Smp::Services::EventId eventId) = 0;
 
