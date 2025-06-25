@@ -67,16 +67,6 @@ void RestService::notifyScheduled(const simdeck::smpext::ISchedule* event) {
     _scheduleQueue.insert(event);
 }
 
-void RestService::notifyUpdated(Smp::Services::EventId eventId) {
-    std::lock_guard<std::mutex> lock(_schdlMutex);
-    for (auto it = _scheduleQueue.begin(); it != _scheduleQueue.end(); ++it) {
-        if ((*it)->GetId() == eventId) {
-            _scheduleQueue.erase(it);
-            return;
-        }
-    }
-}
-
 void RestService::notifyCompleted(Smp::Services::EventId eventId) {
     std::lock_guard<std::mutex> lock(_schdlMutex);
     for (auto it = _scheduleQueue.begin(); it != _scheduleQueue.end(); ++it) {

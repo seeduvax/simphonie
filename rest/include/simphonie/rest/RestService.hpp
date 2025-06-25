@@ -37,7 +37,6 @@ public:
     ~RestService();
 
     void notifyScheduled(const simdeck::smpext::ISchedule* event) override;
-    void notifyUpdated(Smp::Services::EventId eventId) override;
     void notifyCompleted(Smp::Services::EventId eventId) override;
     void notifyCanceled(Smp::Services::EventId eventId) override;
 

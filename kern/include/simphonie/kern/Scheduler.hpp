@@ -131,7 +131,7 @@ private:
      * any.
      */
     Schedule* findSchedule(Smp::Services::EventId event, bool remove = false);
-    void schedule(Schedule* s);
+    void schedule(Schedule* s, bool newSchedule = true);
     // For internal use when mutex is already owned.
     inline Smp::Duration getNextScheduledEventTime() const;
     /**

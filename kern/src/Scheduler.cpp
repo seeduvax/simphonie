@@ -58,7 +58,7 @@ Scheduler::~Scheduler() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-void Scheduler::schedule(Schedule* s) {
+void Scheduler::schedule(Schedule* s, bool newSchedule) {
     {
         Synchronized(_mutex);
         _scheduled.insert(s);
@@ -66,8 +66,10 @@ void Scheduler::schedule(Schedule* s) {
             _activableCount++;
         }
     }
-    for (auto observer : _observers) {
-        observer->notifyScheduled(s);
+    if (newSchedule) {
+        for (auto observer : _observers) {
+            observer->notifyScheduled(s);
+        }
     }
     _monitor.notify_all();
 }
@@ -153,10 +155,7 @@ void Scheduler::schedule(Smp::Services::EventId event, Smp::Duration absoluteSim
 void Scheduler::updateSchedule(Smp::Services::EventId eventId) {
     auto s = findSchedule(eventId, true);
     if (s != nullptr) {
-        schedule(s);
-    }
-    for (auto observer : _observers) {
-        observer->notifyUpdated(eventId);
+        schedule(s, false);
     }
 }
 
