@@ -67,33 +67,31 @@ void RestService::notifyScheduled(const simdeck::smpext::ISchedule* event) {
     _scheduleQueue.insert(event);
 }
 
-void RestService::notifyCompleted(Smp::Services::EventId eventId) {
+bool RestService::removeSchedule(Smp::Services::EventId eventId) {
     std::lock_guard<std::mutex> lock(_schdlMutex);
     for (auto it = _scheduleQueue.begin(); it != _scheduleQueue.end(); ++it) {
         if ((*it)->GetId() == eventId) {
+            std::lock_guard<std::mutex> lock(_schdlMutex);
             _scheduleQueue.erase(it);
-            return;
+            return true;
         }
     }
+    return false;
 }
 
-void RestService::notifyCanceled(Smp::Services::EventId eventId) {
-    std::lock_guard<std::mutex> lock(_schdlMutex);
-    for (auto it = _scheduleQueue.begin(); it != _scheduleQueue.end(); ++it) {
-        if ((*it)->GetId() == eventId) {
-            _scheduleQueue.erase(it);
-            return;
-        }
+void RestService::_FieldHandler::update() {
+    std::lock_guard<std::mutex> lock(_bufMtx);
+
+    if (!_buf.empty()) {
+        _field->Store(this);
+        const auto value = std::string(_buf.data(), _buf.size());
+        _buf.clear();
     }
-}
-
-void RestService::_FieldHandler::setBinValue(const std::string& value) {
-    std::unique_lock<std::mutex> lock(_bufMtx);
-    _bufCovar.wait(lock, [&] { return _buf.empty(); });
-    _buf = std::vector<char>(value.begin(), value.end());
     _field->Restore(this);
     _buf.clear(); /* to make sure it is empty */
     _bufCovar.notify_one();
+
+    _anysimple = _simplefield->GetValue();
 }
 
 std::string RestService::_FieldHandler::getBinValue() {
@@ -106,6 +104,11 @@ std::string RestService::_FieldHandler::getBinValue() {
     _bufCovar.notify_one();
 
     return value;
+}
+
+void RestService::_FieldHandler::setBinValue(const std::string& value) {
+    std::lock_guard<std::mutex> lock(_bufMtx);
+    _buf = std::vector<char>(value.begin(), value.end());
 }
 
 void RestService::_FieldHandler::Store(const Smp::Void* address, Smp::UInt64 size) {

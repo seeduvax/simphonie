@@ -37,8 +37,12 @@ public:
     ~RestService();
 
     void notifyScheduled(const simdeck::smpext::ISchedule* event) override;
-    void notifyCompleted(Smp::Services::EventId eventId) override;
-    void notifyCanceled(Smp::Services::EventId eventId) override;
+    inline void notifyCompleted(Smp::Services::EventId eventId) override {
+        removeSchedule(eventId);
+    }
+    inline void notifyCanceled(Smp::Services::EventId eventId) override {
+        removeSchedule(eventId);
+    }
 
 private:
     class _FieldHandler : virtual public Smp::IStorageWriter, virtual public Smp::IStorageReader {
@@ -46,13 +50,14 @@ private:
         inline _FieldHandler(Smp::IField* field)
             : _field(field), _simplefield(dynamic_cast<Smp::ISimpleField*>(_field)) {}
 
+        void update();
         std::string getBinValue();
         inline bool isSimpleField() const {
             return _simplefield != nullptr;
         }
         inline std::string getStrValue() {
             std::ostringstream oss;
-            oss << _simplefield->GetValue();
+            oss << _anysimple;
             return oss.str();
         }
         void setBinValue(const std::string& value);
@@ -72,6 +77,8 @@ private:
 
         Smp::IField* _field;
         const Smp::ISimpleField* _simplefield;
+        Smp::AnySimple _anysimple;
+        std::string _binValue;
         std::vector<char> _buf;
         std::mutex _bufMtx;
         std::condition_variable _bufCovar;
@@ -83,6 +90,7 @@ private:
 
     void connect();
     static std::string extractLastElemPath(std::string& path);
+    bool removeSchedule(Smp::Services::EventId eventId);
     Json::Object parseTimestamp() const;
     static Json::Object parseType(const Smp::Publication::IType* type);
     template <typename T>
