@@ -12,6 +12,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <sstream>
+#include <unordered_map>
 #include <vector>
 #include "Smp/IField.h"
 #include "Smp/ISimpleField.h"
@@ -20,6 +21,8 @@
 #include "Smp/IStorageWriter.h"
 #include "Smp/Services/IResolver.h"
 #include "Smp/Services/ITimeKeeper.h"
+#include "simdeck/EntryPointPublisher.hpp"
+#include "simdeck/Object.hpp"
 #include "simdeck/Service.hpp"
 #include "simdeck/smpext/ISchedule.hpp"
 #include "simdeck/smpext/ISchedulerObserver.hpp"
@@ -45,43 +48,69 @@ public:
     }
 
 private:
-    class _FieldHandler : virtual public Smp::IStorageWriter, virtual public Smp::IStorageReader {
-    public:
-        inline _FieldHandler(Smp::IField* field)
-            : _field(field), _simplefield(dynamic_cast<Smp::ISimpleField*>(_field)) {}
+    class FieldsHandler : public simdeck::Object, public simdeck::EntryPointPublisher {
+    private:
+        class Handler;
 
+    public:
+        FieldsHandler(Smp::Services::IScheduler* scheduler, Smp::String8 name, Smp::String8 descr,
+                      Smp::IObject* parent);
+
+        FieldsHandler::Handler* get(Smp::IField* field);
         void update();
-        std::string getBinValue();
-        inline bool isSimpleField() const {
-            return _simplefield != nullptr;
-        }
-        inline std::string getStrValue() {
-            std::ostringstream oss;
-            oss << _anysimple;
-            return oss.str();
-        }
-        void setBinValue(const std::string& value);
-        void Store(const Smp::Void* address, Smp::UInt64 size) override;
-        void Restore(Smp::Void* address, Smp::UInt64 size) override;
-        inline Smp::String8 GetStateVectorFileName() const override {
-            return nullptr;
-        };
-        inline Smp::String8 GetStateVectorFilePath() const override {
-            return nullptr;
-        };
+        void release(Handler** handler);
 
     private:
-        static inline uint8_t getHexPos(char c) {
-            return (c <= '9') ? c - '0' : c - 'a' + 10;
-        }
+        class Handler : virtual public Smp::IStorageWriter, virtual public Smp::IStorageReader {
+        public:
+            inline Handler(Smp::IField* field)
+                : _field(field),
+                  _simplefield(dynamic_cast<Smp::ISimpleField*>(_field)),
+                  _updated(false),
+                  _waitingCounter(0),
+                  _toWakeUpCounter(0) {}
 
-        Smp::IField* _field;
-        const Smp::ISimpleField* _simplefield;
-        Smp::AnySimple _anysimple;
-        std::string _binValue;
-        std::vector<char> _buf;
-        std::mutex _bufMtx;
-        std::condition_variable _bufCovar;
+            void retrieveValues(std::string* bin, std::string* string = nullptr);
+            void setBinValue(const std::string& value);
+            inline Smp::IField* getField() const {
+                return _field;
+            }
+
+            void Store(const Smp::Void* address, Smp::UInt64 size) override;
+            void Restore(Smp::Void* address, Smp::UInt64 size) override;
+            inline Smp::String8 GetStateVectorFileName() const override {
+                return nullptr;
+            };
+            inline Smp::String8 GetStateVectorFilePath() const override {
+                return nullptr;
+            };
+
+        private:
+            friend FieldsHandler;
+            void update();
+            static inline uint8_t getHexPos(char c) {
+                return (c <= '9') ? c - '0' : c - 'a' + 10;
+            }
+
+            Smp::IField* _field;
+            const Smp::ISimpleField* _simplefield;
+            Smp::AnySimple _anysimple;
+            std::string _bin;
+            std::vector<char> _buf;
+            std::mutex _mainMutex, _bufMutex;
+            bool _updated;
+            std::condition_variable _updatedCovar;
+            Smp::Int32 _waitingCounter, _toWakeUpCounter;
+        };
+
+        void updateHandlers();
+
+        std::unordered_map<Smp::IField*, std::pair<std::unique_ptr<Handler>, int> > _handlers;
+        Smp::Services::IScheduler* _schdl;
+        std::mutex _updateMutex, _handlersMutex;
+        Smp::IEntryPoint* _updateEP;
+        bool _updateEPIsSchedule;
+        Smp::Services::EventId _updateEventId;
     };
 
     struct _compareSchedule {
@@ -95,13 +124,13 @@ private:
     static Json::Object parseType(const Smp::Publication::IType* type);
     template <typename T>
     static Json::Object parseKind(const T& kind);
-    static Json::Object parseField(Smp::IField* field);
+    Json::Object parseField(Smp::IField* field);
     static Json::Object parseEP(const Smp::IEntryPoint* ep);
     static Json::Object parseSchedule(const simdeck::smpext::ISchedule* schedule);
-    static Json::Array parseFields(const Smp::IComponent* Component);
+    Json::Array parseFields(const Smp::IComponent* Component);
     static Json::Array parseEPs(const Smp::IComponent* Component);
-    static Json::Object parseComponent(const Smp::IComponent* component, bool recursive);
-    static Json::Array parseContainer(const Smp::IContainer* container, bool recursive);
+    Json::Object parseComponent(const Smp::IComponent* component, bool recursive);
+    Json::Array parseContainer(const Smp::IContainer* container, bool recursive);
     void getSimulator(const HttpReq* req, HttpResp* resp);
     void getState(const HttpReq* req, HttpResp* resp) const;
     void getScheduleQueue(const HttpReq* req, HttpResp* resp);
@@ -117,6 +146,7 @@ private:
     Smp::Services::IScheduler* _schdl;
     std::mutex _schdlMutex;
     std::multiset<const simdeck::smpext::ISchedule*, _compareSchedule> _scheduleQueue;
+    FieldsHandler _fieldsHandler;
 };
 
 } /* namespace rest */
