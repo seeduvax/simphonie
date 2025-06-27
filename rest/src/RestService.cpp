@@ -148,8 +148,16 @@ void RestService::FieldsHandler::Handler::update() {
 
     std::unique_lock<std::mutex> lock(_mainMutex);
 
-    /* retrieve the current anysimple value */
-    _anysimple = _simplefield->GetValue();
+    /* retrieve the current anysimple values */
+    _anysimples.clear();
+    if (_simplefield) {
+        _anysimples.push_back(_simplefield->GetValue());
+    }
+    if (_simplearrayfield) {
+        const auto size = _simplearrayfield->GetSize();
+        _anysimples.resize(size);
+        _simplearrayfield->GetValues(size, _anysimples.data());
+    }
 
     /* wake up waiting threads */
     _updated = true;
@@ -158,7 +166,7 @@ void RestService::FieldsHandler::Handler::update() {
     _updatedCovar.notify_all();
 }
 
-void RestService::FieldsHandler::Handler::retrieveValues(std::string* bin, std::string* string) {
+void RestService::FieldsHandler::Handler::retrieveValues(std::string* bin, std::vector<std::string>* readable) {
     /* wait next update */
     std::unique_lock<std::mutex> lock(_mainMutex);
     _waitingCounter++;
@@ -169,10 +177,13 @@ void RestService::FieldsHandler::Handler::retrieveValues(std::string* bin, std::
     }
 
     /* retrieve values */
-    if (_anysimple != nullptr && string != nullptr) {
-        std::ostringstream oss;
-        oss << _anysimple;
-        *string = oss.str();
+    if (readable != nullptr) {
+        readable->clear();
+        for (const auto anysimple : _anysimples) {
+            std::ostringstream oss;
+            oss << anysimple;
+            readable->push_back(oss.str());
+        }
     }
     *bin = _bin;
 }
@@ -258,22 +269,28 @@ Json::Object RestService::parseKind(const T& kind) {
 Json::Object RestService::parseField(Smp::IField* field) {
     Json::Object value;
     {
-        std::string bin, string = "";
+        std::string bin;
+        std::vector<std::string> readable;
         {
             auto handler = _fieldsHandler.get(field);
-            std::cerr << "Get Handler " << handler << std::endl;
             _fieldsHandler.update();
-            std::cerr << "Update " << handler << std::endl;
-            handler->retrieveValues(&bin, &string);
-            std::cerr << "Retrieve Values " << handler << std::endl;
+            handler->retrieveValues(&bin, &readable);
             _fieldsHandler.release(&handler);
-            std::cerr << "Release " << handler << std::endl;
         }
         value = Json::Object{
             {"bin", bin},
         };
-        if (string != "") {
-            value.push_back("string", string);
+        if (readable.size() > 0) {
+            if (readable.size() == 1) {
+                value.push_back("readable", readable.front());
+            }
+            else {
+                Json::Array arr;
+                for (const auto& s : readable) {
+                    arr.push_back(s);
+                }
+                value.push_back("readable", arr);
+            }
         }
     }
     return Json::Object{

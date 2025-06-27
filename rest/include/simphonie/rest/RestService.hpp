@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <vector>
 #include "Smp/IField.h"
+#include "Smp/ISimpleArrayField.h"
 #include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
 #include "Smp/IStorageReader.h"
@@ -66,11 +67,12 @@ private:
             inline Handler(Smp::IField* field)
                 : _field(field),
                   _simplefield(dynamic_cast<Smp::ISimpleField*>(_field)),
+                  _simplearrayfield(dynamic_cast<Smp::ISimpleArrayField*>(_field)),
                   _updated(false),
                   _waitingCounter(0),
                   _toWakeUpCounter(0) {}
 
-            void retrieveValues(std::string* bin, std::string* string = nullptr);
+            void retrieveValues(std::string* bin, std::vector<std::string>* readable = nullptr);
             void setBinValue(const std::string& value);
             inline Smp::IField* getField() const {
                 return _field;
@@ -94,7 +96,8 @@ private:
 
             Smp::IField* _field;
             const Smp::ISimpleField* _simplefield;
-            Smp::AnySimple _anysimple;
+            const Smp::ISimpleArrayField* _simplearrayfield;
+            std::vector<Smp::AnySimple> _anysimples;
             std::string _bin;
             std::vector<char> _buf;
             std::mutex _mainMutex, _bufMutex;
