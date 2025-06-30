@@ -72,7 +72,7 @@ private:
                   _waitingCounter(0),
                   _toWakeUpCounter(0) {}
 
-            void retrieveValues(std::string* bin, std::vector<std::string>* readable = nullptr);
+            std::vector<std::string> retrieveValue();
             void setBinValue(const std::string& value);
             inline Smp::IField* getField() const {
                 return _field;

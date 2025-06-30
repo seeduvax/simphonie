@@ -140,10 +140,12 @@ void RestService::FieldsHandler::Handler::update() {
             _buf.clear(); /* to make sure it is empty */
         }
 
-        /* retrieve the current bin value */
-        _field->Store(this);
-        _bin = std::string(_buf.data(), _buf.size());
-        _buf.clear();
+        /* retrieve the current bin value it it is not a simple one */
+        if (!_simplefield && !_simplearrayfield) {
+            _field->Store(this);
+            _bin = std::string(_buf.data(), _buf.size());
+            _buf.clear();
+        }
     }
 
     std::unique_lock<std::mutex> lock(_mainMutex);
@@ -166,7 +168,7 @@ void RestService::FieldsHandler::Handler::update() {
     _updatedCovar.notify_all();
 }
 
-void RestService::FieldsHandler::Handler::retrieveValues(std::string* bin, std::vector<std::string>* readable) {
+std::vector<std::string> RestService::FieldsHandler::Handler::retrieveValue() {
     /* wait next update */
     std::unique_lock<std::mutex> lock(_mainMutex);
     _waitingCounter++;
@@ -177,15 +179,17 @@ void RestService::FieldsHandler::Handler::retrieveValues(std::string* bin, std::
     }
 
     /* retrieve values */
-    if (readable != nullptr) {
-        readable->clear();
-        for (const auto anysimple : _anysimples) {
-            std::ostringstream oss;
-            oss << anysimple;
-            readable->push_back(oss.str());
-        }
+    std::vector<std::string> value;
+    for (const auto anysimple : _anysimples) {
+        std::ostringstream oss;
+        oss << anysimple;
+        value.push_back(oss.str());
     }
-    *bin = _bin;
+    if (value.size() == 0) {
+        /* if there is no simple value, we at least return the binary one */
+        value.push_back(_bin);
+    }
+    return value;
 }
 
 void RestService::FieldsHandler::Handler::setBinValue(const std::string& value) {
@@ -267,41 +271,31 @@ Json::Object RestService::parseKind(const T& kind) {
 }
 
 Json::Object RestService::parseField(Smp::IField* field) {
-    Json::Object value;
+    Json::Object json{
+        {"name", field->GetName()},      {"viewKind", static_cast<Smp::Int32>(field->GetView())},
+        {"isState", field->IsState()},   {"isInput", field->IsInput()},
+        {"isOutput", field->IsOutput()}, {"type", parseType(field->GetType())},
+    };
     {
-        std::string bin;
-        std::vector<std::string> readable;
+        std::vector<std::string> value;
         {
             auto handler = _fieldsHandler.get(field);
             _fieldsHandler.update();
-            handler->retrieveValues(&bin, &readable);
+            value = handler->retrieveValue();
             _fieldsHandler.release(&handler);
         }
-        value = Json::Object{
-            {"bin", bin},
-        };
-        if (readable.size() > 0) {
-            if (readable.size() == 1) {
-                value.push_back("readable", readable.front());
+        if (value.size() == 1) {
+            json.push_back("value", value.front());
+        }
+        else {
+            Json::Array arr;
+            for (const auto& s : value) {
+                arr.push_back(s);
             }
-            else {
-                Json::Array arr;
-                for (const auto& s : readable) {
-                    arr.push_back(s);
-                }
-                value.push_back("readable", arr);
-            }
+            json.push_back("value", arr);
         }
     }
-    return Json::Object{
-        {"name", field->GetName()},
-        {"viewKind", static_cast<Smp::Int32>(field->GetView())},
-        {"isState", field->IsState()},
-        {"isInput", field->IsInput()},
-        {"isOutput", field->IsOutput()},
-        {"type", parseType(field->GetType())},
-        {"value", value},
-    };
+    return json;
 }
 
 Json::Object RestService::parseEP(const Smp::IEntryPoint* ep) {
