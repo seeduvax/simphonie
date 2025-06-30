@@ -1,0 +1,465 @@
+openapi: 3.0.4
+info:
+  title: Simphonie - RestService
+  version: 1.0.0
+  description: |-
+    Simphonie's RestService is a REST API that enables remote control and data probbing.
+servers:
+  - url: /api/v1/
+tags:
+  - name: State
+    description: Simulator's state
+  - name: ScheduleQueue
+    description: Schedule events and list scheduled events
+  - name: Components
+    description: Simulator's components
+paths:
+  /{sim}/state:
+    get:
+      tags:
+        - State
+      summary: Get the current simulator's state
+      description: Get the current simulator's state.
+      parameters:
+        - name: sim
+          in: path
+          description: Simulator's name.
+          example: mySim
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/StateResult'
+    post:
+      tags:
+        - State
+      summary: Request a state changement
+      description: |-
+        Request a state changement.
+        
+        WARNING: the request may be rejected the simulator.
+      parameters:
+        - name: sim
+          in: path
+          description: Simulator's name.
+          example: mySim
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Requested state.
+        required: true
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/StateRequest'
+      responses:
+        '200':
+          description: |-
+            The state has been successfully requested.
+            
+            WARNING: the new state is not guarenteed as the simulator may have rejected this changement.
+        '422':
+          description: Invalid input
+  /{sim}/scheduleQueue:
+    get:
+      tags:
+        - ScheduleQueue
+      summary: Get the current simulator's scheduling queue
+      description: Get the current simulator's scheduling queue.
+      parameters:
+        - name: sim
+          in: path
+          description: Simulator's name.
+          example: mySim
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ScheduleQueueResult'
+    post:
+      tags:
+        - ScheduleQueue
+      summary: Schedule an event
+      description: Schedule an event.
+      parameters:
+        - name: sim
+          in: path
+          description: Simulator's name.
+          example: mySim
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The event to schedule.
+        required: true
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ScheduleQueueRequest'
+      responses:
+        '200':
+          description: successful operation
+        '422':
+          description: invalid request
+          content:
+            '*/*':
+              schema:
+                type: string
+                description: Few information about the issue.
+  /{sim}/{component}/:
+    get:
+      tags:
+        - Components
+      summary: Get information about a component
+      description: Get information about a component.
+      parameters:
+        - name: sim
+          in: path
+          description: Simulator's name.
+          example: mySim
+          required: true
+          schema:
+            type: string
+        - name: component
+          in: path
+          description: Component's absolute path.
+          example: myModel/mySubModel
+          required: true
+          schema:
+            type: string
+        - name: recursive
+          in: query
+          description: true to retrieves every sub-components informations as well as fields and entrypoints.
+          required: false
+          default: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Component'
+        '404':
+          description: component not found
+          content:
+            '*/*':
+              schema:
+                type: string
+                description: Few information about the issue.
+components:
+  schemas:
+    Timestamp:
+      type: object
+      required:
+        - zulu
+        - simulation
+        - epoch
+        - mission
+      properties:
+        zulu:
+          type: integer
+          format: int64
+          example: 804348763025686528
+        simulation:
+          type: integer
+          format: int64
+          example: 24571768
+        epoch:
+          type: integer
+          format: int64
+          example: 783987
+        mission:
+          type: integer
+          format: int64
+          example: 83903
+    StateResult:
+      type: object
+      required:
+        - id
+        - name
+        - timestamp
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 3
+        name:
+          type: string
+          example: 3(SSK_Standby)
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+    StateRequest:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 4
+        filename:
+          type: string
+          example: MySimu.cp
+          description: Filename when requesting for either saving or restoring. Ingored otherwise.
+    Schedule:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - time
+        - period
+        - repeat
+        - activationCounter
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 3
+        name:
+          type: string
+          example: myStep
+        description:
+          type: string
+          example: My step entrypoint.
+        time:
+          type: integer
+          format: int64
+          description: Newt simulation time the event is scheduled on.
+          example: 24571768
+        period:
+          type: integer
+          format: int64
+          description: Simulation time between two consecutive events.
+          example: 1000000
+        repeat:
+          type: integer
+          format: int64
+          description: Number of wake up to do before unscheduling the event. -1 for infinite repeating.
+          example: 5
+        activationCounter:
+          type: integer
+          format: int64
+          example: 2
+        startOnEventId:
+          type: integer
+          format: int64
+          description: The scheduled event will be considered once this Event's id has been raised. Not provided if none.
+          example: 6
+        stopOnEventId:
+          type: integer
+          format: int64
+          description: The scheduled event will be unscheduled if this Event's id is raised. Not provided if none.
+          example: 6
+    ScheduleQueueResult:
+      type: object
+      required:
+        - queue
+        - timestamp
+      properties:
+        queue:
+          type: array
+          items:
+            $ref: '#/components/schemas/Schedule'
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+    ScheduleQueueRequest:
+      type: object
+      description: If multiplte offset_* parameters are provided, only one is processed. The priority order is offset_s > offset_ms > offset_us > offset_ns. Its value is 0 if none of them are provided. That is the same with cycleTime_* parameters.
+      required:
+        - entrypoint
+      properties:
+        entrypoint:
+          type: string
+          description: Entrypoint's absolute path.
+          example: /myModel/myEntrypoint
+        immediate:
+          type: integer
+          format: bool
+          description: true to immediately schedule the event.
+          default: false
+          example: false
+        cycleTime_s:
+          type: integer
+          format: int64
+          description: Simulation time period in seconds between two consecutive executions of the event.
+          example: 2
+        cycleTime_ms:
+          type: integer
+          format: int64
+          description: Simulation time period in milliseconds between two consecutive executions of the event.
+          example: 2651
+        cycleTime_us:
+          type: integer
+          format: int64
+          description: Simulation time period in microseconds between two consecutive executions of the event.
+          example: 2651685
+        cycleTime_ns:
+          type: integer
+          format: int64
+          description: Simulation time period in nanoseconds between two consecutive executions of the event.
+          example: 2651685789
+        offset_s:
+          type: integer
+          format: int64
+          description: First execution simulation time offset in seconds.
+          example: 2
+        offset_ms:
+          type: integer
+          format: int64
+          description: First execution simulation time offset in milliseconds.
+          example: 2651
+        offset_us:
+          type: integer
+          format: int64
+          description: First execution simulation time offset in microseconds.
+          example: 2651685
+        offset_ns:
+          type: integer
+          format: int64
+          description: First execution simulation time offset in nanoseconds.
+          example: 2651685789
+        repeat:
+          type: integer
+          format: int64
+          description: Number of wake up to do before unscheduling the event. -1 for infinite repeating.
+          default: -1
+          example: 5
+    Field:
+      type: object
+      required:
+        - name
+        - isState
+        - isOutput
+        - isInput
+        - viewKind
+        - type
+        - value
+      properties:
+        name:
+          type: string
+          example: myField
+        isState:
+          type: integer
+          format: bool
+          description: true if it has to be saved when simulator is in its storing mode.
+          example: false
+        isOutput:
+          type: integer
+          format: bool
+          example: false
+        isInput:
+          type: integer
+          format: bool
+          example: false
+        viewKind:
+          type: integer
+          format: int32
+          example: 3
+        type:
+          type: object
+          required:
+            - uuid
+            - primitive
+          properties:
+            uuid:
+              type: string
+              example: 00000000-0000-0003-0000-6C6F61743634
+            primitive:
+              type: object
+              required:
+                - id
+                - name
+              properties:
+                id:
+                  type: integer
+                  format: int32
+                  example: 12
+                name:
+                  type: string
+                  example: PTK_Float64
+        value:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type : string
+          example: "42"
+    Entrypoint:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          example: myEntrypoint
+        description:
+          type: string
+          example: This is myEntrypoint.
+    Component:
+      type: object
+      required:
+        - name
+        - description
+        - uuid
+        - state
+        - timestamp
+      properties:
+        name:
+          type: string
+          example: myComponent
+        description:
+          type: string
+          example: This is myComponent.
+        uuid:
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        state:
+          type: object
+          required:
+            - id
+            - name
+          properties:
+            id:
+              type: integer
+              format: int32
+              example: 3
+            name:
+              type: string
+              example: 3(CSK_Connected)
+        fields:
+          type: array
+          description: Omitted if not recurive.
+          items:
+            $ref: '#/components/schemas/Field'
+        entrypoints:
+          type: array
+          description: Omitted if not recurive.
+          items:
+            $ref: '#/components/schemas/Entrypoint'
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+      additionalProperties:
+        description: Additional property for each containers with their name as the properties' one. It is either an array of the contained components if recursive or an array of their name else.
+        oneOf:
+          - type: array
+            items:
+              type: string
+              description: Component's name
+          - type: array
+            items:
+              $ref: '#/components/schemas/Component'

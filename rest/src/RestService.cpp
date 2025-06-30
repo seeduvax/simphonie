@@ -291,6 +291,7 @@ Json::Object RestService::parseSchedule(const simdeck::smpext::ISchedule* schedu
         {"description", schedule->GetDescription()},
         {"time", schedule->GetTime()},
         {"period", schedule->GetPeriod()},
+        {"repeat", schedule->GetRepeat()},
         {"activationCounter", schedule->GetActivationCounter()},
     };
     if (schedule->GetStartEventId() >= 0) {
@@ -298,9 +299,6 @@ Json::Object RestService::parseSchedule(const simdeck::smpext::ISchedule* schedu
     }
     if (schedule->GetStopEventId() >= 0) {
         json.push_back("StopEventId", schedule->GetStopEventId());
-    }
-    if (schedule->GetRepeat() >= 0) {
-        json.push_back("repeat", schedule->GetRepeat());
     }
     return json;
 }
@@ -464,7 +462,7 @@ void RestService::postScheduleQueue(const HttpReq* req, HttpResp* resp) {
         }
     }
 
-    const auto repeat = json.has("repetitions") ? json["repetitions"].get<Smp::Int64>() : -1LL;
+    const auto repeat = json.has("repeat") ? json["repeat"].get<Smp::Int64>() : -1LL;
 
     try {
         _schdl->AddSimulationTimeEvent(entrypoint, time, period, repeat);
@@ -528,7 +526,7 @@ void RestService::getSimulator(const HttpReq* req, HttpResp* resp) {
     json.push_back("name", _sim->GetName());
     json.push_back("description", _sim->GetDescription());
     json.push_back("state", parseKind(_sim->GetState()));
-    if (req->has_query("recursive")) {
+    if (req->has_query("recursive") && req->query("recursive")) {
         for (const auto cont : *(_sim->GetContainers())) {
             json.push_back(cont->GetName(), parseContainer(cont, true));
         }
@@ -581,7 +579,7 @@ void RestService::defaultGetHandler(const HttpReq* req, HttpResp* resp) {
                     json = parseField(field);
                 }
                 else {
-                    json = parseComponent(comp, req->has_query("recursive"));
+                    json = parseComponent(comp, req->has_query("recursive") && req->query("recursive"));
                 }
             }
         }
