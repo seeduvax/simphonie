@@ -49,71 +49,46 @@ public:
     }
 
 private:
-    class FieldsHandler : public simdeck::Object, public simdeck::EntryPointPublisher {
-    private:
-        class Handler;
-
+    class FieldHandler : public simdeck::Object,
+                         public simdeck::EntryPointPublisher,
+                         virtual public Smp::IStorageWriter,
+                         virtual public Smp::IStorageReader {
     public:
-        FieldsHandler(Smp::Services::IScheduler* scheduler, Smp::String8 name, Smp::String8 descr,
-                      Smp::IObject* parent);
+        FieldHandler(Smp::IField* field, Smp::Services::IScheduler* scheduler, Smp::String8 name, Smp::String8 descr,
+                     Smp::IObject* parent);
 
-        FieldsHandler::Handler* get(Smp::IField* field);
-        void update();
-        void release(Handler** handler);
+        std::vector<std::string> getValue();
+        void setBinValue(const std::string& value);
 
-    private:
-        class Handler : virtual public Smp::IStorageWriter, virtual public Smp::IStorageReader {
-        public:
-            inline Handler(Smp::IField* field)
-                : _field(field),
-                  _simplefield(dynamic_cast<Smp::ISimpleField*>(_field)),
-                  _simplearrayfield(dynamic_cast<Smp::ISimpleArrayField*>(_field)),
-                  _updated(false),
-                  _waitingCounter(0),
-                  _toWakeUpCounter(0) {}
-
-            std::vector<std::string> retrieveValue();
-            void setBinValue(const std::string& value);
-            inline Smp::IField* getField() const {
-                return _field;
-            }
-
-            void Store(const Smp::Void* address, Smp::UInt64 size) override;
-            void Restore(Smp::Void* address, Smp::UInt64 size) override;
-            inline Smp::String8 GetStateVectorFileName() const override {
-                return nullptr;
-            };
-            inline Smp::String8 GetStateVectorFilePath() const override {
-                return nullptr;
-            };
-
-        private:
-            friend FieldsHandler;
-            void update();
-            static inline uint8_t getHexPos(char c) {
-                return (c <= '9') ? c - '0' : c - 'a' + 10;
-            }
-
-            Smp::IField* _field;
-            const Smp::ISimpleField* _simplefield;
-            const Smp::ISimpleArrayField* _simplearrayfield;
-            std::vector<Smp::AnySimple> _anysimples;
-            std::string _bin;
-            std::vector<char> _buf;
-            std::mutex _mainMutex, _bufMutex;
-            bool _updated;
-            std::condition_variable _updatedCovar;
-            Smp::Int32 _waitingCounter, _toWakeUpCounter;
+        void Store(const Smp::Void* address, Smp::UInt64 size) override;
+        void Restore(Smp::Void* address, Smp::UInt64 size) override;
+        inline Smp::String8 GetStateVectorFileName() const override {
+            return nullptr;
+        };
+        inline Smp::String8 GetStateVectorFilePath() const override {
+            return nullptr;
         };
 
-        void updateHandlers();
+    private:
+        void update();
+        void scheduleUpdate();
+        static inline uint8_t getHexPos(char c) {
+            return (c <= '9') ? c - '0' : c - 'a' + 10;
+        }
 
-        std::unordered_map<Smp::IField*, std::pair<std::unique_ptr<Handler>, int> > _handlers;
         Smp::Services::IScheduler* _schdl;
-        std::mutex _updateMutex, _handlersMutex;
         Smp::IEntryPoint* _updateEP;
-        bool _updateEPIsSchedule;
-        Smp::Services::EventId _updateEventId;
+
+        Smp::IField* _field;
+        const Smp::ISimpleField* _simplefield;
+        const Smp::ISimpleArrayField* _simplearrayfield;
+        std::vector<Smp::AnySimple> _anysimples;
+        std::string _bin;
+        std::vector<char> _buf;
+
+        std::mutex _updateMutex, _bufMutex;
+        bool _updated;
+        std::condition_variable _updatedCovar;
     };
 
     struct _compareSchedule {
@@ -149,7 +124,6 @@ private:
     Smp::Services::IScheduler* _schdl;
     std::mutex _schdlMutex;
     std::multiset<const simdeck::smpext::ISchedule*, _compareSchedule> _scheduleQueue;
-    FieldsHandler _fieldsHandler;
 };
 
 } /* namespace rest */

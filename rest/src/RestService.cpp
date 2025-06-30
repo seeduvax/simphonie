@@ -28,9 +28,7 @@ using namespace wfrest;
 const char* _hexDigit = "0123456789abcdef";
 
 RestService::RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : simdeck::Service(name, descr, parent),
-      _sim(dynamic_cast<Smp::ISimulator*>(parent)),
-      _fieldsHandler(_sim->GetScheduler(), "FieldsHandler", "R/W fields encapsulation", this) {
+    : simdeck::Service(name, descr, parent), _sim(dynamic_cast<Smp::ISimulator*>(parent)) {
     if (_sim != nullptr) {
         std::string root = "/api/v1/";
         root += _sim->GetName();
@@ -81,56 +79,18 @@ bool RestService::removeSchedule(Smp::Services::EventId eventId) {
     return false;
 }
 
-RestService::FieldsHandler::FieldsHandler(Smp::Services::IScheduler* scheduler, Smp::String8 name, Smp::String8 descr,
-                                          Smp::IObject* parent)
-    : simdeck::Object(name, descr, parent), _schdl(scheduler), _updateEPIsSchedule(false) {
-    _updateEP =
-        addEP("update", "Update the value of the handled fields.", this, &RestService::FieldsHandler::updateHandlers);
+RestService::FieldHandler::FieldHandler(Smp::IField* field, Smp::Services::IScheduler* scheduler, Smp::String8 name,
+                                        Smp::String8 descr, Smp::IObject* parent)
+    : simdeck::Object(name, descr, parent),
+      _field(field),
+      _simplefield(dynamic_cast<Smp::ISimpleField*>(_field)),
+      _simplearrayfield(dynamic_cast<Smp::ISimpleArrayField*>(_field)),
+      _updated(false),
+      _schdl(scheduler) {
+    _updateEP = addEP("update", "Update the value of the handled fields.", this, &RestService::FieldHandler::update);
 }
 
-void RestService::FieldsHandler::update() {
-    std::lock_guard<std::mutex> lock(_updateMutex);
-    if (!_updateEPIsSchedule) {
-        _updateEventId = _schdl->AddImmediateEvent(_updateEP);
-        _updateEPIsSchedule = true;
-    }
-}
-
-RestService::FieldsHandler::Handler* RestService::FieldsHandler::get(Smp::IField* field) {
-    std::lock_guard<std::mutex> lock(_handlersMutex);
-    auto it = _handlers.find(field);
-    if (it != _handlers.end()) {
-        it->second.second++;
-        return it->second.first.get();
-    }
-    _handlers.insert(std::make_pair(field, std::make_pair(std::make_unique<Handler>(field), 1)));
-    return _handlers[field].first.get();
-}
-
-void RestService::FieldsHandler::release(RestService::FieldsHandler::Handler** handler) {
-    std::lock_guard<std::mutex> lock(_handlersMutex);
-    auto it = _handlers.find((*handler)->getField());
-    if (it != _handlers.end()) {
-        it->second.second--;
-        if (it->second.second == 0) {
-            _handlers.erase(it);
-            *handler = nullptr;
-        }
-    }
-}
-
-void RestService::FieldsHandler::updateHandlers() {
-    {
-        std::lock_guard<std::mutex> lock(_updateMutex);
-        _updateEPIsSchedule = false;
-    }
-    std::lock_guard<std::mutex> lock(_handlersMutex);
-    for (auto& handler : _handlers) {
-        handler.second.first->update();
-    }
-}
-
-void RestService::FieldsHandler::Handler::update() {
+void RestService::FieldHandler::update() {
     {
         std::lock_guard<std::mutex> lock(_bufMutex);
 
@@ -148,7 +108,7 @@ void RestService::FieldsHandler::Handler::update() {
         }
     }
 
-    std::unique_lock<std::mutex> lock(_mainMutex);
+    std::unique_lock<std::mutex> lock(_updateMutex);
 
     /* retrieve the current anysimple values */
     _anysimples.clear();
@@ -163,20 +123,20 @@ void RestService::FieldsHandler::Handler::update() {
 
     /* wake up waiting threads */
     _updated = true;
-    _toWakeUpCounter = _waitingCounter;
-    _waitingCounter = 0;
     _updatedCovar.notify_all();
 }
 
-std::vector<std::string> RestService::FieldsHandler::Handler::retrieveValue() {
-    /* wait next update */
-    std::unique_lock<std::mutex> lock(_mainMutex);
-    _waitingCounter++;
+void RestService::FieldHandler::scheduleUpdate() {
+    _schdl->AddImmediateEvent(_updateEP);
+}
+
+std::vector<std::string> RestService::FieldHandler::getValue() {
+    /* schedule the update EP */
+    scheduleUpdate();
+
+    /* wait for the update */
+    std::unique_lock<std::mutex> lock(_updateMutex);
     _updatedCovar.wait(lock, [&] { return _updated; });
-    _toWakeUpCounter--;
-    if (_toWakeUpCounter == 0) {
-        _updated = false;
-    }
 
     /* retrieve values */
     std::vector<std::string> value;
@@ -192,12 +152,13 @@ std::vector<std::string> RestService::FieldsHandler::Handler::retrieveValue() {
     return value;
 }
 
-void RestService::FieldsHandler::Handler::setBinValue(const std::string& value) {
+void RestService::FieldHandler::setBinValue(const std::string& value) {
     std::lock_guard<std::mutex> lock(_bufMutex);
     _buf = std::vector<char>(value.begin(), value.end());
+    scheduleUpdate();
 }
 
-void RestService::FieldsHandler::Handler::Store(const Smp::Void* address, Smp::UInt64 size) {
+void RestService::FieldHandler::Store(const Smp::Void* address, Smp::UInt64 size) {
     auto addr = reinterpret_cast<const uint8_t*>(address);
     for (Smp::UInt64 i = 0; i < size; ++i) {
         _buf.push_back(_hexDigit[(addr[i] & 0xF0) >> 4]);
@@ -205,7 +166,7 @@ void RestService::FieldsHandler::Handler::Store(const Smp::Void* address, Smp::U
     }
 }
 
-void RestService::FieldsHandler::Handler::Restore(Smp::Void* address, Smp::UInt64 size) {
+void RestService::FieldHandler::Restore(Smp::Void* address, Smp::UInt64 size) {
     auto addr = reinterpret_cast<uint8_t*>(address);
     for (Smp::UInt64 i = 0; i < size; ++i) {
         const auto high = getHexPos(_buf.front());
@@ -278,12 +239,7 @@ Json::Object RestService::parseField(Smp::IField* field) {
     };
     {
         std::vector<std::string> value;
-        {
-            auto handler = _fieldsHandler.get(field);
-            _fieldsHandler.update();
-            value = handler->retrieveValue();
-            _fieldsHandler.release(&handler);
-        }
+        { value = FieldHandler(field, _schdl, "FieldHandler", "", this).getValue(); }
         if (value.size() == 1) {
             json.push_back("value", value.front());
         }
@@ -643,12 +599,7 @@ void RestService::defaultPostHandler(const HttpReq* req, HttpResp* resp) {
         }
         value = json["value"].get<std::string>();
     }
-    {
-        auto handler = _fieldsHandler.get(field);
-        handler->setBinValue(value);
-        _fieldsHandler.update();
-        _fieldsHandler.release(&handler);
-    }
+    { FieldHandler(field, _schdl, "FieldHandler", "", this).setBinValue(value); }
 }
 
 /**
