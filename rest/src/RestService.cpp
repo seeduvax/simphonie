@@ -20,6 +20,9 @@
 #include "simphonie/kern/Schedule.hpp" /* c.f. RestService::_compareSchedule::operator() */
 #include "wfrest/ErrorCode.h"
 
+#define ON_SIM_EXECUTING "onsimexecuting"
+#define ON_SIM_LEAVEEXEC "onsimleavingexec"
+
 namespace simphonie {
 namespace rest {
 
@@ -53,6 +56,13 @@ RestService::RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* pa
     if (schObsv) {
         schObsv->RegisterObserver(this);
     }
+    {
+        std::lock_guard<std::mutex> lock(_simIsRunningMutex);
+        _simIsRunning = (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing);
+    }
+
+    addEP(ON_SIM_EXECUTING, "Internal use only", this, &RestService::onSimExecuting);
+    addEP(ON_SIM_LEAVEEXEC, "Internal use only", this, &RestService::onSimLeavingExec);
 }
 
 RestService::~RestService() {
@@ -79,14 +89,15 @@ bool RestService::removeSchedule(Smp::Services::EventId eventId) {
     return false;
 }
 
-RestService::FieldHandler::FieldHandler(Smp::IField* field, Smp::Services::IScheduler* scheduler, Smp::String8 name,
-                                        Smp::String8 descr, Smp::IObject* parent)
+RestService::FieldHandler::FieldHandler(Smp::IField* field, Smp::Services::IScheduler* scheduler, bool* simIsRunning,
+                                        Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : simdeck::Object(name, descr, parent),
       _field(field),
       _simplefield(dynamic_cast<Smp::ISimpleField*>(_field)),
       _simplearrayfield(dynamic_cast<Smp::ISimpleArrayField*>(_field)),
       _updated(false),
-      _schdl(scheduler) {
+      _schdl(scheduler),
+      _simIsRunning(simIsRunning) {
     _updateEP = addEP("update", "Update the value of the handled fields.", this, &RestService::FieldHandler::update);
 }
 
@@ -127,7 +138,12 @@ void RestService::FieldHandler::update() {
 }
 
 void RestService::FieldHandler::scheduleUpdate() {
-    _schdl->AddImmediateEvent(_updateEP);
+    if (*_simIsRunning) {
+        _schdl->AddImmediateEvent(_updateEP);
+    }
+    else {
+        update();
+    }
 }
 
 std::vector<std::string> RestService::FieldHandler::getValue() {
@@ -181,6 +197,10 @@ void RestService::connect() {
     _tk = _sim->GetTimeKeeper();
     _rslv = _sim->GetResolver();
     _schdl = _sim->GetScheduler();
+    _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_EnterExecutingId,
+                                       GetEntryPoint(ON_SIM_EXECUTING));
+    _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_EnterExecutingId,
+                                       GetEntryPoint(ON_SIM_LEAVEEXEC));
 }
 
 std::string RestService::extractLastElemPath(std::string& path) {
@@ -239,7 +259,10 @@ Json::Object RestService::parseField(Smp::IField* field) {
     };
     {
         std::vector<std::string> value;
-        { value = FieldHandler(field, _schdl, "FieldHandler", "", this).getValue(); }
+        {
+            std::lock_guard<std::mutex> lock(_simIsRunningMutex);
+            value = FieldHandler(field, _schdl, &_simIsRunning, "FieldHandler", "", this).getValue();
+        }
         if (value.size() == 1) {
             json.push_back("value", value.front());
         }
@@ -599,7 +622,10 @@ void RestService::defaultPostHandler(const HttpReq* req, HttpResp* resp) {
         }
         value = json["value"].get<std::string>();
     }
-    { FieldHandler(field, _schdl, "FieldHandler", "", this).setBinValue(value); }
+    {
+        std::lock_guard<std::mutex> lock(_simIsRunningMutex);
+        FieldHandler(field, _schdl, &_simIsRunning, "FieldHandler", "", this).setBinValue(value);
+    }
 }
 
 /**

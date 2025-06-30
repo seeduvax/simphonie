@@ -35,7 +35,9 @@ namespace rest {
 
 using namespace wfrest;
 
-class RestService : public simdeck::Service, virtual public simdeck::smpext::ISchedulerObserver {
+class RestService : public simdeck::Service,
+                    public simdeck::EntryPointPublisher,
+                    virtual public simdeck::smpext::ISchedulerObserver {
 public:
     RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent);
     ~RestService();
@@ -54,8 +56,8 @@ private:
                          virtual public Smp::IStorageWriter,
                          virtual public Smp::IStorageReader {
     public:
-        FieldHandler(Smp::IField* field, Smp::Services::IScheduler* scheduler, Smp::String8 name, Smp::String8 descr,
-                     Smp::IObject* parent);
+        FieldHandler(Smp::IField* field, Smp::Services::IScheduler* scheduler, bool* simIsRunning, Smp::String8 name,
+                     Smp::String8 descr, Smp::IObject* parent);
 
         std::vector<std::string> getValue();
         void setBinValue(const std::string& value);
@@ -84,10 +86,13 @@ private:
         const Smp::ISimpleArrayField* _simplearrayfield;
         std::vector<Smp::AnySimple> _anysimples;
         std::string _bin;
+
+        std::mutex _bufMutex;
         std::vector<char> _buf;
 
-        std::mutex _updateMutex, _bufMutex;
+        std::mutex _updateMutex;
         bool _updated;
+        bool* _simIsRunning;
         std::condition_variable _updatedCovar;
     };
 
@@ -96,6 +101,14 @@ private:
     };
 
     void connect();
+    inline void onSimExecuting() {
+        std::lock_guard<std::mutex> lock(_simIsRunningMutex);
+        _simIsRunning = true;
+    }
+    inline void onSimLeavingExec() {
+        std::lock_guard<std::mutex> lock(_simIsRunningMutex);
+        _simIsRunning = false;
+    }
     static std::string extractLastElemPath(std::string& path);
     bool removeSchedule(Smp::Services::EventId eventId);
     Json::Object parseTimestamp() const;
@@ -124,6 +137,8 @@ private:
     Smp::Services::IScheduler* _schdl;
     std::mutex _schdlMutex;
     std::multiset<const simdeck::smpext::ISchedule*, _compareSchedule> _scheduleQueue;
+    std::mutex _simIsRunningMutex;
+    bool _simIsRunning;
 };
 
 } /* namespace rest */
