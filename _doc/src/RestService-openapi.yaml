@@ -142,7 +142,6 @@ paths:
           in: query
           description: true to retrieves every sub-components informations as well as fields and entrypoints.
           required: false
-          default: false
           schema:
             type: boolean
       responses:
