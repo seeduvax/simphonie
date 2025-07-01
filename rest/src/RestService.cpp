@@ -609,6 +609,11 @@ void RestService::defaultPostHandler(const HttpReq* req, HttpResp* resp) {
             return;
         }
         field = comp->GetField(lastElem.c_str());
+        if (!field) {
+            const std::string msg = "the field '" + lastElem + "' does not exist for the component '" + objPath + "'.";
+            resp->Error(ErrorCode::StatusNotFound, msg);
+            return;
+        }
     }
     std::string value;
     {
