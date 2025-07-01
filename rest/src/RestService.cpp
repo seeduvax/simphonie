@@ -19,6 +19,7 @@
 #include "simdeck/smpext/IObservableScheduler.hpp"
 #include "simphonie/kern/Schedule.hpp" /* c.f. RestService::_compareSchedule::operator() */
 #include "wfrest/ErrorCode.h"
+#include "wfrest/HttpMsg.h"
 
 #define ON_SIM_EXECUTING "onsimexecuting"
 #define ON_SIM_LEAVEEXEC "onsimleavingexec"
@@ -526,7 +527,7 @@ void RestService::getSimulator(const HttpReq* req, HttpResp* resp) {
     json.push_back("name", _sim->GetName());
     json.push_back("description", _sim->GetDescription());
     json.push_back("state", parseKind(_sim->GetState()));
-    if (req->has_query("recursive") && req->query("recursive")) {
+    if (req->has_query("recursive") && req->query("recursive") == "true") {
         for (const auto cont : *(_sim->GetContainers())) {
             json.push_back(cont->GetName(), parseContainer(cont, true));
         }
@@ -579,7 +580,7 @@ void RestService::defaultGetHandler(const HttpReq* req, HttpResp* resp) {
                     json = parseField(field);
                 }
                 else {
-                    json = parseComponent(comp, req->has_query("recursive") && req->query("recursive"));
+                    json = parseComponent(comp, req->has_query("recursive") && req->query("recursive") == "true");
                 }
             }
         }
