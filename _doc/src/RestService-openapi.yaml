@@ -9,7 +9,7 @@ servers:
 tags:
   - name: State
     description: Simulator's state
-  - name: ScheduleQueue
+  - name: Scheduling
     description: Schedule events and list scheduled events
   - name: Components
     description: Simulator's components
@@ -69,7 +69,7 @@ paths:
   /{sim}/scheduleQueue:
     get:
       tags:
-        - ScheduleQueue
+        - Scheduling
       summary: Get the current simulator's scheduling queue
       description: Get the current simulator's scheduling queue.
       parameters:
@@ -89,7 +89,7 @@ paths:
                 $ref: '#/components/schemas/ScheduleQueueResult'
     post:
       tags:
-        - ScheduleQueue
+        - Scheduling
       summary: Schedule an event
       description: Schedule an event.
       parameters:
@@ -158,6 +158,168 @@ paths:
               schema:
                 type: string
                 description: Few information about the issue.
+  /{sim}/{component}/entrypoints/:
+    get:
+      tags:
+        - Components
+      summary: Get the component's entrypoints
+      description: Get the component's entrypoints.
+      parameters:
+        - name: sim
+          in: path
+          description: Simulator's name.
+          example: mySim
+          required: true
+          schema:
+            type: string
+        - name: component
+          in: path
+          description: Component's absolute path.
+          example: myModel/mySubModel
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/EntrypointsResult'
+        '404':
+          description: component not found
+          content:
+            '*/*':
+              schema:
+                type: string
+                description: Few information about the issue.
+  /{sim}/{component}/fields/:
+    get:
+      tags:
+        - Components
+      summary: Get the component's fields
+      description: Get the component's fields.
+      parameters:
+        - name: sim
+          in: path
+          description: Simulator's name.
+          example: mySim
+          required: true
+          schema:
+            type: string
+        - name: component
+          in: path
+          description: Component's absolute path.
+          example: myModel/mySubModel
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/FieldsResult'
+        '404':
+          description: component not found
+          content:
+            '*/*':
+              schema:
+                type: string
+                description: Few information about the issue.
+  /{sim}/{component}/fields/{field}/:
+    get:
+      tags:
+        - Components
+      summary: Get a component's field
+      description: Get a component's field.
+      parameters:
+        - name: sim
+          in: path
+          description: Simulator's name.
+          example: mySim
+          required: true
+          schema:
+            type: string
+        - name: component
+          in: path
+          description: Component's absolute path.
+          example: myModel/mySubModel
+          required: true
+          schema:
+            type: string
+        - name: field
+          in: path
+          description: Component's field.
+          example: myField
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/FieldResult'
+        '404':
+          description: component not found
+          content:
+            '*/*':
+              schema:
+                type: string
+                description: Few information about the issue.
+    post:
+      tags:
+        - Components
+      summary: Set the value of a component's field
+      description: Set the value of a component's field.
+      parameters:
+        - name: sim
+          in: path
+          description: Simulator's name.
+          example: mySim
+          required: true
+          schema:
+            type: string
+        - name: component
+          in: path
+          description: Component's absolute path.
+          example: myModel/mySubModel
+          required: true
+          schema:
+            type: string
+        - name: field
+          in: path
+          description: Component's field.
+          example: myField
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The requested field's value.
+        required: true
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/FieldRequest'
+      responses:
+        '200':
+          description: successful operation
+        '404':
+          description: component or field not found
+          content:
+            '*/*':
+              schema:
+                type: string
+                description: Few information about the issue.
+        '422':
+          description: invalid json
+          content:
+            '*/*':
+              schema:
+                type: string
 components:
   schemas:
     Timestamp:
@@ -393,7 +555,9 @@ components:
         value:
           oneOf:
             - type: string
+              description: Single value field or binary/encoded representation if it cannot be deduced.
             - type: array
+              description: Array field.
               items:
                 type : string
           example: "42"
@@ -462,3 +626,44 @@ components:
           - type: array
             items:
               $ref: '#/components/schemas/Component'
+    EntrypointsResult:
+      type: object
+      required:
+        - entrypoints
+        - timestamp
+      properties:
+        entrypoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entrypoint'
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+    FieldsResult:
+      type: object
+      required:
+        - fields
+        - timestamp
+      properties:
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/Field'
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+    FieldResult:
+      allOf:
+        - $ref: '#/components/schemas/Field'
+        - type: object
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              $ref: '#/components/schemas/Timestamp'
+    FieldRequest:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: string
+          description: The requested value in binary/encoded format.
