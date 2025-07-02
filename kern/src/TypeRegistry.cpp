@@ -17,6 +17,7 @@
 #include "simdeck/ExInvalidPrimitiveType.hpp"
 #include "simdeck/StructureType.hpp"
 #include "simdeck/Type.hpp"
+#include "simdeck/StringType.hpp"
 #include "simphonie/kern/ExTypeAlreadyRegistered.hpp"
 
 // TODO to be reconsidered, smp logger should be used
@@ -61,6 +62,7 @@ TypeRegistry::TypeRegistry(Smp::String8 name, Smp::String8 description, Smp::IOb
                               "Float32", "Four bytes float data type"));
     _types.push_back(new Type(Smp::Uuids::Uuid_Float64, Smp::PrimitiveTypeKind::PTK_Float64, sizeof(Smp::Float64),
                               "Float64", "Eight bytes float data type"));
+    _types.push_back(new StringType(this));
     // TODO add missing type (at least string ?)
 }
 // ..........................................................
