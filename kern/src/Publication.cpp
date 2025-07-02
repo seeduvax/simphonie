@@ -21,6 +21,8 @@
 #include "simdeck/Property.hpp"
 #include "simdeck/SimpleArrayField.hpp"
 #include "simdeck/SimpleField.hpp"
+#include "simdeck/StringField.hpp"
+#include "simdeck/StringType.hpp"
 #include "simdeck/StructureType.hpp"
 #include "simdeck/Type.hpp"
 #include "simphonie/sys/Logger.hpp"
@@ -244,7 +246,13 @@ return nullptr;
 */
             }
         }
-
+    }
+    else if (typeUuid == simdeck::StringType::UuidString) { 
+        // hardcoded here, ideally you would simply call the Publish method of any type but you cant access the parent there
+        Smp::IField* f =
+            new simdeck::StringField(name, description, view, (std::string*)address, t, state, input, output, _pubObj);
+        addField(f);
+        return f;
     }
     std::ostringstream oss;
     oss << "Can't publish field " << name << ", no registered type for uuid " << typeUuid;
