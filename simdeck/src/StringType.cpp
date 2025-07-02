@@ -8,6 +8,7 @@
  * $Date$
  */
 #include "simdeck/StringType.hpp"
+#include "simdeck/StringField.hpp"
 
 namespace simdeck {
     
@@ -30,5 +31,20 @@ Smp::PrimitiveTypeKind StringType::GetPrimitiveTypeKind() const {
 // ..........................................................
 Smp::Uuid StringType::GetUuid() const {
     return StringType::UuidString;   
+}
+
+
+Smp::IField* StringType::Publish(
+    Smp::Publication::IPublishField* receiver,
+    Smp::String8 name,
+    Smp::String8 description,
+    Smp::Void* address,
+    Smp::ViewKind view,
+    Smp::Bool state,
+    Smp::Bool input,
+    Smp::Bool output){
+    simdeck::StringField* sf = new StringField(name,description,view,(std::string*)address,this,state,input,output,dynamic_cast<Smp::IObject*>(receiver));
+    receiver->PublishField(sf);
+    return sf;
 }
 } // namespace simdeck

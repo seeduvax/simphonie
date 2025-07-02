@@ -37,6 +37,15 @@ public:
     // Type specialization
     Smp::PrimitiveTypeKind GetPrimitiveTypeKind() const override;
     Smp::Uuid GetUuid() const override;
+    virtual Smp::IField* Publish(
+        Smp::Publication::IPublishField* receiver,
+        Smp::String8 name,
+        Smp::String8 description,
+        Smp::Void* address,
+        Smp::ViewKind view = Smp::ViewKind::VK_All,
+        Smp::Bool state = true,
+        Smp::Bool input = false,
+        Smp::Bool output = false) = 0;
 };
 
 } // namespace simdeck
