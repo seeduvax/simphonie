@@ -22,7 +22,6 @@
 #include "simdeck/SimpleArrayField.hpp"
 #include "simdeck/SimpleField.hpp"
 #include "simdeck/StringField.hpp"
-#include "simdeck/StringType.hpp"
 #include "simdeck/StructureType.hpp"
 #include "simdeck/Type.hpp"
 #include "simphonie/sys/Logger.hpp"
@@ -213,6 +212,13 @@ Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 descripti
                                Smp::ViewKind view, Smp::Bool state, Smp::Bool input, Smp::Bool output) {
     Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(typeUuid));
     if (t != nullptr) {
+        if (t == _recursivePubGuard) {
+            // This PublishFields calls itself, probably through t->PublishField(...)
+            // stop here to not fail on stacvk overflow.
+            // TODO some error management - log or throw exception (which one?).
+            _recursivePubGuard = nullptr;
+            return nullptr;
+        }
         StructureType* st = dynamic_cast<StructureType*>(t);
         if (st != nullptr) {
 /* TODO restore structure field build.
@@ -238,12 +244,12 @@ return nullptr;
                 return f;
             }
             else {
-/*
-                auto f=
-                    new Field(name, description, view, address, t->getSize(), t, state, input, output, _pubObj);
-                addField(f);
+                // in last resort, delegate the publication to the type, hoping
+                // it will not just call back the current Publication method.
+                _recursivePubGuard = t;
+                f = t->Publish(this, name, description, address, view, state, input, output);
+                _recursivePubGuard = nullptr;
                 return f;
-*/
             }
         }
     }

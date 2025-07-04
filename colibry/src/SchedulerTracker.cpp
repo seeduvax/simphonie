@@ -52,7 +52,7 @@ void SchedulerTracker::_preEventEP() {
     auto schedule = _scheduler->GetSchedule();
     auto it = _events.find(schedule->GetId());
     if (it == _events.end()) {
-        _events.insert({schedule->GetId(), {schedule->GetId(), schedule->GetName(), {}}});
+        _events.insert({schedule->GetId(), {schedule->GetId(), schedule->GetEP()->GetName(), {}}});
         it = _events.find(schedule->GetId());
     }
     _currentEvent = &it->second;

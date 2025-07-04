@@ -8,10 +8,12 @@
  * $Date$
  */
 #include "simphonie/colibry/SimControl.hpp"
+
 #include <functional>
 #include <iomanip>
 #include <limits>
 #include <string>
+
 #include "Smp/IPublication.h"
 #include "Smp/ISimpleField.h"
 #include "Smp/Services/IEventManager.h"
@@ -20,7 +22,7 @@
 #include "simdeck/ExInvalidAnyType.hpp"
 #include "simdeck/ExInvalidFieldName.hpp"
 #include "simdeck/Exception.hpp"
-#include "simdeck/StringField.hpp"
+#include "simdeck/StringType.hpp"
 
 #define CHECK_EP_NAME "checkStop"
 #define CONTAINER_NAME "EventHandlers"
@@ -45,9 +47,9 @@ SimControl::~SimControl() {
 }
 
 void SimControl::publish(Smp::IPublication* receiver) {
-    receiver->PublishField(simdeck::StringField::Create(
+    receiver->PublishField(
         "condition", "S-expression condition. Service shall stop simulation when the condition is no longer false.",
-        Smp::ViewKind::VK_All, &_condition, nullptr, false, true, false, this));
+        &_condition, simdeck::StringType::UuidString, Smp::ViewKind::VK_All, false, true, false);
 }
 
 void SimControl::applyCondition() {

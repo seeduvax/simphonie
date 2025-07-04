@@ -10,8 +10,10 @@
 #include "simphonie/colibry/FieldRecorder.hpp"
 
 #include "Smp/ISimulator.h"
+#include "Smp/IStorageReader.h"
+#include "Smp/IStorageWriter.h"
 #include "Smp/Services/IEventManager.h"
-#include "simdeck/StringField.hpp"
+#include "simdeck/StringType.hpp"
 #include "simdeck/Type.hpp"
 
 namespace simphonie {
@@ -47,8 +49,8 @@ FieldRecorder::~FieldRecorder() {
 void FieldRecorder::publish(Smp::IPublication* receiver) {
     _fieldHolder = new FieldHolder("port", "Fields to records connexion port", this);
     receiver->PublishField(_fieldHolder);
-    receiver->PublishField(simdeck::StringField::Create("filePath", "", Smp::ViewKind::VK_All, &_filePath, nullptr,
-                                                        false, true, false, this));
+    receiver->PublishField("filePath", "", &_filePath, simdeck::StringType::UuidString, Smp::ViewKind::VK_All, false,
+                           true, false);
 }
 // ..........................................................
 void FieldRecorder::connect() {

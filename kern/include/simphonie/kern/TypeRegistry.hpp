@@ -9,10 +9,11 @@
  */
 #ifndef __simphonie_kern_TypeRegistry_HPP__
 #define __simphonie_kern_TypeRegistry_HPP__
-#include "Smp/Publication/ITypeRegistry.h"
+#include <memory>
+
 #include "simdeck/Collection.hpp"
 #include "simdeck/Component.hpp"
-#include <memory>
+#include "simdeck/smpext/ICustomTypeRegistry.hpp"
 
 namespace simphonie {
 namespace kern {
@@ -21,7 +22,7 @@ using namespace simdeck;
 /**
  *
  */
-class TypeRegistry : public Component, virtual public Smp::Publication::ITypeRegistry {
+class TypeRegistry : public Component, virtual public simdeck::smpext::ICustomTypeRegistry {
 public:
     /**
      * Default constructor.
@@ -74,6 +75,8 @@ public:
                                                        Smp::Uuid typeUuid) override;
     Smp::Publication::IClassType* AddClassType(Smp::String8 name, Smp::String8 description, Smp::Uuid typeUuid,
                                                Smp::Uuid baseClassUuid) override;
+    // simdeck::ICustomTypeRegistry implementation
+    void AddType(Smp::Publication::IType* type) override;
 
 private:
     OwnedCollection<Smp::Publication::IType> _types;

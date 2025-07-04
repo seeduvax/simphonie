@@ -22,7 +22,7 @@ namespace kern {
 /**
  *
  */
-class Publication : virtual public Smp::IObject, virtual public Smp::IPublication {
+class Publication : public Smp::IPublication, virtual public Smp::IObject {
 public:
     /**
      * Default constructor.
@@ -46,10 +46,6 @@ public:
         return _pubObj;
     }
      */
-
-    void addChild(IObject* pub);
-    IObject* getChild(Smp::String8 name) const;
-    void removeChild(Publication* pub);
 
     // Smp::IPublication implementation
     Smp::IField* PublishField(Smp::String8 name, Smp::String8 description, Smp::Char8* address,
@@ -130,6 +126,11 @@ private:
     simdeck::Collection<Smp::IProperty> _properties;
 
     inline void addField(Smp::IField* field);
+    void addChild(Smp::IObject* pub);
+    Smp::IObject* getChild(Smp::String8 name) const;
+    void removeChild(Publication* pub);
+
+    Smp::Publication::IType* _recursivePubGuard = nullptr;
 };
 
 }  // namespace kern

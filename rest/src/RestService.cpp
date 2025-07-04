@@ -288,8 +288,8 @@ Json::Object RestService::parseEP(const Smp::IEntryPoint* ep) {
 Json::Object RestService::parseSchedule(const simdeck::smpext::ISchedule* schedule) {
     Json::Object json{
         {"id", schedule->GetId()},
-        {"name", schedule->GetName()},
-        {"description", schedule->GetDescription()},
+        {"name", schedule->GetEP()->GetName()},
+        {"description", schedule->GetEP()->GetDescription()},
         {"time", schedule->GetTime()},
         {"period", schedule->GetPeriod()},
         {"repeat", schedule->GetRepeat()},
