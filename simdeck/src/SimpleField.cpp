@@ -24,7 +24,7 @@ class TSimpleField : public SimpleField, virtual public Smp::ISimpleField {
   friend class MemFieldCopy<T>;
 public:
     TSimpleField(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, T* address, Smp::Bool isState,
-           Smp::Bool isInput, Smp::Bool isOutput, Smp::IObject* parent, Smp::Publication::IType* type)
+           Smp::Bool isInput, Smp::Bool isOutput, Smp::IObject* parent, const Smp::Publication::IType* type)
         : SimpleField(name, description, viewKind, (void*)address, sizeof(T), type, isState, isInput, isOutput, parent),
           _tData(address) {
     }
@@ -118,7 +118,7 @@ public:
                 Smp::Bool isState,
                 Smp::Bool isInput,
                 Smp::IObject* parent,
-                Smp::Publication::IType* type
+                const Smp::Publication::IType* type
                 ):  TSimpleField<T>(name, description, viewKind, address,
                          isState, false, true, parent, type),
                     _targets("targets","connected fields",this) {
@@ -205,7 +205,7 @@ Smp::ISimpleField* SimpleField::Create(
                             Smp::Bool isInput,
                             Smp::Bool isOutput,
                             Smp::IObject* parent,
-                            Smp::Publication::IType* type) {
+                            const Smp::Publication::IType* type) {
     if (isOutput) {
         return new TSimpleOutputField<T>(
                         name, description, viewKind, static_cast<T*>(address),
@@ -222,7 +222,7 @@ Smp::ISimpleField* SimpleField::Create(
 SimpleField::SimpleField(
              Smp::String8 name, Smp::String8 description,
              Smp::ViewKind viewKind, void* address, unsigned int dataSize,
-             Smp::Publication::IType* type, Smp::Bool isState,
+             const Smp::Publication::IType* type, Smp::Bool isState,
              Smp::Bool isInput, Smp::Bool isOutput,
              Smp::IObject* parent)
             : Field(name, description, viewKind, address, dataSize, type,
@@ -240,7 +240,7 @@ Smp::ISimpleField* SimpleField::Create(
                             Smp::String8 name,
                             Smp::String8 description,
                             Smp::ViewKind viewKind,
-                            Smp::Publication::IType* type,
+                            const Smp::Publication::IType* type,
                             void* address,
                             Smp::Bool isState,
                             Smp::Bool isInput,

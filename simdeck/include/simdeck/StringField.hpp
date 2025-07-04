@@ -59,7 +59,7 @@ public:
                 Smp::String8 description,
                 Smp::ViewKind viewKind,
                 std::string* address,
-                Smp::Publication::IType* type,
+                const Smp::Publication::IType* type,
                 Smp::Bool isState,
                 Smp::Bool isInput,
                 Smp::Bool isOutput,

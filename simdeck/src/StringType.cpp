@@ -9,14 +9,22 @@
  */
 #include "simdeck/StringType.hpp"
 #include "simdeck/StringField.hpp"
+#include "Smp/IComponent.h"
 
 namespace simdeck {
     
-const Smp::Uuid StringType::UuidString(0, 0, 0, { ' ',' ','S','t','r','i','n','g'});
+const Smp::Uuid StringType::UuidString(0, 0, 0, { 's','t','S','t','r','i','n','g'});
 // --------------------------------------------------------------------
 // ..........................................................
-StringType::StringType(Smp::IObject* parent): 
-        Parent("StringType", "C++ std::string field type", parent) {
+StringType::StringType(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent): 
+        Parent(
+                StringType::UuidString,
+                Smp::PrimitiveTypeKind::PTK_String8,
+                sizeof(std::string), 
+                             // not really used to perform any operation on
+                             // fields buffer but consistent with parent class
+                             // definition.
+                name, descr, parent) {
 }
 // ..........................................................
 StringType::~StringType() {
@@ -24,27 +32,15 @@ StringType::~StringType() {
 
 // --------------------------------------------------------------------
 // ..........................................................
-Smp::PrimitiveTypeKind StringType::GetPrimitiveTypeKind() const {
-    return Smp::PrimitiveTypeKind::PTK_String8;
-}
-
-// ..........................................................
-Smp::Uuid StringType::GetUuid() const {
-    return StringType::UuidString;   
-}
-
-
-Smp::IField* StringType::Publish(
-    Smp::Publication::IPublishField* receiver,
-    Smp::String8 name,
-    Smp::String8 description,
-    Smp::Void* address,
-    Smp::ViewKind view,
-    Smp::Bool state,
-    Smp::Bool input,
-    Smp::Bool output){
-    simdeck::StringField* sf = new StringField(name,description,view,(std::string*)address,this,state,input,output,dynamic_cast<Smp::IObject*>(receiver));
-    receiver->PublishField(sf);
-    return sf;
+Smp::IField* StringType::createField(
+            Smp::String8 name,
+            Smp::String8 description,
+            Smp::IComponent* parent,
+            void* address,
+            Smp::ViewKind view,
+            Smp::Bool state,
+            Smp::Bool input,
+            Smp::Bool output) const {
+    return  StringField::Create(name,description,view,(std::string*)address,this,state,input,output,parent);
 }
 } // namespace simdeck

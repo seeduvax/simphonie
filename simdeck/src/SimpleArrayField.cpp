@@ -26,7 +26,7 @@ template <typename T>
 class TSimpleArrayField: public SimpleArrayField {
 public:
     TSimpleArrayField(Smp::String8 name, Smp::String8 description, Smp::UInt64 count, void* address,
-                     Smp::Publication::IType* ptype, Smp::ViewKind viewKind, Smp::Publication::IType* type,
+                     const Smp::Publication::IType* ptype, Smp::ViewKind viewKind, const Smp::Publication::IType* type,
                      Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput, Smp::IObject* parent)
         : SimpleArrayField(name, description, count, address,
                           sizeof(T), viewKind, type,
@@ -118,9 +118,9 @@ public:
                             Smp::String8 description,
                             Smp::UInt64 count,
                             T* address,
-                            Smp::Publication::IType* ptype,
+                            const Smp::Publication::IType* ptype,
                             Smp::ViewKind viewKind,
-                            Smp::Publication::IType* type,
+                            const Smp::Publication::IType* type,
                             Smp::Bool isState,
                             Smp::Bool isInput,
                             Smp::IObject* parent)
@@ -166,7 +166,7 @@ SimpleArrayField::SimpleArrayField(
                       Smp::String8 name, Smp::String8 description,
                       Smp::UInt64 count, void* address, Smp::UInt64 itemSize,
                       Smp::ViewKind viewKind,
-                      Smp::Publication::IType* type,
+                      const Smp::Publication::IType* type,
                       Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
                       Smp::IObject* parent)
                     : Field(name, description, viewKind, address, 
@@ -244,9 +244,9 @@ Smp::ISimpleArrayField* SimpleArrayField::Create(
                             Smp::String8 description,
                             Smp::UInt64 count,
                             T* address,
-                            Smp::Publication::IType* ptype,
+                            const Smp::Publication::IType* ptype,
                             Smp::ViewKind viewKind,
-                            Smp::Publication::IType* type,
+                            const Smp::Publication::IType* type,
                             Smp::Bool isState,
                             Smp::Bool isInput,
                             Smp::Bool isOutput,
@@ -270,9 +270,9 @@ Smp::ISimpleArrayField* SimpleArrayField::Create(
                             Smp::String8 description,
                             Smp::UInt64 count,
                             void* address,
-                            Smp::Publication::IType* ptype,
+                            const Smp::Publication::IType* ptype,
                             Smp::ViewKind viewKind,
-                            Smp::Publication::IType* type,
+                            const Smp::Publication::IType* type,
                             Smp::Bool isState,
                             Smp::Bool isInput,
                             Smp::Bool isOutput,

@@ -50,11 +50,20 @@ protected:
     void setSize(Smp::UInt64 newSize) {
         _size = newSize;
     }
+    virtual Smp::IField* createField(
+        Smp::String8 name,
+        Smp::String8 description,
+        Smp::IComponent* parent,
+        void* address,
+        Smp::ViewKind view,
+        Smp::Bool state,
+        Smp::Bool input,
+        Smp::Bool output) const;
 
 private:
     Smp::Uuid _uuid;
     Smp::PrimitiveTypeKind _kind;
-    Smp::UInt64 _size;
+    Smp::UInt64 _size=1;
 };
 
 }  // namespace simdeck
