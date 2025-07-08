@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    summary {
+      cursor: pointer;
+      font-weight: bold;
+    }
+    details > div {
+      margin-left: 20px;
+    }
+    ul {
+      list-style-type: disc;
+      margin-left: 40px;
+      margin-block: 5px;
+    }
+    p  {
+      margin-block: 8px;
+    }
+    .section-title {
+      margin-top: 10px;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div id="sim-info"></div>
+
+<button onclick="postState(0)">Build</button>
+<button onclick="postState(1)">Connect</button>
+<button onclick="postState(2)">Init</button>
+<button onclick="postState(3)">Standby</button>
+<button onclick="postState(4)">Run</button>
+<button onclick="postState(5)">Store</button>
+<button onclick="postState(6)">Restore</button>
+<button onclick="postState(7)">Reconnect</button>
+<button onclick="postState(8)">Exit</button>
+<button onclick="postState(9)">Abort</button>
+- <button onclick="refreshElements()">Refresh</button>
+- <button onclick="autoRefresh()">Auto Refresh: <span id="autoRefresh">On</span></button>
+
+<div id="tree"></div>
+
+<script>
+  const baseUrl = 'http://localhost:8080/api/v1';
+  const simName = 'MySim';
+
+  const postRequest = async (path, body) => {
+      const response = await fetch(path, {
+          method: "POST",
+          body: body
+      });
+      return response;
+  };
+
+  function fetchJson(path) {
+    return fetch(baseUrl + path)
+      .then(response => {
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        return response.json();
+      });
+  }
+
+  const postState = async (id) => {
+      let json;
+      if (id == 5 || id == 6) {
+          json = JSON.stringify({ id: id, filename: prompt("filename: ") });
+      } else {
+          json = JSON.stringify({ id: id });
+      }
+      const response = await postRequest(baseUrl + '/' + simName + "/state", json);
+      location.reload();
+  };
+
+  // Create a <details> element for a component and populate it with data
+  function createComponentDetails(compData, compPath) {
+    const detail = document.createElement('details');
+    const summary = document.createElement('summary');
+    summary.textContent = compData.name;
+    detail.appendChild(summary);
+    detail.dataset.loaded = 'true';
+    detail.dataset.path = compPath;
+
+    const contentDiv = document.createElement('div');
+
+    if (compData.description) {
+      const descP = document.createElement('p');
+      descP.textContent = "Description: " + compData.description;
+      contentDiv.appendChild(descP);
+    }
+    if (compData.state) {
+      const stateP = document.createElement('p');
+      stateP.textContent = "State: " + compData.state.name;
+      contentDiv.appendChild(stateP);
+    }
+    if (compData.uuid) {
+      const uuidP = document.createElement('p');
+      uuidP.textContent = "UUID: " + compData.uuid;
+      contentDiv.appendChild(uuidP);
+    }
+
+    // Retrieve entrypoints
+    const epDetails = document.createElement('details');
+    const epSum = document.createElement('summary');
+    epSum.textContent = "entrypoints";
+    epDetails.appendChild(epSum);
+    const epList = document.createElement('ul');
+    fetchJson(`/${compPath}/entrypoints`)
+      .then(data => {
+        data.entrypoints.forEach(ep => {
+          const li = document.createElement('li');
+          li.textContent = ep.name;
+          if (ep.description != "") {
+            li.textContent += " – " + ep.description;
+          }
+          epList.appendChild(li);
+        });
+      })
+      .catch(err => console.error(err));
+    epDetails.appendChild(epList);
+    contentDiv.appendChild(epDetails);
+
+    const fDetails = document.createElement('details');
+    const fSum = document.createElement('summary');
+    fSum.textContent = "fields";
+    fDetails.appendChild(fSum);
+    const fList = document.createElement('ul');
+    fDetails.dataset.path = compPath;
+    fDetails.dataset.loaded = 'false';
+    fDetails.addEventListener('toggle', function() {
+      if (fDetails.open && fDetails.dataset.loaded === 'false') {
+        fetchJson(`/${fDetails.dataset.path}/fields`)
+          .then(data => {
+            data.fields.forEach(field => {
+              const li = document.createElement('li');
+              let fieldText = field.name + ": " + field.value;
+              if (field.type && field.type.primitive && field.type.primitive.name) {
+                fieldText += " (" + field.type.primitive.name + ")";
+              }
+              li.textContent = fieldText;
+              fList.appendChild(li);
+            });
+          })
+          .catch(err => console.error(err));
+          fDetails.dataset.loaded = 'true';
+      }
+    });
+    fDetails.appendChild(fList);
+    contentDiv.appendChild(fDetails);
+
+    Object.keys(compData).forEach(key => {
+      if (!['name','description','uuid','state','timestamp','fields','entrypoints'].includes(key)) {
+        const subComps = compData[key];
+
+        const contDetails = document.createElement('details');
+        const contSum = document.createElement('summary');
+        contSum.textContent = key;
+        contDetails.appendChild(contSum);
+        const innerDiv = document.createElement('div');
+
+        if (Array.isArray(subComps)) {
+          subComps.forEach(item => {
+            const childDetail = document.createElement('details');
+            const childSum = document.createElement('summary');
+            childSum.textContent = item;
+            childDetail.appendChild(childSum);
+            childDetail.dataset.path = '/' + compPath + '/' + item;
+            childDetail.dataset.loaded = 'false';
+            childDetail.addEventListener('toggle', function() {
+              if (childDetail.open && childDetail.dataset.loaded === 'false') {
+                fetchJson(childDetail.dataset.path)
+                  .then(data => {
+                    // Build and attach the child component UI
+                    const newNode = createComponentDetails(data, childDetail.dataset.path);
+                    // Replace placeholder detail with full detail
+                    innerDiv.replaceChild(newNode, childDetail);
+                  })
+                  .catch(err => console.error(err));
+                childDetail.dataset.loaded = 'true';
+              }
+            });
+            innerDiv.appendChild(childDetail);
+          });
+        }
+
+        contDetails.appendChild(innerDiv);
+        contentDiv.appendChild(contDetails);
+      }
+    });
+
+    detail.appendChild(contentDiv);
+    return detail;
+  }
+
+  function init() {
+    fetchJson(`/${simName}`)
+      .then(data => {
+        const infoDiv = document.getElementById('sim-info');
+        const titleH2 = document.createElement('h2');
+        titleH2.textContent = data.name;
+        infoDiv.appendChild(titleH2);
+        if (data.description) {
+          const descP = document.createElement('p');
+          descP.textContent = "Description: " + data.description;
+          infoDiv.appendChild(descP);
+        }
+        if (data.state) {
+          const stateP = document.createElement('p');
+          stateP.textContent = "State: " + data.state.name;
+          infoDiv.appendChild(stateP);
+        }
+
+        const rootDetail = document.createElement('details');
+        rootDetail.open = true;
+        const rootSummary = document.createElement('summary');
+        rootSummary.textContent = data.name;
+        rootDetail.appendChild(rootSummary);
+
+        const containerDiv = document.createElement('div');
+
+        // For each container
+        Object.keys(data).forEach(containerName => {
+          if (!['id','name','description','state','timestamp'].includes(containerName)) {
+            const arr = data[containerName];
+            const contDetail = document.createElement('details');
+            const contSum = document.createElement('summary');
+            contSum.textContent = containerName;
+            contDetail.appendChild(contSum);
+            const innerDiv = document.createElement('div');
+
+            // For each component
+            if (Array.isArray(arr)) {
+              arr.forEach(item => {
+                const compDetail = document.createElement('details');
+                const compSum = document.createElement('summary');
+                compSum.textContent = item;
+                compDetail.appendChild(compSum);
+                compDetail.dataset.path = "/" + simName + "/" + item;
+                compDetail.dataset.loaded = 'false';
+                compDetail.addEventListener('toggle', function() {
+                  if (compDetail.open && compDetail.dataset.loaded === 'false') {
+                    fetchJson(compDetail.dataset.path)
+                      .then(data => {
+                        const newNode = createComponentDetails(data, compDetail.dataset.path);
+                        innerDiv.replaceChild(newNode, compDetail);
+                      })
+                      .catch(err => console.error(err));
+                    compDetail.dataset.loaded = 'true';
+                  }
+                });
+                innerDiv.appendChild(compDetail);
+              });
+            }
+            contDetail.appendChild(innerDiv);
+            containerDiv.appendChild(contDetail);
+          }
+        });
+
+        rootDetail.appendChild(containerDiv);
+        document.getElementById('tree').appendChild(rootDetail);
+      })
+      .catch(err => {
+        console.error("Failed to load simulator:", err);
+        const infoDiv = document.getElementById('sim-info');
+        infoDiv.textContent = "Error loading simulator data.";
+      });
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>

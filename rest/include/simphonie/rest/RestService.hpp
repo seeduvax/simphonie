@@ -101,6 +101,7 @@ private:
     };
 
     void connect();
+    static void setupResponse(HttpResp* resp);
     inline void onSimExecuting() {
         std::lock_guard<std::mutex> lock(_simIsRunningMutex);
         _simIsRunning = true;

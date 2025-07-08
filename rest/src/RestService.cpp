@@ -204,6 +204,13 @@ void RestService::connect() {
                                        GetEntryPoint(ON_SIM_LEAVEEXEC));
 }
 
+void RestService::setupResponse(HttpResp* resp) {
+    resp->set_header_pair("Access-Control-Origin", "*");
+    resp->set_header_pair("Access-Control-Allow-Origin", "*");
+    resp->set_header_pair("Access-Control-Allow-Methods", "GET, POST");
+    resp->set_header_pair("Access-Control-Allow-Headers", "Content-Type");
+}
+
 std::string RestService::extractLastElemPath(std::string& path) {
     const auto pos = path.rfind('/');
     if (pos == std::string::npos) {
@@ -296,10 +303,10 @@ Json::Object RestService::parseSchedule(const simdeck::smpext::ISchedule* schedu
         {"activationCounter", schedule->GetActivationCounter()},
     };
     if (schedule->GetStartEventId() >= 0) {
-        json.push_back("StartEventId", schedule->GetStartEventId());
+        json.push_back("startOnEventId", schedule->GetStartEventId());
     }
     if (schedule->GetStopEventId() >= 0) {
-        json.push_back("StopEventId", schedule->GetStopEventId());
+        json.push_back("stopEventId", schedule->GetStopEventId());
     }
     return json;
 }
@@ -335,18 +342,31 @@ Json::Object RestService::parseComponent(const Smp::IComponent* component, bool 
     }
     json.push_back("state", parseKind(component->GetState()));
     if (recursive) {
-        {
-            const auto fields = parseFields(component);
-            if (fields.size() > 0) {
-                json.push_back("fields", fields);
-            }
+        const auto fields = parseFields(component);
+        if (fields.size() > 0) {
+            json.push_back("fields", fields);
         }
-        {
-            const auto eps = parseEPs(component);
-            if (eps.size() > 0) {
-                json.push_back("entrypoints", eps);
-            }
+    }
+    else {
+        Json::Array arr;
+        for (const auto fld : *(component->GetFields())) {
+            arr.push_back(fld->GetName());
         }
+        json.push_back("fields", arr);
+    }
+    if (recursive) {
+        const auto eps = parseEPs(component);
+        if (eps.size() > 0) {
+            json.push_back("entrypoints", eps);
+        }
+    }
+    else {
+        Json::Array arr;
+        const auto epp = dynamic_cast<const Smp::IEntryPointPublisher*>(component);
+        for (const auto fld : *(epp->GetEntryPoints())) {
+            arr.push_back(fld->GetName());
+        }
+        json.push_back("entrypoints", arr);
     }
     {
         const auto composite = dynamic_cast<const Smp::IComposite*>(component);
@@ -380,12 +400,14 @@ Json::Array RestService::parseContainer(const Smp::IContainer* container, bool r
 }
 
 void RestService::getState(const HttpReq* req, HttpResp* resp) const {
+    setupResponse(resp);
     auto json = parseKind(_sim->GetState());
     json.push_back("timestamp", parseTimestamp());
     resp->Json(json);
 }
 
 void RestService::getScheduleQueue(const HttpReq* req, HttpResp* resp) {
+    setupResponse(resp);
     Json::Object json;
     for (const auto schedule : _scheduleQueue) {
         json["queue"].push_back(parseSchedule(schedule));
@@ -395,6 +417,7 @@ void RestService::getScheduleQueue(const HttpReq* req, HttpResp* resp) {
 }
 
 void RestService::postScheduleQueue(const HttpReq* req, HttpResp* resp) {
+    setupResponse(resp);
     const auto json = Json::parse(req->body());
     /* req->json() is better but it requires the content-type to be set to app/json */
     if (!json.is_valid()) {
@@ -475,6 +498,7 @@ void RestService::postScheduleQueue(const HttpReq* req, HttpResp* resp) {
 }
 
 void RestService::postState(const HttpReq* req, HttpResp* resp) {
+    setupResponse(resp);
     try {
         const auto json = Json::parse(req->body());
         /* req->json() is better but it requires the content-type to be set to app/json */
@@ -523,6 +547,7 @@ void RestService::postState(const HttpReq* req, HttpResp* resp) {
 }
 
 void RestService::getSimulator(const HttpReq* req, HttpResp* resp) {
+    setupResponse(resp);
     Json::Object json;
     json.push_back("name", _sim->GetName());
     json.push_back("description", _sim->GetDescription());
@@ -547,6 +572,7 @@ void RestService::getSimulator(const HttpReq* req, HttpResp* resp) {
 }
 
 void RestService::defaultGetHandler(const HttpReq* req, HttpResp* resp) {
+    setupResponse(resp);
     const auto path = "/" + req->match_path();
 
     auto objPath = path;
@@ -590,6 +616,7 @@ void RestService::defaultGetHandler(const HttpReq* req, HttpResp* resp) {
 }
 
 void RestService::defaultPostHandler(const HttpReq* req, HttpResp* resp) {
+    setupResponse(resp);
     Smp::IField* field;
     {
         const auto path = "/" + req->match_path();

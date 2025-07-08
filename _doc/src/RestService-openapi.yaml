@@ -7,6 +7,8 @@ info:
 servers:
   - url: /api/v1/
 tags:
+  - name: Simulator
+    description: Simulator
   - name: State
     description: Simulator's state
   - name: Scheduling
@@ -14,6 +16,27 @@ tags:
   - name: Components
     description: Simulator's components
 paths:
+  /{sim}:
+    get:
+      tags:
+        - Simulator
+      summary: Get the simulator
+      description: Get the simulator.
+      parameters:
+        - name: sim
+          in: path
+          description: Simulator's name.
+          example: mySim
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SimulatorResult'
   /{sim}/state:
     get:
       tags:
@@ -580,6 +603,8 @@ components:
         - description
         - uuid
         - state
+        - fields
+        - entrypoints
         - timestamp
       properties:
         name:
@@ -605,19 +630,29 @@ components:
               type: string
               example: 3(CSK_Connected)
         fields:
-          type: array
-          description: Omitted if not recurive.
-          items:
-            $ref: '#/components/schemas/Field'
+          description: It is either an array of fields if recursive or an array of their name.
+          oneOf:
+            - type: array
+              items:
+                type: string
+                description: Fields' name
+            - type: array
+              items:
+                $ref: '#/components/schemas/Field'
         entrypoints:
-          type: array
-          description: Omitted if not recurive.
-          items:
-            $ref: '#/components/schemas/Entrypoint'
+          description: It is either an array of entrypoints if recursive or an array of their name.
+          oneOf:
+            - type: array
+              items:
+                type: string
+                description: Entrypoints' name
+            - type: array
+              items:
+                $ref: '#/components/schemas/Entrypoint'
         timestamp:
           $ref: '#/components/schemas/Timestamp'
       additionalProperties:
-        description: Additional property for each containers with their name as the properties' one. It is either an array of the contained components if recursive or an array of their name else.
+        description: Additional property for each containers with their name as the properties' one. It is either an array of the contained components if recursive or an array of their name.
         oneOf:
           - type: array
             items:
@@ -667,3 +702,46 @@ components:
         value:
           type: string
           description: The requested value in binary/encoded format.
+    SimulatorResult:
+      type: object
+      required:
+        - name
+        - description
+        - state
+        - timestamp
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 3
+        name:
+          type: string
+          example: MySim
+        description:
+          type: string
+          example: This is MySim
+        state:
+          type: object
+          required:
+            - id
+            - name
+          properties:
+            id:
+              type: integer
+              format: int32
+              example: 3
+            name:
+              type: string
+              example: 3(SSK_Standby)
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+      additionalProperties:
+        description: Additional property for each containers with their name as the properties' one. It is either an array of the contained components if recursive or an array of their name else.
+        oneOf:
+          - type: array
+            items:
+              type: string
+              description: Component's name
+          - type: array
+            items:
+              $ref: '#/components/schemas/Component'
