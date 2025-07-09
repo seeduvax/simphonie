@@ -34,7 +34,7 @@ void StructureType::AddField(
                 Smp::Bool state,
                 Smp::Bool input,
                 Smp::Bool output) {
-    Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(uuid));
+    auto t = _typeRegistry->GetType(uuid);
     if (t != nullptr) {
 // TODO from IStructureField header, type shall be checked:
 //  - be a value type.
@@ -42,19 +42,13 @@ void StructureType::AddField(
         struct StructureType::FieldDescr fd;
         fd.name = name;
         fd.description = description;
-        fd.uuid = uuid;
+        fd.type = t;
         fd.offset = offset;
-        fd.size = t->getSize();
         fd.view = view;
         fd.state = state;
         fd.input = input;
         fd.output = output;
         _fields.push_back(fd);
-        int size = getSize();
-        int newSize = offset + fd.size;
-        if (newSize > size) {
-            setSize(newSize);
-        }
     }
     else {
         throw new ExTypeNotRegistered(this, uuid);
@@ -62,6 +56,8 @@ void StructureType::AddField(
 }
 // ..........................................................
 void StructureType::setup(StructureField* sf) const {
+/*
+ * TODO to be removed once StructureType handles that itself.
     for (auto fd : _fields) {
         // TODO make better pointer arithmetic than this ugly hack to
         // make it quicly compile.
@@ -89,6 +85,7 @@ void StructureType::setup(StructureField* sf) const {
             throw ExTypeNotRegistered(this,fd.uuid);
         }
     }
+  */
 }
 
 }  // namespace simdeck

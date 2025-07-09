@@ -45,18 +45,17 @@ public:
      */
     void setup(StructureField* sf) const;
 
-private:
     struct FieldDescr {
         Smp::String8 name;
         Smp::String8 description;
-        Smp::Uuid uuid;
+        Smp::Publication::IType* type;
         Smp::Int64 offset;
-        Smp::UInt64 size;
         Smp::ViewKind view;
         Smp::Bool state;
         Smp::Bool input;
         Smp::Bool output;
     };
+private:
     std::vector<struct FieldDescr> _fields;
     Smp::Publication::ITypeRegistry* _typeRegistry;
 };
