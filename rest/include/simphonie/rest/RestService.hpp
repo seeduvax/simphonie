@@ -14,7 +14,9 @@
 #include <sstream>
 #include <unordered_map>
 #include <vector>
+
 #include "Smp/IField.h"
+#include "Smp/IPublication.h"
 #include "Smp/ISimpleArrayField.h"
 #include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
@@ -100,7 +102,8 @@ private:
         bool operator()(const simdeck::smpext::ISchedule* a, const simdeck::smpext::ISchedule* b) const;
     };
 
-    void connect();
+    void publish(Smp::IPublication* reciever) override;
+    void connect() override;
     static void setupResponse(HttpResp* resp);
     inline void onSimExecuting() {
         std::lock_guard<std::mutex> lock(_simIsRunningMutex);
@@ -132,6 +135,9 @@ private:
     void defaultPostHandler(const HttpReq* req, HttpResp* resp);
 
     HttpServer _server;
+    Smp::Int32 _family;
+    std::string _host;
+    Smp::UInt16 _port;
     Smp::ISimulator* _sim;
     Smp::Services::IResolver* _rslv;
     Smp::Services::ITimeKeeper* _tk;
