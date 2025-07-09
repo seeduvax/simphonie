@@ -21,17 +21,14 @@ namespace simdeck {
 
 /**
  * SMP::ICollection implementation.
- * TODO consider this collection not being an object and
- * create a CollectionObject class being both Object and Collection.
  */
 template <typename T>
-class Collection : public Object, public Smp::ICollection<T> {
+class Collection : public Smp::ICollection<T> {
 public:
     /**
      * Default constructor.
      */
-    Collection(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr)
-        : Object(name, descr, parent) {}
+    Collection() {}
     /**
      * Destructor.
      */
@@ -100,7 +97,7 @@ private:
 template <typename T>
 class OwnedCollection : public Collection<T> {
 public:
-    OwnedCollection(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Collection<T>(name, descr, parent) {}
+    OwnedCollection() {}
 
     virtual ~OwnedCollection() {
         for (auto field : *this) {

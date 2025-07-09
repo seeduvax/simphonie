@@ -126,7 +126,7 @@ public:
                             Smp::IObject* parent)
         : TSimpleArrayField<T>(name, description, count, address, ptype,
                         viewKind, type, isState, isInput, true, parent),
-          _targets("targets","Connected fields",this) {
+          _targets() {
     }
     virtual ~TSimpleArrayOutputField() {
     }

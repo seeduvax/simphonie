@@ -50,7 +50,7 @@ Component::Component(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
       _state(Smp::ComponentStateKind::CSK_Created),
       _logger(nullptr),
       _linkRegistry(nullptr),
-      _fields("Fields", "", this),
+      _fields(),
       _uuid(),
       _simulator(nullptr) {
 }

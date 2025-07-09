@@ -121,7 +121,7 @@ public:
                 const Smp::Publication::IType* type
                 ):  TSimpleField<T>(name, description, viewKind, address,
                          isState, false, true, parent, type),
-                    _targets("targets","connected fields",this) {
+                    _targets() {
     } 
     virtual ~TSimpleOutputField() {
         for (auto h: _copyHandlers) {

@@ -103,7 +103,7 @@ public:
                 Smp::Bool isOutput,
                 Smp::IObject* parent): StringField(name, description, viewKind,
                         address, type, isState, isInput, isOutput, parent),
-                        _targets("targets","connected fields",this) {
+                        _targets() {
     }
     virtual ~StringOutputField() {
     }

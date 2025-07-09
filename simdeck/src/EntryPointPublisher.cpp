@@ -12,7 +12,7 @@
 namespace simdeck {
 // --------------------------------------------------------------------
 // ..........................................................
-EntryPointPublisher::EntryPointPublisher() : _epList("epList", "", nullptr) {}
+EntryPointPublisher::EntryPointPublisher() : _epList() {}
 // ..........................................................
 EntryPointPublisher::~EntryPointPublisher() {}
 

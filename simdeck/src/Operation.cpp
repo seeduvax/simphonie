@@ -15,7 +15,7 @@ namespace simdeck {
 // --------------------------------------------------------------------
 // ..........................................................
 Operation::Operation(Smp::String8 name, Smp::String8 description, Smp::IObject* parent)
-    : simdeck::Object(name, description, parent), _params("params", "", this) {}
+    : simdeck::Object(name, description, parent), _params() {}
 // ..........................................................
 Operation::~Operation() {}
 // --------------------------------------------------------------------

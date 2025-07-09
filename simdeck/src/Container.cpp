@@ -19,7 +19,7 @@ namespace simdeck {
 // --------------------------------------------------------------------
 // ..........................................................
 Container::Container(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : Object(name, descr, parent), _content("Content", "", this) {}
+    : Object(name, descr, parent), _content() {}
 // ..........................................................
 Container::~Container() {}
 // --------------------------------------------------------------------

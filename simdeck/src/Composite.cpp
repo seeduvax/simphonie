@@ -12,7 +12,7 @@
 
 namespace simdeck {
 
-AComposite::AComposite() : _containers("Containers", "", this) {}
+AComposite::AComposite() : _containers() {}
 
 Composite::Composite(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) 
     : Object(name, descr, parent) {
