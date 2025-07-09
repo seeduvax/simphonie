@@ -35,7 +35,7 @@ using namespace simdeck;
 // --------------------------------------------------------------------
 // ..........................................................
 TypeRegistry::TypeRegistry(Smp::String8 name, Smp::String8 description, Smp::IObject* parent)
-    : Component(name, description, parent), _types("types", "", this) {
+    : Component(name, description, parent), _types() {
     // Register primitive types
 
     _types.push_back(new Type(Smp::Uuids::Uuid_Char8, Smp::PrimitiveTypeKind::PTK_Char8, sizeof(Smp::Char8), "Char8",

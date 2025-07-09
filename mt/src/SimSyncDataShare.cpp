@@ -20,7 +20,7 @@ static simdeck::Type _dataShareType(Smp::Uuids::Uuid_Void, Smp::PrimitiveTypeKin
 class SimSyncDataShare::FieldHolder : public simdeck::Object, virtual public Smp::IOutputField {
 public:
     inline FieldHolder(Smp::String8 name, Smp::String8 description, Smp::IObject* parent)
-        : simdeck::Object(name, description, parent), _fields("fields", "collection of fields to be held", this) {}
+        : simdeck::Object(name, description, parent), _fields() {}
     ~FieldHolder() = default;
     /* Smp::IOutputField implementation. mostly faked except Connect and Disconnect */
     inline void Connect(Smp::IField* field) override {

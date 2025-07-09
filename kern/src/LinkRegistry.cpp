@@ -12,8 +12,7 @@
 
 namespace simphonie {
 namespace kern {
-static const Collection<Smp::IComponent> _emptyCompCollection("emptyCompCollection", "Dummy empty component collection",
-                                                              nullptr);
+static const Collection<Smp::IComponent> _emptyCompCollection;
 // --------------------------------------------------------------------
 // ..........................................................
 LinkRegistry::LinkRegistry(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
@@ -24,7 +23,7 @@ LinkRegistry::~LinkRegistry() {}
 // ..........................................................
 void LinkRegistry::AddLink(Smp::IComponent* source, const Smp::IComponent* target) {
     auto it = _links.emplace(std::piecewise_construct, std::forward_as_tuple(target),
-                             std::forward_as_tuple(target->GetName(), "Links", this));
+                             std::forward_as_tuple());
     it.first->second.push_back(source);
 }
 // ..........................................................

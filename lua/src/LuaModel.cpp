@@ -49,7 +49,7 @@ private:
 // ..........................................................
 LuaModel::LuaModel(Smp::String8 name, Smp::String8 description, Smp::IObject* parent):
         Parent(buildName(name).c_str(), description, parent),
-        _epList("epList", "Entry point list", this) {
+        _epList() {
     std::string s=name;
     auto loc=s.find('=');
     if ( loc != std::string::npos ) {

@@ -40,8 +40,8 @@ namespace kern {
 // ..........................................................
 Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : Parent(name, descr, parent),
-      _initEntryPoints("InitEntryPoints", "", this),
-      _compFactories("ComponentFactories", "", this) {
+      _initEntryPoints(),
+      _compFactories() {
     addContainer(Smp::ISimulator::SMP_SimulatorModels);
     _models = GetContainer(Smp::ISimulator::SMP_SimulatorModels);
     addContainer(Smp::ISimulator::SMP_SimulatorServices);

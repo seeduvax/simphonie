@@ -46,7 +46,7 @@ private:
 Publication::Publication(Smp::IObject* toPublish, Smp::Publication::ITypeRegistry* typeRegistry)
     : _pubObj(dynamic_cast<Smp::IComponent*>(toPublish)),
       _typeRegistry(typeRegistry),
-      _properties("properties", "", this) {
+      _properties() {
 }
 // ..........................................................
 Publication::~Publication() {
@@ -58,25 +58,7 @@ Publication::~Publication() {
     }
 }
 // --------------------------------------------------------------------
-// IObject implementation, mostly binding to the published object
-// ..........................................................
-Smp::String8 Publication::GetName() const {
-    return _pubObj->GetName();
-}
-// ..........................................................
-Smp::String8 Publication::GetDescription() const {
-    return _pubObj->GetDescription();
-}
-// ..........................................................
-Smp::IObject* Publication::GetParent() const {
-    return _pubObj->GetParent();
-}
-// ..........................................................
-Smp::IObject* Publication::GetChild(Smp::String8 name) const {
-    return _pubObj->GetChild(name);
-}
-// --------------------------------------------------------------------
-// Childs management
+// Children management
 // TODO to be reconsidered since IObject now have GetChild and
 // IComponent have AddChild etc.
 // ..........................................................
@@ -266,7 +248,7 @@ void Publication::PublishField(Smp::IField* field){
 Smp::Publication::IType* Publication::getArrayType(Smp::PrimitiveTypeKind ptk, Smp::Int64 count) {
     Type* pt = dynamic_cast<Type*>(_typeRegistry->GetType(ptk));
     if (pt == nullptr) {
-        throw ExInvalidPrimitiveType(this, ptk);
+        throw ExInvalidPrimitiveType(_pubObj, ptk);
     }
     Smp::Uuid arrayTypeUuid((uint32_t)(count >> 32),
                             {(uint16_t)((count & 0xffff0000) >> 16), (uint16_t)(count & 0xffff), 0},
@@ -329,15 +311,14 @@ Smp::IProperty* Publication::PublishProperty(
                         Smp::ViewKind view) {
     Smp::Publication::IType* type = _typeRegistry->GetType(typeUuid);
     if (type != nullptr) {
-        // TODO use this or wrapped obj as parent?
         // TODO are only simple type OK for properties?
-        Property* p = new Property(name, description, this, type, accessKind, view);
+        Property* p = new Property(name, description, _pubObj, type, accessKind, view);
         _properties.push_back(p);
         addChild(p);
         return p;
     }
     else {
-        throw ExTypeNotRegistered(this, typeUuid);
+        throw ExTypeNotRegistered(_pubObj, typeUuid);
     }
     return nullptr;
 }
@@ -376,26 +357,6 @@ Smp::IOperation* Publication::GetOperation(Smp::String8 name) const {
 const Smp::OperationCollection* Publication::GetOperations() const {
     // TODO
     return nullptr;
-}
-
-// ..........................................................
-void Publication::dump(int level) {
-    for (int i = 0; i < level; ++i) {
-        std::cout << "    ";
-    }
-    std::cout << GetName() << ": " << simphonie::sys::RttiUtil::getTypeName(_pubObj) << std::endl;
-    for (auto child : _childs) {
-        auto sp = dynamic_cast<Publication*>(child);
-        if (sp != nullptr) {
-            sp->dump(level + 1);
-        }
-        else {
-            for (int i = 0; i < level; ++i) {
-                std::cout << "    ";
-            }
-            std::cout << "  " << child->GetName() << ": " << simphonie::sys::RttiUtil::getTypeName(child) << std::endl;
-        }
-    }
 }
 
 }  // namespace kern

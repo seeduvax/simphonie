@@ -40,24 +40,24 @@ public:
 
         Smp::Char8 testChar = 'A';
         pub.PublishField("Char", "char8 test pub", &testChar);
-        Smp::ISimpleField* f = dynamic_cast<Smp::ISimpleField*>(pub.GetChild("Char"));
+        Smp::ISimpleField* f = dynamic_cast<Smp::ISimpleField*>(pub.GetField("Char"));
         CPPUNIT_ASSERT(f != nullptr);
-        CPPUNIT_ASSERT_EQUAL(f, dynamic_cast<Smp::ISimpleField*>(pub.GetField("Char")));
+        CPPUNIT_ASSERT_EQUAL(f, dynamic_cast<Smp::ISimpleField*>(component->GetField("Char")));
         CPPUNIT_ASSERT(strcmp(f->GetName(), "Char") == 0);
         CPPUNIT_ASSERT_EQUAL('A', (char)f->GetValue());
 
         Smp::Int32 testInt32 = -17042;
         pub.PublishField("int32", "int32 test pub", &testInt32);
-        f = dynamic_cast<Smp::ISimpleField*>(pub.GetChild("int32"));
+        f = dynamic_cast<Smp::ISimpleField*>(pub.GetField("int32"));
         CPPUNIT_ASSERT(f != nullptr);
-        CPPUNIT_ASSERT_EQUAL(f, dynamic_cast<Smp::ISimpleField*>(pub.GetField("int32")));
+        CPPUNIT_ASSERT_EQUAL(f, dynamic_cast<Smp::ISimpleField*>(component->GetField("int32")));
         CPPUNIT_ASSERT(strcmp(f->GetName(), "int32") == 0);
         CPPUNIT_ASSERT_EQUAL(-17042, (int32_t)f->GetValue());
 
         Smp::Float64 testDouble = 42.042;
         pub.PublishField("Double", "float 64 test pub", &testDouble);
-        f = dynamic_cast<Smp::ISimpleField*>(pub.GetChild("Double"));
-        CPPUNIT_ASSERT_EQUAL(f, dynamic_cast<Smp::ISimpleField*>(pub.GetField("Double")));
+        f = dynamic_cast<Smp::ISimpleField*>(pub.GetField("Double"));
+        CPPUNIT_ASSERT_EQUAL(f, dynamic_cast<Smp::ISimpleField*>(component->GetChild("Double")));
         CPPUNIT_ASSERT(f != nullptr);
         CPPUNIT_ASSERT(strcmp(f->GetName(), "Double") == 0);
         CPPUNIT_ASSERT_EQUAL(42.042, (double)f->GetValue());
@@ -82,7 +82,7 @@ public:
         Smp::Int32 iArray[] = {12, 17, 42};
         pub.PublishArray("iArray", "int array test pub", 3, iArray, Smp::PrimitiveTypeKind::PTK_Int32);
 
-        Smp::ISimpleArrayField* f = dynamic_cast<Smp::ISimpleArrayField*>(pub.GetChild("iArray"));
+        Smp::ISimpleArrayField* f = dynamic_cast<Smp::ISimpleArrayField*>(pub.GetField("iArray"));
         CPPUNIT_ASSERT(f != nullptr);
         CPPUNIT_ASSERT(strcmp(f->GetName(), "iArray") == 0);
         CPPUNIT_ASSERT_EQUAL(12, (int32_t)f->GetValue(0));

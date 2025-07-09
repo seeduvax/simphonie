@@ -33,7 +33,7 @@ EventManager::EventManager(Smp::String8 name, Smp::String8 descr, Smp::IObject* 
     : Component(name, descr, parent) {
     for (int evtIdx = 1; evtIdx <= Smp::Services::IEventManager::SMP_PostSimTimeChangeId; ++evtIdx) {
         _evRegistry.emplace(std::piecewise_construct, std::forward_as_tuple(evtIdx),
-                            std::forward_as_tuple(_SMP_EventNamesTable[evtIdx - 1], "", this));
+                            std::forward_as_tuple());
     }
 }
 // ..........................................................
@@ -59,7 +59,7 @@ Smp::Services::EventId EventManager::QueryEventId(Smp::String8 eventName) {
         // Create new slot in registry for the queried event if not yet
         // existing.
         _evRegistry.emplace(std::piecewise_construct, std::forward_as_tuple(id),
-                            std::forward_as_tuple(eventName, "", this));
+                            std::forward_as_tuple());
     }
     // TODO may be it is possible to check for collisition by checking
     // collection's name against provided event name when there is already

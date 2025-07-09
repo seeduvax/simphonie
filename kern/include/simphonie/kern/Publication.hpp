@@ -22,7 +22,7 @@ namespace kern {
 /**
  *
  */
-class Publication : public Smp::IPublication, virtual public Smp::IObject {
+class Publication : public Smp::IPublication {
 public:
     /**
      * Default constructor.
@@ -32,20 +32,6 @@ public:
      * Destructor.
      */
     virtual ~Publication();
-
-    // Smp::IObject implementation
-    Smp::String8 GetName() const override;
-    Smp::String8 GetDescription() const override;
-    Smp::IObject* GetParent() const override;
-    Smp::IObject* GetChild(Smp::String8 childName) const override;
-
-    /**
-     * @return the published object hold by this publication
-// TODO is this still needed?
-    inline Smp::IObject* getPubObj() const {
-        return _pubObj;
-    }
-     */
 
     // Smp::IPublication implementation
     Smp::IField* PublishField(Smp::String8 name, Smp::String8 description, Smp::Char8* address,
@@ -115,8 +101,6 @@ public:
     const Smp::OperationCollection* GetOperations() const override;
     Smp::Publication::ITypeRegistry* GetTypeRegistry() const override;
     void Unpublish() override;
-
-    void dump(int level = 0);
 
 private:
     Smp::IComponent* _pubObj;
