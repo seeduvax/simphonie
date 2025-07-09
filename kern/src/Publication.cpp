@@ -13,6 +13,7 @@
 
 #include "Smp/IComponent.h"
 #include "Smp/IEntryPointPublisher.h"
+#include "Smp/IDynamicInvocation.h"
 #include "Smp/Publication/IArrayType.h"
 #include "simdeck/ExDuplicateName.hpp"
 #include "simdeck/ExInvalidPrimitiveType.hpp"
@@ -24,6 +25,7 @@
 #include "simdeck/StringField.hpp"
 #include "simdeck/StructureType.hpp"
 #include "simdeck/Type.hpp"
+#include "simphonie/kern/ExNoDynamicInvocation.hpp"
 #include "simphonie/sys/Logger.hpp"
 #include "simphonie/sys/RttiUtil.hpp"
 
@@ -50,41 +52,23 @@ Publication::Publication(Smp::IObject* toPublish, Smp::Publication::ITypeRegistr
 }
 // ..........................................................
 Publication::~Publication() {
-    for (auto ch : _childs) {
-        auto ep = dynamic_cast<Smp::IEntryPoint*>(ch);
-        if (ch == nullptr) {
-            delete ch;
-        }
-    }
 }
 // --------------------------------------------------------------------
 // Children management
 // TODO to be reconsidered since IObject now have GetChild and
 // IComponent have AddChild etc.
 // ..........................................................
-void Publication::addChild(Smp::IObject* pub) {
-    Smp::IObject* p = getChild(pub->GetName());
+void Publication::addChild(Smp::IObject* pub, const Smp::ICollectionBase* collection) {
+    Smp::IObject* p = _pubObj->GetChild(pub->GetName());
     if (p != nullptr) {
+        delete pub;
         throw ExDuplicateName(_pubObj, pub->GetName());
     }
-    _childs.push_back(pub);
+    _pubObj->AddChild(pub,collection);
+    _published.push_back({pub,collection});
 }
 void Publication::addField(Smp::IField* field) {
-    auto* f = _pubObj->GetChild(field->GetName());
-    if (f != nullptr) {
-        delete field;
-        throw ExDuplicateName(_pubObj, f->GetName());
-    }
-    _pubObj->AddChild(field,_pubObj->GetFields());
-}
-// ..........................................................
-Smp::IObject* Publication::getChild(Smp::String8 name) const {
-    for (auto ch : _childs) {
-        if (strcmp(ch->GetName(), name) == 0) {
-            return ch;
-        }
-    }
-    return _pubObj->GetChild(name);
+    addChild(field,_pubObj->GetFields());
 }
 
 // --------------------------------------------------------------------
@@ -309,12 +293,14 @@ Smp::IProperty* Publication::PublishProperty(
                         Smp::Uuid typeUuid,
                         Smp::AccessKind accessKind,
                         Smp::ViewKind view) {
+    auto dpubObj=dynamic_cast<Smp::IDynamicInvocation*>(_pubObj);
+    if (dpubObj==nullptr) {
+       throw ExNoDynamicInvocation(_pubObj);
+    }
     Smp::Publication::IType* type = _typeRegistry->GetType(typeUuid);
     if (type != nullptr) {
-        // TODO are only simple type OK for properties?
         Property* p = new Property(name, description, _pubObj, type, accessKind, view);
-        _properties.push_back(p);
-        addChild(p);
+        _pubObj->AddChild(p,dpubObj->GetProperties() );
         return p;
     }
     else {
@@ -324,21 +310,19 @@ Smp::IProperty* Publication::PublishProperty(
 }
 // ..........................................................
 void Publication::PublishProperty(Smp::IProperty* property) {
-    _properties.push_back(property);
-    addChild(property);
-}
-// ..........................................................
-Smp::IProperty* Publication::GetProperty(Smp::String8 name) const {
-    for (auto p: _properties) {
-        if (strcmp(name,p->GetName())==0) {
-            return p;
-        }
+    auto dpubObj=dynamic_cast<Smp::IDynamicInvocation*>(_pubObj);
+    if (dpubObj==nullptr) {
+        throw ExNoDynamicInvocation(_pubObj);
     }
-    return nullptr;
+    _pubObj->AddChild(property, dpubObj->GetProperties() );
 }
 // ..........................................................
-void Publication::Unpublish(){// TODO
-                              LOGE("Publication::Unpublish(...) not implemented yet!")}
+void Publication::Unpublish() {
+    for (auto p: _published) {
+        _pubObj->RemoveChild(std::get<0>(p), std::get<1>(p));
+    }
+    _published.clear();
+}
 // ..........................................................
 Smp::IField* Publication::GetField(Smp::String8 fullName) const {
     return _pubObj->GetField(fullName);
@@ -347,15 +331,36 @@ Smp::IField* Publication::GetField(Smp::String8 fullName) const {
 const Smp::FieldCollection* Publication::GetFields() const {
     return _pubObj->GetFields();
 }
-const Smp::PropertyCollection* Publication::GetProperties() const {
-    return &_properties;
-}
-Smp::IOperation* Publication::GetOperation(Smp::String8 name) const {
-    // TODO
+// ..........................................................
+Smp::IProperty* Publication::GetProperty(Smp::String8 name) const {
+    auto dpubObj=dynamic_cast<Smp::IDynamicInvocation*>(_pubObj);
+    if (dpubObj!=nullptr) {
+        return dpubObj->GetProperty(name);
+    }
     return nullptr;
 }
+// ..........................................................
+const Smp::PropertyCollection* Publication::GetProperties() const {
+    auto dpubObj=dynamic_cast<Smp::IDynamicInvocation*>(_pubObj);
+    if (dpubObj!=nullptr) {
+        return dpubObj->GetProperties();
+    }
+    return nullptr;
+}
+// ..........................................................
+Smp::IOperation* Publication::GetOperation(Smp::String8 name) const {
+    auto dpubObj=dynamic_cast<Smp::IDynamicInvocation*>(_pubObj);
+    if (dpubObj!=nullptr) {
+        return dpubObj->GetOperation(name);
+    }
+    return nullptr;
+}
+// ..........................................................
 const Smp::OperationCollection* Publication::GetOperations() const {
-    // TODO
+    auto dpubObj=dynamic_cast<Smp::IDynamicInvocation*>(_pubObj);
+    if (dpubObj!=nullptr) {
+        return dpubObj->GetOperations();
+    }
     return nullptr;
 }
 

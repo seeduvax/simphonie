@@ -104,16 +104,13 @@ public:
 
 private:
     Smp::IComponent* _pubObj;
-    std::vector<Smp::IObject*> _childs;
+    std::vector<std::tuple<Smp::IObject*, const Smp::ICollectionBase*>> _published;
     Smp::Publication::ITypeRegistry* _typeRegistry;
     Smp::Publication::IType* getArrayType(Smp::PrimitiveTypeKind ptk, Smp::Int64 count);
     simdeck::Collection<Smp::IProperty> _properties;
 
     inline void addField(Smp::IField* field);
-    void addChild(Smp::IObject* pub);
-    Smp::IObject* getChild(Smp::String8 name) const;
-    void removeChild(Publication* pub);
-
+    void addChild(Smp::IObject* pub, const Smp::ICollectionBase* collection);
     Smp::Publication::IType* _recursivePubGuard = nullptr;
 };
 
