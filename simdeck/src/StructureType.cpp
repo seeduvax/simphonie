@@ -12,6 +12,8 @@
 #include "simdeck/ExInvalidType.hpp"
 #include "simdeck/SimpleField.hpp"
 #include "simdeck/Type.hpp"
+#include "simdeck/StructureField.hpp"
+#include "Smp/IComponent.h"
 
 #include <sstream>
 
@@ -55,37 +57,16 @@ void StructureType::AddField(
     }
 }
 // ..........................................................
-void StructureType::setup(StructureField* sf) const {
-/*
- * TODO to be removed once StructureType handles that itself.
-    for (auto fd : _fields) {
-        // TODO make better pointer arithmetic than this ugly hack to
-        // make it quicly compile.
-        const void* address = sf->getAddress(fd.offset);
-        Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(fd.uuid));
-        if (t != nullptr) {
-            auto f=SimpleField::Create(
-                                 fd.name, 
-                                 fd.description,
-                                 fd.view, t, (Smp::Char8*)address,
-                                 sf->IsState(),
-                                 sf->IsInput(),
-                                 sf->IsOutput(),
-                                 sf);
-            if (f!=nullptr) {
-                sf->addField(f);
-            }
-            else {
-                std::ostringstream ss;
-                ss << "invalid type for field "<<fd.name;
-                throw ExInvalidType(this,ss.str().c_str());
-            }
-        }
-        else {
-            throw ExTypeNotRegistered(this,fd.uuid);
-        }
-    }
-  */
+Smp::IField* StructureType::createField(
+            Smp::String8 name,
+            Smp::String8 description,
+            Smp::IComponent* parent,
+            void* address,
+            Smp::ViewKind view,
+            Smp::Bool state,
+            Smp::Bool input,
+            Smp::Bool output) const {
+    return  StructureField::Create(name,description,view,address,this,state,input,output,parent,_fields);
 }
 
 }  // namespace simdeck

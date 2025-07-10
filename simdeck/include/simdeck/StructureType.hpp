@@ -43,7 +43,6 @@ public:
      * Setup structure field according to this structure type definition.
      * @param sf StructureField to setup
      */
-    void setup(StructureField* sf) const;
 
     struct FieldDescr {
         Smp::String8 name;
@@ -55,6 +54,17 @@ public:
         Smp::Bool input;
         Smp::Bool output;
     };
+protected:
+    Smp::IField* createField(
+            Smp::String8 name,
+            Smp::String8 description,
+            Smp::IComponent* parent,
+            void* address,
+            Smp::ViewKind view,
+            Smp::Bool state,
+            Smp::Bool input,
+            Smp::Bool output) const override;
+
 private:
     std::vector<struct FieldDescr> _fields;
     Smp::Publication::ITypeRegistry* _typeRegistry;

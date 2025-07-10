@@ -18,19 +18,27 @@
 namespace simdeck {
 
 class StructureField : public Field, virtual public Smp::IStructureField {
-public:
+protected:
     StructureField(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, void* address,
                    const Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
-                   Smp::IObject* parent, std::vector<StructureType::FieldDescr>& fieldsDescr);
+                   Smp::IObject* parent);
+public:
     virtual ~StructureField();
+    static Smp::IField* Create(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, void* address,
+                   const Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+                   Smp::IObject* parent, const std::vector<StructureType::FieldDescr>& fieldsDescr);
     inline const Smp::FieldCollection* GetFields() const override {
         return &_fields;
     }
-    inline Smp::IField* GetField(Smp::String8 name) const {
+    inline Smp::IField* GetField(Smp::String8 name) const override {
         return _fields.at(name);
     }
     void Store(Smp::IStorageWriter* writer) override;
     void Restore(Smp::IStorageReader* reader) override;
+protected:
+    inline void addField(Smp::IField* field) {
+        _fields.push_back(field);
+    }
 
 private:
     OwnedCollection<Smp::IField> _fields;
