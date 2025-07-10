@@ -8,14 +8,17 @@
  * $Date$
  */
 #include "simphonie/rest/RestService.hpp"
+
 #include <string>
 #include <utility>
+
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/Publication/IType.h"
 #include "Smp/Services/IScheduler.h"
 #include "Smp/SimulatorStateKind.h"
 #include "Smp/ViewKind.h"
 #include "simdeck/ExInvalidParent.hpp"
+#include "simdeck/StringType.hpp"
 #include "simdeck/smpext/IObservableScheduler.hpp"
 #include "simphonie/kern/Schedule.hpp" /* c.f. RestService::_compareSchedule::operator() */
 #include "wfrest/ErrorCode.h"
@@ -32,7 +35,11 @@ using namespace wfrest;
 const char* _hexDigit = "0123456789abcdef";
 
 RestService::RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : simdeck::Service(name, descr, parent), _sim(dynamic_cast<Smp::ISimulator*>(parent)) {
+    : simdeck::Service(name, descr, parent),
+      _family(AF_INET),
+      _host("localhost"),
+      _port(8080),
+      _sim(dynamic_cast<Smp::ISimulator*>(parent)) {
     if (_sim != nullptr) {
         std::string root = "/api/v1/";
         root += _sim->GetName();
@@ -45,7 +52,6 @@ RestService::RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* pa
         _server.POST(root + "/scheduleQueue",
                      [=](const HttpReq* req, HttpResp* resp) { this->postScheduleQueue(req, resp); });
         _server.POST(root + "/*", [=](const HttpReq* req, HttpResp* resp) { this->defaultPostHandler(req, resp); });
-        _server.start(8080); /* TODO add config params */
     }
     else {
         simdeck::ExInvalidParent ex(this, parent, nullptr);
@@ -194,6 +200,13 @@ void RestService::FieldHandler::Restore(Smp::Void* address, Smp::UInt64 size) {
     }
 }
 
+void RestService::publish(Smp::IPublication* receiver) {
+    receiver->PublishField("family", "IP family.", &_family, Smp::ViewKind::VK_All, false, true, false);
+    receiver->PublishField("host", "Host.", &_host, simdeck::StringType::UuidString, Smp::ViewKind::VK_All, false, true,
+                           false);
+    receiver->PublishField("port", "Port.", &_port, Smp::ViewKind::VK_All, false, true, false);
+}
+
 void RestService::connect() {
     _tk = _sim->GetTimeKeeper();
     _rslv = _sim->GetResolver();
@@ -202,6 +215,7 @@ void RestService::connect() {
                                        GetEntryPoint(ON_SIM_EXECUTING));
     _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_EnterExecutingId,
                                        GetEntryPoint(ON_SIM_LEAVEEXEC));
+    _server.start(_family, _host.c_str(), _port);
 }
 
 void RestService::setupResponse(HttpResp* resp) {
@@ -261,9 +275,13 @@ Json::Object RestService::parseKind(const T& kind) {
 
 Json::Object RestService::parseField(Smp::IField* field) {
     Json::Object json{
-        {"name", field->GetName()},      {"viewKind", static_cast<Smp::Int32>(field->GetView())},
-        {"isState", field->IsState()},   {"isInput", field->IsInput()},
-        {"isOutput", field->IsOutput()}, {"type", parseType(field->GetType())},
+        {"name", field->GetName()},
+        {"description", field->GetDescription()},
+        {"viewKind", static_cast<Smp::Int32>(field->GetView())},
+        {"isState", field->IsState()},
+        {"isInput", field->IsInput()},
+        {"isOutput", field->IsOutput()},
+        {"type", parseType(field->GetType())},
     };
     {
         std::vector<std::string> value;
@@ -363,8 +381,10 @@ Json::Object RestService::parseComponent(const Smp::IComponent* component, bool 
     else {
         Json::Array arr;
         const auto epp = dynamic_cast<const Smp::IEntryPointPublisher*>(component);
-        for (const auto fld : *(epp->GetEntryPoints())) {
-            arr.push_back(fld->GetName());
+        if (epp) {
+            for (const auto fld : *(epp->GetEntryPoints())) {
+                arr.push_back(fld->GetName());
+            }
         }
         json.push_back("entrypoints", arr);
     }

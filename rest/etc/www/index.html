@@ -6,7 +6,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
+      margin-left: 20px;
     }
     summary {
       cursor: pointer;
@@ -20,7 +20,7 @@
       margin-left: 40px;
       margin-block: 5px;
     }
-    p  {
+    button, p  {
       margin-block: 8px;
     }
     .section-title {
@@ -30,8 +30,6 @@
   </style>
 </head>
 <body>
-
-<div id="sim-info"></div>
 
 <button onclick="postState(0)">Build</button>
 <button onclick="postState(1)">Connect</button>
@@ -43,13 +41,20 @@
 <button onclick="postState(7)">Reconnect</button>
 <button onclick="postState(8)">Exit</button>
 <button onclick="postState(9)">Abort</button>
-- <button onclick="refreshElements()">Refresh</button>
-- <button onclick="autoRefresh()">Auto Refresh: <span id="autoRefresh">On</span></button>
+
+<hr>
+
+<div id="sim-info"></div>
 
 <div id="tree"></div>
 
+<hr>
+
+<h2>Schedule Queue</h2>
+<div id="scheduleQueue">Loading ...</div>
+
 <script>
-  const baseUrl = 'http://localhost:8080/api/v1';
+  const baseUrl = 'http://localhost:8128/api/v1';
   const simName = 'MySim';
 
   const postRequest = async (path, body) => {
@@ -81,13 +86,6 @@
 
   // Create a <details> element for a component and populate it with data
   function createComponentDetails(compData, compPath) {
-    const detail = document.createElement('details');
-    const summary = document.createElement('summary');
-    summary.textContent = compData.name;
-    detail.appendChild(summary);
-    detail.dataset.loaded = 'true';
-    detail.dataset.path = compPath;
-
     const contentDiv = document.createElement('div');
 
     if (compData.description) {
@@ -112,21 +110,31 @@
     epSum.textContent = "entrypoints";
     epDetails.appendChild(epSum);
     const epList = document.createElement('ul');
-    fetchJson(`/${compPath}/entrypoints`)
-      .then(data => {
-        data.entrypoints.forEach(ep => {
-          const li = document.createElement('li');
-          li.textContent = ep.name;
-          if (ep.description != "") {
-            li.textContent += " – " + ep.description;
-          }
-          epList.appendChild(li);
-        });
-      })
-      .catch(err => console.error(err));
+    epDetails.dataset.path = compPath;
+    epDetails.dataset.loaded = 'false';
+    epDetails.addEventListener('toggle', function() {
+      if (epDetails.open && epDetails.dataset.loaded === 'false') {
+        fetchJson(`/${compPath}/entrypoints`)
+          .then(data => {
+            data.entrypoints.forEach(ep => {
+              const li = document.createElement('li');
+              li.textContent = ep.name;
+              if (ep.description) {
+                const descP = document.createElement('p');
+                descP.textContent = "Description: " + ep.description;
+                li.appendChild(descP);
+              }
+              epList.appendChild(li);
+            });
+          })
+          .catch(err => console.error(err));
+          epDetails.dataset.loaded = 'true';
+      }
+    });
     epDetails.appendChild(epList);
     contentDiv.appendChild(epDetails);
 
+    // Retrieve fields
     const fDetails = document.createElement('details');
     const fSum = document.createElement('summary');
     fSum.textContent = "fields";
@@ -140,11 +148,32 @@
           .then(data => {
             data.fields.forEach(field => {
               const li = document.createElement('li');
-              let fieldText = field.name + ": " + field.value;
-              if (field.type && field.type.primitive && field.type.primitive.name) {
-                fieldText += " (" + field.type.primitive.name + ")";
+              li.textContent = field.name;
+              {
+                const descP = document.createElement('p');
+                descP.textContent = "Description: " + field.description;
+                li.appendChild(descP);
               }
-              li.textContent = fieldText;
+              {
+                const descP = document.createElement('p');
+                descP.textContent = "Value: " + field.value;
+                li.appendChild(descP);
+              }
+              {
+                const descP = document.createElement('p');
+                descP.textContent = "Type: " + field.type.primitive.name;
+                li.appendChild(descP);
+              }
+              {
+                const descP = document.createElement('p');
+                descP.textContent = "IsInput: " + field.isInput;
+                li.appendChild(descP);
+              }
+              {
+                const descP = document.createElement('p');
+                descP.textContent = "IsOutput: " + field.isOutput;
+                li.appendChild(descP);
+              }
               fList.appendChild(li);
             });
           })
@@ -155,6 +184,7 @@
     fDetails.appendChild(fList);
     contentDiv.appendChild(fDetails);
 
+    // For each container
     Object.keys(compData).forEach(key => {
       if (!['name','description','uuid','state','timestamp','fields','entrypoints'].includes(key)) {
         const subComps = compData[key];
@@ -165,6 +195,7 @@
         contDetails.appendChild(contSum);
         const innerDiv = document.createElement('div');
 
+        // For each component
         if (Array.isArray(subComps)) {
           subComps.forEach(item => {
             const childDetail = document.createElement('details');
@@ -177,10 +208,8 @@
               if (childDetail.open && childDetail.dataset.loaded === 'false') {
                 fetchJson(childDetail.dataset.path)
                   .then(data => {
-                    // Build and attach the child component UI
-                    const newNode = createComponentDetails(data, childDetail.dataset.path);
-                    // Replace placeholder detail with full detail
-                    innerDiv.replaceChild(newNode, childDetail);
+                    const content = createComponentDetails(data, childDetail.dataset.path);
+                    childDetail.appendChild(content);
                   })
                   .catch(err => console.error(err));
                 childDetail.dataset.loaded = 'true';
@@ -195,8 +224,7 @@
       }
     });
 
-    detail.appendChild(contentDiv);
-    return detail;
+    return contentDiv;
   }
 
   function init() {
@@ -248,8 +276,8 @@
                   if (compDetail.open && compDetail.dataset.loaded === 'false') {
                     fetchJson(compDetail.dataset.path)
                       .then(data => {
-                        const newNode = createComponentDetails(data, compDetail.dataset.path);
-                        innerDiv.replaceChild(newNode, compDetail);
+                        const content = createComponentDetails(data, compDetail.dataset.path);
+                        compDetail.appendChild(content);
                       })
                       .catch(err => console.error(err));
                     compDetail.dataset.loaded = 'true';
@@ -273,7 +301,39 @@
       });
   }
 
+  async function loadSchedule() {
+    const schedule = await fetchJson(`/${simName}/scheduleQueue`);
+    if (schedule) {
+      let html = "<table><tr>"
+              + ["ID","Name","Description","Time","Period","Repeat",
+                  "Activation Counter","StartEventID","StopEventID"]
+                .map(h => `<th>${h}</th>`).join("")
+              + "</tr>";
+      schedule.queue.forEach(entry => {
+        html += "<tr>"
+            + `<td>${entry.id}</td>`
+            + `<td>${entry.name}</td>`
+            + `<td>${entry.description}</td>`
+            + `<td>${entry.time}</td>`
+            + `<td>${entry.period}</td>`
+            + `<td>${entry.repeat}</td>`
+            + `<td>${entry.activationCounter}</td>`
+            + `<td>${entry.startOnEventId}</td>`
+            + `<td>${entry.stopOnEventId}</td>`
+            + "</tr>";
+      });
+      html += "</table>";
+      document.getElementById("scheduleQueue").innerHTML = html;
+    } else {
+      document.getElementById("scheduleQueue").textContent = "Failed to load schedule.";
+    }
+  }
+
+  loadSchedule();
+
   document.addEventListener('DOMContentLoaded', init);
+
+  setInterval(loadSchedule, 1000);
 </script>
 
 </body>
