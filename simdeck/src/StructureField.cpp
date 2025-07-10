@@ -8,6 +8,9 @@
  * $Date$
  */
 #include "simdeck/StructureField.hpp"
+#include "simdeck/SimpleField.hpp"
+#include "simdeck/SimpleArrayField.hpp"
+#include "Smp/Publication/IArrayType.h"
 
 namespace simdeck {
 // ..........................................................
@@ -19,18 +22,24 @@ StructureField::StructureField(Smp::String8 name, Smp::String8 description, Smp:
     auto st = dynamic_cast<const StructureType*>(type);
     for (auto fd: fieldsSpec) {
         Smp::IField* f=nullptr;
-/*
- * TODO
-        auto st=dynamic_cast<Smp::IArrayType*>(fd.type);
+        auto st=dynamic_cast<Smp::Publication::IArrayType*>(fd.type);
         if (st!=nullptr) {
-            f=SimpleField::Create(fd.name, fd.description, fd.viewKind, fd.type,
-                        address + fd.offset,
-                        fd.isState, fd.isInput, fd.isOutput, this);
+            f=SimpleArrayField::Create(fd.name, fd.description, 
+                        st->GetSize(),
+                        (void*)((uint8_t*)address + fd.offset),
+                        st->GetItemType(),
+                        fd.view,
+                        fd.type, 
+                        isState, isInput, isOutput, this); 
+        }
+        else if (type->GetPrimitiveTypeKind()!=Smp::PrimitiveTypeKind::PTK_None) {
+            f=SimpleField::Create(fd.name, fd.description, fd.view, fd.type,
+                        (void*)((uint8_t*)address + fd.offset),
+                        isState, isInput, isOutput, this);
         }
         if (f!=nullptr) {
             _fields.push_back(f);
         }
-  */
     }
 }
 // ..........................................................
