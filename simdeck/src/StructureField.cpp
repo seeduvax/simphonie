@@ -24,9 +24,6 @@ StructureField::StructureField(Smp::String8 name, Smp::String8 description, Smp:
 }
 // ..........................................................
 StructureField::~StructureField() {}
-// ..........................................................
-/* TODO to be restored with OutputField
-*/
 
 // ..........................................................
 void StructureField::Store(Smp::IStorageWriter* writer ) {
@@ -105,6 +102,7 @@ private:
     std::vector<std::tuple<Smp::IOutputField*,int> > _outputFields;
     Collection<Smp::IField> _targets;
 };
+
 // ..........................................................
 // ..........................................................
 Smp::IField* StructureField::Create(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, void* address,
@@ -122,6 +120,7 @@ Smp::IField* StructureField::Create(Smp::String8 name, Smp::String8 description,
         for (auto fd: fieldsSpec) {
             Smp::IField* f=nullptr;
             auto st=dynamic_cast<Smp::Publication::IArrayType*>(fd.type);
+
             if (st!=nullptr) {
                 f=SimpleArrayField::Create(fd.name, fd.description, 
                             st->GetSize(),
@@ -131,7 +130,7 @@ Smp::IField* StructureField::Create(Smp::String8 name, Smp::String8 description,
                             fd.type, 
                             isState, isInput, isOutput, sf); 
             }
-            else if (type->GetPrimitiveTypeKind()!=Smp::PrimitiveTypeKind::PTK_None) {
+            else if (fd.type->GetPrimitiveTypeKind()!=Smp::PrimitiveTypeKind::PTK_None) {
                 f=SimpleField::Create(fd.name, fd.description, fd.view, fd.type,
                             (void*)((uint8_t*)address + fd.offset),
                             isState, isInput, isOutput, sf);
