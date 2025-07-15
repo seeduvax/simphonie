@@ -15,7 +15,7 @@
 #include "simdeck/StringType.hpp"
 
 namespace simdeck {
-static const Type _StringType(StringType::UuidString, Smp::PrimitiveTypeKind::PTK_String8, sizeof(std::string), "String", "C++ String");
+static const StringType _defStringType("String", "C++ String", nullptr);
 // --------------------------------------------------------------------
 // ..........................................................
 StringField::StringField(Smp::String8 name,
@@ -29,7 +29,7 @@ StringField::StringField(Smp::String8 name,
                 Smp::IObject* parent):
                     Parent(name, description, viewKind, address, 
                         sizeof(std::string), 
-                        type == nullptr ? &_StringType : type,
+                        type == nullptr ? &_defStringType : type,
                         isState, isInput, isOutput, parent) {
     _value=address;
 }

@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    Type(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind, Smp::UInt64 typeSize, Smp::String8 name, Smp::String8 descr = "",
+    Type(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind, Smp::String8 name, Smp::String8 descr = "",
          Smp::IObject* parent = nullptr);
     /**
      * Destructor.
@@ -42,14 +42,8 @@ public:
         Smp::Bool state = true,
         Smp::Bool input = false,
         Smp::Bool output = false) override;
-    inline Smp::UInt64 getSize() const {
-        return _size;
-    }
 
 protected:
-    void setSize(Smp::UInt64 newSize) {
-        _size = newSize;
-    }
     virtual Smp::IField* createField(
         Smp::String8 name,
         Smp::String8 description,
@@ -58,13 +52,13 @@ protected:
         Smp::ViewKind view,
         Smp::Bool state,
         Smp::Bool input,
-        Smp::Bool output) const;
+        Smp::Bool output) const = 0;
 
 private:
     Smp::Uuid _uuid;
     Smp::PrimitiveTypeKind _kind;
-    Smp::UInt64 _size=1;
 };
+
 
 }  // namespace simdeck
 #endif  // __simdeck_Type_HPP__

@@ -10,13 +10,13 @@
 #include "abs/test.h"
 #include "simdeck/StructureField.hpp"
 #include "Smp/PrimitiveTypes.h"
-#include "simdeck/Type.hpp"
+#include "simdeck/SimpleType.hpp"
 
 namespace test {
 using namespace simdeck;
-Type _byteType(Smp::Uuids::Uuid_UInt8, Smp::PrimitiveTypeKind::PTK_UInt8, sizeof(Smp::UInt8), "Byte", "byte data type", nullptr);
-Type _intType(Smp::Uuids::Uuid_Int64, Smp::PrimitiveTypeKind::PTK_Int64, sizeof(Smp::Int64), "Int64", "integer type", nullptr);
-Type _numberType(Smp::Uuids::Uuid_Float64, Smp::PrimitiveTypeKind::PTK_Float64, sizeof(Smp::Float64), "Number", "Number data type", nullptr);
+SimpleType _byteType(Smp::Uuids::Uuid_UInt8, Smp::PrimitiveTypeKind::PTK_UInt8, "Byte");
+SimpleType _intType(Smp::Uuids::Uuid_Int64, Smp::PrimitiveTypeKind::PTK_Int64, "Int64");
+SimpleType _numberType(Smp::Uuids::Uuid_Float64, Smp::PrimitiveTypeKind::PTK_Float64, "Number");
 
 class TypeReg: public Smp::Publication::ITypeRegistry {
 public:

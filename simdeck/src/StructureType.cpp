@@ -22,7 +22,7 @@ namespace simdeck {
 // ..........................................................
 StructureType::StructureType(Smp::Uuid uuid, Smp::Publication::ITypeRegistry* typeReg, Smp::String8 name, Smp::String8 description,
                              Smp::IObject* parent)
-    : Type(uuid, Smp::PrimitiveTypeKind::PTK_None, 0, name, description, parent), _typeRegistry(typeReg) {}
+    : Type(uuid, Smp::PrimitiveTypeKind::PTK_None, name, description, parent), _typeRegistry(typeReg) {}
 // ..........................................................
 StructureType::~StructureType() {}
 // --------------------------------------------------------------------

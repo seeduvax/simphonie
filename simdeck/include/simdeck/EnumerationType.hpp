@@ -31,7 +31,16 @@ public:
     virtual ~EnumerationType();
     // Smp::Publication::IEnumerationType implementation
     void AddLiteral(Smp::String8 name, Smp::String8 description, Smp::Int32 value) override;
-
+protected:
+    Smp::IField* createField(
+        Smp::String8 name,
+        Smp::String8 description,
+        Smp::IComponent* parent,
+        void* address,
+        Smp::ViewKind view,
+        Smp::Bool state,
+        Smp::Bool input,
+        Smp::Bool output) const override;
 private:
     struct literal {
         Smp::String8 name;

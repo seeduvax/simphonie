@@ -20,10 +20,6 @@ StringType::StringType(Smp::String8 name, Smp::String8 descr, Smp::IObject* pare
         Parent(
                 StringType::UuidString,
                 Smp::PrimitiveTypeKind::PTK_String8,
-                sizeof(std::string), 
-                             // not really used to perform any operation on
-                             // fields buffer but consistent with parent class
-                             // definition.
                 name, descr, parent) {
 }
 // ..........................................................

@@ -14,14 +14,11 @@
 
 namespace simdeck {
 
-Type _byteType(Smp::Uuids::Uuid_UInt8, Smp::PrimitiveTypeKind::PTK_UInt8, sizeof(Smp::UInt8), "UInt8",
-                              "One byte unsigned int data type");
-
 // --------------------------------------------------------------------
 // ..........................................................
-Type::Type(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind, Smp::UInt64 typeSize, Smp::String8 name, Smp::String8 descr,
+Type::Type(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind, Smp::String8 name, Smp::String8 descr,
            Smp::IObject* parent)
-    : Object(name, descr, parent), _uuid(uuid), _kind(kind), _size(typeSize) {}
+    : Object(name, descr, parent), _uuid(uuid), _kind(kind) {}
 // ..........................................................
 Type::~Type() {}
 // --------------------------------------------------------------------
@@ -64,21 +61,6 @@ Smp::IField* Type::Publish(Smp::Publication::IPublishField* receiver,
     }
     // TODO error management and related exception throwing
     return nullptr;
-}
-// ..........................................................
-// default field creation is an array of bytes.
-Smp::IField* Type::createField( Smp::String8 name,
-                                Smp::String8 descr,
-                                Smp::IComponent* parent,
-                                void* address,
-                                Smp::ViewKind view,
-                                Smp::Bool state,
-                                Smp::Bool input,
-                                Smp::Bool output) const {
-    return SimpleArrayField::Create(name, descr, _size, (Smp::UInt8*)address,
-                                &_byteType,
-                                view, this, state, input, output, parent); 
-    
 }
 
 }  // namespace simdeck

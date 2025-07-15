@@ -8,7 +8,7 @@
  * $Date$
  */
 #include "abs/test.h"
-#include "simdeck/SimpleField.hpp"
+#include "simdeck/SimpleType.hpp"
 #include "Smp/IOutputField.h"
 
 #include <string>
@@ -17,7 +17,7 @@
 namespace test {
 using namespace simdeck;
 
-    static Type _int64Type(Smp::Uuids::Uuid_Int64, Smp::PrimitiveTypeKind::PTK_Int64, sizeof(Smp::Int64), "Int64",
+    static SimpleType _int64Type(Smp::Uuids::Uuid_Int64, Smp::PrimitiveTypeKind::PTK_Int64, "Int64",
                        "Eight bytes signed int data type");
 
 // ----------------------------------------------------------

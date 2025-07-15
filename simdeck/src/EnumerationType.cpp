@@ -12,6 +12,8 @@
 #include "simdeck/ExDuplicateLiteral.hpp"
 #include "simdeck/ExDuplicateName.hpp"
 #include "simdeck/ExInvalidObjectName.hpp"
+#include "simdeck/SimpleField.hpp"
+#include "Smp/IComponent.h"
 
 namespace simdeck {
 using namespace simdeck;
@@ -19,7 +21,7 @@ using namespace simdeck;
 // ..........................................................
 EnumerationType::EnumerationType(Smp::Uuid uuid, Smp::PrimitiveTypeKind kind, Smp::String8 name, Smp::String8 descr,
                                  Smp::IObject* parent)
-    : Type(uuid, kind, sizeof(Smp::Int32), name, descr, parent) {}
+    : Type(uuid, kind, name, descr, parent) {}
 // ..........................................................
 EnumerationType::~EnumerationType() {}
 // --------------------------------------------------------------------
@@ -40,4 +42,17 @@ void EnumerationType::AddLiteral(Smp::String8 name, Smp::String8 description, Sm
     l.value = value;
     _literals.push_back(l);
 }
+// --------------------------------------------------------------------
+// ..........................................................
+Smp::IField* EnumerationType::createField(
+        Smp::String8 name,
+        Smp::String8 description,
+        Smp::IComponent* parent,
+        void* address,
+        Smp::ViewKind view,
+        Smp::Bool state,
+        Smp::Bool input,
+        Smp::Bool output) const {
+            return SimpleField::Create(name, description, view, this, address, state, input, output, parent);
+    }
 }  // namespace simdeck

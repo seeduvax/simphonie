@@ -23,7 +23,7 @@ public:
     /**
      * Default constructor.
      */
-    ArrayType(Smp::Uuid uuid, Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, Smp::UInt64 elemSize,
+    ArrayType(Smp::Uuid uuid, Smp::String8 name, Smp::String8 descr, Smp::IObject* parent,
               Smp::UInt64 size, Smp::Publication::IType* type);
     /**
      * Destructor.
@@ -32,6 +32,17 @@ public:
     // Smp::Publication::IArrayType implementation
     Smp::UInt64 GetSize() const override;
     const Smp::Publication::IType* GetItemType() const override;
+
+protected:
+    Smp::IField* createField(
+        Smp::String8 name,
+        Smp::String8 description,
+        Smp::IComponent* parent,
+        void* address,
+        Smp::ViewKind view,
+        Smp::Bool state,
+        Smp::Bool input,
+        Smp::Bool output) const override;
 
 private:
     Smp::UInt64 _size;
