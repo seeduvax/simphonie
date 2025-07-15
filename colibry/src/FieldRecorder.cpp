@@ -19,8 +19,20 @@
 namespace simphonie {
 namespace colibry {
 
-static simdeck::Type _recorderType(Smp::Uuids::Uuid_Void, Smp::PrimitiveTypeKind::PTK_None, 0, "RecorderType",
-                       "Dummy type for the field recording service as output field.");
+class RecorderPortType : public simdeck::Type {
+public:
+    RecorderPortType(Smp::String8 name, Smp::String8 descr)
+        : simdeck::Type(Smp::Uuids::Uuid_Void, Smp::PrimitiveTypeKind::PTK_None, name, descr) {}
+    virtual ~RecorderPortType() {}
+
+protected:
+    Smp::IField* createField(Smp::String8 name, Smp::String8 description, Smp::IComponent* parent, void* address,
+                             Smp::ViewKind view, Smp::Bool state, Smp::Bool input, Smp::Bool output) const override {
+        return nullptr;
+    }
+};
+
+static RecorderPortType _recorderType("RecorderType", "Dummy type for the field recording service as output field.");
 // --------------------------------------------------------------------
 // ..........................................................
 FieldRecorder::FieldRecorder(Smp::String8 name, Smp::String8 description, Smp::IObject* parent, Smp::String8 fileExt)

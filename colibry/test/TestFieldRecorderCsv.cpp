@@ -8,10 +8,10 @@
  * $Date$
  */
 #include "abs/test.h"
+#include "simdeck/SimpleField.hpp"
+#include "simdeck/SimpleType.hpp"
 #include "simphonie/colibry/FieldRecorderCsv.hpp"
 #include "simphonie/kern/Simulator.hpp"
-
-#include "simdeck/SimpleField.hpp"
 
 namespace test {
 using namespace simphonie::colibry;
@@ -40,10 +40,10 @@ public:
         sim.Configure();
         sim.Connect();
 
-        simdeck::Type _float64Type(Smp::Uuids::Uuid_Int64, Smp::PrimitiveTypeKind::PTK_Float64, sizeof(Smp::Float64), "Float64",
-                       "Eight bytes signed float data type");
-        simdeck::Type _int32Type(Smp::Uuids::Uuid_Int32, Smp::PrimitiveTypeKind::PTK_Int32, sizeof(Smp::Int32), "Int32",
-                       "Four bytes signed int data type");
+        simdeck::SimpleType _float64Type(Smp::Uuids::Uuid_Int64, Smp::PrimitiveTypeKind::PTK_Float64, "Float64",
+                                         "Eight bytes signed float data type");
+        simdeck::SimpleType _int32Type(Smp::Uuids::Uuid_Int32, Smp::PrimitiveTypeKind::PTK_Int32, "Int32",
+                                       "Four bytes signed int data type");
 
         Smp::Float64 dblV=42.0;
         Smp::Int32 intV=42;

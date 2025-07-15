@@ -65,7 +65,6 @@ public:
         t->AddField("f2", "Field Two double", Smp::Uuids::Uuid_Float64, (uint64_t) & (tFieldA.f2) - (uint64_t)&tFieldA);
         StructureType* st = dynamic_cast<StructureType*>(t);
         CPPUNIT_ASSERT(t != nullptr);
-        CPPUNIT_ASSERT_EQUAL((Smp::UInt64)16, st->getSize());
 
         /* TODO restore similar test with registry
                 ObjectsRegistry* oReg=new ObjectsRegistry("oreg","",nullptr,_reg);

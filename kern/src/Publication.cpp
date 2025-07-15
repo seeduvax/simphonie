@@ -12,8 +12,8 @@
 #include <string.h>
 
 #include "Smp/IComponent.h"
-#include "Smp/IEntryPointPublisher.h"
 #include "Smp/IDynamicInvocation.h"
+#include "Smp/IEntryPointPublisher.h"
 #include "Smp/Publication/IArrayType.h"
 #include "simdeck/ExDuplicateName.hpp"
 #include "simdeck/ExInvalidPrimitiveType.hpp"
@@ -26,6 +26,7 @@
 #include "simdeck/StructureType.hpp"
 #include "simdeck/Type.hpp"
 #include "simphonie/kern/ExNoDynamicInvocation.hpp"
+#include "simphonie/kern/TypeRegistry.hpp"
 #include "simphonie/sys/Logger.hpp"
 #include "simphonie/sys/RttiUtil.hpp"
 
@@ -243,8 +244,9 @@ Smp::Publication::IType* Publication::getArrayType(Smp::PrimitiveTypeKind ptk, S
         tname = tname + pt->GetName();
         std::string tdescr = "Array of ";
         tdescr = tdescr + pt->GetDescription();
-        t = _typeRegistry->AddArrayType(tname.c_str(), tdescr.c_str(), arrayTypeUuid, pt->GetUuid(), pt->getSize(),
-                                        count);
+        int itemSize = TypeRegistry::getPrimitiveTypeSize(pt->GetPrimitiveTypeKind());
+        // TODO shall we send exception when itemSize is 0?
+        t = _typeRegistry->AddArrayType(tname.c_str(), tdescr.c_str(), arrayTypeUuid, pt->GetUuid(), itemSize, count);
     }
     return t;
 }

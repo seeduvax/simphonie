@@ -14,7 +14,20 @@
 namespace simphonie {
 namespace mt {
 
-static simdeck::Type _dataShareType(Smp::Uuids::Uuid_Void, Smp::PrimitiveTypeKind::PTK_None, 0, "DataShareType",
+class DataShareType : public simdeck::Type {
+public:
+    DataShareType(Smp::String8 name, Smp::String8 descr)
+        : simdeck::Type(Smp::Uuids::Uuid_Void, Smp::PrimitiveTypeKind::PTK_None, name, descr) {}
+    virtual ~DataShareType() {}
+
+protected:
+    Smp::IField* createField(Smp::String8 name, Smp::String8 description, Smp::IComponent* parent, void* address,
+                             Smp::ViewKind view, Smp::Bool state, Smp::Bool input, Smp::Bool output) const override {
+        return nullptr;
+    }
+};
+
+static DataShareType _dataShareType("DataShareType",
                                     "Dummy type for the simulation synchronization service as output field.");
 
 class SimSyncDataShare::FieldHolder : public simdeck::Object, virtual public Smp::IOutputField {

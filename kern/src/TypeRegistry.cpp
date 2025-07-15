@@ -15,9 +15,9 @@
 #include "simdeck/ClassType.hpp"
 #include "simdeck/EnumerationType.hpp"
 #include "simdeck/ExInvalidPrimitiveType.hpp"
-#include "simdeck/StructureType.hpp"
-#include "simdeck/Type.hpp"
+#include "simdeck/SimpleType.hpp"
 #include "simdeck/StringType.hpp"
+#include "simdeck/StructureType.hpp"
 #include "simphonie/kern/ExTypeAlreadyRegistered.hpp"
 
 // TODO to be reconsidered, smp logger should be used
@@ -38,30 +38,30 @@ TypeRegistry::TypeRegistry(Smp::String8 name, Smp::String8 description, Smp::IOb
     : Component(name, description, parent), _types() {
     // Register primitive types
 
-    _types.push_back(new Type(Smp::Uuids::Uuid_Char8, Smp::PrimitiveTypeKind::PTK_Char8, sizeof(Smp::Char8), "Char8",
-                              "One byte char data type", this));
-    _types.push_back(new Type(Smp::Uuids::Uuid_Bool, Smp::PrimitiveTypeKind::PTK_Bool, sizeof(Smp::Bool), "Bool",
-                              "Bool data type", this));
-    _types.push_back(new Type(Smp::Uuids::Uuid_Int8, Smp::PrimitiveTypeKind::PTK_Int8, sizeof(Smp::Int8), "Int8",
-                              "One byte signed int data type", this));
-    _types.push_back(new Type(Smp::Uuids::Uuid_Int16, Smp::PrimitiveTypeKind::PTK_Int16, sizeof(Smp::Int16), "Int16",
-                              "Two bytes signed int data type", this));
-    _types.push_back(new Type(Smp::Uuids::Uuid_Int32, Smp::PrimitiveTypeKind::PTK_Int32, sizeof(Smp::Int32), "Int32",
-                              "Four bytes signed int data type", this));
-    _types.push_back(new Type(Smp::Uuids::Uuid_Int64, Smp::PrimitiveTypeKind::PTK_Int64, sizeof(Smp::Int64), "Int64",
-                              "Eight bytes signed int data type", this));
-    _types.push_back(new Type(Smp::Uuids::Uuid_UInt8, Smp::PrimitiveTypeKind::PTK_UInt8, sizeof(Smp::UInt8), "UInt8",
-                              "One byte unsigned int data type", this));
-    _types.push_back(new Type(Smp::Uuids::Uuid_UInt16, Smp::PrimitiveTypeKind::PTK_UInt16, sizeof(Smp::UInt16),
-                              "UInt16", "Two bytes unsigned int data type", this));
-    _types.push_back(new Type(Smp::Uuids::Uuid_UInt32, Smp::PrimitiveTypeKind::PTK_UInt32, sizeof(Smp::UInt32),
-                              "UInt32", "Four bytes unsigned int data type", this));
-    _types.push_back(new Type(Smp::Uuids::Uuid_UInt64, Smp::PrimitiveTypeKind::PTK_UInt64, sizeof(Smp::UInt64),
-                              "UInt64", "Eight bytes unsigned int data type", this));
-    _types.push_back(new Type(Smp::Uuids::Uuid_Float32, Smp::PrimitiveTypeKind::PTK_Float32, sizeof(Smp::Float32),
-                              "Float32", "Four bytes float data type", this));
-    _types.push_back(new Type(Smp::Uuids::Uuid_Float64, Smp::PrimitiveTypeKind::PTK_Float64, sizeof(Smp::Float64),
-                              "Float64", "Eight bytes float data type", this));
+    _types.push_back(new SimpleType(Smp::Uuids::Uuid_Char8, Smp::PrimitiveTypeKind::PTK_Char8, "Char8",
+                                    "One byte char data type", this));
+    _types.push_back(
+        new SimpleType(Smp::Uuids::Uuid_Bool, Smp::PrimitiveTypeKind::PTK_Bool, "Bool", "Bool data type", this));
+    _types.push_back(new SimpleType(Smp::Uuids::Uuid_Int8, Smp::PrimitiveTypeKind::PTK_Int8, "Int8",
+                                    "One byte signed int data type", this));
+    _types.push_back(new SimpleType(Smp::Uuids::Uuid_Int16, Smp::PrimitiveTypeKind::PTK_Int16, "Int16",
+                                    "Two bytes signed int data type", this));
+    _types.push_back(new SimpleType(Smp::Uuids::Uuid_Int32, Smp::PrimitiveTypeKind::PTK_Int32, "Int32",
+                                    "Four bytes signed int data type", this));
+    _types.push_back(new SimpleType(Smp::Uuids::Uuid_Int64, Smp::PrimitiveTypeKind::PTK_Int64, "Int64",
+                                    "Eight bytes signed int data type", this));
+    _types.push_back(new SimpleType(Smp::Uuids::Uuid_UInt8, Smp::PrimitiveTypeKind::PTK_UInt8, "UInt8",
+                                    "One byte unsigned int data type", this));
+    _types.push_back(new SimpleType(Smp::Uuids::Uuid_UInt16, Smp::PrimitiveTypeKind::PTK_UInt16, "UInt16",
+                                    "Two bytes unsigned int data type", this));
+    _types.push_back(new SimpleType(Smp::Uuids::Uuid_UInt32, Smp::PrimitiveTypeKind::PTK_UInt32, "UInt32",
+                                    "Four bytes unsigned int data type", this));
+    _types.push_back(new SimpleType(Smp::Uuids::Uuid_UInt64, Smp::PrimitiveTypeKind::PTK_UInt64, "UInt64",
+                                    "Eight bytes unsigned int data type", this));
+    _types.push_back(new SimpleType(Smp::Uuids::Uuid_Float32, Smp::PrimitiveTypeKind::PTK_Float32, "Float32",
+                                    "Four bytes float data type", this));
+    _types.push_back(new SimpleType(Smp::Uuids::Uuid_Float64, Smp::PrimitiveTypeKind::PTK_Float64, "Float64",
+                                    "Eight bytes float data type", this));
     _types.push_back(new StringType("StdString", "C++ std::string data type", this));
 }
 // ..........................................................
@@ -176,12 +176,7 @@ Smp::Publication::IType* TypeRegistry::AddFloatType(Smp::String8 name, Smp::Stri
     if (res != nullptr) {
         throw ExTypeAlreadyRegistered(this, name, res);
     }
-    if (type == Smp::PrimitiveTypeKind::PTK_Float32) {
-        res = new Type(typeUuid, type, sizeof(Smp::Float32), name, descr, this);
-    }
-    else {
-        res = new Type(typeUuid, type, sizeof(Smp::Float64), name, descr, this);
-    }
+    res = new SimpleType(typeUuid, type, name, descr, this);
     // TODO create Type subclass to store min, max, unit, etc. Once I can
     // find what to do with such additional attributes....
     _types.push_back(res);
@@ -195,36 +190,27 @@ Smp::Publication::IType* TypeRegistry::AddIntegerType(Smp::String8 name, Smp::St
     if (res != nullptr) {
         throw ExTypeAlreadyRegistered(this, name, res);
     }
-    int size = 0;
     switch (type) {
         case Smp::PrimitiveTypeKind::PTK_Int8:
-            size = sizeof(Smp::Int8);
             break;
         case Smp::PrimitiveTypeKind::PTK_Int16:
-            size = sizeof(Smp::Int16);
             break;
         case Smp::PrimitiveTypeKind::PTK_Int32:
-            size = sizeof(Smp::Int32);
             break;
         case Smp::PrimitiveTypeKind::PTK_Int64:
-            size = sizeof(Smp::Int64);
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt8:
-            size = sizeof(Smp::Int8);
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt16:
-            size = sizeof(Smp::Int16);
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt32:
-            size = sizeof(Smp::Int32);
             break;
         case Smp::PrimitiveTypeKind::PTK_UInt64:
-            size = sizeof(Smp::Int64);
             break;
         default:
             throw ExInvalidPrimitiveType(this, type);
     }
-    res = new Type(typeUuid, type, size, name, descr, this);
+    res = new SimpleType(typeUuid, type, name, descr, this);
     // TODO create Type subclass to store min, max, unit, etc. Once I can
     // find what to do with such additional attributes....
     _types.push_back(res);
@@ -261,8 +247,7 @@ Smp::Publication::IArrayType* TypeRegistry::AddArrayType(
     }
     Smp::Publication::IType* itemType = GetType(itemTypeUuid);
     if (itemType != nullptr) {
-        Smp::Publication::IArrayType* res =
-            new ArrayType(typeUuid, name, description, this, itemSize, arrayCount, itemType);
+        Smp::Publication::IArrayType* res = new ArrayType(typeUuid, name, description, this, arrayCount, itemType);
         _types.push_back(res);
         return res;
     }
