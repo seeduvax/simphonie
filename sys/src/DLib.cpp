@@ -15,6 +15,7 @@
 #define OS_IS_WINDOWS
 #else
 #include <dlfcn.h>
+#include <unistd.h>
 #endif
 
 namespace simphonie {
@@ -58,19 +59,23 @@ private:
 class NativeLib: public DLib::IHandler {
 public:
     NativeLib(const char* libName): _name(libName) {
+        std::string err = "";
         _lib = dlopen(libName, RTLD_NOW | RTLD_LAZY);
         if (_lib==nullptr) {
+            std::ostringstream oss;
+            oss << "Can't load library " << libName << ": " << std::endl
+                << "- tried " << libName << ": " << dlerror() << std::endl;
             std::string libFile=libName;
             libFile+=".so";
             _lib = dlopen(libFile.c_str(), RTLD_NOW | RTLD_LAZY);
             if (_lib==nullptr) {
+                oss << "- tried " << libFile << ": " << dlerror() << std::endl;
                 libFile="lib"+libFile;
                 _lib = dlopen(libFile.c_str(), RTLD_NOW | RTLD_LAZY);
                 if (_lib == nullptr) {
-                    std::ostringstream msg;
-                    msg << "Can't load library " << libName << ": " << dlerror();
-                    LOGE(msg.str());
-                    throw std::runtime_error(msg.str());
+                    oss << "- tried " << libFile << ": " << dlerror();
+                    LOGE(oss.str());
+                    throw std::runtime_error(oss.str());
                 }
             }
         }
