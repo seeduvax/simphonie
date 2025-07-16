@@ -63,7 +63,7 @@ public:
 
                 auto o=dynamic_cast<Smp::IOutputField*>(f);
                 if (o!=nullptr) {
-                    _outputFields.push_back({o, i});
+                    _outputFields.push_back(std::tuple<Smp::IOutputField *, int>(o, i));
                 }
                 i++;
             }
