@@ -10,7 +10,7 @@
 #include "abs/test.h"
 #include "simdeck/StructureField.hpp"
 #include "Smp/PrimitiveTypes.h"
-#include "SimpleType.hpp"
+#include "simdeck/SimpleType.hpp"
 
 namespace test {
 using namespace simdeck;

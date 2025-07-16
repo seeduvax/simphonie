@@ -10,7 +10,7 @@
 #include "abs/test.h"
 #include "simdeck/SimpleField.hpp"
 #include "Smp/IOutputField.h"
-#include "SimpleType.hpp"
+#include "simdeck/SimpleType.hpp"
 
 #include <string>
 #include <iostream>
