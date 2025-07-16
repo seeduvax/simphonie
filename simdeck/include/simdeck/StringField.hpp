@@ -54,6 +54,11 @@ public:
     Smp::Bool IsForced() const override;
     void Freeze() override;
 
+    /**
+     * Get the pointer to the string associated to this field.
+     */
+    std::string* getValuePtr() const { return _value; }
+
     static StringField* Create(
                 Smp::String8 name,
                 Smp::String8 description,
