@@ -10,10 +10,11 @@
 #include "abs/test.h"
 #include "simdeck/StructureField.hpp"
 #include "Smp/PrimitiveTypes.h"
-#include "simdeck/SimpleType.hpp"
+#include "SimpleType.hpp"
 
 namespace test {
 using namespace simdeck;
+
 SimpleType _byteType(Smp::Uuids::Uuid_UInt8, Smp::PrimitiveTypeKind::PTK_UInt8, "Byte");
 SimpleType _intType(Smp::Uuids::Uuid_Int64, Smp::PrimitiveTypeKind::PTK_Int64, "Int64");
 SimpleType _numberType(Smp::Uuids::Uuid_Float64, Smp::PrimitiveTypeKind::PTK_Float64, "Number");

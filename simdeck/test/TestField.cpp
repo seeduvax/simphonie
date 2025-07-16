@@ -8,8 +8,9 @@
  * $Date$
  */
 #include "abs/test.h"
-#include "simdeck/SimpleType.hpp"
+#include "simdeck/SimpleField.hpp"
 #include "Smp/IOutputField.h"
+#include "SimpleType.hpp"
 
 #include <string>
 #include <iostream>
@@ -17,14 +18,12 @@
 namespace test {
 using namespace simdeck;
 
-    static SimpleType _int64Type(Smp::Uuids::Uuid_Int64, Smp::PrimitiveTypeKind::PTK_Int64, "Int64",
-                       "Eight bytes signed int data type");
-
 // ----------------------------------------------------------
 // test fixture implementation
 ABS_TEST_SUITE_BEGIN( Field )
 
 private:
+    static SimpleType _int64Type;
 
 public:
     void setUp() {}
@@ -83,4 +82,7 @@ public:
     ABS_TEST_CASE_END
 
 ABS_TEST_SUITE_END
+
+SimpleType TestField::_int64Type(Smp::Uuids::Uuid_Int64, Smp::PrimitiveTypeKind::PTK_Int64, "Int64",
+                    "Eight bytes signed int data type");
 }  // namespace test
