@@ -122,14 +122,10 @@ public:
     void Push() override {
         auto value=this->GetValue();
         for (auto target: _targets) {
-            auto stringF=dynamic_cast<StringField*>(target);
-            if (stringF!=nullptr) {
-                stringF->SetValue(value);
-            }
+            // TODO find away to avoid dynamic cast here since only ISimpleType
+            // instances are accepted to be inserted in targets by Connect.
             auto simpleF=dynamic_cast<ISimpleField*>(target);
-            if (simpleF!=nullptr) {
-                simpleF->SetValue(value);
-            }
+            simpleF->SetValue(value);
         }
     }
     const Smp::FieldCollection* GetInputFields() const override {
