@@ -38,7 +38,6 @@ public:
 // test fixture implementation
 class TestEventManager : public CppUnit::TestFixture {
     CPPUNIT_TEST_SUITE(TestEventManager);
-    // TODO for each test method:
     CPPUNIT_TEST(testEventManager);
     CPPUNIT_TEST_SUITE_END();
 

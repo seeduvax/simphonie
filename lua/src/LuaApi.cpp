@@ -26,11 +26,6 @@
 #include "simphonie/sys/DLib.hpp"
 #include "sol/sol.hpp"
 
-// TODO check calling sim.Publish is allowed many times (and simulator
-// implementation shall be robust to that), in order to let services be pre
-// published. May not be required for LuaBuilder since it should finally receive
-// the configuration table through property binding to lua.
-
 // --------------------------------------------------------------------
 // ..........................................................
 

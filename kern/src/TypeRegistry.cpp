@@ -23,10 +23,6 @@
 // TODO to be reconsidered, smp logger should be used
 #include "simphonie/sys/Logger.hpp"
 
-// TODO good news, since there is no AddType but only Add<supertype>Type, the
-// registered IType instance are only simdeck instances, then it should be safe
-// to extend IType to include a field factory in it.
-
 namespace simphonie {
 namespace kern {
 
@@ -264,8 +260,8 @@ Smp::Publication::IStringType* TypeRegistry::AddStringType(
         throw ExTypeAlreadyRegistered(this, name, res);
     }
     /*
-     * TODO to be restored with proper String Type
-        res = new Type(typeUuid, Smp::PrimitiveTypeKind::PTK_String8, length, name, description, this);
+     * TODO Create simdeck::FixedStringType instance
+        res =
         _types.push_back(res);
         return res;
      */

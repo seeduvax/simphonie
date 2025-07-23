@@ -59,9 +59,7 @@ void LuaBuilder::setConfiguration(sol::table config) {
         sol::table v=te.second;
         std::string type=v["type"];
         std::string description = v.get_or<std::string>("description", "");
-        auto comp=simulatorCreateComponent(_sim, type.c_str(), name.c_str(),
-                                 description.c_str());
-        // TODO recursively scan to build child components.
+        auto comp = simulatorCreateComponent(_sim, type.c_str(), name.c_str(), description.c_str());
         auto composite=dynamic_cast<Smp::IComposite*>(comp);
         if (composite!=nullptr) {
             addSubComponents(composite,v);
@@ -124,8 +122,6 @@ void LuaBuilder::configure() {
     // iterate on configuration table component section to init data defined
     // at that level to set related fields value.
     // iterate on init data section to set related fields value.
-    // iterate on connection section to connect fields (TODO all kind of
-    // connection to be handled, not only field to field connections)
     sol::table components=_config["components"];
     for (auto te : components) {
         std::string name=te.first.as<std::string>();

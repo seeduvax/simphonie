@@ -78,7 +78,6 @@ public:
     void step();
 
     // Runnable implementation.
-    // TODO consider rework sys/thread to use entry point.
     void run() override;
 
 protected:

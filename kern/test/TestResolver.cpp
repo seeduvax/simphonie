@@ -103,12 +103,6 @@ public:
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)mdl2.get(), resolver.ResolveRelative("to2", mdl1));
         auto arrField = resolver.ResolveAbsolute("to1.to2.iArray");
 
-        // TODO: question why our array fields are a simpleField or forcible field
-        // (that exposes 'Force' and 'Setvalue' methods which take an AnySimple as argument )
-        // (A. Astyl: shouldn't we consider that only leaves fields which are basically a simple fields
-        // are the only ones to be considered fallible/forcible ?
-        // CPPUNIT_ASSERT(dynamic_cast<Smp::ISimpleField*>(arrField)==nullptr);
-
         CPPUNIT_ASSERT(dynamic_cast<Smp::ISimpleArrayField*>(arrField) != nullptr);
         CPPUNIT_ASSERT_EQUAL((size_t)3, dynamic_cast<Smp::ISimpleArrayField*>(arrField)->GetSize());
 

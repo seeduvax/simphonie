@@ -238,7 +238,7 @@ void Scheduler::SetEventStartOnEvent(Smp::Services::EventId eventId, Smp::Servic
 
 void Scheduler::SetEventStopOnEvent(Smp::Services::EventId eventId, Smp::Services::EventId triggerEventId) {
     auto s = findSchedule(eventId);
-    if (s) {
+    if (s != nullptr) {
         s->setStopEventId(triggerEventId);
     }
 }
@@ -297,7 +297,7 @@ void Scheduler::RegisterObserver(smpext::ISchedulerObserver* observer) {
 
 void Scheduler::RemoveObserver(smpext::ISchedulerObserver* observer) {
     for (auto it = _observers.begin(); it != _observers.end(); ++it) {
-        if (*it = observer) {
+        if (*it == observer) {
             _observers.erase(it);
         }
     }

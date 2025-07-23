@@ -56,8 +56,6 @@ Publication::~Publication() {
 }
 // --------------------------------------------------------------------
 // Children management
-// TODO to be reconsidered since IObject now have GetChild and
-// IComponent have AddChild etc.
 // ..........................................................
 void Publication::addChild(Smp::IObject* pub, const Smp::ICollectionBase* collection) {
     Smp::IObject* p = _pubObj->GetChild(pub->GetName());
@@ -186,38 +184,27 @@ Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 descripti
             _recursivePubGuard = nullptr;
             return nullptr;
         }
-        StructureType* st = dynamic_cast<StructureType*>(t);
-        if (st != nullptr) {
-/* TODO restore structure field build.
-            auto f=new StructureField(name, description, view, address, st, state, input, output, _pubObj);
-            addField(f);
-            return f;
-*/
-return nullptr;
+        auto at = dynamic_cast<Smp::Publication::IArrayType*>(t);
+        Smp::IField* f = nullptr;
+        if (at != nullptr) {
+            Smp::Publication::IType* pt = _typeRegistry->GetType(t->GetPrimitiveTypeKind());
+            f = SimpleArrayField::Create(name, description, at->GetSize(), address, pt, view, t, state, input, output,
+                                         _pubObj);
         }
         else {
-            auto at = dynamic_cast<Smp::Publication::IArrayType*>(t);
-            Smp::IField* f = nullptr;
-            if (at != nullptr) {
-                Smp::Publication::IType* pt = _typeRegistry->GetType(t->GetPrimitiveTypeKind());
-                f = SimpleArrayField::Create(name, description, at->GetSize(), address, pt, view, t, state, input,
-                                             output, _pubObj);
-            }
-            else {
-                f = SimpleField::Create(name, description, view, t, address, state, input, output, _pubObj);
-            }
-            if (f!=nullptr) {
-                addField(f);
-                return f;
-            }
-            else {
-                // in last resort, delegate the publication to the type, hoping
-                // it will not just call back the current Publication method.
-                _recursivePubGuard = t;
-                f = t->Publish(this, name, description, address, view, state, input, output);
-                _recursivePubGuard = nullptr;
-                return f;
-            }
+            f = SimpleField::Create(name, description, view, t, address, state, input, output, _pubObj);
+        }
+        if (f != nullptr) {
+            addField(f);
+            return f;
+        }
+        else {
+            // in last resort, delegate the publication to the type, hoping
+            // it will not just call back the current Publication method.
+            _recursivePubGuard = t;
+            f = t->Publish(this, name, description, address, view, state, input, output);
+            _recursivePubGuard = nullptr;
+            return f;
         }
     }
     std::ostringstream oss;
@@ -245,7 +232,6 @@ Smp::Publication::IType* Publication::getArrayType(Smp::PrimitiveTypeKind ptk, S
         std::string tdescr = "Array of ";
         tdescr = tdescr + pt->GetDescription();
         int itemSize = TypeRegistry::getPrimitiveTypeSize(pt->GetPrimitiveTypeKind());
-        // TODO shall we send exception when itemSize is 0?
         t = _typeRegistry->AddArrayType(tname.c_str(), tdescr.c_str(), arrayTypeUuid, pt->GetUuid(), itemSize, count);
     }
     return t;

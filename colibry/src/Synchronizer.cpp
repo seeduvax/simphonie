@@ -13,8 +13,6 @@
 #include "Smp/Services/IScheduler.h"
 #include <thread>
 
-//#include "simphonie/kern/Scheduler.hpp" /* TODO use #include "simdeck/smpext/?.hpp" instead */
-
 #define INIT_EP_NAME "init"
 #define STEP_EP_NAME "step"
 

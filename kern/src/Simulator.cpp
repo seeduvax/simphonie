@@ -237,8 +237,10 @@ void Simulator::Publish() {
         }
 
         // publish models
-        // TODO decide to repeat publication of models as for services or not.
-        // When decided, a justification shall be written here.
+        // Same publish loop policy apllied to service is not applied againd to
+        // models, because models should not have strong coupling over other
+        // models until Connec(), then it is not an issue to have models added
+        // during publish or configured being published only from connect.
         for (auto model : *(_models->GetComponents())) {
             doPublish(model);
         }
@@ -329,8 +331,6 @@ void Simulator::Run() {
 }
 // ..........................................................
 void Simulator::Hold(Smp::Bool immediate) {
-    // TODO manage immediate...
-    // But not sure it will be so easy for a multi-threaded scheduler...
     if (checkState("Hold", Smp::SimulatorStateKind::SSK_Executing)) {
         if (immediate) {
             _scheduler->AddImmediateEvent(_epStop);
@@ -388,13 +388,14 @@ void Simulator::Reconnect(Smp::IComponent* root) {
 void Simulator::Exit() {
     if (checkState("Exit", Smp::SimulatorStateKind::SSK_Standby)) {
         setState(Smp::SimulatorStateKind::SSK_Exiting);
-        // TODO shutdown everything...
+        // TODO Destruction propre de tout if destructor is not called by exit()
+        exit(0);
     }
 }
 // ..........................................................
 void Simulator::Abort() {
     setState(Smp::SimulatorStateKind::SSK_Aborting);
-    // TODO force stop of anything that is runnning.
+    exit(0);
 }
 // ..........................................................
 Smp::SimulatorStateKind Simulator::GetState() const {
@@ -471,12 +472,6 @@ Smp::IComponent* Simulator::CreateInstance(Smp::Uuid uuid, Smp::String8 name, Sm
     for (auto fac : _compFactories) {
         if (fac->GetUuid() == uuid) {
             res = fac->CreateInstance(name, description, parent == nullptr ? this : parent);
-            // TODO is it required to add new instance in a container when
-            // the parent is set?
-            // may trouble publication/configure/connect loops since the same
-            // component may be processed twice: one from the "root" containers
-            // processing, and one through the recusive composite component
-            // processing.
             if (dynamic_cast<Smp::IModel*>(res)) {
                 _models->AddComponent(res);
             }
@@ -533,78 +528,6 @@ const Smp::FactoryCollection* Simulator::GetFactories() const {
 Smp::Publication::ITypeRegistry* Simulator::GetTypeRegistry() const {
     return _typeRegistry;
 }
-
-/*
-// ..........................................................
-// TODO moved that to a dedicated connection service.
-void Simulator::connect(std::string inputFieldPath, std::string outputFieldPath) {
-    auto outputField = dynamic_cast<Smp::IOutputField*>(GetResolver()->ResolveAbsolute(outputFieldPath.c_str()));
-    auto inputField = dynamic_cast<Smp::IField*>(GetResolver()->ResolveAbsolute(inputFieldPath.c_str()));
-
-    if (inputField == nullptr) {
-        // TODO add macro in sys module to ease this kind of throw
-        // ex: S_THROW(std::runtime_error, "my reason:" << reason)
-        // TODO throw right SMP exception rather than std::runtime error
-        std::stringstream ss;
-        ss << "Input field not found: " << inputFieldPath;
-        throw std::runtime_error(ss.str().c_str());
-    }
-    if (outputField == nullptr) {
-        std::stringstream ss;
-        ss << "Output field not found: " << outputFieldPath;
-        throw std::runtime_error(ss.str().c_str());
-    }
-
-    outputField->Connect(inputField);
-}
-*/
-// ..........................................................
-/*
-void Simulator::schedule(std::string modelName, std::string entryPoint, uint32_t period) {
-    // TODO handle errors
-    auto model = dynamic_cast<Smp::IEntryPointPublisher*>(GetResolver()->ResolveAbsolute(modelName.c_str()));
-    if (model == nullptr) {
-        std::stringstream ss;
-        ss << "Model " << modelName << " not found";
-        throw std::runtime_error(ss.str().c_str());
-    }
-    auto ep = model->GetEntryPoint(entryPoint.c_str());
-    if (ep == nullptr) {
-        std::stringstream ss;
-        ss << "EntryPoint " << entryPoint << " not found";
-        throw std::runtime_error(ss.str().c_str());
-    }
-    GetScheduler()->AddSimulationTimeEvent(ep, 0, period, -1);
-};
-*/
-// ..........................................................
-/*
-Smp::IComponent* Simulator::createSmpModel(Smp::String8 typeName, Smp::String8 name, Smp::String8 description) {
-    Smp::IComponent* res = nullptr;
-    for (auto fac : _compFactories) {
-        if (std::string(fac->GetTypeName()) == std::string(typeName)
-            || std::string(fac->GetName()) == std::string(typeName)) {
-            res = fac->CreateInstance(name, description, this);
-            // TODO is it required to add new instance in a container when
-            // the parent is set?
-            if (dynamic_cast<Smp::IModel*>(res)) {
-                _models->AddComponent(res);
-            }
-            if (dynamic_cast<Smp::IService*>(res)) {
-                _services->AddComponent(res);
-            }
-            // TODO check it is needed to pulish/configure/connect immediately
-            // according to current simulator state.
-            break;
-        }
-    }
-
-    // When no factory is found, Smp header tels to return null. So nothing
-    // particular to do since res is initialized as nullptr.
-    return res;
-}
-*/
-
 // ..........................................................
 void Simulator::epStart() {
     _schedulerThreadId=simphonie::sys::Thread::GetCurrentThreadId();
