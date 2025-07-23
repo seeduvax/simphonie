@@ -148,8 +148,7 @@ public:
             }
         }
         CPPUNIT_ASSERT(_sim->GetTimeKeeper()->GetSimulationTime()>=_endSimTime);
-        CPPUNIT_ASSERT_EQUAL(Smp::SimulatorStateKind::SSK_Standby,_sim->GetState());
-        _sim->Exit();
+        CPPUNIT_ASSERT_EQUAL(Smp::SimulatorStateKind::SSK_Standby, _sim->GetState());
     }
 };
 

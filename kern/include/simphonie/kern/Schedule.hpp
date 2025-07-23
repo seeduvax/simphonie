@@ -42,7 +42,7 @@ public:
     inline Smp::Duration GetTime() const override { return _simTime; }
     inline Smp::Duration GetPeriod() const override { return _period; }
     inline Smp::Int64 GetRepeat() const override { return _repeat; }
-    inline Smp::Int64 GetPriority() const {
+    inline Smp::UInt64 GetPriority() const {
         return _priority;
     } /* TODO add to simdeck::smpext::ISchedule */
     inline Smp::Int64 GetActivationCounter() const override {
