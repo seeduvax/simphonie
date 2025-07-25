@@ -24,7 +24,7 @@ public:
     /**
      * Default constructor.
      */
-    DLib(const char* libName);
+    DLib(const char* libName, bool global = true);
     /**
      * Destructor.
      */

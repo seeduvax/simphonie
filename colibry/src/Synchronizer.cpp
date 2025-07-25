@@ -47,6 +47,8 @@ void Synchronizer::publish(Smp::IPublication* receiver) {
                            false);
     receiver->PublishField("startSec", "true to start on the next second.", &_startSec, Smp::ViewKind::VK_All, false,
                            true, false);
+    receiver->PublishField("marginThreshold", "The thread sleep if the margin to wait for is above this threshold.",
+                           &_marginThresh, Smp::ViewKind::VK_All, false, true, false);
 }
 
 // ..........................................................
@@ -69,7 +71,7 @@ void Synchronizer::step() {
         auto timeLeft=_goal - std::chrono::system_clock::now();
         _margin=std::chrono::duration_cast<std::chrono::nanoseconds>(timeLeft).count();
         // TODO set overflow threshold configurable
-        if (_margin > 1000) {
+        if (_margin > _marginThresh) {
             std::this_thread::sleep_until(_goal);
         }
         else {

@@ -20,9 +20,6 @@
 #include "simdeck/StructureType.hpp"
 #include "simphonie/kern/ExTypeAlreadyRegistered.hpp"
 
-// TODO to be reconsidered, smp logger should be used
-#include "simphonie/sys/Logger.hpp"
-
 namespace simphonie {
 namespace kern {
 

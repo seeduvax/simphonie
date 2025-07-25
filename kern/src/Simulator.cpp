@@ -192,7 +192,7 @@ void Simulator::doPublish(Smp::IComponent* comp) {
         std::ostringstream msg;
         msg <<"Publishing component : " << comp->GetName();
         SMPLOGI(msg.str().c_str());
-        Smp::IPublication* pub=new Publication(comp,_typeRegistry);
+        Smp::IPublication* pub = new Publication(comp, this);
         _publications.push_back(pub);
         comp->Publish(pub);
         // forward publication to children if component is a composite.
@@ -388,14 +388,15 @@ void Simulator::Reconnect(Smp::IComponent* root) {
 void Simulator::Exit() {
     if (checkState("Exit", Smp::SimulatorStateKind::SSK_Standby)) {
         setState(Smp::SimulatorStateKind::SSK_Exiting);
-        // TODO Destruction propre de tout if destructor is not called by exit()
-        exit(0);
+        // TODO Tres bien uniquement quand on utilise ISimulator comme un singleton
+        this->~Simulator(); /* cleanup owned objects */
+        exit(EXIT_SUCCESS); /* cleanup static objects and syscall to end program execution */
     }
 }
 // ..........................................................
 void Simulator::Abort() {
     setState(Smp::SimulatorStateKind::SSK_Aborting);
-    exit(0);
+    abort(); /* syscall to end program execution */
 }
 // ..........................................................
 Smp::SimulatorStateKind Simulator::GetState() const {
@@ -497,7 +498,6 @@ Smp::IFactory* Simulator::GetFactory(Smp::Uuid uuid) const {
 }
 // ..........................................................
 void Simulator::LoadLibrary(Smp::String8 name, Smp::LibraryLoadingFlag loadFlag) {
-    // TODO take care of loadFlag
     std::string libName = name;
     simphonie::sys::DLib* fLib = nullptr;
     for (auto lib : _libs) {
@@ -507,7 +507,17 @@ void Simulator::LoadLibrary(Smp::String8 name, Smp::LibraryLoadingFlag loadFlag)
     }
     if (fLib == nullptr) {
         try {
-            fLib = new simphonie::sys::DLib(name);
+            bool global;
+            switch (loadFlag) {
+                case Smp::LibraryLoadingFlag::LLF_Auto:
+                case Smp::LibraryLoadingFlag::LLF_Global:
+                    global = true;
+                    break;
+                case Smp::LibraryLoadingFlag::LLF_Local:
+                    global = false;
+                    break;
+            }
+            fLib = new simphonie::sys::DLib(name, global);
             auto init =
                 fLib->getEntry<bool (*)(Smp::ISimulator*, Smp::Publication::ITypeRegistry * tReg)>("Initialise");
             if (init != nullptr) {

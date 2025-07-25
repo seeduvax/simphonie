@@ -137,25 +137,6 @@ void TimeKeeper::connect() {
     auto preEventExecuteId = _eventMgr->QueryEventId(EV_NAME_PRE_EVENT_EXECUTE);
     _eventMgr->Subscribe(preEventExecuteId,GetEntryPoint(EP_NAME_UPDATE_SIM_TIME));
 }
-// ..........................................................
-void TimeKeeper::reset() {
-    // default : set epoch time to current zulu time.
-    // set simTime to 0
-    // set missionTime to 0 too.
-    if (_eventMgr != nullptr) {
-        _inPreSimTimeChange=true;
-        _eventMgr->Emit(Smp::Services::IEventManager::SMP_PreSimTimeChangeId);
-        _inPreSimTimeChange=false;
-    }
-    _simTime = 0;
-    _epochOffset = GetZuluTime();
-    _missionStart = _epochOffset;
-    if (_eventMgr != nullptr) {
-        _eventMgr->Emit(Smp::Services::IEventManager::SMP_PostSimTimeChangeId);
-        _eventMgr->Emit(Smp::Services::IEventManager::SMP_EpochTimeChangedId);
-        _eventMgr->Emit(Smp::Services::IEventManager::SMP_MissionTimeChangedId);
-    }
-}
 
 }  // namespace kern
 }  // namespace simph

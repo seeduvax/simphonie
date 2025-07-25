@@ -38,19 +38,18 @@ using namespace simdeck;
 // ..........................................................
 class StructurePublication : public Publication {
 public:
-    StructurePublication(Smp::IObject* toPublish, Smp::Publication::ITypeRegistry* typeRegistry)
-        : Publication(toPublish, typeRegistry) {}
+    StructurePublication(Smp::IObject* toPublish, Smp::ISimulator* sim) : Publication(toPublish, sim) {}
     virtual ~StructurePublication() {}
 
 private:
 };
 // --------------------------------------------------------------------
 // ..........................................................
-Publication::Publication(Smp::IObject* toPublish, Smp::Publication::ITypeRegistry* typeRegistry)
+Publication::Publication(Smp::IObject* toPublish, Smp::ISimulator* sim)
     : _pubObj(dynamic_cast<Smp::IComponent*>(toPublish)),
-      _typeRegistry(typeRegistry),
-      _properties() {
-}
+      _typeRegistry(sim->GetTypeRegistry()),
+      _sim(sim),
+      _properties() {}
 // ..........................................................
 Publication::~Publication() {
 }
@@ -178,9 +177,8 @@ Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 descripti
     Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(typeUuid));
     if (t != nullptr) {
         if (t == _recursivePubGuard) {
-            // This PublishFields calls itself, probably through t->PublishField(...)
-            // stop here to not fail on stacvk overflow.
-            // TODO some error management - log or throw exception (which one?).
+            _sim->GetLogger()->Log(_sim, "A PublishField called itself, stop here to not fail on stack overflow.",
+                                   Smp::Services::ILogger::LMK_Error);
             _recursivePubGuard = nullptr;
             return nullptr;
         }

@@ -58,7 +58,7 @@ private:
 #else
 class NativeLib: public DLib::IHandler {
 public:
-    NativeLib(const char* libName): _name(libName) {
+    NativeLib(const char* libName, bool global) : _name(libName) {
         std::string err = "";
         _lib = dlopen(libName, RTLD_NOW | RTLD_LAZY);
         if (_lib==nullptr) {
@@ -67,7 +67,16 @@ public:
                 << "- tried " << libName << ": " << dlerror() << std::endl;
             std::string libFile=libName;
             libFile+=".so";
-            _lib = dlopen(libFile.c_str(), RTLD_NOW | RTLD_LAZY);
+            {
+                int flg;
+                if (global) {
+                    flg = RTLD_GLOBAL;
+                }
+                else {
+                    flg = RTLD_LOCAL;
+                }
+                _lib = dlopen(libFile.c_str(), RTLD_NOW | RTLD_LAZY | flg);
+            }
             if (_lib==nullptr) {
                 oss << "- tried " << libFile << ": " << dlerror() << std::endl;
                 libFile="lib"+libFile;
@@ -100,8 +109,7 @@ private:
 #endif
 // --------------------------------------------------------------------
 // ..........................................................
-DLib::DLib(const char* libName) : _libH(new NativeLib(libName)) {
-}
+DLib::DLib(const char* libName, bool global) : _libH(new NativeLib(libName, global)) {}
 // ..........................................................
 DLib::~DLib() {
 }

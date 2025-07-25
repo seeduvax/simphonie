@@ -44,6 +44,7 @@ private:
 
     Smp::UInt64 _overflowCount;
     Smp::Int64 _margin;
+    Smp::Int64 _marginThresh;
     Smp::Bool _startSec;
 
     std::chrono::time_point<std::chrono::system_clock> _goal;

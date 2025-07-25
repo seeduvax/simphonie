@@ -21,6 +21,7 @@
 #include "Smp/Services/IEventManager.h"
 #include "Smp/Services/IResolver.h"
 #include "Smp/Services/IScheduler.h"
+#include "simdeck/ExInvalidParent.hpp"
 #include "simdeck/ExInvalidType.hpp"
 #include "simdeck/smpext/ISchedulerOnEvent.hpp"
 #include "simphonie/sys/Logger.hpp"
@@ -36,7 +37,7 @@ LuaBuilder::LuaBuilder(Smp::String8 name, Smp::String8 description, Smp::IObject
         _sim=sim;
     }
     else {
-        // TODO send exception.
+        throw simdeck::ExInvalidParent(this, parent, nullptr);
     }
 }
 // ..........................................................
@@ -295,7 +296,7 @@ Smp::IComponent* LuaBuilder::componentCreateComponent(
     return nullptr;
 }
 
-Smp::AnySimple anyFromLua(Smp::PrimitiveTypeKind ptk, sol::object val){
+Smp::AnySimple LuaBuilder::anyFromLua(Smp::PrimitiveTypeKind ptk, sol::object val) {
     Smp::AnySimple res = Smp::AnySimple(ptk);
     switch (ptk) {
         case Smp::PrimitiveTypeKind::PTK_Int8:

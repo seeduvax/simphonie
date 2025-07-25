@@ -65,7 +65,13 @@ LuaModel::LuaModel(Smp::String8 name, Smp::String8 description, Smp::IObject* pa
 }
 // ..........................................................
 LuaModel::~LuaModel() {
-    // TODO delete allocated memory for published fields.
+    for (const auto& data : _publishedIntData) {
+        delete[] data;
+    }
+    for (const auto& data : _publishedDoubleData) {
+        delete[] data;
+    }
+    // TODO SegFault table's destructor: may be related to github.com/ThePhd/sol2/issues/335
 }
 
 // --------------------------------------------------------------------
@@ -130,7 +136,7 @@ void LuaModel::publishFieldsImpl(sol::table fields, bool isInput, bool isOutput,
         size_t vsize = 1;
         if (f.second.is<sol::table>()) {
             v = f.second;
-            elem = v[1];  // TODO is 1st element [1] ?
+            elem = v[1];
             vsize = v.size();
         }
         else {
@@ -138,6 +144,7 @@ void LuaModel::publishFieldsImpl(sol::table fields, bool isInput, bool isOutput,
         }
         if (elem.is<int64_t>()) {
             int64_t* data = new int64_t[vsize];
+            _publishedIntData.push_back(data);
             if (vsize == 1) {
                 data[0] = elem.as<int64_t>();
                 _pub->PublishField(name.c_str(), "", data, Smp::ViewKind::VK_All, isState, isInput, isOutput);
@@ -152,6 +159,7 @@ void LuaModel::publishFieldsImpl(sol::table fields, bool isInput, bool isOutput,
         }
         else if (elem.is<double>()) {
             double* data = new double[vsize];
+            _publishedDoubleData.push_back(data);
             if (vsize == 1) {
                 data[0] = elem.as<double>();
                 _pub->PublishField(name.c_str(), "", data, Smp::ViewKind::VK_All, isState, isInput, isOutput);

@@ -9,12 +9,13 @@
  */
 #include <cppunit/extensions/HelperMacros.h>
 #include <unistd.h>
+
 #include <memory>
+
 #include "abs/test.h"
 #include "simphonie/kern/Scheduler.hpp"
 #include "simphonie/kern/Simulator.hpp"
 #include "simphonie/sys/Callback.hpp"
-#include "simphonie/sys/ChronoTool.hpp"
 #include "simphonie/sys/Logger.hpp"
 
 namespace test {
@@ -166,10 +167,11 @@ _scheduler->SetEventStartOnEvent(ev, 3);
         _scheduler->AddSimulationTimeEvent(ep, 10);
         _scheduler->AddSimulationTimeEvent(ep, 10);
 
-        auto runTo = Callback::create([this]() { _scheduler->step(); });
-        ChronoTool::Record rec = ChronoTool::execution(*runTo);
+        const auto start = std::chrono::steady_clock::now();
+        _scheduler->step();
+        const auto end = std::chrono::steady_clock::now();
 
-        auto duration_ms = rec.count<std::chrono::milliseconds>();
+        auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         delete ep;
         TRACE("recorded duration = " << duration_ms << " ms")
         CPPUNIT_ASSERT(duration_ms - 500 < 20);  // 20ms margin for an expected 500ms execution time

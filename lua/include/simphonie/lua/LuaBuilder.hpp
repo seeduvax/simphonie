@@ -40,6 +40,8 @@ public:
                                             Smp::String8 container,
                                             Smp::String8 name,
                                             Smp::String8 description);
+    static Smp::AnySimple anyFromLua(Smp::PrimitiveTypeKind ptk, sol::object val);
+
 protected:
     /** 
      * Publish specialization.

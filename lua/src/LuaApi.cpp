@@ -116,59 +116,6 @@ Smp::Bool componentCreateChild(Smp::IComponent* th, Smp::String8 typeName, Smp::
     return false;
 }
 
-Smp::AnySimple anyFromLua(Smp::PrimitiveTypeKind ptk, sol::object val){ //TODO: maybe deduplicate from luabuilder
-    Smp::AnySimple res = Smp::AnySimple(ptk);
-    switch (ptk) {
-        case Smp::PrimitiveTypeKind::PTK_Int8:
-            res.SetValue(ptk,(Smp::Int8)val.as<double>()); // read double to handle scientific notation
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Int16:
-            res.SetValue(ptk,(Smp::Int16)val.as<double>());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Int32:
-            res.SetValue(ptk,(Smp::Int32)val.as<double>());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Int64:
-        case Smp::PrimitiveTypeKind::PTK_DateTime:
-        case Smp::PrimitiveTypeKind::PTK_Duration:
-            res.SetValue(ptk,(Smp::Int64)val.as<double>());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_UInt8:
-            res.SetValue(ptk,(Smp::UInt8)val.as<double>());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_UInt16:
-            res.SetValue(ptk,(Smp::UInt16)val.as<double>());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_UInt32:
-            res.SetValue(ptk,(Smp::UInt32)val.as<double>());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_UInt64:
-            res.SetValue(ptk,(Smp::UInt64)val.as<double>());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Bool:
-            res.SetValue(ptk,val.as<Smp::Bool>());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Char8:
-            res.SetValue(ptk,val.as<Smp::Char8>());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Float32:
-            res.SetValue(ptk,val.as<Smp::Float32>());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_Float64:
-            res.SetValue(ptk,val.as<Smp::Float64>());
-            break;
-        case Smp::PrimitiveTypeKind::PTK_String8:
-            res.SetValue(ptk,val.as<Smp::String8>());
-            break;
-        default:
-            std::stringstream ss;
-            ss << "Can't set value, primitive of type" << ptk << " not supported";
-            throw std::runtime_error(ss.str().c_str());
-            break;
-    }
-    return res;
-}
-
 // ..........................................................
 sol::object fieldGetValue(Smp::IField* field, sol::this_state L) {
     sol::object res = sol::nil;
@@ -235,7 +182,7 @@ void fieldSetValue(Smp::IField* field, sol::object value) {
     auto ptk = field->GetType()->GetPrimitiveTypeKind();
     if (sf != nullptr) {
         auto v = sf->GetValue();
-        sf->SetValue(anyFromLua(ptk, value));
+        sf->SetValue(simphonie::lua::LuaBuilder::anyFromLua(ptk, value));
     }
     auto af = dynamic_cast<Smp::ISimpleArrayField*>(field);
     if (af != nullptr) {
@@ -243,7 +190,7 @@ void fieldSetValue(Smp::IField* field, sol::object value) {
         if(luaArray.size() == af->GetSize()){
             for(Smp::UInt64 i=0;i<af->GetSize();i++)
             {
-                af->SetValue(i, anyFromLua(ptk , luaArray[i+1]));
+                af->SetValue(i, simphonie::lua::LuaBuilder::anyFromLua(ptk, luaArray[i + 1]));
             }
         }
         else{
@@ -300,7 +247,7 @@ int luaopen_libsimph_lua(lua_State* L) {
         "RawPtr", sol::property([](Smp::IObject* o,sol::this_state L) { 
                 return uint64_t(o);
         }),
-        "Type", sol::property([](Smp::IObject* o) { return typeid(*o).name(); }),  // TODO add some demangling here
+        "Type", sol::property([](Smp::IObject* o) { return simdeck::Utils::Demangle(typeid(*o).name()); }),
         sol::meta_function::index, &objectIndex 
     );
     nsSmp.new_usertype<Smp::IEntryPoint>("IEntryPoint", 

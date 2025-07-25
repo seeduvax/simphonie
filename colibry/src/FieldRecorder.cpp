@@ -9,6 +9,9 @@
  */
 #include "simphonie/colibry/FieldRecorder.hpp"
 
+#include <ctime>
+#include <iomanip>
+
 #include "Smp/ISimulator.h"
 #include "Smp/IStorageReader.h"
 #include "Smp/IStorageWriter.h"
@@ -39,8 +42,13 @@ FieldRecorder::FieldRecorder(Smp::String8 name, Smp::String8 description, Smp::I
     : Parent(name, description, parent) {
     _fieldHolder = nullptr;
     _filePath = name;
-    // TODO consider adding date and time to the default file name to avoid
-    // overwriting.
+    {
+        auto t = std::time(nullptr);
+        auto tm = std::localtime(&t);
+        std::ostringstream oss;
+        oss << std::put_time(tm, "_%d-%m-%Y_%H-%M-%S");
+        _filePath += oss.str();
+    }
     _filePath = _filePath + ".";
     if (fileExt!=nullptr) {
         _filePath = _filePath + fileExt;

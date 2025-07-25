@@ -40,6 +40,7 @@ Resolver::~Resolver() {
 // ..........................................................
 void Resolver::connect() {
     _root=getSimulator();
+    _linkeRegistry = getSimulator()->GetLinkRegistry();
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -61,11 +62,11 @@ std::string Resolver::getFullName(Smp::IObject* o) const {
     }
 }
 // ..........................................................
-void Resolver::dump() {
+void Resolver::dump() const {
     dumpObj(_root);
 }
 // ..........................................................
-void Resolver::dumpObj(const Smp::IObject* from, int level) {
+void Resolver::dumpObj(const Smp::IObject* from, int level) const {
     for (int i=0; i<level; i++) {
         std::cout << "    ";
     }
@@ -136,12 +137,12 @@ void Resolver::dumpObj(const Smp::IObject* from, int level) {
     }   
     auto c=dynamic_cast<const Smp::IComponent*>(from);
     if (c!=nullptr) {
-        auto lr = getSimulator()->GetLinkRegistry();
-        for (auto source : *(lr->GetLinkSources(c))) {
+        for (auto source : *(_linkeRegistry->GetLinkSources(c))) {
             for (int i = 0; i < level; i++) {
                 std::cout << "    ";
             }
-            std::cout << "    <-[" << lr->GetLinkCount(source, c) << "]- " << getFullName(source) << std::endl;
+            std::cout << "    <-[" << _linkeRegistry->GetLinkCount(source, c) << "]- " << getFullName(source)
+                      << std::endl;
         }
         for (auto f: *(c->GetFields())) {
             dumpObj(f,l);

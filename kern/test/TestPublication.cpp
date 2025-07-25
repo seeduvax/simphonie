@@ -11,6 +11,7 @@
 
 #include "Smp/ISimpleArrayField.h"
 #include "Smp/ISimpleField.h"
+#include "Smp/ISimulator.h"
 #include "abs/test.h"
 #include "simdeck/Component.hpp"
 #include "simdeck/StringField.hpp"
@@ -28,15 +29,95 @@ using namespace simdeck;
 ABS_TEST_SUITE_BEGIN(Publication)
 
 private:
+    class FakeSimulator : public virtual Smp::ISimulator {
+    public:
+        inline FakeSimulator() : _treg(new TypeRegistry("TypeRegistry", "", nullptr)) {}
+        inline Smp::Publication::ITypeRegistry* GetTypeRegistry() const override {
+            return _treg;
+        }
+
+        inline void Initialise() override {}
+        inline void Publish() override {}
+        inline void Configure() override {}
+        inline void Connect() override {}
+        inline void Run() override {}
+        inline void Hold(Smp::Bool immediate) override {}
+        inline void Store(Smp::String8 filename) override {}
+        inline void Restore(Smp::String8 filename) override {}
+        inline void Reconnect(Smp::IComponent* root) override {}
+        inline void Exit() override {}
+        inline void Abort() override {}
+        inline Smp::SimulatorStateKind GetState() const override {
+            return Smp::SimulatorStateKind::SSK_Standby;
+        }
+        inline void AddInitEntryPoint(Smp::IEntryPoint* entryPoint) override {}
+        inline void AddModel(Smp::IModel* model) override {}
+        inline void AddService(Smp::IService* service) override {}
+        inline Smp::IService* GetService(Smp::String8 name) const override {
+            return nullptr;
+        }
+        inline Smp::Services::ILogger* GetLogger() const override {
+            return nullptr;
+        }
+        inline Smp::Services::ITimeKeeper* GetTimeKeeper() const override {
+            return nullptr;
+        }
+        inline Smp::Services::IScheduler* GetScheduler() const override {
+            return nullptr;
+        }
+        inline Smp::Services::IEventManager* GetEventManager() const override {
+            return nullptr;
+        }
+        inline Smp::Services::IResolver* GetResolver() const override {
+            return nullptr;
+        }
+        inline Smp::Services::ILinkRegistry* GetLinkRegistry() const override {
+            return nullptr;
+        }
+        inline void RegisterFactory(Smp::IFactory* componentFactory) override {}
+        inline Smp::IComponent* CreateInstance(Smp::Uuid uuid, Smp::String8 name, Smp::String8 description,
+                                               Smp::IComposite* parent) override {
+            return nullptr;
+        }
+        inline Smp::IFactory* GetFactory(Smp::Uuid uuid) const override {
+            return nullptr;
+        }
+        inline const Smp::FactoryCollection* GetFactories() const override {
+            return nullptr;
+        }
+        inline void LoadLibrary(Smp::String8 libraryPath, Smp::LibraryLoadingFlag flag) override {}
+        inline const Smp::ContainerCollection* GetContainers() const override {
+            return nullptr;
+        }
+        inline Smp::IContainer* GetContainer(Smp::String8 name) const override {
+            return nullptr;
+        }
+        inline Smp::String8 GetName() const {
+            return nullptr;
+        }
+        inline Smp::String8 GetDescription() const override {
+            return nullptr;
+        }
+        inline Smp::IObject* GetParent() const override {
+            return nullptr;
+        }
+        inline Smp::IObject* GetChild(Smp::String8 name) const override {
+            return nullptr;
+        }
+
+    private:
+        TypeRegistry* _treg;
+    };
+
 public:
     void setUp() {}
 
     void tearDown() {}
 
     ABS_TEST_CASE_BEGIN(PublishField) {
+        FakeSimulator sim;
         std::unique_ptr<simdeck::Component> component(new simdeck::Component("testObj", "dummy object for testing", nullptr));
-        TypeRegistry treg("TypeRegistry", "", nullptr);
-        Publication pub(component.get(), &treg);
+        Publication pub(component.get(), &sim);
 
         Smp::Char8 testChar = 'A';
         pub.PublishField("Char", "char8 test pub", &testChar);
@@ -75,9 +156,9 @@ public:
     }
     ABS_TEST_CASE_END
     ABS_TEST_CASE_BEGIN(PublishArrayField) {
-        TypeRegistry tReg("TypesRegistry", "test types registry", nullptr);
+        FakeSimulator sim;
         std::unique_ptr<simdeck::Component> component(new simdeck::Component("testObj", "dummy object for testing", nullptr));
-        Publication pub(component.get(), &tReg);
+        Publication pub(component.get(), &sim);
 
         Smp::Int32 iArray[] = {12, 17, 42};
         pub.PublishArray("iArray", "int array test pub", 3, iArray, Smp::PrimitiveTypeKind::PTK_Int32);
@@ -92,10 +173,10 @@ public:
     ABS_TEST_CASE_END
 
     ABS_TEST_CASE_BEGIN(PublishStringField) {
-        TypeRegistry tReg("TypesRegistry", "test types registry", nullptr);
+        FakeSimulator sim;
         std::unique_ptr<simdeck::Component> component(
             new simdeck::Component("testObj", "dummy object for testing", nullptr));
-        Publication pub(component.get(), &tReg);
+        Publication pub(component.get(), &sim);
 
         std::string stringField = "String Field";
         auto f = pub.PublishField("strField", "std::string test pub", &stringField, StringType::UuidString);

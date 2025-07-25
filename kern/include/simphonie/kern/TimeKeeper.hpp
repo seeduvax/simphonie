@@ -50,16 +50,13 @@ public:
     // => SimTime = EpochTime - EpochOffset, where EpochOffset is EpochTime at
     //    simulation start.
 
-    // TODO should not be public but binded to some simulation start even handling
-    // to be changed as entry point subscribed to the right event
-    void reset();
-    void epUpdateSimulationTime();
-
 protected:
     void connect();
     void publish(Smp::IPublication* receiver);
 
 private:
+    void epUpdateSimulationTime();
+
     Smp::Duration _simTime=0;
     Smp::Duration _nextEventTime=0;
     Smp::Duration _epochOffset=0;

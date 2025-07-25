@@ -57,6 +57,8 @@ private:
     std::string buildName(Smp::String8 spec);
     void call(const char* name);
     simdeck::OwnedCollection<Smp::IEntryPoint> _epList;
+    std::vector<int64_t*> _publishedIntData;
+    std::vector<double*> _publishedDoubleData;
 
     Smp::IPublication* _pub;
     class EntryPoint;

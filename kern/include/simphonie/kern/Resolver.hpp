@@ -12,11 +12,13 @@
 
 #include <map>
 #include <regex>
+
 #include "Smp/Publication/ITypeRegistry.h"
+#include "Smp/Services/ILinkRegistry.h"
 #include "Smp/Services/IResolver.h"
+#include "simdeck/Component.hpp"
 #include "simdeck/EntryPointPublisher.hpp"
 #include "simphonie/kern/Publication.hpp"
-#include "simdeck/Component.hpp"
 
 namespace simphonie {
 namespace kern {
@@ -42,7 +44,7 @@ public:
     Smp::IObject* ResolveAbsolute(Smp::String8 absolutePath) override;
     Smp::IObject* ResolveRelative(Smp::String8 relativePath, Smp::IObject* sender) override;
 
-    void dump() /* const [TODO restore when simdeck is OK for that]*/;
+    void dump() const;
 
 protected:
     void connect() override;
@@ -50,7 +52,8 @@ protected:
 
 private:
     Smp::IObject* _root;
-    void dumpObj(const Smp::IObject* from, int level = 0) /* const [TODO restore when simdeck is OK for that]*/;
+    Smp::Services::ILinkRegistry* _linkeRegistry;
+    void dumpObj(const Smp::IObject* from, int level = 0) const;
 };
 
 }  // namespace kern

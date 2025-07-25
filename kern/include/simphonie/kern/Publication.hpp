@@ -11,9 +11,12 @@
 #define __simphonie_kern_Publication_HPP__
 
 #include <vector>
+
 #include "Smp/DuplicateName.h"
 #include "Smp/IPublication.h"
+#include "Smp/ISimulator.h"
 #include "Smp/Publication/ITypeRegistry.h"
+#include "Smp/Services/ILogger.h"
 #include "simdeck/Collection.hpp"
 
 namespace simphonie {
@@ -27,7 +30,7 @@ public:
     /**
      * Default constructor.
      */
-    Publication(Smp::IObject* toPublish, Smp::Publication::ITypeRegistry* typeRegistry);
+    Publication(Smp::IObject* toPublish, Smp::ISimulator* sim);
     /**
      * Destructor.
      */
@@ -105,6 +108,7 @@ public:
 private:
     Smp::IComponent* _pubObj;
     std::vector<std::tuple<Smp::IObject*, const Smp::ICollectionBase*>> _published;
+    Smp::ISimulator* _sim;
     Smp::Publication::ITypeRegistry* _typeRegistry;
     Smp::Publication::IType* getArrayType(Smp::PrimitiveTypeKind ptk, Smp::Int64 count);
     simdeck::Collection<Smp::IProperty> _properties;

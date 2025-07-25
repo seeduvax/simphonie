@@ -23,19 +23,99 @@ using namespace simphonie::mt;
 ABS_TEST_SUITE_BEGIN(SimSyncDataShare)
 
 private:
+    class FakeSimulator : public virtual Smp::ISimulator {
+    public:
+        inline FakeSimulator() : _treg(new simphonie::kern::TypeRegistry("TypeRegistry", "", nullptr)) {}
+        inline Smp::Publication::ITypeRegistry* GetTypeRegistry() const override {
+            return _treg;
+        }
+
+        inline void Initialise() override {}
+        inline void Publish() override {}
+        inline void Configure() override {}
+        inline void Connect() override {}
+        inline void Run() override {}
+        inline void Hold(Smp::Bool immediate) override {}
+        inline void Store(Smp::String8 filename) override {}
+        inline void Restore(Smp::String8 filename) override {}
+        inline void Reconnect(Smp::IComponent* root) override {}
+        inline void Exit() override {}
+        inline void Abort() override {}
+        inline Smp::SimulatorStateKind GetState() const override {
+            return Smp::SimulatorStateKind::SSK_Standby;
+        }
+        inline void AddInitEntryPoint(Smp::IEntryPoint* entryPoint) override {}
+        inline void AddModel(Smp::IModel* model) override {}
+        inline void AddService(Smp::IService* service) override {}
+        inline Smp::IService* GetService(Smp::String8 name) const override {
+            return nullptr;
+        }
+        inline Smp::Services::ILogger* GetLogger() const override {
+            return nullptr;
+        }
+        inline Smp::Services::ITimeKeeper* GetTimeKeeper() const override {
+            return nullptr;
+        }
+        inline Smp::Services::IScheduler* GetScheduler() const override {
+            return nullptr;
+        }
+        inline Smp::Services::IEventManager* GetEventManager() const override {
+            return nullptr;
+        }
+        inline Smp::Services::IResolver* GetResolver() const override {
+            return nullptr;
+        }
+        inline Smp::Services::ILinkRegistry* GetLinkRegistry() const override {
+            return nullptr;
+        }
+        inline void RegisterFactory(Smp::IFactory* componentFactory) override {}
+        inline Smp::IComponent* CreateInstance(Smp::Uuid uuid, Smp::String8 name, Smp::String8 description,
+                                               Smp::IComposite* parent) override {
+            return nullptr;
+        }
+        inline Smp::IFactory* GetFactory(Smp::Uuid uuid) const override {
+            return nullptr;
+        }
+        inline const Smp::FactoryCollection* GetFactories() const override {
+            return nullptr;
+        }
+        inline void LoadLibrary(Smp::String8 libraryPath, Smp::LibraryLoadingFlag flag) override {}
+        inline const Smp::ContainerCollection* GetContainers() const override {
+            return nullptr;
+        }
+        inline Smp::IContainer* GetContainer(Smp::String8 name) const override {
+            return nullptr;
+        }
+        inline Smp::String8 GetName() const {
+            return nullptr;
+        }
+        inline Smp::String8 GetDescription() const override {
+            return nullptr;
+        }
+        inline Smp::IObject* GetParent() const override {
+            return nullptr;
+        }
+        inline Smp::IObject* GetChild(Smp::String8 name) const override {
+            return nullptr;
+        }
+
+    private:
+        Smp::Publication::ITypeRegistry* _treg;
+    };
+
 Smp::Int64 _val1, _val2;
 Smp::Float32 _val3, _val4;
 Smp::IComponent* _comp;
 SimSyncDataShare* _dataShare;
-Smp::Publication::ITypeRegistry* _typeRegistry;
 Smp::IPublication* _receiver;
+FakeSimulator* _sim;
 
 public:
 void setUp() {
     _comp = new simdeck::Component("comp", "");
     _dataShare = new SimSyncDataShare();
-    _typeRegistry = new simphonie::kern::TypeRegistry("typeRegistry", "", nullptr);
-    _receiver = new simphonie::kern::Publication(_comp, _typeRegistry);
+    _sim = new FakeSimulator();
+    _receiver = new simphonie::kern::Publication(_comp, _sim);
     _receiver->PublishField("field1", "", &_val1, Smp::ViewKind::VK_All, false, true, false);
     _receiver->PublishField("field2", "", &_val2, Smp::ViewKind::VK_All, false, false, true);
     _receiver->PublishField("field3", "", &_val3, Smp::ViewKind::VK_All, false, true, false);
@@ -45,7 +125,7 @@ void setUp() {
 void tearDown() {
     delete _comp;
     delete _dataShare;
-    delete _typeRegistry;
+    delete _sim;
     delete _receiver;
 }
 
