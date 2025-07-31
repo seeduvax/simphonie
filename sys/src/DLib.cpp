@@ -60,27 +60,25 @@ class NativeLib: public DLib::IHandler {
 public:
     NativeLib(const char* libName, bool global) : _name(libName) {
         std::string err = "";
-        _lib = dlopen(libName, RTLD_NOW | RTLD_LAZY);
+        int flg;
+        if (global) {
+            flg = RTLD_GLOBAL;
+        }
+        else {
+            flg = RTLD_LOCAL;
+        }
+        _lib = dlopen(libName, RTLD_NOW | RTLD_LAZY | flg);
         if (_lib==nullptr) {
             std::ostringstream oss;
             oss << "Can't load library " << libName << ": " << std::endl
                 << "- tried " << libName << ": " << dlerror() << std::endl;
             std::string libFile=libName;
             libFile+=".so";
-            {
-                int flg;
-                if (global) {
-                    flg = RTLD_GLOBAL;
-                }
-                else {
-                    flg = RTLD_LOCAL;
-                }
-                _lib = dlopen(libFile.c_str(), RTLD_NOW | RTLD_LAZY | flg);
-            }
+            _lib = dlopen(libFile.c_str(), RTLD_NOW | RTLD_LAZY | flg);
             if (_lib==nullptr) {
                 oss << "- tried " << libFile << ": " << dlerror() << std::endl;
                 libFile="lib"+libFile;
-                _lib = dlopen(libFile.c_str(), RTLD_NOW | RTLD_LAZY);
+                _lib = dlopen(libFile.c_str(), RTLD_NOW | RTLD_LAZY | flg);
                 if (_lib == nullptr) {
                     oss << "- tried " << libFile << ": " << dlerror();
                     LOGE(oss.str());
