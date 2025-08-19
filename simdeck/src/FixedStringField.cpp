@@ -64,6 +64,10 @@ void FixedStringField::Freeze() {
     _isForced=true;
 }
 // ..........................................................
+Smp::Bool FixedStringField::IsForced() const {
+    return _isForced;
+}
+// ..........................................................
 void FixedStringField::Restore(Smp::IStorageReader* reader) {
     reader->Restore(_value,_maxLength);
 }
