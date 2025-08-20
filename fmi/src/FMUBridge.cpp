@@ -360,13 +360,12 @@ bool FMUBridge::exportSim(Smp::ISimulator* sim, Smp::String8 filename) {
             << R"(    </ScalarVariable>)" << std::endl;
         ref++;
     }
-    xml << R "(  </ModelVariables>)" << std::endl;
-    xml << R "(  <ModelStructure>)" << std::endl;
-    xml << R "(    <Outputs>)" << std::endl;
-    xml << modelStruct.str();
-    xml << R "(    </Outputs>)" << std::endl;
-    xml << R "(  </ModelStructure>)" << std::endl;
-    xml << R "(</fmiModelDescription>)" << std::endl;
+    xml << "  </ModelVariables>" << std::endl
+        << "  <ModelStructure>" << std::endl
+        << "    <Outputs>" << std::endl
+        << modelStruct.str() << "    </Outputs>" << std::endl
+        << "  </ModelStructure>" << std::endl
+        << "</fmiModelDescription>" << std::endl;
     xml.close();
 
     /* zip the file */
