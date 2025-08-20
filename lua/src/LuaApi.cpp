@@ -8,6 +8,7 @@
  * $Date$
  */
 #include <cstdint>
+
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/IModel.h"
 #include "Smp/IOutputField.h"
@@ -20,6 +21,7 @@
 #include "Smp/Services/IScheduler.h"
 #include "Smp/Services/ITimeKeeper.h"
 #include "simdeck/Utils.hpp"
+#include "simphonie/fmi/FMUBridge.hpp"
 #include "simphonie/lua/LuaBuilder.hpp"
 #include "simphonie/lua/LuaModel.hpp"
 #include "simphonie/mt/SimSyncMaster.hpp"
@@ -331,6 +333,7 @@ int luaopen_libsimph_lua(lua_State* L) {
         "GetResolver", &Smp::ISimulator::GetResolver,
         "GetEventManager", &Smp::ISimulator::GetEventManager,
         "CreateComponent", &simphonie::lua::LuaBuilder::simulatorCreateComponent,
+        "ExportToFMU", &simphonie::fmi::FMUBridge::exportSim,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite>()
     );
     nsSmp.new_usertype<Smp::Services::ITimeKeeper>("ITimeKeeper",

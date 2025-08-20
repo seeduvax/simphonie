@@ -45,10 +45,10 @@ public:
     Smp::IObject* ResolveRelative(Smp::String8 relativePath, Smp::IObject* sender) override;
 
     void dump() const;
+    std::string getFullName(Smp::IObject* o) const;
 
 protected:
     void connect() override;
-    std::string getFullName(Smp::IObject* o) const;
 
 private:
     Smp::IObject* _root;

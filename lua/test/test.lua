@@ -107,6 +107,7 @@ sim=s.CreateSimulator({
         ["inc4/step"]={startOnEvent="TheEvent", cycleTime_ms=30, offset_ms=20}
     }
 })
+
 sim:Run()
 print("Simulator name: "..sim.Name)
 tk=sim:GetTimeKeeper()
@@ -128,6 +129,9 @@ sim:Publish()
 sim:Configure()
 sim:Connect()
 sim.inc.output:Connect(sim.inc.subinc.input)
+
+-- sim:ExportToFMU("MySim.fmu");
+
 sim.Resolver.dump:Execute()
 print("simulator state "..sim.State)
 
