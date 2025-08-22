@@ -41,7 +41,6 @@ public:
                                             Smp::String8 name,
                                             Smp::String8 description);
     static Smp::AnySimple anyFromLua(Smp::PrimitiveTypeKind ptk, sol::object val);
-    static bool simulatorExportToFMU(Smp::ISimulator* sim, Smp::String8 filename);
 
 protected:
     /** 

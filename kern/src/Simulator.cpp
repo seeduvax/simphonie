@@ -171,7 +171,7 @@ bool Simulator::checkState(Smp::String8 opName, Smp::SimulatorStateKind expState
     bool res = _state == expState;
     if (!res) {
         std::ostringstream msg;
-        msg << opName << " request ingored, operation not available at current state: " << _state;
+        msg << opName << " request ignored, operation not available at current state: " << _state;
         SMPLOGW(msg.str().c_str());
     }
     return res;

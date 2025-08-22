@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription
+  fmiVersion="2.0"
+  modelName="FMITest"
+  guid="FMITEST"
+  description="Test of a simple Simphonie-based co-simulation"
+  generationTool="Simphonie"
+  generationDateAndTime="2025-08-21T14:37:23Z"
+  variableNamingConvention="structured">
+  <CoSimulation
+    modelIdentifier="FMITest"
+    needsExecutionTool="false"
+    canHandleVariableCommunicationStepSize="true"
+    canInterpolateInputs="false"
+    maxOutputDerivativeOrder="0"
+    canRunAsynchronuously="false"
+    canBeInstantiatedOnlyOncePerProcess="false"
+    canNotUseMemoryManagementFunctions="false"
+    canGetAndSetFMUstate="false"
+    canSerializeFMUstate="false"
+    providesDirectionalDerivative="false"/>
+
+  <DefaultExperiment startTime="0" stepSize="0.05" stopTime="0.2"/>
+
+  <ModelVariables>
+    <ScalarVariable
+      name="MySim.inc1.output"
+      valueReference="0"
+      description="inc1 output"
+      causality="output"
+      initial="exact"
+      variability="continuous">
+      <Real start="0"/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="MySim.inc1.input"
+      valueReference="1"
+      description="inc1 input"
+      causality="input"
+      initial="exact"
+      variability="continuous">
+      <Real start="0"/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="MySim.inc2.output"
+      valueReference="2"
+      description="inc2 output"
+      causality="output"
+      initial="exact"
+      variability="continuous">
+      <Real start="0"/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="MySim.inc2.input"
+      valueReference="3"
+      description="inc2 input"
+      causality="input"
+      initial="exact"
+      variability="continuous">
+      <Real start="0"/>
+    </ScalarVariable>
+  </ModelVariables>
+  <ModelStructure>
+    <Outputs>
+      <Unknown index="0"/>
+      <Unknown index="2"/>
+    </Outputs>
+  </ModelStructure>
+</fmiModelDescription>

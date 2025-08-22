@@ -45,7 +45,6 @@ public:
     Smp::IObject* ResolveRelative(Smp::String8 relativePath, Smp::IObject* sender) override;
 
     void dump() const;
-    std::string getFullName(Smp::IObject* o) const;
 
 protected:
     void connect() override;
@@ -54,6 +53,7 @@ private:
     Smp::IObject* _root;
     Smp::Services::ILinkRegistry* _linkeRegistry;
     void dumpObj(const Smp::IObject* from, int level = 0) const;
+    std::string getFullName(Smp::IObject* o) const;
 };
 
 }  // namespace kern

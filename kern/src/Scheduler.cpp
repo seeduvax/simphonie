@@ -163,7 +163,7 @@ void Scheduler::updateSchedule(Smp::Services::EventId eventId) {
 Smp::Services::EventId Scheduler::AddSimulationTimeEvent(const Smp::IEntryPoint* entryPoint,
                                                          Smp::Duration simulationTime, Smp::Duration cycleTime,
                                                          Smp::Int64 repeat) {
-    return schedule(entryPoint, _timeKeeper->GetSimulationTime() + simulationTime, cycleTime, repeat);
+    return schedule(entryPoint, simulationTime, cycleTime, repeat);
 };
 // ..........................................................
 Smp::Services::EventId Scheduler::AddMissionTimeEvent(const Smp::IEntryPoint* entryPoint, Smp::Duration missionTime,
