@@ -39,7 +39,9 @@ public:
              Smp::Int64 repeat = 0, Smp::UInt64 priority = 0);
 
     inline Smp::Services::EventId GetId() const override { return _id; }
-    inline Smp::Duration GetTime() const override { return _simTime; }
+    inline Smp::Duration GetTime() const override {
+        return _absoluteSimTime;
+    }
     inline Smp::Duration GetPeriod() const override { return _period; }
     inline Smp::Int64 GetRepeat() const override { return _repeat; }
     inline Smp::UInt64 GetPriority() const {
@@ -55,7 +57,7 @@ public:
         return _ep; }
     inline Smp::Bool IsCompleted() const override { return _completed; }
 
-    void setTime(Smp::Duration simTime, Smp::Bool updateScheduler = true);
+    void setTime(Smp::Duration absoluteSimTime, Smp::Bool updateScheduler = true);
     inline void setPeriod(Smp::Duration period) { _period = period; }
     inline void setRepeat(Smp::Int64 repeat) { _repeat = repeat; }
     void setPriority(Smp::UInt64 priority, Smp::Bool updateScheduler = true);
@@ -75,8 +77,8 @@ public:
         if (other.isWaiting() && !_isWaiting) {
             return true;
         }
-        if (_simTime != other.GetTime()) {
-            return _simTime < other.GetTime();
+        if (_absoluteSimTime != other.GetTime()) {
+            return _absoluteSimTime < other.GetTime();
         }
         if (_priority != other.GetPriority()) {
             return _priority > other.GetPriority();
@@ -92,7 +94,7 @@ private:
 
     const Smp::IEntryPoint* _ep;
     std::vector<Smp::IOutputField*> _fields;
-    Smp::Duration _simTime;
+    Smp::Duration _absoluteSimTime;
     Smp::Duration _period;
     Smp::Int64 _repeat;
     Smp::UInt64 _priority;

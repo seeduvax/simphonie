@@ -17,13 +17,13 @@ namespace simphonie {
 namespace kern {
 
 Schedule::Schedule(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, const Smp::IEntryPoint* ep,
-                   const std::vector<Smp::IOutputField*>& fields, Smp::Duration simTime, Smp::Duration period,
+                   const std::vector<Smp::IOutputField*>& fields, Smp::Duration absoluteSimTime, Smp::Duration period,
                    Smp::Int64 repeat, Smp::UInt64 priority)
     : Object(name, descr, parent),
       _scheduler(dynamic_cast<Scheduler*>(parent)),
       _ep(ep),
       _fields(fields),
-      _simTime(simTime),
+      _absoluteSimTime(absoluteSimTime),
       _period(period),
       _repeat(repeat),
       _priority(priority),
@@ -41,8 +41,8 @@ Schedule::Schedule(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, 
     addEP(STOP_EP, "EntryPoint for stoping on event.", this, &Schedule::_epStopOnEvent);
 }
 
-void Schedule::setTime(Smp::Duration simTime, Smp::Bool updateScheduler) {
-    _simTime = simTime;
+void Schedule::setTime(Smp::Duration absoluteSimTime, Smp::Bool updateScheduler) {
+    _absoluteSimTime = absoluteSimTime;
     if (updateScheduler) {
         _scheduler->updateSchedule(_id);
     }
@@ -99,7 +99,7 @@ void Schedule::run() {
         }
         if (_counterActivation != _repeat) {
             if (_period > 0) {
-                setTime(_simTime + _period);
+                setTime(_absoluteSimTime + _period);
             }
         }
         else {
@@ -110,7 +110,7 @@ void Schedule::run() {
 }
 
 void Schedule::_epStartOnEvent() {
-    _simTime += _scheduler->getSimulator()->GetTimeKeeper()->GetSimulationTime(); /* assuming simTime is an offset to time 0 */
+    _absoluteSimTime = _scheduler->getSimulator()->GetTimeKeeper()->GetSimulationTime();
     setIsWaiting(false);
 }
 

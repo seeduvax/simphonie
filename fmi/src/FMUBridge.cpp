@@ -14,6 +14,7 @@
 #include <regex>
 #include <vector>
 
+#include "Smp/Publication/IType.h"
 #include "Smp/Services/IEventManager.h"
 #include "Smp/Services/ILogger.h"
 #include "Smp/Services/IResolver.h"
@@ -99,9 +100,15 @@ template <typename T>
 void FMUBridge::SetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) {
     for (std::size_t i = 0; i < nvr; ++i) {
         auto fld = _fmiRef2Field[vr[i]];
-        /* TODO check if it need conversion from cppfmu types to Smp ones on some platforms */
-        const Smp::AnySimple anysimp(fld->GetPrimitiveTypeKind(), value[i]);
-        fld->SetValue(anysimp);
+        /* TODO check if it needs conversion from cppfmu types to Smp ones on some platforms */
+        if (fld.isArray) {
+            const Smp::AnySimple anysimp(fld.value.array.ptr->GetType()->GetPrimitiveTypeKind(), value[i]);
+            fld.value.array.ptr->SetValue(fld.value.array.index, anysimp);
+        }
+        else {
+            const Smp::AnySimple anysimp(fld.value.simple->GetPrimitiveTypeKind(), value[i]);
+            fld.value.simple->SetValue(anysimp);
+        }
     }
 }
 // ..........................................................
@@ -109,7 +116,12 @@ template <typename T>
 void FMUBridge::GetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) const {
     for (std::size_t i = 0; i < nvr; ++i) {
         auto fld = _fmiRef2Field.at(vr[i]);
-        value[i] = static_cast<T>(fld->GetValue());
+        if (fld.isArray) {
+            value[i] = static_cast<T>(fld.value.array.ptr->GetValue(fld.value.array.index));
+        }
+        else {
+            value[i] = static_cast<T>(fld.value.simple->GetValue());
+        }
     }
 }
 // ..........................................................
@@ -121,8 +133,9 @@ bool FMUBridge::DoStep(cppfmu::FMIReal currentCommunicationPoint, cppfmu::FMIRea
      */
 
     /* Set the holdEP */
-    const auto endSimTime = static_cast<Smp::Duration>((currentCommunicationPoint + communicationStepSize) * 1e9);
+    const auto endSimTime = static_cast<Smp::Duration>(communicationStepSize * 1e9);
     const auto event = _sched->AddSimulationTimeEvent(_holdEP, endSimTime, 0, 0); /* TODO max priority */
+    /* TODO abboner sur sim change check to stop: this would avoid approximations errors */
 
     /* Run the simulation */
     _sim->Run();
@@ -143,13 +156,29 @@ bool FMUBridge::DoStep(cppfmu::FMIReal currentCommunicationPoint, cppfmu::FMIRea
     return true;
 }
 // ..........................................................
-bool FMUBridge::addFieldRef(cppfmu::FMIValueReference ref, const char* name) {
-    /* TODO add array support */
-    auto fld = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveAbsolute(name));
-    if (fld == nullptr) {
+bool FMUBridge::addFieldRef(cppfmu::FMIValueReference ref, const std::string& name) {
+    FMUBridge::Field field;
+
+    if (*name.end() != ']') {
+        /* this is a simple field */
+        field.isArray = false;
+        field.value.simple = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveAbsolute(name.c_str()));
+        if (field.value.simple == nullptr) {
+            return false;
+        }
+        _fmiRef2Field.insert(std::make_pair(ref, field));
+        return true;
+    }
+
+    /* this is an array element */
+    field.isArray = true;
+    const auto fieldName = name.substr(0, '[').c_str();
+    field.value.array.ptr = dynamic_cast<Smp::ISimpleArrayField*>(_sim->GetResolver()->ResolveAbsolute(fieldName));
+    if (field.value.array.ptr == nullptr) {
         return false;
     }
-    _fmiRef2Field.insert(std::make_pair(ref, fld));
+    field.value.array.index = std::stoi(name.substr('[', ']'));
+    _fmiRef2Field.insert(std::make_pair(ref, field));
     return true;
 }
 // ..........................................................
@@ -190,10 +219,13 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
         cppfmu::FMIStatus::fmi2Warning, "Instantiation",
         "Logging messages will not be sent to this logger. The Simphonie's internal logging system will handle them.");
 
-    /* set the path to the resources folder. The issue is likely that sol::state::safe_script_file only accepts "local"
-     * files */
+    /* set the path to the resources folder */
+    /**
+     * TODO We have to supprt the URI standard IETF RFC3986. However, sol::state::safe_script_file
+     * looks like unable to read non-local files. A good workaround might be to download
+     * a local copy of the file and to call sol's fucntion on it.
+     */
     if (std::strncmp(fmuResourceLocation, "file://", 7) != 0) {
-        /* TODO support IETF RFC3986 */
         std::ostringstream oss;
         oss << "The URI to the fmu file should start with file://: \"" << fmuResourceLocation << "\" received";
         logger.Log(cppfmu::FMIStatus::fmi2Error, "Instantiation", oss.str().c_str());
@@ -223,15 +255,22 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
 
     auto fmu = cppfmu::AllocateUnique<simphonie::fmi::FMUBridge>(memory, sim, "FMUBridge");
 
-    /* setup FMIValueReference to string names mapping */
+    /* setup FMIValueReference to field mapping */
+    /**
+     * TODO reading the XML and looking for regex patterns is a dirty way to get
+     * the mapping FMIValueReference to field pointers. A better way would have
+     * been to use an hash function during the creation of the XML file for
+     * hashing fields into an unique FMIValueReference.
+     */
     {
         std::ifstream file((resources + "/../modelDescription.xml").c_str());
         std::ostringstream oss;
         oss << file.rdbuf();
         const auto modelDesc = oss.str();
-        /* TODO the regex may be too specific */
+        /* WARN the regex is too restrictive (should be removed anyway c.f. previous TODO) */
         const auto refsMatches = simphonie::fmi::FMUBridge::getRegexMatches(modelDesc, "valueReference=\"[0-9]+");
-        const auto namesMatches = simphonie::fmi::FMUBridge::getRegexMatches(modelDesc, " name=\"[0-9a-zA-Z./]+");
+        const auto namesMatches =
+            simphonie::fmi::FMUBridge::getRegexMatches(modelDesc, " name=\"[0-9a-zA-Z./]+(?:\[[0-9]+\])?");
         if (refsMatches.size() != namesMatches.size()) {
             const auto msg("The parsing of the fields' references failed.");
             logger.Log(cppfmu::FMIStatus::fmi2Error, "Instantiation", msg);
