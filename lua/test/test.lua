@@ -130,8 +130,6 @@ sim:Configure()
 sim:Connect()
 sim.inc.output:Connect(sim.inc.subinc.input)
 
--- sim:ExportToFMU("MySim.fmu");
-
 sim.Resolver.dump:Execute()
 print("simulator state "..sim.State)
 

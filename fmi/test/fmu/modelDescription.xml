@@ -24,7 +24,7 @@
 
   <ModelVariables>
     <ScalarVariable
-      name="MySim.inc1.output"
+      name="inc1.output"
       valueReference="0"
       description="inc1 output"
       causality="output"
@@ -33,7 +33,7 @@
       <Real start="0"/>
     </ScalarVariable>
     <ScalarVariable
-      name="MySim.inc1.input"
+      name="inc1.input"
       valueReference="1"
       description="inc1 input"
       causality="input"
@@ -42,7 +42,7 @@
       <Real start="0"/>
     </ScalarVariable>
     <ScalarVariable
-      name="MySim.inc2.output"
+      name="inc2.output"
       valueReference="2"
       description="inc2 output"
       causality="output"
@@ -51,7 +51,7 @@
       <Real start="0"/>
     </ScalarVariable>
     <ScalarVariable
-      name="MySim.inc2.input"
+      name="inc2.input"
       valueReference="3"
       description="inc2 input"
       causality="input"
