@@ -255,7 +255,7 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
         /* WARN the regex is too restrictive (should be removed anyway c.f. previous TODO) */
         const auto refsMatches = simphonie::fmi::FMUBridge::getRegexMatches(modelDesc, "valueReference=\"[0-9]+");
         const auto namesMatches =
-            simphonie::fmi::FMUBridge::getRegexMatches(modelDesc, R "( name=\"[0-9a-zA-Z./]+(\[[0-9]+\]){0,1})");
+            simphonie::fmi::FMUBridge::getRegexMatches(modelDesc, " name=\"[0-9a-zA-Z./]+(\[[0-9]+\]){0,1}");
         if (refsMatches.size() != namesMatches.size()) {
             const auto msg("The parsing of the fields' references failed.");
             logger.Log(cppfmu::FMIStatus::fmi2Error, "Instantiation", msg);
