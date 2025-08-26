@@ -9,6 +9,7 @@ sim=s.CreateSimulator({
     components={
         inc1={type="simphonie::umdl::SmpIncrement"},
         inc2={type="simphonie::umdl::SmpIncrement"},
+        -- ["MyLuaModel=model.lua"]={type="simphonie::lua::LuaModel"},
     },
     connections={
         ["inc2/input"]="inc1/output",
@@ -17,6 +18,7 @@ sim=s.CreateSimulator({
     schedule={
         {name="inc1/step", cycleTime_ms=25, offset_ms=20},
         {name="inc2/step", cycleTime_ms=50},
+        -- {name="MyLuaModel/step", cycleTime_ms=50},
     }
 })
 sim:Publish()

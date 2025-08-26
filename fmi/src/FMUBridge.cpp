@@ -101,14 +101,8 @@ void FMUBridge::SetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr
     for (std::size_t i = 0; i < nvr; ++i) {
         auto fld = _fmiRef2Field[vr[i]];
         /* TODO check if it needs conversion from cppfmu types to Smp ones on some platforms */
-        if (fld.isArray) {
-            const Smp::AnySimple anysimp(fld.value.array.ptr->GetType()->GetPrimitiveTypeKind(), value[i]);
-            fld.value.array.ptr->SetValue(fld.value.array.index, anysimp);
-        }
-        else {
-            const Smp::AnySimple anysimp(fld.value.simple->GetPrimitiveTypeKind(), value[i]);
-            fld.value.simple->SetValue(anysimp);
-        }
+        const Smp::AnySimple anysimp(fld->GetPrimitiveTypeKind(), value[i]);
+        fld->SetValue(anysimp);
     }
 }
 // ..........................................................
@@ -116,12 +110,7 @@ template <typename T>
 void FMUBridge::GetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) const {
     for (std::size_t i = 0; i < nvr; ++i) {
         auto fld = _fmiRef2Field.at(vr[i]);
-        if (fld.isArray) {
-            value[i] = static_cast<T>(fld.value.array.ptr->GetValue(fld.value.array.index));
-        }
-        else {
-            value[i] = static_cast<T>(fld.value.simple->GetValue());
-        }
+        value[i] = static_cast<T>(fld->GetValue());
     }
 }
 // ..........................................................
@@ -157,28 +146,11 @@ bool FMUBridge::DoStep(cppfmu::FMIReal currentCommunicationPoint, cppfmu::FMIRea
 }
 // ..........................................................
 bool FMUBridge::addFieldRef(cppfmu::FMIValueReference ref, const std::string& name) {
-    FMUBridge::Field field;
-
-    if (*name.end() != ']') {
-        /* this is a simple field */
-        field.isArray = false;
-        field.value.simple = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveAbsolute(name.c_str()));
-        if (field.value.simple == nullptr) {
-            return false;
-        }
-        _fmiRef2Field.insert(std::make_pair(ref, field));
-        return true;
-    }
-
-    /* this is an array element */
-    field.isArray = true;
-    const auto fieldName = name.substr(0, '[').c_str();
-    field.value.array.ptr = dynamic_cast<Smp::ISimpleArrayField*>(_sim->GetResolver()->ResolveAbsolute(fieldName));
-    if (field.value.array.ptr == nullptr) {
+    auto fld = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveAbsolute(name.c_str()));
+    if (fld == nullptr) {
         return false;
     }
-    field.value.array.index = std::stoi(name.substr('[', ']'));
-    _fmiRef2Field.insert(std::make_pair(ref, field));
+    _fmiRef2Field.insert(std::make_pair(ref, fld));
     return true;
 }
 // ..........................................................
@@ -222,8 +194,8 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
     /* set the path to the resources folder */
     /**
      * TODO We have to supprt the URI standard IETF RFC3986. However, sol::state::safe_script_file
-     * looks like unable to read non-local files. A good workaround might be to download
-     * a local copy of the file and to call sol's fucntion on it.
+     * looks like it is unable to read non-local files. A good workaround might be to download
+     * a local copy of the file and to call sol's function on it.
      */
     if (std::strncmp(fmuResourceLocation, "file://", 7) != 0) {
         std::ostringstream oss;
@@ -233,18 +205,31 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
     }
     const auto resources = std::string(fmuResourceLocation).substr(7);
 
+    /* setup lua */
+    {
+        /* adding resources/../binaries/?/lib/ to sol2 libray path as well as adding resources/ to sol2 lua file path.
+         * The latter is only useful if setup.lua has a 'require something.lua' */
+        std::string path;
+        for (const auto& dir : std::filesystem::directory_iterator(resources + "/../binaries/")) {
+            path += (!path.empty() ? ";" : "") + dir.path().string() + "/lib/lib?.so";
+        }
+        path += ";;"; /* appends default paths too
+                         https://stackoverflow.com/questions/26446333/how-to-set-the-lua-path-and-lua-cpath-for-the-zerobrane-studio-in-linux
+                       */
+#ifdef __linux__
+        setenv("LUA_CPATH", path.c_str(), 1);
+        setenv("LUA_PATH", (resources + "/?;;").c_str(), 1);
+#else
+        _putenv_s("LUA_CPATH", path.c_str());
+        _putenv_s("LUA_PATH", (resources + "/?;;").c_str());
+#endif /* __linux__ */
+    }
+
     /* run the setup lua script to setup and retrieve the simulator */
     sol::state lua;
     lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::os, sol::lib::math,
                        sol::lib::table, sol::lib::debug);
-    {
-        /* adding ../binaries/?/lib/ to lua libray path */
-        auto path = lua["package"]["cpath"].get<std::string>();
-        for (const auto& dir : std::filesystem::directory_iterator(resources + "/../binaries/")) {
-            path += (!path.empty() ? ";" : "") + dir.path().string() + "/lib/lib?.so";
-        }
-        lua["package"]["cpath"] = path;
-    }
+    std::cout << lua["package"]["path"].get<std::string>() << std::endl;
     const auto res = lua.safe_script_file((resources + "/setup.lua").c_str());
     if (!res.valid()) {
         const auto msg("The result from the Lua setup script failed");
@@ -270,7 +255,7 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
         /* WARN the regex is too restrictive (should be removed anyway c.f. previous TODO) */
         const auto refsMatches = simphonie::fmi::FMUBridge::getRegexMatches(modelDesc, "valueReference=\"[0-9]+");
         const auto namesMatches =
-            simphonie::fmi::FMUBridge::getRegexMatches(modelDesc, " name=\"[0-9a-zA-Z./]+(?:\[[0-9]+\])?");
+            simphonie::fmi::FMUBridge::getRegexMatches(modelDesc, R "( name=\"[0-9a-zA-Z./]+(\[[0-9]+\]){0,1})");
         if (refsMatches.size() != namesMatches.size()) {
             const auto msg("The parsing of the fields' references failed.");
             logger.Log(cppfmu::FMIStatus::fmi2Error, "Instantiation", msg);
@@ -278,8 +263,8 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
         }
         for (size_t i = 0; i < namesMatches.size(); ++i) {
             const auto ref = static_cast<cppfmu::FMIValueReference>(std::stoi(refsMatches[i].substr(16)));
-            const auto name = namesMatches[i].substr(7).c_str();
-            if (!fmu.get()->addFieldRef(ref, name)) {
+            const auto name = namesMatches[i].substr(7);
+            if (!fmu.get()->addFieldRef(ref, name.c_str())) {
                 std::ostringstream oss;
                 oss << "An error occur while looking for the field associated to the name \"" << name << "\"";
                 logger.Log(cppfmu::FMIStatus::fmi2Error, "Instantiation", oss.str().c_str());

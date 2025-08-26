@@ -14,7 +14,6 @@
 #include <mutex>
 #include <unordered_map>
 
-#include "Smp/ISimpleArrayField.h"
 #include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
 #include "Smp/Services/IScheduler.h"
@@ -59,18 +58,7 @@ private:
     template <typename T>
     void GetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) const;
 
-    struct Field {
-        bool isArray;
-        union {
-            Smp::ISimpleField* simple;
-            struct {
-                Smp::ISimpleArrayField* ptr;
-                Smp::UInt64 index;
-            } array;
-        } value;
-    };
-
-    std::unordered_map<cppfmu::FMIValueReference, Field> _fmiRef2Field;
+    std::unordered_map<cppfmu::FMIValueReference, Smp::ISimpleField*> _fmiRef2Field;
     Smp::ISimulator* _sim;
     Smp::Services::IScheduler* _sched;
     Smp::Services::ITimeKeeper* _tk;
