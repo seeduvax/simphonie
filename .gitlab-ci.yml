@@ -104,6 +104,13 @@ test_debian12_lua-5.3.5.1:
     variables:
         TASK_OPTVAR: "$USER_TASK_OPTVAR LUA_VERSION=5.3.5.1 ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST WORKSPACE_IS_TAG=true"
 
+test_debian12_arm64_lua-5.3.5.1:
+    extends: .test_base
+    tags:
+        - debian_12_arm64
+    variables:
+        TASK_OPTVAR: "$USER_TASK_OPTVAR LUA_VERSION=5.3.5.1 ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST WORKSPACE_IS_TAG=true"
+
 test_debian12_arm64:
     extends: .test_base
     tags:
@@ -140,6 +147,13 @@ deploy_debian12_lua-5.3.5.1:
     variables:
         TASK_OPTVAR: "$USER_TASK_OPTVAR LUA_VERSION=5.3.5.1 MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST WORKSPACE_IS_TAG=true"
 
+deploy_debian12_arm64_lua-5.3.5.1:
+    extends: .deploy_base
+    tags:
+        - debian_12_arm64
+    variables:
+        TASK_OPTVAR: "$USER_TASK_OPTVAR LUA_VERSION=5.3.5.1 MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST WORKSPACE_IS_TAG=true"
+    
 deploy_debian12_arm64:
     extends: .deploy_base
     tags:
