@@ -12,7 +12,7 @@
 
 #include <condition_variable>
 #include <mutex>
-#include <unordered_map>
+#include <set>
 
 #include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
@@ -30,8 +30,6 @@ public:
     FMUBridge(Smp::ISimulator* sim, Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
     ~FMUBridge() = default;
 
-    static std::vector<std::string> getRegexMatches(const std::string& text, const char* pattern);
-
     /* cppfmu::SlaveInstance */
     void SetupExperiment(cppfmu::FMIBoolean toleranceDefined, cppfmu::FMIReal tolerance, cppfmu::FMIReal tStart,
                          cppfmu::FMIBoolean stopTimeDefined, cppfmu::FMIReal tStop) override;
@@ -48,9 +46,9 @@ public:
     bool DoStep(cppfmu::FMIReal currentCommunicationPoint, cppfmu::FMIReal communicationStepSize,
                 cppfmu::FMIBoolean newStep, cppfmu::FMIReal& endOfStep) override;
 
-    bool addFieldRef(cppfmu::FMIValueReference ref, const std::string& name);
-
 private:
+    static void getAllFields(Smp::IComponent* c, std::vector<Smp::ISimpleField*>& fields);
+    static bool compareFields(const Smp::ISimpleField* a, const Smp::ISimpleField* b);
     void hold();
     void onLeaveExecuting();
     template <typename T>
@@ -58,7 +56,6 @@ private:
     template <typename T>
     void GetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) const;
 
-    std::unordered_map<cppfmu::FMIValueReference, Smp::ISimpleField*> _fmiRef2Field;
     Smp::ISimulator* _sim;
     Smp::Services::IScheduler* _sched;
     Smp::Services::ITimeKeeper* _tk;
@@ -66,6 +63,7 @@ private:
     bool _completed = false;
     std::mutex _mutex;
     std::condition_variable _monitor;
+    std::vector<Smp::ISimpleField*> _fmiRef2Field;
 };
 
 } /* namespace fmi */

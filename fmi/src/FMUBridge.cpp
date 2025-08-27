@@ -38,6 +38,20 @@ FMUBridge::FMUBridge(Smp::ISimulator* sim, Smp::String8 name, Smp::String8 descr
     addEP(LEAVEEXECUTINGEP, "", this, &FMUBridge::onLeaveExecuting);
     _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId,
                                        GetEntryPoint(LEAVEEXECUTINGEP));
+    /* Setup _fmiRef2Field */
+    for (auto cont : *(_sim->GetContainers())) {
+        for (auto c : *(cont->GetComponents())) {
+            getAllFields(c, _fmiRef2Field);
+        }
+    }
+    std::sort(_fmiRef2Field.begin(), _fmiRef2Field.end(),
+              [](const Smp::ISimpleField* a, const Smp::ISimpleField* b) { return compareFields(a, b); });
+    std::ostringstream oss;
+    oss << "Fields have been referenced as:" << std::endl << "<ValueReference>\t<short name>" << std::endl;
+    for (size_t i = 0; i < _fmiRef2Field.size(); ++i) {
+        oss << i << "\t" << _fmiRef2Field[i]->GetName() << std::endl;
+    }
+    _sim->GetLogger()->Log(this, oss.str().c_str(), Smp::Services::ILogger::LMK_Debug);
 }
 // ..........................................................
 void FMUBridge::SetupExperiment(cppfmu::FMIBoolean toleranceDefined, cppfmu::FMIReal tolerance, cppfmu::FMIReal tStart,
@@ -99,8 +113,14 @@ void FMUBridge::GetString(const cppfmu::FMIValueReference vr[], std::size_t nvr,
 template <typename T>
 void FMUBridge::SetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) {
     for (std::size_t i = 0; i < nvr; ++i) {
-        auto fld = _fmiRef2Field[vr[i]];
-        /* TODO check if it needs conversion from cppfmu types to Smp ones on some platforms */
+        const auto id = vr[i];
+        if (id >= _fmiRef2Field.size()) {
+            std::ostringstream oss;
+            oss << "Set requested on a too high ValueReference: " << id << ". Skipped.";
+            _sim->GetLogger()->Log(this, oss.str().c_str(), Smp::Services::ILogger::LMK_Warning);
+            continue;
+        }
+        auto fld = _fmiRef2Field[id];
         const Smp::AnySimple anysimp(fld->GetPrimitiveTypeKind(), value[i]);
         fld->SetValue(anysimp);
     }
@@ -109,7 +129,14 @@ void FMUBridge::SetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr
 template <typename T>
 void FMUBridge::GetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) const {
     for (std::size_t i = 0; i < nvr; ++i) {
-        auto fld = _fmiRef2Field.at(vr[i]);
+        const auto id = vr[i];
+        if (id >= _fmiRef2Field.size()) {
+            std::ostringstream oss;
+            oss << "Get requested on a too high ValueReference: " << id << ". Skipped.";
+            _sim->GetLogger()->Log(this, oss.str().c_str(), Smp::Services::ILogger::LMK_Warning);
+            continue;
+        }
+        auto fld = _fmiRef2Field.at(id);
         value[i] = static_cast<T>(fld->GetValue());
     }
 }
@@ -145,15 +172,6 @@ bool FMUBridge::DoStep(cppfmu::FMIReal currentCommunicationPoint, cppfmu::FMIRea
     return true;
 }
 // ..........................................................
-bool FMUBridge::addFieldRef(cppfmu::FMIValueReference ref, const std::string& name) {
-    auto fld = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveAbsolute(name.c_str()));
-    if (fld == nullptr) {
-        return false;
-    }
-    _fmiRef2Field.insert(std::make_pair(ref, fld));
-    return true;
-}
-// ..........................................................
 void FMUBridge::hold() {
     _sim->Hold(true);
 }
@@ -166,17 +184,56 @@ void FMUBridge::onLeaveExecuting() {
     _monitor.notify_all();
 }
 // ..........................................................
-std::vector<std::string> FMUBridge::getRegexMatches(const std::string& text, const char* pattern) {
-    std::vector<std::string> res;
-    const std::regex ptn(pattern);
-    std::smatch match;
-    auto begin = text.cbegin();
-    const auto end = text.cend();
-    while (std::regex_search(begin, end, match, ptn)) {
-        res.push_back(match[0].str());
-        begin = match.suffix().first;
+void FMUBridge::getAllFields(Smp::IComponent* c, std::vector<Smp::ISimpleField*>& fields) {
+    /* add fields */
+    for (const auto f : *(c->GetFields())) {
+        const auto sf = dynamic_cast<Smp::ISimpleField*>(f);
+        if (sf != nullptr) {
+            fields.push_back(sf);
+        }
     }
-    return res;
+
+    /* check for subcomponents */
+    auto parent = dynamic_cast<Smp::IComposite*>(c);
+    if (parent != nullptr) {
+        for (auto cont : *(parent->GetContainers())) {
+            for (auto newC : *(cont->GetComponents())) {
+                FMUBridge::getAllFields(newC, fields);
+            }
+        }
+    }
+}
+// ..........................................................
+bool FMUBridge::compareFields(const Smp::ISimpleField* a, const Smp::ISimpleField* b) {
+    /* build their hierarchies */
+    std::vector<const Smp::IObject*> aHiera, bHiera;
+    for (auto p = dynamic_cast<const Smp::IObject*>(a); p != nullptr; p = p->GetParent()) {
+        aHiera.push_back(p);
+    }
+    for (auto p = dynamic_cast<const Smp::IObject*>(b); p != nullptr; p = p->GetParent()) {
+        bHiera.push_back(p);
+    }
+
+    /* find the first different member */
+    auto ia = aHiera.end() - 1;
+    auto ib = bHiera.end() - 1;
+    while (ia != aHiera.begin() && ib != bHiera.begin() && *ia == *ib) {
+        ia--;
+        ib--;
+    }
+
+    /* actual compare */
+    const auto aBegin = (ia == aHiera.begin());
+    const auto bBegin = (ib == bHiera.begin());
+    if (aBegin && !bBegin) {
+        /* the full name of a is shorter than b and equal to its beggining */
+        return true;
+    }
+    if (!aBegin && bBegin) {
+        /* the full name of b is shorter than a and equal to its beggining */
+        return false;
+    }
+    return std::string((*ia)->GetName()).compare((*ib)->GetName()) < 0;
 }
 
 } /* namespace fmi */
@@ -191,7 +248,7 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
         cppfmu::FMIStatus::fmi2Warning, "Instantiation",
         "Logging messages will not be sent to this logger. The Simphonie's internal logging system will handle them.");
 
-    /* set the path to the resources folder */
+    /* Set the path to the resources folder */
     /**
      * TODO We have to supprt the URI standard IETF RFC3986. However, sol::state::safe_script_file
      * looks like it is unable to read non-local files. A good workaround might be to download
@@ -205,7 +262,7 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
     }
     const auto resources = std::string(fmuResourceLocation).substr(7);
 
-    /* setup lua */
+    /* Setup lua */
     {
         /* adding resources/../binaries/?/lib/ to sol2 libray path as well as adding resources/ to sol2 lua file path.
          * The latter is only useful if setup.lua has a 'require something.lua' */
@@ -216,20 +273,19 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
         path += ";;"; /* appends default paths too
                          https://stackoverflow.com/questions/26446333/how-to-set-the-lua-path-and-lua-cpath-for-the-zerobrane-studio-in-linux
                        */
-#ifdef __linux__
-        setenv("LUA_CPATH", path.c_str(), 1);
-        setenv("LUA_PATH", (resources + "/?;;").c_str(), 1);
-#else
+#if defined(_WIN64) || defined(_WIN32)
         _putenv_s("LUA_CPATH", path.c_str());
         _putenv_s("LUA_PATH", (resources + "/?;;").c_str());
-#endif /* __linux__ */
+#else
+        setenv("LUA_CPATH", path.c_str(), 1);
+        setenv("LUA_PATH", (resources + "/?;;").c_str(), 1);
+#endif /* defined(_WIN64) || defined(_WIN32) */
     }
 
-    /* run the setup lua script to setup and retrieve the simulator */
+    /* Run the setup lua script to setup and retrieve the simulator */
     sol::state lua;
     lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::os, sol::lib::math,
                        sol::lib::table, sol::lib::debug);
-    std::cout << lua["package"]["path"].get<std::string>() << std::endl;
     const auto res = lua.safe_script_file((resources + "/setup.lua").c_str());
     if (!res.valid()) {
         const auto msg("The result from the Lua setup script failed");
@@ -239,39 +295,6 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
     auto sim = res.get<Smp::ISimulator*>(0);
 
     auto fmu = cppfmu::AllocateUnique<simphonie::fmi::FMUBridge>(memory, sim, "FMUBridge");
-
-    /* setup FMIValueReference to field mapping */
-    /**
-     * TODO reading the XML and looking for regex patterns is a dirty way to get
-     * the mapping FMIValueReference to field pointers. A better way would have
-     * been to use an hash function during the creation of the XML file for
-     * hashing fields into an unique FMIValueReference.
-     */
-    {
-        std::ifstream file((resources + "/../modelDescription.xml").c_str());
-        std::ostringstream oss;
-        oss << file.rdbuf();
-        const auto modelDesc = oss.str();
-        /* WARN the regex is too restrictive (should be removed anyway c.f. previous TODO) */
-        const auto refsMatches = simphonie::fmi::FMUBridge::getRegexMatches(modelDesc, "valueReference=\"[0-9]+");
-        const auto namesMatches =
-            simphonie::fmi::FMUBridge::getRegexMatches(modelDesc, " name=\"[0-9a-zA-Z./]+(\[[0-9]+\]){0,1}");
-        if (refsMatches.size() != namesMatches.size()) {
-            const auto msg("The parsing of the fields' references failed.");
-            logger.Log(cppfmu::FMIStatus::fmi2Error, "Instantiation", msg);
-            throw new cppfmu::FatalError(msg);
-        }
-        for (size_t i = 0; i < namesMatches.size(); ++i) {
-            const auto ref = static_cast<cppfmu::FMIValueReference>(std::stoi(refsMatches[i].substr(16)));
-            const auto name = namesMatches[i].substr(7);
-            if (!fmu.get()->addFieldRef(ref, name.c_str())) {
-                std::ostringstream oss;
-                oss << "An error occur while looking for the field associated to the name \"" << name << "\"";
-                logger.Log(cppfmu::FMIStatus::fmi2Error, "Instantiation", oss.str().c_str());
-                throw new cppfmu::FatalError(oss.str().c_str());
-            }
-        }
-    }
 
     return fmu;
 }

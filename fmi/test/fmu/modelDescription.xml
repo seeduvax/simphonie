@@ -24,17 +24,116 @@
 
   <ModelVariables>
     <ScalarVariable
-      name="inc1.output"
+      name="Logger.Counter"
       valueReference="0"
-      description="inc1 output"
+      description="Logger counter"
+      causality="output"
+      initial="exact"
+      variability="discrete">
+      <Integer start="0"/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="Logger.DebugCounter"
+      valueReference="1"
+      description="Logger counter"
+      causality="output"
+      initial="exact"
+      variability="discrete">
+      <Integer start="0"/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="Logger.ErrorCounter"
+      valueReference="2"
+      description="Logger counter"
+      causality="output"
+      initial="exact"
+      variability="discrete">
+      <Integer start="0"/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="Logger.EventCounter"
+      valueReference="3"
+      description="Logger counter"
+      causality="output"
+      initial="exact"
+      variability="discrete">
+      <Integer start="0"/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="Logger.InformationCounter"
+      valueReference="4"
+      description="Logger counter"
+      causality="output"
+      initial="exact"
+      variability="discrete">
+      <Integer start="0"/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="Logger.WarningCounter"
+      valueReference="5"
+      description="Logger counter"
+      causality="output"
+      initial="exact"
+      variability="discrete">
+      <Integer start="0"/>
+    </ScalarVariable>
+    <!--<ScalarVariable
+      name="MyLuaModel.cpt"
+      valueReference="13"
+      description="cpt from MyLuaModel"
       causality="output"
       initial="exact"
       variability="continuous">
       <Real start="0"/>
     </ScalarVariable>
     <ScalarVariable
+      name="MyLuaModel.dblvect[0]"
+      valueReference="10"
+      description="First value of a vector from MyLuaModel"
+      causality="input"
+      initial="exact"
+      variability="continuous">
+      <Real start="0"/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="MyLuaModel.dblvect[1]"
+      valueReference="11"
+      description="Second value of a vector from MyLuaModel"
+      causality="input"
+      initial="exact"
+      variability="continuous">
+      <Real start="0"/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="MyLuaModel.dblvect[2]"
+      valueReference="12"
+      description="Third value of a vector from MyLuaModel"
+      causality="input"
+      initial="exact"
+      variability="continuous">
+      <Real start="0"/>
+    </ScalarVariable> -->
+    <ScalarVariable
+      name="Scheduler.activableCount"
+      valueReference="6"
+      description="Scheduler activableCount"
+      causality="output"
+      initial="exact"
+      variability="discrete">
+      <Integer start="0"/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="TimeKeeper.simTime"
+      valueReference="7"
+      description="Simulation Time"
+      causality="output"
+      initial="exact"
+      variability="discrete">
+      <Integer start="0"/>
+    </ScalarVariable>
+    <ScalarVariable
       name="inc1.input"
-      valueReference="1"
+      valueReference="8"
       description="inc1 input"
       causality="input"
       initial="exact"
@@ -42,9 +141,9 @@
       <Real start="0"/>
     </ScalarVariable>
     <ScalarVariable
-      name="inc2.output"
-      valueReference="2"
-      description="inc2 output"
+      name="inc1.output"
+      valueReference="9"
+      description="inc1 output"
       causality="output"
       initial="exact"
       variability="continuous">
@@ -52,9 +151,18 @@
     </ScalarVariable>
     <ScalarVariable
       name="inc2.input"
-      valueReference="3"
+      valueReference="10"
       description="inc2 input"
       causality="input"
+      initial="exact"
+      variability="continuous">
+      <Real start="0"/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="inc2.output"
+      valueReference="11"
+      description="inc2 output"
+      causality="output"
       initial="exact"
       variability="continuous">
       <Real start="0"/>
@@ -63,7 +171,15 @@
   <ModelStructure>
     <Outputs>
       <Unknown index="0"/>
+      <Unknown index="1"/>
       <Unknown index="2"/>
+      <Unknown index="3"/>
+      <Unknown index="4"/>
+      <Unknown index="5"/>
+      <Unknown index="6"/>
+      <Unknown index="7"/>
+      <Unknown index="9"/>
+      <Unknown index="11"/>
     </Outputs>
   </ModelStructure>
 </fmiModelDescription>
