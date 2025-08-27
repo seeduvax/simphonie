@@ -1,5 +1,5 @@
 /*
- * @file FMUBridge.cpp
+ * @file FMIBridge.cpp
  *
  * Copyright 2025. All rights reserved.
  * Use is subject to license terms.
@@ -7,7 +7,7 @@
  * $Id$
  * $Date$
  */
-#include "simphonie/fmi/FMUBridge.hpp"
+#include "simphonie/fmi/FMIBridge.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -29,13 +29,13 @@ namespace simphonie {
 namespace fmi {
 // --------------------------------------------------------------------
 // ..........................................................
-FMUBridge::FMUBridge(Smp::ISimulator* sim, Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
+FMIBridge::FMIBridge(Smp::ISimulator* sim, Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : Object(name, descr, parent),
       _sim(sim),
       _tk(_sim->GetTimeKeeper()),
       _sched(_sim->GetScheduler()),
-      _holdEP(addEP("Hold", "Hold the simulation", this, &FMUBridge::hold)) {
-    addEP(LEAVEEXECUTINGEP, "", this, &FMUBridge::onLeaveExecuting);
+      _holdEP(addEP("Hold", "Hold the simulation", this, &FMIBridge::hold)) {
+    addEP(LEAVEEXECUTINGEP, "", this, &FMIBridge::onLeaveExecuting);
     _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId,
                                        GetEntryPoint(LEAVEEXECUTINGEP));
     /* Setup _fmiRef2Field */
@@ -54,7 +54,7 @@ FMUBridge::FMUBridge(Smp::ISimulator* sim, Smp::String8 name, Smp::String8 descr
     _sim->GetLogger()->Log(this, oss.str().c_str(), Smp::Services::ILogger::LMK_Debug);
 }
 // ..........................................................
-void FMUBridge::SetupExperiment(cppfmu::FMIBoolean toleranceDefined, cppfmu::FMIReal tolerance, cppfmu::FMIReal tStart,
+void FMIBridge::SetupExperiment(cppfmu::FMIBoolean toleranceDefined, cppfmu::FMIReal tolerance, cppfmu::FMIReal tStart,
                                 cppfmu::FMIBoolean stopTimeDefined, cppfmu::FMIReal tStop) {
     if (toleranceDefined) {
         _sim->GetLogger()->Log(_sim, "tolerance argument is not used, even if provided",
@@ -70,48 +70,48 @@ void FMUBridge::SetupExperiment(cppfmu::FMIBoolean toleranceDefined, cppfmu::FMI
     _sim->Connect();
 }
 // ..........................................................
-void FMUBridge::Terminate() {
+void FMIBridge::Terminate() {
     _sim->Hold(true);
 }
 // ..........................................................
-void FMUBridge::Reset() {
+void FMIBridge::Reset() {
     _sim->GetLogger()->Log(_sim, "The simulator cannot be resetted", Smp::Services::ILogger::LMK_Error);
 }
 // ..........................................................
-void FMUBridge::SetReal(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIReal value[]) {
+void FMIBridge::SetReal(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIReal value[]) {
     SetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMUBridge::SetInteger(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIInteger value[]) {
+void FMIBridge::SetInteger(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIInteger value[]) {
     SetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMUBridge::SetBoolean(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIBoolean value[]) {
+void FMIBridge::SetBoolean(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIBoolean value[]) {
     SetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMUBridge::SetString(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIString value[]) {
+void FMIBridge::SetString(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIString value[]) {
     SetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMUBridge::GetReal(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIReal value[]) const {
+void FMIBridge::GetReal(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIReal value[]) const {
     GetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMUBridge::GetInteger(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIInteger value[]) const {
+void FMIBridge::GetInteger(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIInteger value[]) const {
     GetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMUBridge::GetBoolean(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIBoolean value[]) const {
+void FMIBridge::GetBoolean(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIBoolean value[]) const {
     GetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMUBridge::GetString(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIString value[]) const {
+void FMIBridge::GetString(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIString value[]) const {
     GetGeneric(vr, nvr, value);
 }
 // ..........................................................
 template <typename T>
-void FMUBridge::SetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) {
+void FMIBridge::SetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) {
     for (std::size_t i = 0; i < nvr; ++i) {
         const auto id = vr[i];
         if (id >= _fmiRef2Field.size()) {
@@ -127,7 +127,7 @@ void FMUBridge::SetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr
 }
 // ..........................................................
 template <typename T>
-void FMUBridge::GetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) const {
+void FMIBridge::GetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) const {
     for (std::size_t i = 0; i < nvr; ++i) {
         const auto id = vr[i];
         if (id >= _fmiRef2Field.size()) {
@@ -141,7 +141,7 @@ void FMUBridge::GetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr
     }
 }
 // ..........................................................
-bool FMUBridge::DoStep(cppfmu::FMIReal currentCommunicationPoint, cppfmu::FMIReal communicationStepSize,
+bool FMIBridge::DoStep(cppfmu::FMIReal currentCommunicationPoint, cppfmu::FMIReal communicationStepSize,
                        cppfmu::FMIBoolean newStep, cppfmu::FMIReal& endOfStep) {
     /**
      * TOOD what is the use of newStep & endOfStep?
@@ -172,11 +172,11 @@ bool FMUBridge::DoStep(cppfmu::FMIReal currentCommunicationPoint, cppfmu::FMIRea
     return true;
 }
 // ..........................................................
-void FMUBridge::hold() {
+void FMIBridge::hold() {
     _sim->Hold(true);
 }
 // ..........................................................
-void FMUBridge::onLeaveExecuting() {
+void FMIBridge::onLeaveExecuting() {
     {
         Synchronized(_mutex);
         _completed = true;
@@ -184,7 +184,7 @@ void FMUBridge::onLeaveExecuting() {
     _monitor.notify_all();
 }
 // ..........................................................
-void FMUBridge::getAllFields(Smp::IComponent* c, std::vector<Smp::ISimpleField*>& fields) {
+void FMIBridge::getAllFields(Smp::IComponent* c, std::vector<Smp::ISimpleField*>& fields) {
     /* add fields */
     for (const auto f : *(c->GetFields())) {
         const auto sf = dynamic_cast<Smp::ISimpleField*>(f);
@@ -198,13 +198,13 @@ void FMUBridge::getAllFields(Smp::IComponent* c, std::vector<Smp::ISimpleField*>
     if (parent != nullptr) {
         for (auto cont : *(parent->GetContainers())) {
             for (auto newC : *(cont->GetComponents())) {
-                FMUBridge::getAllFields(newC, fields);
+                FMIBridge::getAllFields(newC, fields);
             }
         }
     }
 }
 // ..........................................................
-bool FMUBridge::compareFields(const Smp::ISimpleField* a, const Smp::ISimpleField* b) {
+bool FMIBridge::compareFields(const Smp::ISimpleField* a, const Smp::ISimpleField* b) {
     /* build their hierarchies */
     std::vector<const Smp::IObject*> aHiera, bHiera;
     for (auto p = dynamic_cast<const Smp::IObject*>(a); p != nullptr; p = p->GetParent()) {
@@ -294,7 +294,7 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
     }
     auto sim = res.get<Smp::ISimulator*>(0);
 
-    auto fmu = cppfmu::AllocateUnique<simphonie::fmi::FMUBridge>(memory, sim, "FMUBridge");
+    auto fmu = cppfmu::AllocateUnique<simphonie::fmi::FMIBridge>(memory, sim, "FMIBridge");
 
     return fmu;
 }

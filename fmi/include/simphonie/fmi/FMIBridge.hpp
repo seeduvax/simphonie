@@ -1,5 +1,5 @@
 /*
- * @file FMUBridge.hpp
+ * @file FMIBridge.hpp
  *
  * Copyright 2025. All rights reserved.
  * Use is subject to license terms.
@@ -7,8 +7,8 @@
  * $Id$
  * $Date$
  */
-#ifndef __simphonie_fmi_FMUBridge_HPP__
-#define __simphonie_fmi_FMUBridge_HPP__
+#ifndef __simphonie_fmi_FMIBridge_HPP__
+#define __simphonie_fmi_FMIBridge_HPP__
 
 #include <condition_variable>
 #include <mutex>
@@ -25,10 +25,10 @@
 namespace simphonie {
 namespace fmi {
 
-class FMUBridge : public cppfmu::SlaveInstance, public simdeck::EntryPointPublisher, public simdeck::Object {
+class FMIBridge : public cppfmu::SlaveInstance, public simdeck::EntryPointPublisher, public simdeck::Object {
 public:
-    FMUBridge(Smp::ISimulator* sim, Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
-    ~FMUBridge() = default;
+    FMIBridge(Smp::ISimulator* sim, Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
+    ~FMIBridge() = default;
 
     /* cppfmu::SlaveInstance */
     void SetupExperiment(cppfmu::FMIBoolean toleranceDefined, cppfmu::FMIReal tolerance, cppfmu::FMIReal tStart,
@@ -68,4 +68,4 @@ private:
 
 } /* namespace fmi */
 } /* namespace simphonie */
-#endif /* __simphonie_fmi_FMUBridge_HPP__ */
+#endif /* __simphonie_fmi_FMIBridge_HPP__ */
