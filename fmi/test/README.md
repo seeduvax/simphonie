@@ -4,7 +4,7 @@ Based on [FMpy](https://github.com/CATIA-Systems/FMPy/).
 
 ```python
 import fmpy
-fmpy.simulate_fmu(file)
+fmpy.simulate_fmu(file, debug_logging=True)
 ```
 
 With `file` the path to either a zipped fmu file or a regular folder (e.g. "simphonie/fmi/test/fmu"). 

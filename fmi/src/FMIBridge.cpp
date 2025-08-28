@@ -300,6 +300,7 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
     if (simLgr != nullptr) {
         auto fmiLgr = new simphonie::fmi::FMILoggerBackend(logger, "FMILogger",
                                                            "Sends logs to the host simulation logging system", simLgr);
+        simLgr->clearBackends();
         simLgr->addBackend(fmiLgr);
     }
     else {
