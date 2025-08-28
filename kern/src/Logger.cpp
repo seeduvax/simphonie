@@ -45,6 +45,17 @@ Logger::Logger(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Co
 
 Logger::~Logger() {}
 
+void Logger::addBackend(ILoggerBackend* obj) {
+    auto comp = dynamic_cast<Smp::IComponent*>(obj);
+    if (comp == nullptr) {
+        Log(this, "A backend that does not implement Smp::IComponent cannot be added",
+            Smp::Services::ILogger::LMK_Warning);
+        return;
+    }
+    GetContainer(CONTAINER_NAME)->AddComponent(comp);
+    _backends.push_back(obj);
+}
+
 void Logger::publish(Smp::IPublication* receiver) {
     receiver->PublishField("Counter", "Counter of logs", &Logger::_logCounter, Smp::ViewKind::VK_All, false, false,
                            true);

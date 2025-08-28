@@ -36,6 +36,8 @@ public:
     Logger(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
     ~Logger() override;
 
+    void addBackend(ILoggerBackend* obj);
+
     Smp::Services::LogMessageKind QueryLogMessageKind(Smp::String8 messageKindName) override;
     void Log(const Smp::IObject* sender, Smp::String8 message,
              Smp::Services::LogMessageKind kind = Smp::Services::ILogger::LMK_Debug) override;

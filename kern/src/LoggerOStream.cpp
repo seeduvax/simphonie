@@ -8,7 +8,6 @@
  * $Date$
  */
 #include "simphonie/kern/LoggerOStream.hpp"
-#include "simphonie/kern/Logger.hpp"
 
 namespace simphonie {
 namespace kern {
