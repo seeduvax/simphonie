@@ -19,6 +19,8 @@
 #include "Smp/Services/ILogger.h"
 #include "Smp/Services/IResolver.h"
 #include "simdeck/ExInvalidFile.hpp"
+#include "simphonie/fmi/FMILoggerBackend.hpp"
+#include "simphonie/kern/Logger.hpp"
 #include "simphonie/lua/LuaApi.hpp"
 #include "simphonie/sys/Synchro.hpp"
 #include "sol/sol.hpp"
@@ -243,11 +245,6 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
     cppfmu::FMIString instanceName, cppfmu::FMIString fmuGUID, cppfmu::FMIString fmuResourceLocation,
     cppfmu::FMIString mimeType, cppfmu::FMIReal timeout, cppfmu::FMIBoolean visible, cppfmu::FMIBoolean interactive,
     cppfmu::Memory memory, cppfmu::Logger logger) {
-    /* TODO use the provided logger? */
-    logger.Log(
-        cppfmu::FMIStatus::fmi2Warning, "Instantiation",
-        "Logging messages will not be sent to this logger. The Simphonie's internal logging system will handle them.");
-
     /* Set the path to the resources folder */
     /**
      * TODO We have to supprt the URI standard IETF RFC3986. However, sol::state::safe_script_file
@@ -282,6 +279,10 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
 #endif /* defined(_WIN64) || defined(_WIN32) */
     }
 
+    logger.Log(cppfmu::FMIStatus::fmi2Warning, "Instantiation",
+               "Simphonie's logging system cannot be override for now: all the logs will be internally handle by "
+               "simphonie during its setup.");
+
     /* Run the setup lua script to setup and retrieve the simulator */
     sol::state lua;
     lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::os, sol::lib::math,
@@ -293,6 +294,19 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
         throw new cppfmu::FatalError(msg);
     }
     auto sim = res.get<Smp::ISimulator*>(0);
+
+    /* Setup the logger */
+    auto simLgr = dynamic_cast<simphonie::kern::Logger*>(sim->GetLogger());
+    if (simLgr != nullptr) {
+        auto fmiLgr = new simphonie::fmi::FMILoggerBackend(logger, "FMILogger",
+                                                           "Sends logs to the host simulation logging system", simLgr);
+        simLgr->addBackend(fmiLgr);
+    }
+    else {
+        logger.Log(
+            cppfmu::FMIStatus::fmi2Warning, "Instantiation",
+            "Simphonie's logging system cannot be override: all the logs will be internally handle by simphonie.");
+    }
 
     auto fmu = cppfmu::AllocateUnique<simphonie::fmi::FMIBridge>(memory, sim, "FMIBridge");
 
