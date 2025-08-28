@@ -49,8 +49,8 @@ public:
 private:
     static void getAllFields(Smp::IComponent* c, std::vector<Smp::ISimpleField*>& fields);
     static bool compareFields(const Smp::ISimpleField* a, const Smp::ISimpleField* b);
-    void hold();
     void onLeaveExecuting();
+    void onSimTimeChanged();
     template <typename T>
     void SetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]);
     template <typename T>
@@ -59,10 +59,10 @@ private:
     Smp::ISimulator* _sim;
     Smp::Services::IScheduler* _sched;
     Smp::Services::ITimeKeeper* _tk;
-    Smp::IEntryPoint* _holdEP;
-    bool _completed = false;
+    bool _completed;
     std::mutex _mutex;
     std::condition_variable _monitor;
+    Smp::Duration _endAbsoluteSimTime;
     std::vector<Smp::ISimpleField*> _fmiRef2Field;
 };
 

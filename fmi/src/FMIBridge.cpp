@@ -25,21 +25,23 @@
 #include "simphonie/sys/Synchro.hpp"
 #include "sol/sol.hpp"
 
-#define LEAVEEXECUTINGEP "leave_executing"
-
 namespace simphonie {
 namespace fmi {
 // --------------------------------------------------------------------
 // ..........................................................
 FMIBridge::FMIBridge(Smp::ISimulator* sim, Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : Object(name, descr, parent),
-      _sim(sim),
-      _tk(_sim->GetTimeKeeper()),
-      _sched(_sim->GetScheduler()),
-      _holdEP(addEP("Hold", "Hold the simulation", this, &FMIBridge::hold)) {
-    addEP(LEAVEEXECUTINGEP, "", this, &FMIBridge::onLeaveExecuting);
-    _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId,
-                                       GetEntryPoint(LEAVEEXECUTINGEP));
+    : Object(name, descr, parent), _sim(sim), _tk(_sim->GetTimeKeeper()), _sched(_sim->GetScheduler()) {
+    _endAbsoluteSimTime = 0;
+    _completed = false;
+    {
+        const auto ep = addEP("simTimeChangedEP", "", this, &FMIBridge::onSimTimeChanged);
+        _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_PostSimTimeChangeId, ep);
+    }
+    {
+        const auto ep = addEP("leavExecutingEP", "", this, &FMIBridge::onLeaveExecuting);
+        _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId, ep);
+    }
+
     /* Setup _fmiRef2Field */
     for (auto cont : *(_sim->GetContainers())) {
         for (auto c : *(cont->GetComponents())) {
@@ -65,8 +67,7 @@ void FMIBridge::SetupExperiment(cppfmu::FMIBoolean toleranceDefined, cppfmu::FMI
     _sim->Publish();
     _tk->SetSimulationTime(static_cast<Smp::Duration>(tStart));
     if (stopTimeDefined) {
-        /* TODO max priority */
-        _sched->AddSimulationTimeEvent(_holdEP, static_cast<Smp::Duration>(tStop), 0, 0);
+        _endAbsoluteSimTime = static_cast<Smp::Duration>(tStop);
     }
     _sim->Configure();
     _sim->Connect();
@@ -150,10 +151,8 @@ bool FMIBridge::DoStep(cppfmu::FMIReal currentCommunicationPoint, cppfmu::FMIRea
      * From cppfmu/fmi_functions.cpp: newStep=fmi2True and endOfStep=currentCommunicationPoint (ref to local) anyways
      */
 
-    /* Set the holdEP */
-    const auto endSimTime = static_cast<Smp::Duration>(communicationStepSize * 1e9);
-    const auto event = _sched->AddSimulationTimeEvent(_holdEP, endSimTime, 0, 0); /* TODO max priority */
-    /* TODO abboner sur sim change check to stop: this would avoid approximations errors */
+    /* Set the end simulation time */
+    _endAbsoluteSimTime = static_cast<Smp::Duration>((currentCommunicationPoint + communicationStepSize) * 1e9);
 
     /* Run the simulation */
     _sim->Run();
@@ -165,17 +164,12 @@ bool FMIBridge::DoStep(cppfmu::FMIReal currentCommunicationPoint, cppfmu::FMIRea
     }
     _completed = false;
 
-    if (_tk->GetSimulationTime() < endSimTime) {
+    if (_tk->GetSimulationTime() < _endAbsoluteSimTime) {
         /* the simulation stopped before the requested simulation time */
-        _sched->RemoveEvent(event); /* the event has not been use */
         return false;
     }
 
     return true;
-}
-// ..........................................................
-void FMIBridge::hold() {
-    _sim->Hold(true);
 }
 // ..........................................................
 void FMIBridge::onLeaveExecuting() {
@@ -184,6 +178,12 @@ void FMIBridge::onLeaveExecuting() {
         _completed = true;
     }
     _monitor.notify_all();
+}
+// ..........................................................
+void FMIBridge::onSimTimeChanged() {
+    if (_tk->GetSimulationTime() >= _endAbsoluteSimTime) {
+        _sim->Hold(true);
+    }
 }
 // ..........................................................
 void FMIBridge::getAllFields(Smp::IComponent* c, std::vector<Smp::ISimpleField*>& fields) {
