@@ -56,6 +56,17 @@ void Logger::addBackend(ILoggerBackend* obj) {
     _backends.push_back(obj);
 }
 
+void Logger::clearBackends() {
+    auto cont = GetContainer(CONTAINER_NAME);
+    for (auto comp : *(cont->GetComponents())) {
+        auto backend = dynamic_cast<ILoggerBackend*>(comp);
+        if (backend != nullptr) {
+            cont->DeleteComponent(comp);
+        }
+    }
+    _backends.clear();
+}
+
 void Logger::publish(Smp::IPublication* receiver) {
     receiver->PublishField("Counter", "Counter of logs", &Logger::_logCounter, Smp::ViewKind::VK_All, false, false,
                            true);
