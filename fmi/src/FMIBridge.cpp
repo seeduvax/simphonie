@@ -60,17 +60,12 @@ FMIBridge::FMIBridge(Smp::ISimulator* sim, Smp::String8 name, Smp::String8 descr
 // ..........................................................
 void FMIBridge::SetupExperiment(cppfmu::FMIBoolean toleranceDefined, cppfmu::FMIReal tolerance, cppfmu::FMIReal tStart,
                                 cppfmu::FMIBoolean stopTimeDefined, cppfmu::FMIReal tStop) {
+    /* TODO What to do with the experiment stop time? */
     if (toleranceDefined) {
         _sim->GetLogger()->Log(_sim, "tolerance argument is not used, even if provided",
                                Smp::Services::ILogger::LMK_Warning);
     }
-    _sim->Publish();
     _tk->SetSimulationTime(static_cast<Smp::Duration>(tStart));
-    if (stopTimeDefined) {
-        _endAbsoluteSimTime = static_cast<Smp::Duration>(tStop);
-    }
-    _sim->Configure();
-    _sim->Connect();
 }
 // ..........................................................
 void FMIBridge::Terminate() {
