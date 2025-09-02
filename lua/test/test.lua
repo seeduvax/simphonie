@@ -43,6 +43,7 @@ sim=s.CreateSimulator({
         "simphonie_lua",
         "simphonie_mt",
         "simphonie_rest",
+        "simphonie_fmi",
     },
     components={
         webserver={type="simphonie::rest::RestService"},
@@ -72,7 +73,8 @@ sim=s.CreateSimulator({
         inc2={type="simphonie::umdl::SmpIncrement"},
         inc3={type="simphonie::umdl::SmpIncrement"},
         inc4={type="simphonie::umdl::SmpIncrement"},
-        ["MyLuaModel=test/model.lua"]={type="simphonie::lua::LuaModel"}
+        ["MyLuaModel=test/model.lua"]={type="simphonie::lua::LuaModel"},
+        -- MyFMISim={type="simphonie::fmi::FMILoad", path="test/BouncingBall.fmu", stepSize=0.1}
     },
     connections={
         ["inc2/input"]="inc1/output",
@@ -104,6 +106,7 @@ sim=s.CreateSimulator({
         {name="recorderH5/step", cycleTime_ms=50},
         {name="master/sync", cycleTime_ms=50, offset_ms=20},
         {name="MyLuaModel/step", cycleTime_ms=50},
+        -- {name="MyFMISim/doStep", cycleTime_ms=100},
         ["inc4/step"]={startOnEvent="TheEvent", cycleTime_ms=30, offset_ms=20}
     }
 })

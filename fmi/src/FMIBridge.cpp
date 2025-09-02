@@ -21,7 +21,6 @@
 #include "simdeck/ExInvalidFile.hpp"
 #include "simphonie/fmi/FMILoggerBackend.hpp"
 #include "simphonie/kern/Logger.hpp"
-#include "simphonie/lua/LuaApi.hpp"
 #include "simphonie/sys/Synchro.hpp"
 #include "sol/sol.hpp"
 
