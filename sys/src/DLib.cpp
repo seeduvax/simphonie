@@ -24,13 +24,28 @@ namespace sys {
 #ifdef OS_IS_WINDOWS
 class NativeLib: public DLib::IHandler {
 public:
-    NativeLib(const char* libName): _name(libName) {
+    NativeLib(const char* libName, bool global): _name(libName) {
         _lib = LoadLibraryA(libName);
         if (_lib == NULL) {
             auto errCode=GetLastError();
             std::ostringstream msg;
-            msg << "Can't load library " << libName << "[ errCode = " 
-                << errCode << " ]" ;
+            msg << "Can't load library " << libName << " [ errCode = " 
+                << errCode << " ] " ;
+            
+            char* msgDetail;
+            auto cr=FormatMessage(
+                    FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+                    FORMAT_MESSAGE_FROM_SYSTEM |
+                    FORMAT_MESSAGE_IGNORE_INSERTS,
+                    NULL,
+                    errCode,
+                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                    (LPTSTR) &msgDetail,
+                    0, NULL);
+            if ( cr != 0 ) {
+                msg << " " << msgDetail;
+                LocalFree(msgDetail);
+            }
             LOGE(msg.str());
             throw std::runtime_error(msg.str());
         }

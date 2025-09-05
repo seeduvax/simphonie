@@ -25,7 +25,6 @@
 #include "simdeck/Utils.hpp"
 #include "simphonie/lua/LuaBuilder.hpp"
 #include "simphonie/lua/LuaModel.hpp"
-#include "simphonie/mt/SimSyncMaster.hpp"
 #include "simphonie/sys/DLib.hpp"
 #include "sol/sol.hpp"
 
@@ -210,9 +209,10 @@ sol::object CreateSimulator(sol::lua_table cfg, sol::this_state L) {
     std::string simName = cfg.get_or<std::string>("name", "simulator");
     std::string descr = cfg.get_or<std::string>("description", "");
     try {
-        simphonie::sys::DLib simLib(libName.c_str());
+        // TODO do something to delete this DLib at least on shutdown.
+        auto simLib=new simphonie::sys::DLib(libName.c_str());
         auto createSim =
-            simLib.getEntry<Smp::ISimulator* (*)(Smp::String8 name, Smp::String8 description, Smp::IObject * parent)>(
+            simLib->getEntry<Smp::ISimulator* (*)(Smp::String8 name, Smp::String8 description, Smp::IObject * parent)>(
                 "CreateSimulator");
         if (createSim != nullptr) {
             Smp::ISimulator* sim = createSim(simName.c_str(), descr.c_str(), nullptr);

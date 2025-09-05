@@ -85,6 +85,10 @@ private:
         inline const Smp::FactoryCollection* GetFactories() const override {
             return nullptr;
         }
+#ifdef LoadLibrary
+// Workaround collision between macro and method name on windows.
+#undef LoadLibrary
+#endif
         inline void LoadLibrary(Smp::String8 libraryPath, Smp::LibraryLoadingFlag flag) override {}
         inline const Smp::ContainerCollection* GetContainers() const override {
             return nullptr;

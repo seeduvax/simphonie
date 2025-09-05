@@ -86,7 +86,7 @@ public:
         _ctrl->applyCondition();
         _sim->Run();
         while (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing) {}
-        CPPUNIT_ASSERT_EQUAL(80L, _sim->GetTimeKeeper()->GetSimulationTime());
+        CPPUNIT_ASSERT_EQUAL((Smp::Duration)80, _sim->GetTimeKeeper()->GetSimulationTime());
     }
     ABS_TEST_CASE_END
 
@@ -99,7 +99,7 @@ public:
         _ctrl->applyCondition();
         _sim->Run();
         while (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing) {}
-        CPPUNIT_ASSERT_EQUAL(10L, _incr->getCounter());
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)10, _incr->getCounter());
     }
     ABS_TEST_CASE_END
 
@@ -112,7 +112,7 @@ public:
         _ctrl->applyCondition();
         _sim->Run();
         while (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing) {}
-        CPPUNIT_ASSERT_EQUAL(6L, _incr->getCounter());
+        CPPUNIT_ASSERT_EQUAL((Smp::Int64)6, _incr->getCounter());
     }
     ABS_TEST_CASE_END
 
