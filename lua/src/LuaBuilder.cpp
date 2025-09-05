@@ -260,9 +260,9 @@ Smp::IComponent* LuaBuilder::simulatorCreateComponent(Smp::ISimulator* sim,
                 // from here built component is neither a service or a model
                 // then it can't be added to the simulator a shall be dropped
                 sim->GetLogger()->Log(comp,
-                        "Component is neither a service or a model. "
-                        "Can't add it to the simulator",
-                        Smp::Services::ILogger::LMK_Error);
+                                      "Component is neither a service nor a model. "
+                                      "Can't add it to the simulator",
+                                      Smp::Services::ILogger::LMK_Error);
                 delete comp;
                 return nullptr;
             }
