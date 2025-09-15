@@ -43,8 +43,6 @@ Logger::Logger(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) : Co
     addEP("resetCounters", "Reset events' counters", this, &Logger::resetCounters);
 }
 
-Logger::~Logger() {}
-
 void Logger::addBackend(ILoggerBackend* obj) {
     auto comp = dynamic_cast<Smp::IComponent*>(obj);
     if (comp == nullptr) {

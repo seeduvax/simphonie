@@ -34,7 +34,7 @@ class Logger : public Component,
                virtual public simdeck::EntryPointPublisher {
 public:
     Logger(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
-    ~Logger() override;
+    ~Logger() = default;
 
     void addBackend(ILoggerBackend* obj);
     void clearBackends();
@@ -51,7 +51,7 @@ protected:
     };
     static std::unordered_map<Smp::Services::LogMessageKind, _LMK> _LMKMap;
 
-    void publish(Smp::IPublication* receiver);
+    void publish(Smp::IPublication* receiver) override;
     void configure() override;
 
 private:

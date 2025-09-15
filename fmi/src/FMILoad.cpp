@@ -25,13 +25,24 @@
 
 #define TMP_FOLDER "./FMILoad.d"
 
-#define toStr(a) #a
-#define getFn(name)                                                                            \
-    auto name = _binary->getEntry<fmi2##name##TYPE*>(toStr(fmi2##name));                       \
-    if (name == nullptr) {                                                                     \
-        const auto msg(toStr(The entry point fmi2##name cannot be found in the provided FMU)); \
-        _logger->Log(this, msg, Smp::Services::ILogger::LMK_Error);                            \
-        throw new simdeck::ExInvalidFile(this, _path.c_str(), msg);                            \
+#define TO_STR(a) #a
+#define GET_FN(name)                                                                            \
+    auto name = _binary->getEntry<fmi2##name##TYPE*>(TO_STR(fmi2##name));                       \
+    if (name == nullptr) {                                                                      \
+        const auto msg(TO_STR(The entry point fmi2##name cannot be found in the provided FMU)); \
+        _logger->Log(this, msg, Smp::Services::ILogger::LMK_Error);                             \
+        throw new simdeck::ExInvalidFile(this, _path.c_str(), msg);                             \
+    }
+#define GET_VARIABLES(type, ptk, fields, refs)                   \
+    {                                                            \
+        const auto vals = new fmi2##type[refs.size()];           \
+        _get##type##Fn(_fmiObj, refs.data(), refs.size(), vals); \
+        size_t i = 0;                                            \
+        for (const auto& fld : fields) {                         \
+            fld->SetValue(Smp::AnySimple(ptk, vals[i]));         \
+            ++i;                                                 \
+        }                                                        \
+        delete[] vals;                                           \
     }
 
 namespace simphonie {
@@ -52,7 +63,7 @@ FMILoad::~FMILoad() {
     if (_fmiObj != nullptr) {
         auto FreeInstance = _binary->getEntry<fmi2FreeInstanceTYPE*>("fmi2FreeInstance");
         if (FreeInstance == nullptr) {
-            const auto msg("The entry point #name cannot be found in the provided FMU");
+            const auto msg("The entry point fmi2FreeInstance cannot be found in the provided FMU");
             _logger->Log(this, msg, Smp::Services::ILogger::LMK_Error);
         }
         FreeInstance(_fmiObj);
@@ -437,37 +448,42 @@ void FMILoad::configure() {
 
     /* Instantiate the FMI object */
     _binary = std::make_unique<simphonie::sys::DLib>(libpath.c_str());
-    getFn(Instantiate) const auto resourcesURI = (_path + "/resources").c_str(); /* TODO URI */
+    GET_FN(Instantiate) const auto resourcesURI = (_path + "/resources").c_str(); /* TODO URI */
     _fmiObj =
         Instantiate(_instanceName.c_str(), fmi2CoSimulation, guid, resourcesURI, &_cbFunctions, fmi2False, fmi2True);
     xmlFree(guid);
 
     /* Retrieve functions */
-    getFn(DoStep) _doStepFn = DoStep;
-    getFn(SetReal) _setRealFn = SetReal;
-    getFn(SetInteger) _setIntegerFn = SetInteger;
-    getFn(SetBoolean) _setBooleanFn = SetBoolean;
-    getFn(SetString) _setStringFn = SetString;
+    GET_FN(DoStep) _doStepFn = DoStep;
+    GET_FN(SetReal) _setRealFn = SetReal;
+    GET_FN(SetInteger) _setIntegerFn = SetInteger;
+    GET_FN(SetBoolean) _setBooleanFn = SetBoolean;
+    GET_FN(SetString) _setStringFn = SetString;
+    GET_FN(GetReal) _getRealFn = GetReal;
+    GET_FN(GetInteger) _getIntegerFn = GetInteger;
+    GET_FN(GetBoolean) _getBooleanFn = GetBoolean;
+    GET_FN(GetString) _getStringFn = GetString;
     if (_doStepFn == nullptr || _setRealFn == nullptr || _setIntegerFn == nullptr || _setBooleanFn == nullptr
-        || _setStringFn == nullptr) {
+        || _setStringFn == nullptr || _getRealFn == nullptr || _getIntegerFn == nullptr || _getBooleanFn == nullptr
+        || _getStringFn == nullptr) {
         const auto msg(
             "Unable to find at least one of those required function: fmi2DoStep, fmi2SetReal, fmi2SetInteger, "
-            "fmi2SetBoolean, fmi2SetString");
+            "fmi2SetBoolean, fmi2SetString, fmi2GetReal, fmi2GetInteger, fmi2GetBoolean, fmi2GetString");
         _logger->Log(this, msg, Smp::Services::ILogger::LMK_Error);
         throw new simdeck::ExInvalidFile(this, _path.c_str(), msg);
     }
 
     /* Setup */
-    setup();
+    setup(true);
 }
 // ..........................................................
-void FMILoad::setup() {
+void FMILoad::setup(bool noSetVariables) {
     /**
      * 1:
      * - set variables with variablility!=constant and (initial=exact or initial=approx)
      * - call fmi2SetupExperiment
      */
-    {
+    if (!noSetVariables) {
         std::vector<Variable*> vars;
         for (auto& var : _vars) {
             if (var.variability != Variable::Variability::CONSTANT
@@ -477,10 +493,10 @@ void FMILoad::setup() {
         }
         setVariables(vars);
     }
-    getFn(SetupExperiment)
-        SetupExperiment(_fmiObj, (_tolerance >= 0), _tolerance, _startTime, (_stopTime >= 0), _stopTime);
+    GET_FN(SetupExperiment)
+    SetupExperiment(_fmiObj, (_tolerance >= 0), _tolerance, _startTime, (_stopTime >= 0), _stopTime);
     /* 2: set variables with variablility!=constant and (initial=exact or causality=input) */
-    {
+    if (!noSetVariables) {
         std::vector<Variable*> vars;
         for (auto& var : _vars) {
             if (var.variability != Variable::Variability::CONSTANT
@@ -491,26 +507,29 @@ void FMILoad::setup() {
         setVariables(vars);
     }
     /* 3: call fmi2EnterInitializationMode */
-    getFn(EnterInitializationMode) EnterInitializationMode(_fmiObj);
+    GET_FN(EnterInitializationMode) EnterInitializationMode(_fmiObj);
     /**
      * 4:
      * - set variables with causability=input or (causability=parameter and variability=tunable)
      * - set variables with variablility!=constant and initial=exact
      */
-    {
+    if (!noSetVariables) {
         std::vector<Variable*> vars;
         for (auto& var : _vars) {
             if ((var.variability != Variable::Variability::CONSTANT && var.initial == Variable::Initial::EXACT)
-                || (var.causality != Variable::Causality::INPUT
-                    || (var.causality != Variable::Causality::PARAMETER
-                        && var.variability != Variable::Variability::TUNABLE))) {
+                || (var.causality == Variable::Causality::INPUT
+                    || (var.causality == Variable::Causality::PARAMETER
+                        && var.variability == Variable::Variability::TUNABLE))) {
                 vars.push_back(&var);
             }
         }
         setVariables(vars);
     }
     /* 5: call fmi2ExitInitializationMode */
-    getFn(ExitInitializationMode) ExitInitializationMode(_fmiObj);
+    GET_FN(ExitInitializationMode) ExitInitializationMode(_fmiObj);
+
+    /* Update variables */
+    getVariables();
 
     if (_startTime < 0.0)
         _startTime = 0.0; /* no value provided by the user as well as no value found in the xml */
@@ -551,53 +570,114 @@ void FMILoad::loggingFn(fmi2ComponentEnvironment componentEnvironment, fmi2Strin
 // ..........................................................
 void FMILoad::setVariables(std::vector<Variable*>& vars) {
     /* Real */
-    // {
-    //     std::vector<fmi2ValueReference> refs;
-    //     std::vector<fmi2Real> vals;
-    //     for (auto var : vars) {
-    //         if (var->uuid == Smp::Uuids::Uuid_Float64) {
-    //             refs.push_back(var->ref);
-    //             vals.push_back(var->field->GetValue());
-    //         }
-    //     }
-    //     _setRealFn(_fmiObj, refs.data(), refs.size(), vals.data());
-    // }
+    {
+        std::vector<fmi2ValueReference> refs;
+        std::vector<fmi2Real> vals;
+        for (auto var : vars) {
+            if (var->uuid == Smp::Uuids::Uuid_Float64) {
+                refs.push_back(var->ref);
+                vals.push_back(var->field->GetValue());
+            }
+        }
+        if (refs.size() > 0) {
+            _setRealFn(_fmiObj, refs.data(), refs.size(), vals.data());
+        }
+    }
     /* Integer */
-    // {
-    //     std::vector<fmi2ValueReference> refs;
-    //     std::vector<fmi2Integer> vals;
-    //     for (auto var : vars) {
-    //         if (var->uuid == Smp::Uuids::Uuid_Int32) {
-    //             refs.push_back(var->ref);
-    //             vals.push_back(var->field->GetValue());
-    //         }
-    //     }
-    //     _setIntegerFn(_fmiObj, refs.data(), refs.size(), vals.data());
-    // }
+    {
+        std::vector<fmi2ValueReference> refs;
+        std::vector<fmi2Integer> vals;
+        for (auto var : vars) {
+            if (var->uuid == Smp::Uuids::Uuid_Int32) {
+                refs.push_back(var->ref);
+                vals.push_back(var->field->GetValue());
+            }
+        }
+        _setIntegerFn(_fmiObj, refs.data(), refs.size(), vals.data());
+    }
     /* Boolean */
-    // {
-    //     std::vector<fmi2ValueReference> refs;
-    //     std::vector<fmi2Boolean> vals;
-    //     for (auto var : vars) {
-    //         if (var->uuid == Smp::Uuids::Uuid_Bool) {
-    //             refs.push_back(var->ref);
-    //             vals.push_back(var->field->GetValue());
-    //         }
-    //     }
-    //     _setBooleanFn(_fmiObj, refs.data(), refs.size(), vals.data());
-    // }
+    {
+        std::vector<fmi2ValueReference> refs;
+        std::vector<fmi2Boolean> vals;
+        for (auto var : vars) {
+            if (var->uuid == Smp::Uuids::Uuid_Bool) {
+                refs.push_back(var->ref);
+                vals.push_back(var->field->GetValue());
+            }
+        }
+        _setBooleanFn(_fmiObj, refs.data(), refs.size(), vals.data());
+    }
     /* String */
-    // {
-    //     std::vector<fmi2ValueReference> refs;
-    //     std::vector<fmi2String> vals;
-    //     for (auto var : vars) {
-    //         if (var->uuid == simdeck::StringType::UuidString) {
-    //             refs.push_back(var->ref);
-    //             vals.push_back(var->field->GetValue()); /* TODO allowed? */
-    //         }
-    //     }
-    //     _setStringFn(_fmiObj, refs.data(), refs.size(), vals.data());
-    // }
+    {
+        std::vector<fmi2ValueReference> refs;
+        std::vector<fmi2String> vals;
+        for (auto var : vars) {
+            if (var->uuid == simdeck::StringType::UuidString) {
+                refs.push_back(var->ref);
+                vals.push_back(var->field->GetValue()); /* TODO allowed? */
+            }
+        }
+        _setStringFn(_fmiObj, refs.data(), refs.size(), vals.data());
+    }
+}
+// ..........................................................
+void FMILoad::getVariables() {
+    /* real */
+    {
+        std::vector<fmi2ValueReference> refs;
+        std::vector<Smp::ISimpleField*> fields;
+        for (const auto& var : _vars) {
+            if (var.uuid == Smp::Uuids::Uuid_Float64) {
+                refs.push_back(var.ref);
+                fields.push_back(var.field);
+            }
+        }
+        if (refs.size() > 0) {
+            GET_VARIABLES(Real, Smp::PrimitiveTypeKind::PTK_Float64, fields, refs)
+        }
+    }
+    /* integer */
+    {
+        std::vector<fmi2ValueReference> refs;
+        std::vector<Smp::ISimpleField*> fields;
+        for (const auto& var : _vars) {
+            if (var.uuid == Smp::Uuids::Uuid_Int32) {
+                refs.push_back(var.ref);
+                fields.push_back(var.field);
+            }
+        }
+        if (refs.size() > 0) {
+            GET_VARIABLES(Integer, Smp::PrimitiveTypeKind::PTK_Int32, fields, refs)
+        }
+    }
+    /* boolean */
+    {
+        std::vector<fmi2ValueReference> refs;
+        std::vector<Smp::ISimpleField*> fields;
+        for (const auto& var : _vars) {
+            if (var.uuid == Smp::Uuids::Uuid_Bool) {
+                refs.push_back(var.ref);
+                fields.push_back(var.field);
+            }
+        }
+        if (refs.size() > 0) {
+            GET_VARIABLES(Boolean, Smp::PrimitiveTypeKind::PTK_Bool, fields, refs)
+        }
+    }
+    /* string */
+    {
+        std::vector<fmi2ValueReference> refs;
+        std::vector<Smp::ISimpleField*> fields;
+        for (const auto& var : _vars) {
+            if (var.uuid == simdeck::StringType::UuidString) {
+                refs.push_back(var.ref);
+                fields.push_back(var.field);
+            }
+        }
+        if (refs.size() > 0) {
+            GET_VARIABLES(String, Smp::PrimitiveTypeKind::PTK_String8, fields, refs)
+        }
+    }
 }
 // ..........................................................
 bool FMILoad::doStep(fmi2Real stepSize) {
@@ -606,7 +686,20 @@ bool FMILoad::doStep(fmi2Real stepSize) {
                      Smp::Services::ILogger::LMK_Warning);
         return false;
     }
-    /* Get/set variables */
+    /* Set variables */
+    {
+        std::vector<Variable*> vars;
+        for (auto& var : _vars) {
+            if (var.causality == Variable::Causality::INPUT
+                || (var.causality == Variable::Causality::PARAMETER
+                    && var.variability == Variable::Variability::TUNABLE)) {
+                vars.push_back(&var);
+            }
+        }
+        setVariables(vars);
+    }
+    /* Get variables */
+    getVariables();
     /* Call fmi2DoStep */
     const auto status = _doStepFn(_fmiObj, _curComTime, stepSize, fmi2True);
     switch (status) {
@@ -642,21 +735,21 @@ void FMILoad::terminate() {
     /* Get variables */
     /* Call fmi2FreeInstance */
     if (_fmiObj != nullptr) {
-        getFn(FreeInstance) FreeInstance(_fmiObj);
+        GET_FN(FreeInstance) FreeInstance(_fmiObj);
         _fmiObj == nullptr;
     }
 }
 // ..........................................................
 void FMILoad::reset() {
     /* Call fmi2Reset */
-    getFn(Reset) Reset(_fmiObj);
+    GET_FN(Reset) Reset(_fmiObj);
 
     /* Setup */
     setup();
 }
 // --------------------------------------------------------------------
 // ..........................................................
-FMILoad::Variable::Variable(const fmi2ValueReference ref, const Causality causality, const Variability variabliity,
+FMILoad::Variable::Variable(const fmi2ValueReference ref, const Causality causality, const Variability variability,
                             const Initial initial, const Smp::Uuid uuid, Smp::ISimpleField* field)
     : ref(ref), causality(causality), variability(variability), initial(initial), uuid(uuid), field(field){};
 } /* namespace fmi */

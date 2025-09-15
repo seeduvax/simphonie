@@ -76,7 +76,7 @@ private:
 
     void publish(Smp::IPublication* receiver) override;
     void configure() override;
-    void setup();
+    void setup(bool noSetVariables = false);
     inline void doStepEP() {
         doStep(_stepSize);
     };
@@ -84,6 +84,7 @@ private:
                           fmi2String category, fmi2String message, ...);
     static void stepFinished(fmi2ComponentEnvironment componentEnvironment, fmi2Status status){};
     void setVariables(std::vector<Variable*>& vars);
+    void getVariables();
 
     /* published fields */
     std::string _path;
@@ -105,6 +106,10 @@ private:
     fmi2SetIntegerTYPE* _setIntegerFn;
     fmi2SetBooleanTYPE* _setBooleanFn;
     fmi2SetStringTYPE* _setStringFn;
+    fmi2GetRealTYPE* _getRealFn;
+    fmi2GetIntegerTYPE* _getIntegerFn;
+    fmi2GetBooleanTYPE* _getBooleanFn;
+    fmi2GetStringTYPE* _getStringFn;
 
     /* arguments to provide to the fmi co-simulation */
     struct cbArgs {
