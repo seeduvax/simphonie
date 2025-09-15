@@ -29,11 +29,13 @@ namespace fmi {
 /**
  * @brief Class for handling an external FMI compliant simulation
  *
- * State machine of the FMI v2.0 standard fro co-simulation  can be found at
+ * The state machine of the FMI v2.0 standard fro co-simulation can be found at
  * https://fmi-standard.org/assets/releases/FMI_for_ModelExchange_and_CoSimulation_v2.0.pdf
  * page 103.
  *
- * @warning The full fmi standard is not yet implemented, especially derivatives and FMU State
+ * @warning The full fmi standard is not yet implemented, especially derivatives and FMU State.
+ * @note Fields are published during the configuration state and update by the user values at the connection one.
+ * @note This class will first setup and then reset the FMI model before calling the step function.
  */
 class FMILoad : public simdeck::Component, virtual public Smp::IModel, virtual public simdeck::EntryPointPublisher {
 public:
@@ -76,6 +78,7 @@ private:
 
     void publish(Smp::IPublication* receiver) override;
     void configure() override;
+    void connect() override;
     void setup(bool noSetVariables = false);
     inline void doStepEP() {
         doStep(_stepSize);

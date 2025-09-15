@@ -474,7 +474,15 @@ void FMILoad::configure() {
     }
 
     /* Setup */
+    /* the goal of this setup call is to enable the model's variables to be retrieve and set to the published fields.
+     * See FMILoad::connect for the actual setup */
     setup(true);
+}
+// ..........................................................
+void FMILoad::connect() {
+    /* This reset call will both override the values of the model's variables with the published ones and setup the fmi
+     * object */
+    reset();
 }
 // ..........................................................
 void FMILoad::setup(bool noSetVariables) {
