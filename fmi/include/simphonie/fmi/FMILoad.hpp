@@ -78,7 +78,6 @@ private:
 
     void publish(Smp::IPublication* receiver) override;
     void configure() override;
-    void connect() override;
     void setup(bool noSetVariables = false);
     inline void doStepEP() {
         doStep(_stepSize);

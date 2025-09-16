@@ -57,6 +57,10 @@ FMILoad::FMILoad(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
       _stopTime(-1.0),
       _stepSize(-1.0) {
     addEP("doStep", "Do a single step of simulation", this, &FMILoad::doStepEP);
+    {
+        const auto resetEP = addEP("reset", "Reset the model", this, &FMILoad::reset);
+        getSimulator()->AddInitEntryPoint(resetEP);
+    }
 }
 // ..........................................................
 FMILoad::~FMILoad() {
@@ -477,12 +481,6 @@ void FMILoad::configure() {
     /* the goal of this setup call is to enable the model's variables to be retrieve and set to the published fields.
      * See FMILoad::connect for the actual setup */
     setup(true);
-}
-// ..........................................................
-void FMILoad::connect() {
-    /* This reset call will both override the values of the model's variables with the published ones and setup the fmi
-     * object */
-    reset();
 }
 // ..........................................................
 void FMILoad::setup(bool noSetVariables) {
