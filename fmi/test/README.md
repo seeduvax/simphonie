@@ -1,6 +1,8 @@
-# How to test fmu packages
+# How to test FMU packages
 
-Based on [FMpy](https://github.com/CATIA-Systems/FMPy/).
+## Test FMU export
+
+Load the exported FMU in [FMpy](https://github.com/CATIA-Systems/FMPy/).
 
 ```python
 import fmpy
@@ -9,7 +11,7 @@ fmpy.simulate_fmu(file, debug_logging=True)
 
 With `file` the path to either a zipped fmu file or a regular folder (e.g. "simphonie/fmi/test/fmu"). 
 
-## Parameters
+### Parameters
 - `filename`:               filename of the FMU or directory with extracted FMU
 - `validate`:               validate the FMU and start values
 - `start_time`:             simulation start time (None: use default experiment or 0 if not defined)
@@ -41,5 +43,33 @@ With `file` the path to either a zipped fmu file or a regular folder (e.g. "simp
 - `fmu_state`:              the FMU state or serialized FMU state to initialize the FMU
 - `set_stop_time`:          communicate the stop time to the FMU instance
 
-## Returns
+### Returns
 - `result`:                 a structured numpy array that contains the result
+
+## Test FMU import
+
+- Download a FMU model from the [official samples](https://github.com/modelica/Reference-FMUs/).
+- Run simphonie on a lua script that uses the FMILoad component:
+```lua
+s=require "simphonie_lua"
+sim=s.CreateSimulator({
+    name="MySim",
+    lib="simphonie_kern",
+    libraries={
+        "simphonie_fmi",
+    },
+    components={
+        MyFMISim={type="simphonie::fmi::FMILoad", path="test/BouncingBall", stepSize=0.1}, -- the path is either a path to a regular folder or a path to a .fmu zipped file
+    },
+    connections={
+    },
+    schedule={
+        {name="MyFMISim/doStep", cycleTime_ms=50},
+    }
+})
+sim:Publish()
+sim:Configure()
+sim.MyFMISim.g.Value = -18.0
+sim:Connect()
+sim:Run()
+```
