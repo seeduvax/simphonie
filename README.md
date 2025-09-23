@@ -6,6 +6,12 @@
 This library is part of the simphonie project, used by the project for its own
 needs. However it can be used to support any SMP related application or library.
 
+Caution: the primary git repository hosts two main "components"
+  - simdeck: the SMP SDK subject of this readme and tracked with all simdeck-*
+    branches.
+  - simphonie: A SMP runtime implementation, tracked with all simphonie-*
+    branches.
+
 ## SMP / ECSS-E-ST-40-07C
 SMP stands for Simulation Modelling Platform. It is an [ECSS][0] standard 
 defining C++ interface for simulation models and simulation execution
@@ -13,7 +19,7 @@ infrastructure. Simphonie is a direct and simplistic (partial) implementation
 of this standard enabling its learning and experimentation. 
 
 ## Disclamer
-Do not expect simdeck to be a full and validated SMP implementation. It was
+Do not expect simdeck to be a full and validated SMP SDK. It was
 created for prototyping and training purpose and shall be use for anything else
 only after a strong validation of the fitness to the target use case.
 
@@ -22,13 +28,12 @@ any warrenty*; without even the implied warrenty of *merchantability* or
 *fitness for a particular purpose*. Simphonie is free software released under
 LGPL V3. See [LICENSE][4] file for more information.
 
-Despite simphonie itself is free software, the required SMP C++ headers are
+Despite simphonie itself is free software, the SMP stajndard definition is 
 subject to copyright hold by the European Space Agency for the member of ECSS.
-See the [ECSS policy of use][2] for more details. In consequence, the SMP 
-headers are not included in simphonie and can't be fetched automatically when
-building the software. However when you are able to get by yourself the [SMP
-material][1], the makefile includes a specific target to assist in the header
-integration into the project.
+See the [ECSS policy of use][2] for more details. The SMP header files are
+published using a BSD licence (referee complete information directly). And the
+build process should fetch the needed file from the main package repository used
+for simphonie development.
 
 ## Build
 - Clone the project and checkout the branch or tag you need.
@@ -52,23 +57,7 @@ integration into the project.
 ```
 
 See [AcrobatomaticBuildSystem][5] documentation for more details about the 
-build features, in particular the required dependencies fetch. The dependencies
-package repository. This repository may not host the needed package for your
-specific target architecture. You may yourself build the missing packages to be
-stored in your local ABS cache storage (`~/.abs/cache/<archname>/).
-
-The `ecss.smp` package being itself almost only a set of C++ header file, you
-may create your own target from the one available for the architecture available
-from the primary repository:
-```
-makedir -p ~/.abs/cache/<your_arch_name>/
-wget http://www.eduvax.net/dist/Debian_12_x86_64/ecss.smp-20240920.Debian_12_x86_64.tar.gz -o ~/.abs/cache/<your_arch_name>/ecss.smp-20240920.<your_arch_name>.tar.gz
-```
-
-To know the architecture name required for your specific host, just try to build
-and look at the dependency fetching error that should provide you the full name
-of the missing package and let you see obiously the expected architecture name.
- 
+build features, in particular the required dependencies fetching. 
 
 ## project tools:
 
