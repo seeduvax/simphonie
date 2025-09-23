@@ -19,6 +19,12 @@ any warrenty*; without even the implied warrenty of *merchantability* or
 *fitness for a particular purpose*. Simphonie is free software released under
 LGPL V3. See [LICENSE][4] file for more information.
 
+Despite simphonie itself is free software, the SMP stajndard definition is 
+subject to copyright hold by the European Space Agency for the member of ECSS.
+See the [ECSS policy of use][2] for more details. The SMP header files are
+published using a BSD licence (referee complete information directly). And the
+build process should fetch the needed file from the main package repository used
+for simphonie development.
 
 ## Build
 - Clone the project and checkout the branch or tag you need.
@@ -40,6 +46,11 @@ LGPL V3. See [LICENSE][4] file for more information.
 ```
     make distinstall
 ```
+- build library package (to use simphonie as a dependency in your own project)
+
+```
+    make dist
+```
 
 See [AcrobatomaticBuildSystem][5] documentation for more details about the 
 build features, in particular the required dependencies fetch. The dependencies
@@ -52,7 +63,7 @@ git repository. Each package is subject to its own branches and tags set:
  - simdeck-X.Y: SMP models and simulation services development kit - set of
    concrete classes implementing the basic SMP interfaces needed for models and
    services development.
- - simphonie-X.Y: SMP simuulation runtime environment.  
+ - simphonie-X.Y: SMP simulation runtime environment.  
 
 ## project tools:
 
