@@ -40,6 +40,9 @@ protected:
     void connect() override;
 
 private:
+    /**
+     * @brief Type used within the condition
+     */
     typedef double T;
 
     class _EventHandler : public simdeck::Component, virtual public simdeck::EntryPointPublisher {

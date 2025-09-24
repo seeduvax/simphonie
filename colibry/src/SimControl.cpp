@@ -31,9 +31,7 @@ namespace simphonie {
 namespace colibry {
 
 SimControl::SimControl(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-    : simdeck::Service(name, descr, parent) {
-    _condition = "(not true)";
-    _evaluator = nullptr;
+    : simdeck::Service(name, descr, parent), _condition("(not true)"), _evaluator(new sxeval::SXEval<T>()) {
     addEP(CHECK_EP_NAME, "Check stop condition and request simulation hold when condition is met.", this,
           &SimControl::_checkStopCondition);
     addEP("applyCondition", "Apply the stopping s-expression condition.", this, &SimControl::applyCondition);
@@ -53,8 +51,8 @@ void SimControl::publish(Smp::IPublication* receiver) {
 }
 
 void SimControl::applyCondition() {
-    auto encapsulatedResolver = [&](const char* name) -> std::function<T(void)> {
-        Smp::IObject* obj = getSimulator()->GetResolver()->ResolveAbsolute(name);
+    auto encapsulatedResolver = [&](const std::string& name) -> std::function<T(void)> {
+        Smp::IObject* obj = getSimulator()->GetResolver()->ResolveAbsolute(name.c_str());
         if (obj == nullptr) {
             std::ostringstream ss;
             ss << "Path \"" << name << "\" led to nothing";
@@ -120,37 +118,35 @@ void SimControl::applyCondition() {
         }
     };
 
-    auto ownResolver = [&](const char* name) -> T& {
+    auto ownResolver = [&](const std::string& name) -> T& {
         {
-            Smp::IObject* obj = getSimulator()->GetResolver()->ResolveAbsolute(name);
+            const auto obj = getSimulator()->GetResolver()->ResolveAbsolute(name.c_str());
             if (obj != nullptr) {
                 /* throw an error to force encapsulated variable resolution */
                 throw std::runtime_error("This is a field (encapsulated variable) instead of an event.");
             }
         }
-        const auto eventId = getSimulator()->GetEventManager()->QueryEventId(name);
-        _eventHandlers.push_back(std::make_unique<_EventHandler>(name, "Internal use only.", this, eventId));
+        const auto eventId = getSimulator()->GetEventManager()->QueryEventId(name.c_str());
+        _eventHandlers.push_back(std::make_unique<_EventHandler>(name.c_str(), "Internal use only.", this, eventId));
         GetContainer(CONTAINER_NAME)->AddComponent(_eventHandlers.back().get());
         return _eventHandlers.back()->get();
     };
 
     try {
-        _evaluator.reset();
-        _evaluator = std::make_unique<sxeval::SXEval<T> >(const_cast<char*>(_condition.c_str()), ownResolver,
-                                                          encapsulatedResolver);
+        _evaluator->build(_condition, ownResolver, encapsulatedResolver);
         std::ostringstream ss;
         ss << "Condition updated to \"" << _condition << "\"";
         logInfo(ss.str().c_str());
     }
     catch (const std::exception& e) {
         std::ostringstream ss;
-        ss << "Fatal error during SimControl::_evaluator's instanciation: " << e.what();
+        ss << "Fatal error during the SimControl::_evaluator's building: " << e.what();
         throw simdeck::Exception(this, ss.str().c_str());
     }
 }
 
 void SimControl::_checkStopCondition() {
-    const T val = _evaluator->evaluate();
+    const T val = _evaluator->execute();
     if (std::abs(val) > std::numeric_limits<T>::epsilon()) {
         logInfo("Request simulation stop");
         getSimulator()->Hold(true);
