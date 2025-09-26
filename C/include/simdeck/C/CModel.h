@@ -9,7 +9,8 @@
  */
 #ifndef __CModel_H__
 #define __CModel_H__
-#include "CWrapper.h"
+#include "Smp-C/Services/IEventManager.h"
+#include "Smp-C/Services/ILogger.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -33,7 +34,8 @@ typedef void Bridge;
 struct SmpEnv;
 typedef void (*CModelEP)(void* env, const struct SmpEnv* smpEnv);
 
-#define CW_SPACE CW_BUILD_SPACE(Smp, Services)
+#define CW_Smp CW_BUILD_SPACE(CW_root, Smp)
+#define CW_SPACE CW_BUILD_SPACE(CW_Smp, Services)
 
 typedef struct SmpEnv {
     int (*addEntryPoint)(Bridge* bridge, const char* name, const char* description, CModelEP ep);

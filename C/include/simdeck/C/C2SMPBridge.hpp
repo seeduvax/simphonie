@@ -17,8 +17,9 @@
 #include "simdeck/Composite.hpp"
 #include "simdeck/EntryPoint.hpp"
 #include "simdeck/Collection.hpp"
-#include "CModel.h"
-#include "CWrapper.h"
+#include "simdeck/C/CModel.h"
+#include "Smp-C/Services/IEventManager.h"
+#include "Smp-C/Services/ILogger.h"
 #include <sstream>
 
 #define TO_STR(a) #a
@@ -30,7 +31,7 @@
         throw new simdeck::Exception(this, msg.str().c_str());                                        \
     }
 
-#define CW_Smp CW_BUILD_SPACE(Smp)
+#define CW_Smp CW_BUILD_SPACE(CW_root, Smp)
 #define CW_SPACE CW_BUILD_SPACE(CW_Smp, Services)
 
 
