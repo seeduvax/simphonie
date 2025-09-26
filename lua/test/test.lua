@@ -69,7 +69,7 @@ sim=s.CreateSimulator({
                 inc11={type="simphonie::umdl::SmpIncrement", description="to check sub component."}
             }
         },
-        inc2={type="simphonie::umdl::SmpIncrement"},
+        inc2={type="simphonie::umdl::SmpIncrement"},-- simdeck::C::C2SMPBridge<&SmpIncrementC>"},
         inc3={type="simphonie::umdl::SmpIncrement"},
         inc4={type="simphonie::umdl::SmpIncrement"},
         ["MyLuaModel=test/model.lua"]={type="simphonie::lua::LuaModel"},
