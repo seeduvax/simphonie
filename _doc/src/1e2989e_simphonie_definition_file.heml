@@ -10,12 +10,17 @@
   }
   {section %title=Introduction
     {references %title=Reference %id=R
-{ref %id=SMP %edition=2 March 2020 %ref=ECSS-E-ST-40-07C %href=https://ecss.nl/standard/ecss-e-st-40-07c-simulation-modelling-platform-2-march-2020/ %%Simulation Modelling Platform (SMP)}
+{ref %id=SMP %edition=Rev.1 (5 August 2025) %ref=ECSS-E-ST-40-07C %href=https://ecss.nl/standard/ecss-e-st-40-07c-rev-1-simulation-modelling-platform-level-1-5-august-2025/ %%Simulation Modelling Platform (SMP) Level 1}
+{ref %id=SMPL2 %edition=5 August 2025 %ref=ECSS-E-ST-40-08C %href=https://ecss.nl/standard/ecss-e-st-40-08c-simulation-modelling-platform-level-2-5-august-2025/ %%Simulation Modelling Platform (SMP) Level 2}
 {ref %id=SYSLOG %authors=R. Gerhards %edition=March 2009 %ref=RFC 5424 %href=https://datatracker.ietf.org/doc/html/rfc5424 %%The Syslog Protocol}
 {ref %id=HDF5 %href=https://www.hdfgroup.org/solutions/hdf5/ %%High performance data management and storage suite}
+{ref %id=simdeck %authors=S. Devaux %edition=1, 2025-11-07 %ref=1e2889e %%simdeck - SMP development kit - definition file}
     }
     {section %title=Scope
-This document is the definition file of the simphonie project. The purpose of the project is to provide a free simulation infrastructure implementation according the SMP standard {xref SMP}. This definition file includes:
+This document is the definition file of the simphonie project. The purpose of
+the project is to provide a free simulation infrastructure implementation
+according the SMP standards {xref SMP}{xref SMPL2}. This definition file
+includes:
   - additional requirements to complete the definition from the SMP standard.
   - the design.
   - a test plan.
@@ -24,23 +29,54 @@ This document is the definition file of the simphonie project. The purpose of th
     }
   }
   {section %title=Requirements
+    {section %title=Requirements definition
+The requirements in this document are defined and rendered using the following
+layout:
+{reqsample %id=req.unique.identifier
+A sentence applying the format <subject> shall <property> defining a verifiable  characteristic of the subject.
+
+{rational
+Optional information providing some motivation and justification of the
+requirement.
+}
+}
+Any text outside the requirement box is only additional information for a better
+understanding of the requirement and its scope. Such text shall net define any
+property to be verified. When such text is inserted between requirement, without
+any reference, is related to the preceding requirement.
+    }
     {section %title=SMP Level 1 features coverage
 In this section, the requirements are defined only to link to SMP level clauses
 subset in order to organize test traceability and provide an overview of the
-SMP features coverage.
+SMP{xref SMP} features coverage.
 
-{req %id=simph.smpdk.1
-The simphonie project shall include a SMP development kit aming at providing the
-concrete classes of the SMP interfaces needed to develop some components
-(services and models) libraries.
+{note %title=SMP development kit
 }
-{req %id=simph.smpdk.2
-The SMP development kit shall provide a concrete class for the Smp::IObject
-interface.
+
+
+{req %id=simph.kern.1
+The simphonie kernel shall provide a simulator class implementing the 
+{kw Smp::ISimulator} interface.
 }
-{req %id=simph.smpdk.3
-The SMP development kit shall provide a concrete class for the Smp::IComponent
-interface.
+
+{req %id=simph.kern.svc.1
+The simphonie kernel simulator shall create the mandory services during its
+building phase. 
+
+{rational
+Simphonie shall be able to run SMP simulations out of the box.
+}
+}
+
+{req %id=simph.kern.svc.2
+The simphonie kernel simulator shall let the replacement of any of the mandatory
+services with a user defined implementation during the building phase.
+
+{rational
+Simphonie shall propose, not impose, an implementation of the mandatory
+services. Users may extend and customize the simulator services implementation
+according their own needs.
+}
 }
     }
     {section %title=SMP Level 2 features coverage
@@ -207,13 +243,18 @@ system that can't fit a single threaded simulation.
       }
     }
     {section %title=SMP complements and extension
-Here are defined some extended SMP featured, that are features not defined by
+Here are defined some extended SMP features, that are features not defined by
 the SMP standard but considered to be needed to create a full featured
 simulator.
       {section %title=Design and implementation constraints
 {req %id=simph.esmp.1
 The extended SMP feature libraries shall not link with the simphonie's kernel
 library.
+
+{rational
+The extended SMP features shall remain compatible with any SMP compliant
+simulation infrastructure.
+}
 }
 The basic object implementation (object, component, collection, composites) can
 be shared, but the extended service shall rely only on the standard SMP
@@ -264,14 +305,14 @@ publish/subscribe patterns.
 the schedule monitoring service shall include a method returning the actual
 state of the scheduler as a schedule list.
 }
-Each entry of the schedul list:
+Each entry of the schedule list:
   - schedule event id.
   - entry point name or identifier.
   - schedule parameter (period, count, etc).
   - actual activation count.
 
 
-It is assumed that the returned shcedule list may be absolete as soon it is
+It is assumed that the returned schedule list may be obsolete as soon it is
 returned, since when the simulation is running, the scheduler state and its
 internal scheduled event list evolves.
 
