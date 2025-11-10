@@ -1,0 +1,296 @@
+{?set %encoding=utf-8 %line=wrap}
+{document
+  {title simdeck - SMP development kit - definition file}
+  {reference 1e2889e}
+  {author Sebastien Devaux}
+  {copyright %year=2019-2025 %holder=Sebastien Devaux}
+  {keywords simulation, simulation modelling platform, ECSS-E-ST-40-07C, development kit}
+  {history
+    {edition %version=1 %date=2025-11-07 %%Document creation}
+  }
+  {section %title=Introduction
+    {references %title=Reference %id=R
+{ref %id=SMP %edition=Rev.1 (5 August 2025) %ref=ECSS-E-ST-40-07C %href=https://ecss.nl/standard/ecss-e-st-40-07c-rev-1-simulation-modelling-platform-level-1-5-august-2025/ %%Simulation Modelling Platform (SMP) Level 1}
+{ref %id=SMPL2 %edition=5 August 2025 %ref=ECSS-E-ST-40-08C %href=https://ecss.nl/standard/ecss-e-st-40-08c-simulation-modelling-platform-level-2-5-august-2025/ %%Simulation Modelling Platform (SMP) Level 2}
+    }
+    {section %title=Scope
+The simdeck component is a library of C++ classes implementing the SMP {xref SMP}
+interfaces needed for models and optional services development. This is
+part of the simphonie project and is used for the simphonie own implementation
+of a SMP simulation infrastructure. Simdeck may be used with our without
+simphonie. It is expected to deliver with simdeck a compliant implementation of
+the SMP interfaces in order to let any model or service built on top of simdeck
+run into any SMP compliant simulation infrastructure.
+
+This definition file includes:
+  - traceability requirement: identification of the implemented SMP interfaces.
+  - few design considerations.
+  - a test plan.
+  - a user's guide, the targeted user being a model or optional service
+    developer that wish to deliver simulation artefact able to be hosted by
+    a SMP simulation infrastructure.
+    }
+  }
+  {section %title=Requirements
+    {section %title=Requirements definition
+The requirements in this document are defined and rendered using the following
+layout:
+{reqsample %id=req.unique.identifier
+A sentence applying the format <subject> shall <property> defining a verifiable  characteristic of the subject.
+
+{rational
+Optional information providing some motivation and justification of the
+requirement.
+}
+}
+Any text outside the requirement box is only additional information for a better
+understanding of the requirement and its scope. Such text shall net define any
+property to be verified. When such text is inserted between requirement, without
+any reference, is related to the preceding requirement.
+    }
+    {section %title=Some SMP Level 1 concrete classes
+{req %id=simdeck.1
+The simphonie project shall include a SMP development kit aming at providing the
+concrete classes of the SMP interfaces needed to develop some components
+(services and models) libraries.
+
+{rational
+The SMP headers only defines pure virtual C++ classes requiring the simulator
+and models implementers to define every methods implementation. Many interfaces
+are designed to be used on both model and infrastructure side. Having the
+related concrete classes available speed-up the models and infrastructure
+development.   
+}
+}
+The SMP development kit library is expected to provide what's needed for users
+models and services development. It is not expected to provide any
+implementation for the infrastructure side components (for instance the
+simulator and its mandatory services implementation). Such simulation host
+implementation is left to the simphonie project. Even simdeck is part of the
+simphonie project, it may be used for any SMP component development outside
+simphonie.
+
+{req %id=simdeck.2
+The SMP development kit shall provide a concrete class for the {kw Smp::IObject}
+interface.
+}
+
+{req %id=simdeck.3
+The SMP development kit shall provide a concrete class for the {kw Smp::IComponent}
+interface.
+}
+
+{req %id=simdeck.4
+The SMP development kit shall provide a concrete class for the {kw Smp::IComposite}
+interface.
+}
+
+{req %id=simdeck.5
+The SMP development kit shall provide a concrete class for the {kw Smp::ICollection}
+interface.
+}
+
+{req %id=simdeck.6
+The SMP development kit shall provide a concrete class for the {kw Smp::IContainer}
+interface.
+}
+
+{req %id=simdeck.7
+The SMP development kit shall provide a concrete class for the {kw Smp::IEntryPoint}
+interface.
+}
+
+{req %id=simdeck.8.1
+The SMP development kit shall provide a concrete class for the {kw Smp::IEntryPointPublisher}
+interface.
+}
+
+{req %id=simdeck.8.2
+The entry point publisher implementation shall provide a method to create an
+entry point directly from a void class method without argument.
+
+{rational
+Let the model or service implementer directly promote any of the component's method as an entry point that may be scheduled or subscribed to the event manager.
+}
+}
+
+{req %id=simdeck.9
+The SMP development kit shall provide a concrete class for the {kw Smp::IException}
+interface.
+}
+
+{req %id=simdeck.10.1
+The SMP development kit shall provide a concrete classe for the {kw Smp::IField}
+interface.
+}
+
+{req %id=simdeck.10.2
+The SMP development kit shall provide a concrete classe for the {kw Smp::IPersist}
+interface.
+}
+
+{req %id=simdeck.10.3
+The SMP development kit shall provide a concrete class for the {kw Smp::IOutputField}
+interface.
+}
+
+{req %id=simdeck.10.4
+The SMP development kit shall provide a concrete class for the {kw Smp::ISimpleField}
+interface.
+}
+
+{req %id=simdeck.10.5
+The SMP development kit shall provide a concrete class implementing both 
+{kw Smp::ISimpleField} and {kw Smp::IOutputField}
+interface.
+}
+
+{req %id=simdeck.10.6
+The SMP development kit shall provide a concrete class for the {kw Smp::IArrayField}
+interface.
+}
+
+{req %id=simdeck.10.7
+The SMP development kit shall provide a concrete class for the {kw Smp::ISimpleArrayField}
+interface.
+}
+
+{req %id=simdeck.10.8
+The SMP development kit shall provide a concrete class implementing both 
+{kw Smp::ISimpleArrayField} and {kw Smp::IOutputField}
+interface.
+}
+
+{req %id=simdeck.10.9
+The SMP development kit shall provide a concrete class for the {kw Smp::IStructureField}
+interface.
+}
+
+{req %id=simdeck.10.10
+The SMP development kit shall provide a concrete class implementing both 
+{kw Smp::IStructureField} and {kw Smp::IOutputField}
+interface.
+}
+
+    }
+    {section %title=Additional utility classes
+      {section %title=Variable length string field
+{req %id=simdeck.addon.str.1
+The simdeck library shall provide a {kw Smp::Publication::IType} implementation
+of non fixed sized string fields.
+
+{rational
+Let models and services implementers manage string parameters without the
+constraint of oversized fixed memory allocation.
+}
+}
+
+{req %id=simdeck.addon.str.2
+The simdeck library shall provide a {kw Smp::IField} implementation to wrap a
+C++ {kw std::string} parameter.
+
+{rational
+std::string type is now th emost common way of handling strings with C++.
+}
+}
+
+{req %id=simdeck.addon.str.3
+The simdeck library shall provide a {kw Smp::IField} implementation to wrap a
+C++ {kw std::string} parameter.
+
+{rational
+std::string type is now the most common way of handling strings with C++.
+}
+}
+      }
+      {section %title=Zero copy fields
+{req %id=simdeck.zcf.1
+The simdeck library shall provide a {kw Smp::IOutputField} implementation able
+to share its data with connected fields.
+
+{rational
+The SMP publication mecanisme and field handling was designed to make the model
+implementation quite agnostic from the simulation infrastructure, requiring the
+model to only share some pointers to its data. A more optimized memory
+management would required the model to request its memory from the simulation
+infrastructure to let when relevant, the infrastructure provide the same buffer
+pointer to be shared between a data producer and its consumers. A dedicated
+field type may provide the same capability.
+
+Such buffer sharing can brings high performance increase: in many cases, the
+simulator spent more time to copy data from outputs to inputs than to compute
+anything.
+}
+}
+The zero copy field type is compatible with itself only: it is admitted it can
+work only when both producer and consumer of a data are managing it using the
+same field class family that extends consistently the {kw SMp::IField}
+interface to do so. Such field are necessary automatic fields, meaning the
+output data is pushed every time it is changed since the push finally does
+nothing because the same buffer is shared between the connected fields.
+
+As well, sharing the same buffer implies the users (simulators designers) are
+aware such fields shall be used (read and written) sequentially only, meaning
+from entry points executed from the same thread.
+
+{req %id=simdeck.zcf.2
+The simdeck library zero copy fields feature shall cover all the SMP primitive
+types.
+}
+
+{req %id=simdeck.zcf.3
+The simdeck library zero copy fields feature shall define the cast operators to
+let the fields type assignable to their related primitive type and the opposite.
+
+{rational
+The model implementer shall be able to use the field the same way it would use
+the wrapped data. It shall not require to use explicit setter or getters to 
+access the value. The code using the fields will then remain as readable than
+the equivalent code using the native unboxed data.
+}
+}
+      }
+      {section %title=Bus fields
+The purpose of the feature is to be able to create many to one and many to many
+fields connections.
+- define something similar to matlab/simulinks bus features.
+- shall it be derive from Smp::IField (connectable by itself) or IComponent
+conectable with the ILink registrey.
+- quite obvious to push many outputs into a single thing. But how to select
+cells when connecting inputs?
+
+      }
+    }
+  }
+  {section %title=Design
+    {section %title=Zero copy fields
+Zero copy fields aree implemented the same way the "standard" fields are. The
+differences are:
+  - it manages a buffer and a pointer. The pointer defines the data wrapped by
+    the field. When not connected, the pointer is the address of the internal
+    buffer. When connected, the pointer is the address of the connected field's
+    internal buffer.
+  - on connect, the output field push its buffer address to the target field.
+  - on disconnect, the target field shall be notify to restore its data pointer
+    to its own buffer address.
+
+Of course, the buffer pointer sharing is applied only when both source and
+destination are zero copy fields. Otherwise the regular data propagation process
+shall be applied.
+    }
+  }
+  {section %title=Validation plan
+    {section %title=Strategy
+The simdeck classes shall be fully covered by unit tests. The test are
+implemented with the help of the cppunit library and additional helper macro
+from the {a %href=https://gitub.com/seeduvax/AcrobatomicBuildSystem %%AcrobatomaticBuildSystem},
+to support requirement traceability management. The next section provide the
+unit test index.
+    }
+    {section %title=Automated test index
+{?include %src=testdefindex.heml}
+    }
+  }
+  {section %title=Developing SMP models and services with simdeck
+  }
+}

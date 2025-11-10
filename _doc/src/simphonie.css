@@ -1,0 +1,15 @@
+@import "style.css";
+
+div.head {
+	font-family: sans-serif;
+	border-bottom
+	border-top: 1px solid #5A4799;
+	border-bottom: 1px solid #5A4799;
+	background-color: #FAFAFF;
+	background-image: url('logoSimphonie.png'), url('eduvax.png');
+	background-repeat: no-repeat, no-repeat;
+	background-position: top left, top right;
+	background-size: 64px, 100px;
+	padding: 11px;
+}
+
