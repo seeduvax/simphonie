@@ -249,13 +249,18 @@ access the value. The code using the fields will then remain as readable than
 the equivalent code using the native unboxed data.
 }
 }
+
+{req %id=simdeck.zcf.4
+The simdeck library zero copy fields feature shall cover the simple array type
+for each  the SMP primitive types.
+}
       }
       {section %title=Bus fields
 The purpose of the feature is to be able to create many to one and many to many
 fields connections.
 - define something similar to matlab/simulinks bus features.
 - shall it be derive from Smp::IField (connectable by itself) or IComponent
-conectable with the ILink registrey.
+connectable with the link registry.
 - quite obvious to push many outputs into a single thing. But how to select
 cells when connecting inputs?
 
