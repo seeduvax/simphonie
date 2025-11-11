@@ -83,19 +83,70 @@ according their own needs.
 SMP L2 is to be considered in further development increment.
     }
     {section %title=Simphonie specific behaviors
+The SMP standard defines many expected behaviors. Some additional requirements
+are defined here to precise the expected behaviors regarding some specific
+configuration and services coordination.
       {section %title=Scheduler service
 {req %id=simph.sched.1
 The scheduler shall emit an event named {kw Scheduler_PreEventExecute} before
 executing the next scheduled entry point.
+
+{rational
+The scheduler and at least the time keeper services need to work together. Some
+designs choose to implement both service with a single class. Additional event
+enable to use distinct objects for each services and may be other service
+coordination.
+}
 }
 {req %id=simph.sched.2
 The scheduler shall emit an event named {kw Scheduler_PostEventExecute} just
 after the execution of each schduled entry point is completed. 
+
+{rational
+Some services may need to observe and react to the scheduler activity.
+}
 }
 {req %id=simph.sched.3
 The scheduler shall request simulator to hold simulation when there are no more
 events in the schedule queue.
 }
+The implementer is free to propose an override feature to let the scheduler wait
+for ever for events when it is useful to the simulator integrator.
+
+{req %id=simph.sched.4
+When scheduling an entry point, the simulation time value shall be saturated to
+stay in the simulation time data type range.
+
+{rational
+Simulation time overflow should not introduce a case where the event is trigger
+by the scheduler at a earlier simulation time than it would be if simulation
+time had a wider range.
+}
+}
+
+{req %id=simph.sched.5
+When an entry point is scheduled to run at a simulation time value above or
+equal to the maximum valid value for the simulation time, the scheduler shall
+not execute the entry point.
+
+{rational
+A saturated simulation time value value may have one of the two following meanings:
+  - entry point shall be run but at a simulation time not known yet to be
+    defined later using {kw SetEventSimulationTime}. This is useful to run entry
+    points applying some aperiodic scheduling rule while staying synchronous to
+    the scheduler.
+  - the schedule time is saturated because of an overflow and running the entry
+    point even at the latest reachable simulation date is not valid.
+}
+}
+Any on event or aperiodic scheduling feature can rely safely on such behavior
+even using a laternate scheduler implementation not strictly applying the above
+saturated simulation date policy requirements. To do so any simulation threshold
+time value can be defined, checked on simulation time change event to stop the
+simulation when it is reached ensuring the events scheduled later are not run.
+
+Handling properly date saturation remains a propoer way to ensure scheduling
+consistency even when no aperiodic or on event scheduling is considered.
       }
       {section %title=Smp::ISimulator implementation class design constraint
 {req %id=simph.isim.1
@@ -515,13 +566,15 @@ using the HDF5 file format (see {xref HDF5}).
   }
   
   {section %title=Design
-    {section %title=Mandatory services bundle
+    {section %title=Kernel, simulator and mandatory services bundle
+      {section %title=Service override
 The kernel library include an implementation for each of the mandatory SMP
 services:
+  - Resolver
   - Logger
   - Scheduler
-  - Resolver
   - TimeKeeper
+  - LinkRegistry
 
 The services are created on the simulator construction to ensure availability at
 the earliest stages of the simulator build.
@@ -564,8 +617,8 @@ return
 return
 @enduml
 #}
-    }
-    {section %title=Path parsing
+      }
+      {section %title=Resolver
 The bundled resolver parses the pathes to be resolved according the following state diagram.
 {fig %src=resolver_path_parse_state.png %title=Path parsing state diagram}
 {#
@@ -595,8 +648,8 @@ DotSep --> Name: a-zA-Z_
 DotSep --> [*]: c=null
 @enduml
 #}
-    }
-    {section %title=Scheduler / Time Keeper coordination
+      }
+      {section %title=Scheduler / Time Keeper coordination
 The scheduler / time keeper coordination relies on a specific event that is not
 defined in the SMP standard: {kw Scheduler_PreEventExecute} shall be registered
 in the event manager sometime during the simulator building phase. Then the
@@ -644,8 +697,8 @@ end
 Any alternate scheduler or time keeper service implementation may be used as
 soon the {kw Scheduler_PreEventExecute} event is handled appling the policy
 defined above in this section. 
-    }
-    {section %title=Simulation start / stop control
+      }
+      {section %title=Simulation start / stop control
 According to the SMP standard, the simulator shall emit events when starting and
 stopping the simulation:
   - on simulation start request, if the current state allows it:
@@ -735,159 +788,60 @@ Scheduler -> SchedulerThread!!
 return
 @enduml
 #}
-    }
-    {section %title=Data propagation implicit schedule
+      }
+      {section %title=Data propagation implicit schedule
 When an entry point execution is completed, each of its owner's output field
 Push method is invoked to forward the possibly updated data to each connected
 input field. 
-    }
-    {section %title=Meta scheduler
-      {section %title=Static architecture, role and responsibility
-The meta scheduler is an optional service providing on event scheduling policies
-but delegating the execution of the entry points to the kernel's scheduler. 
-
-{fig %src=MetaScheduler_class_uml.png %title=Meta scheduler class diagram}
+      }
+      {section %title=Scheduling Service
+{fig %src=Scheduler_class.png %title=Scheduler Architecture}
 {#
-@startuml MetaScheduler_class_uml.png
+@startuml Scheduler_class.png
+package simphonie::kern {
+class Scheduler <<Component>> <<Runnable>> <<EntryPointPublisher>> <<IScheduler>> {
 
-class smpdk.Service {
 }
+class Schedule <<Object>> {
 
-class MetaScheduler {
-+ [ep] preExec()
-+ [ep] postExec()
-+ GetSchedule(ev: EventId): Schedule
-+ NewSchedule(ep: Smp::IEntryPoint): Schedule
 }
-
-interface IScheduleListener {
-+ notifyExecBegin(s: Schedule)
-+ notifyExecEnd(s: Schedule)
 }
-
-class Schedule {
-+ [ep] activate()
-+ [ep] deactivate()
-- eventId: Smp.EventId
-+ Schedule(ep: Smp.IEntryPoint, scheduler: Smp.Services.IScheduler)
-+ setStartDelay(delay: Smp.Duration)
-+ setPeriod(period: Smp.Duration)
-+ setAperiodic()
-+ setCount()
+package simdeck::smpext {
+interface IObservableScheduler <<IComponent>> {
+  +RegisterObserver(observer : ISchedulerObserver*)
+  +RemoveObserver(observer : ISchedulerObserver*)
+  +GetSchedule() : const ISchedule*
 }
-
-smpdk.Service <|-- MetaScheduler
-MetaScheduler *- "*" Schedule
-MetaScheduler *-- "*" IScheduleListener
-Schedule o- "1" Smp.Services.IScheduler
+interface ISchedulerObserver {
+  +NotifySheduled(event : const ISchedule*)
+  +NotifyCompleted(eventId : Smp::Services::EventId)
+  +NotifyCanceled(eventId : Smp::Services::EventId)
+}
+interface ISchedule <<IObject>> {
+  +GetId() : Smp::Services::EventId
+  +GetEP() : const Smp::IEntryPoint*
+  +GetTime() : Smp::Duration
+  +GetStartEventId() : Smp::Services::EventId
+  +GetStopEventId() : Smp::Services::EventId
+  +GetPeriod() : Smp::Duration
+  +GetRepeat() : Smp::Int64
+  +GetActivationCounter() : Smp::Int64
+  +IsCompleted() : Smp::Bool
+}
+interface ISchedulerOnEvent {
+  +SetEventStartOnEvent(eventId : Smp::Services::EventId, triggerEventId : Smp::Services::EventId)
+  +SetEventStopOnEvent(eventId : Smp::Services::EventId, triggerEventId : Smp::Services::EventId)
+}
+}
+Scheduler .up.|> IObservableScheduler
+Scheduler .up.|> ISchedulerOnEvent
+Scheduler *.up. ISchedulerObserver : "child"
+Schedule .up.|> ISchedule
+Scheduler *.. Schedule : "0..*"
 @enduml
 #}
       }
-      {section %title=Entry point execution monitoring
-{fig %src=ep_exec_monitoring_seq.png %title=Entry point execution monitoring sequence}
-{#
-@startuml ep_exec_monitoring_seq.png
-participant Scheduler
-participant EventManager
-participant MetaScheduler
-participant IScheduleListener
-participant IEntryPoint
-
-loop scheduler thread
-  Scheduler -> EventManager++: Emit("PreExec")
-    EventManager -> MetaScheduler++: preExec()
-      MetaScheduler -> Scheduler++: GetCurrentEvent()
-      return
-      loop for each listener
-        MetaScheduler -> IScheduleListener++: notifyExecBegin(s)
-	return
-      end
-    return
-  return
-  Scheduler -> IEntryPoint++: Execute()
-  return
-  Scheduler -> EventManager++: Emit("PostExec")
-    EventManager -> MetaScheduler++: postExec()
-      loop for each listener
-        MetaScheduler -> IScheduleListener++: notifyExecEnd(s)
-	return
-      end
-    return
-  return
-end
-@enduml
-#}
-
-      }
-      {section %title=On event periodic schedule activation and deactivation
-
-{fig %src=ep_exec_monitoring_seq.png %title=Entry point execution monitoring sequence}
-{#
-@startuml ep_exec_monitoring_seq.png
-participant Anything
-participant EventManager
-participant Schedule
-participant Scheduler
-
-group activation
-  Anything -> EventManager++: Emit("evActivate")
-    EventManager -> Schedule++: activate()
-      Schedule -> Scheduler++: SetEventSimulationTime(eventId, startDelay)
-      return
-    return
-  return
-end
-group deactivation
-  Anything -> EventManager++: Emit("evDeactivate")
-    EventManager -> Schedule++: deactivate()
-      Schedule -> Scheduler++: SetEventSimulationTime(eventId, END_OF_SIM_TIME)
-      return
-    return
-  return
-end
-@end
-#}
-
-
-      }
-      {section %title=aperiodic out of clock scheduling
-        {section %title=Simulation time change triggered by external event
-Implementation strategy does not need a specific scheduler. The aperiodic and
-asynchronous event will synchronized the as fast as possible default scheduler behavior through the following strategy based on two entry points:
-  - 1st, a synchronization entry point that shall wait (block) until the next
-    event that shall trigger the simulation time change. This synchronization
-    entry point should be scheduled at a simulation time when all activities to
-    be done before the expected event shall be completed. In most case when the
-    simulation time is related to external events, the release entry point
-    should be scheduled at Zulu time of the release event, making the simulation
-    time reached the release event zulu time.
-  - 2nd, a time change entry point. This entry point does almost nothing, it is
-    scheduled by the previous entry point, once the event is received an
-    deblocking the waiting state at the simulation time value equal to the
-    simulation time supposed to be reached when the synchronization event is
-    received. This quite dummy entry point jut let have in the schedule queue
-    list an event at the right time to trigger the simulation time change at the
-    right value, even when no events are previously scheduled for the to reach
-    simulation time. It finally reschedule the synchronisation entry point at
-    the simulation time from which no more entry points are scheduled until the
-    next synchronisation time.
-        }
-        {section %title=Entry points scheduled on data event
-In order to let entry point be activated (and consume CPU ressource) only when
-relevent, that is when the computed output shall be refreshed because of the
-update of an input, some specific Smp::IField subclass shall be implemented to
-override the SetValue() method. Then when a value is pushed by a connected
-output field: 
-   - an assigned entry point is scheduled if any.
-   - this schedule is requested on various condition with any valid schedule option
-     - only when value is change and not when new value is equel to current value.
-     - immediate, now or delay.
-     - with a period and repetition count.
-   - {tbd how to restrict the schedule when many fields are assign to a single entry point and avoid many shcedule of the same entry point at the same time}.
-        }
-      }
-    }
-    {section %title=Logging service
+      {section %title=Logging service
 The logging service is splitted into a front-end logger (c.f. class named
 Logger) and several back-ends ones. The front-end logger acts as an abstraction
 layer as, regardless of how the log messages are processed, the system has to
@@ -948,55 +902,8 @@ Logger *.. ILoggerBackend : "child"
 note top of LoggerNetwork : Not Implemented
 @enduml
 #}
-}
-{section %title=Scheduling Service
-{fig %src=Scheduler_class.png %title=Scheduler Architecture}
-{#
-@startuml Scheduler_class.png
-package simphonie::kern {
-class Scheduler <<Component>> <<Runnable>> <<EntryPointPublisher>> <<IScheduler>> {
-
-}
-class Schedule <<Object>> {
-
-}
-}
-package simdeck::smpext {
-interface IObservableScheduler <<IComponent>> {
-  +RegisterObserver(observer : ISchedulerObserver*)
-  +RemoveObserver(observer : ISchedulerObserver*)
-  +GetSchedule() : const ISchedule*
-}
-interface ISchedulerObserver {
-  +NotifySheduled(event : const ISchedule*)
-  +NotifyCompleted(eventId : Smp::Services::EventId)
-  +NotifyCanceled(eventId : Smp::Services::EventId)
-}
-interface ISchedule <<IObject>> {
-  +GetId() : Smp::Services::EventId
-  +GetEP() : const Smp::IEntryPoint*
-  +GetTime() : Smp::Duration
-  +GetStartEventId() : Smp::Services::EventId
-  +GetStopEventId() : Smp::Services::EventId
-  +GetPeriod() : Smp::Duration
-  +GetRepeat() : Smp::Int64
-  +GetActivationCounter() : Smp::Int64
-  +IsCompleted() : Smp::Bool
-}
-interface ISchedulerOnEvent {
-  +SetEventStartOnEvent(eventId : Smp::Services::EventId, triggerEventId : Smp::Services::EventId)
-  +SetEventStopOnEvent(eventId : Smp::Services::EventId, triggerEventId : Smp::Services::EventId)
-}
-}
-Scheduler .up.|> IObservableScheduler
-Scheduler .up.|> ISchedulerOnEvent
-Scheduler *.up. ISchedulerObserver : "child"
-Schedule .up.|> ISchedule
-Scheduler *.. Schedule : "0..*"
-@enduml
-#}
-}
-{section %title=Storing System
+      }
+      {section %title=Storing System
 {fig %src=StorageReader_state.png %title=StorageReader State Machine}
 {#
 @startuml StorageReader_state.png
@@ -1065,6 +972,238 @@ FIELD_VALUE --> FIELD_VALUE : value
 FIELD_VALUE --> FIELDS_CONTENT : skip
 @enduml
 #}
+      }
+    }
+    {section %title=Additional services and components
+      {section %title=Meta scheduler
+        {section %title=Static architecture, role and responsibility
+The meta scheduler is an optional service providing on event scheduling policies
+but delegating the execution of the entry points to the kernel's scheduler. 
+
+{fig %src=MetaScheduler_class_uml.png %title=Meta scheduler class diagram}
+{#
+@startuml MetaScheduler_class_uml.png
+
+class smpdk.Service {
 }
+
+class MetaScheduler {
++ [ep] preExec()
++ [ep] postExec()
++ GetSchedule(ev: EventId): Schedule
++ NewSchedule(ep: Smp::IEntryPoint): Schedule
+}
+
+interface IScheduleListener {
++ notifyExecBegin(s: Schedule)
++ notifyExecEnd(s: Schedule)
+}
+
+class Schedule {
++ [ep] activate()
++ [ep] deactivate()
+- eventId: Smp.EventId
++ Schedule(ep: Smp.IEntryPoint, scheduler: Smp.Services.IScheduler)
++ setStartDelay(delay: Smp.Duration)
++ setPeriod(period: Smp.Duration)
++ setAperiodic()
++ setCount()
+}
+
+smpdk.Service <|-- MetaScheduler
+MetaScheduler *- "*" Schedule
+MetaScheduler *-- "*" IScheduleListener
+Schedule o- "1" Smp.Services.IScheduler
+@enduml
+#}
+        }
+        {section %title=Entry point execution monitoring
+{fig %src=ep_exec_monitoring_seq.png %title=Entry point execution monitoring sequence}
+{#
+@startuml ep_exec_monitoring_seq.png
+participant Scheduler
+participant EventManager
+participant MetaScheduler
+participant IScheduleListener
+participant IEntryPoint
+
+loop scheduler thread
+  Scheduler -> EventManager++: Emit("PreExec")
+    EventManager -> MetaScheduler++: preExec()
+      MetaScheduler -> Scheduler++: GetCurrentEvent()
+      return
+      loop for each listener
+        MetaScheduler -> IScheduleListener++: notifyExecBegin(s)
+	return
+      end
+    return
+  return
+  Scheduler -> IEntryPoint++: Execute()
+  return
+  Scheduler -> EventManager++: Emit("PostExec")
+    EventManager -> MetaScheduler++: postExec()
+      loop for each listener
+        MetaScheduler -> IScheduleListener++: notifyExecEnd(s)
+	return
+      end
+    return
+  return
+end
+@enduml
+#}
+
+        }
+        {section %title=On event periodic schedule activation and deactivation
+An entry point expected to run periodically but only starting from an event
+until another shell be scheduled to the saturated simulation time in order to
+not be executed before simulation end. The schedule activate and deactivate
+entry points shall subscribe the events activating and deactivating the
+schedule. On activation the event simulation time is updated to the first
+activation relative date following the start event. From this action the
+schedule become a regular periodic schedule. On a stop event, the schedule event
+simulation time is updated again, setting it to the simulation date saturated
+value and the the entry point is no more executed.
+
+{fig %src=on_event_periodic_schedule_seq.png %title=Entry point execution monitoring sequence}
+{#
+@startuml on_event_periodic_schedule_seq.png
+participant Anything
+participant EventManager
+participant Schedule
+participant Scheduler
+
+group activation
+  Anything -> EventManager++: Emit("evActivate")
+    EventManager -> Schedule++: activate()
+      Schedule -> Scheduler++: SetEventSimulationTime(eventId, startDelay)
+      return
+    return
+  return
+end
+group deactivation
+  Anything -> EventManager++: Emit("evDeactivate")
+    EventManager -> Schedule++: deactivate()
+      Schedule -> Scheduler++: SetEventSimulationTime(eventId, END_OF_SIM_TIME)
+      return
+    return
+  return
+end
+@end
+#}
+        }
+        {section %title=Aperiodic schedule
+In a similar way than the schedule case described in previous section, an
+aperiodic schedule define its simulation time at the saturated time value in
+order to be inserted in the schedule queue but not being executed. It is also
+defined as periodic and the period duration is also set to the saturated
+simulation time. Doing so, when executed, the scheduler will push the event at
+the end of its queue list at a time when it is no more executed. On the bound
+aperiodic event that shall trigger the entry point, the schedule event
+simulation time is set to the relative date from the triggering event. 
+
+{fig %src=aperiodic_schedule_seq.png %title=Entry point execution monitoring sequence}
+{#
+@startuml aperiodic_schedule_seq.png
+participant Anything
+participant EventManager
+participant Schedule
+participant Scheduler
+participant EntryPoint
+
+group aperiodic schedule creation
+  Anything -> Schedule**: new
+    Schedule -> Simulator++: AddSimulationTimeEvent(END_OF_SIM_TIME)
+    return
+  Anything -> Schedule++: setAperiodic()
+    Schedule -> Simulator++: SetEventCycleTime(END_OF_SIM_TIME)
+    return
+  return
+end
+
+group aperiodic schedule creation
+  Anything -> EventManager++: Emit("trigEv")
+    EventManager -> Schedule++: activate()
+      Schedule -> Scheduler++: SetEventSimulationTime(eventId, startDelay)
+      return
+    return
+  return
+end
+
+group scheduler thread
+  Scheduler -> EntryPoint++: Execute()
+  return
+  Scheduler -> Scheduler++: SetEventCycleTime(END_OF_SIM_TIME)
+  return
+  note right
+In reaction of the saturated period, the event is pushed further the
+simulation end. It will be moved back on occurence of another event triggering
+a simulation time change to a reachable date.
+  end note
+end
+
+@enduml
+#}
+        }
+{# TODO The next section is probably made obsolete by the previous section
+  about on evenet and aperiodic scheduling.
+
+        {section %title=aperiodic out of clock scheduling
+          {section %title=Simulation time change triggered by external event
+Implementation strategy does not need a specific scheduler. The aperiodic and
+asynchronous event will synchronized the as fast as possible default scheduler behavior through the following strategy based on two entry points:
+  - 1st, a synchronization entry point that shall wait (block) until the next
+    event that shall trigger the simulation time change. This synchronization
+    entry point should be scheduled at a simulation time when all activities to
+    be done before the expected event shall be completed. In most case when the
+    simulation time is related to external events, the release entry point
+    should be scheduled at Zulu time of the release event, making the simulation
+    time reached the release event zulu time.
+  - 2nd, a time change entry point. This entry point does almost nothing, it is
+    scheduled by the previous entry point, once the event is received an
+    deblocking the waiting state at the simulation time value equal to the
+    simulation time supposed to be reached when the synchronization event is
+    received. This quite dummy entry point jut let have in the schedule queue
+    list an event at the right time to trigger the simulation time change at the
+    right value, even when no events are previously scheduled for the to reach
+    simulation time. It finally reschedule the synchronisation entry point at
+    the simulation time from which no more entry points are scheduled until the
+    next synchronisation time.
+          }
+          {section %title=Entry points scheduled on data event
+In order to let entry point be activated (and consume CPU ressource) only when
+relevent, that is when the computed output shall be refreshed because of the
+update of an input, some specific Smp::IField subclass shall be implemented to
+override the SetValue() method. Then when a value is pushed by a connected
+output field: 
+   - an assigned entry point is scheduled if any.
+   - this schedule is requested on various condition with any valid schedule option
+     - only when value is change and not when new value is equel to current value.
+     - immediate, now or delay.
+     - with a period and repetition count.
+   - {tbd how to restrict the schedule when many fields are assign to a single entry point and avoid many shcedule of the same entry point at the same time}.
+          }
+        }
+#}
+      }
+    }
+  }
+  {section %title=Validation plan
+    {section %title=Validation strategy
+As much as possible automated testing.
+    }
+    {section %title=Automated test index
+{?include %src=testdefindex.heml}
+    }
+  }
+  {section %title=User guide
+  }
+  {appendices
+    {section %title=Requirement references
+{index %type=req}
+    }
+    {section %title=Open points
+{index %type=tbd}
+{index %type=tbc}
+    }
   }
 }
