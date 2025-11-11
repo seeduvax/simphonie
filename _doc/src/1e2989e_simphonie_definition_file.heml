@@ -121,6 +121,20 @@ constraints to keep its simulation system able to run properly:
    registry replacement can be set making possible the loss of the early type
    registrations.
 
+{req %id=simph.isim.2
+The simphonie Smp::ISimulator implementation shall allow to create many instance
+in the same process without side effects from on instance to another.
+}
+This requirement does not forbid to link the many simulator instances together
+as soon it is done on purpose, for instance for:
+ - start/stop the instances together.
+ - synchronize the scheduler of each instances with each other.
+ - propagate data or events from one instance to another.
+On purpose means the many simulator instances shall be explicitly configured to
+do so. The foreseen use cases for such simulator instances linking are,
+multithreaded simulation, co-simulation running composites models of a complex
+system that can't fit a single threaded simulation.
+
       }
       {section %title=Logging service
 {req %id=simph.log.1
@@ -225,29 +239,22 @@ Designer is free to build a composite logging service where all optional
 features are handled by a subcomponent and activated when the related component
 is added to the service.
       }
-      {section %title=Design constraints
-{req %id=simph.dsg.1
-The simphonie Smp::ISimulator implementation shall allow to create many instance
-in the same process without side effects from on instance to another.
-}
-This requirement does not forbid to link the many simulator instances together
-as soon it is done on purpose, for instance for:
- - start/stop the instances together.
- - synchronize the scheduler of each instances with each other.
- - propagate data or events from one instance to another.
-On purpose means the many simulator instances shall be explicitly configured to
-do so. The foreseen use cases for such simulator instances linking are,
-multithreaded simulation, co-simulation running composites models of a complex
-system that can't fit a single threaded simulation.
-
-      }
     }
-    {section %title=SMP complements and extension
-Here are defined some extended SMP features, that are features not defined by
-the SMP standard but considered to be needed to create a full featured
-simulator.
+    {section %title=Additional services and components
+      {section %title=Motivation and recommendations
+Implementing strictly the ECSS SMP standard is not enough to deliver a full
+featured simulation system. Additional services are needed. Such are omitted
+mostly because it does not engage simulation model interoperability and exchange
+capabilities that are the main purpose of the standard. Even there are no
+constraints at standard level, the implementer in the frame of the simphonie
+project shall consider to rely as much as possible on the standard itself with
+as less as possible coupling on the specific infrastructure design from
+simphonie. This means those service should be package in a library that can be
+loaded into any SMP infrastructure to enrich it the same way than it is as
+bundled with simphonie.
+      }
       {section %title=Design and implementation constraints
-{req %id=simph.esmp.1
+{req %id=simph.svclib.1
 The extended SMP feature libraries shall not link with the simphonie's kernel
 library.
 
@@ -261,25 +268,11 @@ be shared, but the extended service shall rely only on the standard SMP
 interface when interacting with the simulator, models, components and other
 services to be hopefully reusable with any SMP compliant simulation
 infrastructure.
-
-{req %id=simph.esmp.2
-The SMP complements and extension shall be defined as interface (C++ pure
-virtual class headers)  only as the SMP standard itself is.
-}
-
-{req %id=simph.esmp.3
-The SMP complements and extension shall not derive from the SMP interfaces.
-}
-The implementers shall remain as free as possible for the design, a remains to
-be able to decide when a single class shall implements many interface or add
-the optional extended features by delegation or composition.
-
-
       }
       {section %title=On event scheduling
-{req %id=simph.esmp.fsched.1
-Simphonie shall let the simulator integrator define entry point scheduling based
-on field related events.
+{req %id=simph.evsched.1
+The event based scheduling service shall let the simulator integrator define
+entry point scheduling based on field related events.
 }
 This feature shall let define aperiodic entry points activation. The following
 event kinds and scheduling policies shall be considered:
@@ -291,7 +284,7 @@ event kinds and scheduling policies shall be considered:
   - when the entry point activation is requested by many events at the same 
     simulation time, the entry point shall be scheduled only once. Said another
     way, the entry point should not be scheduled several times for the same 
-   simulation time. 
+    simulation time. 
 
 The above policy may be refined as more formal requirement in future editions.
 The main motivation for such feature is to trigger computation only when
@@ -299,10 +292,51 @@ relevant on external asynchronous and aperiodic stimulation. The SMP discrete
 event simulation kernel may then handle computation pipelines according to any
 on-demand strategy similar to the very common observer/observable patterns or
 publish/subscribe patterns.
+
+{req %id=simph.evsched.2
+An optional device listener shall periodically poll external signals (such as
+hardware interrupt) to activate the execution of scheduled entry points bound
+to the polled signals.
+
+{rational
+In the context of hardware in the loop simulation, some data handling models are
+expected to run aperiodically to fetch external inputs data only when available.
+}
+}
+
+{req %id=simph.evsched.3
+The event based scheduling service shall let the simulator integrator define
+entry point scheduling that are activated and deactivated on event.
+
+{rational
+To optimise the processor use, the simulator integrator shall be able to fully
+deactivated models having no effect during some phase of the simulation (too far
+objects, sleeping objects or anything similar).
+}
+}
+
+{req %id=simph.evsched.4
+The event based scheduling service shall ensure the execution of entry points
+activated on events match a global schedule sequence.
+
+{rational
+For data flow consistency and simulation causality, the simulator integrator
+needs to master the overall entry point execution order, even when some entry
+points are switched active or inactive.
+}
+}
+For instance, in a schedule list containing the entry points {kw A}, {kw B}, {kw C}
+inserted in that order, at the same date and the same period, but {kw B} to be
+active only from the event {kw ev1} until the event {kw ev2}, the expected
+effective entry point execution order is:
+  - before {kw ev1}: {kw A}, {kw C}
+  - after {kw ev1} and before {kw ev2}: {kw A}, {kw B}, {kw C}  
+  - after after {kw ev2}: {kw A}, {kw C}  
+
       }
-      {section %title=Scheduling and entry point activation monitoring
-{req %id=simph.esmp.msched.1
-the schedule monitoring service shall include a method returning the actual
+      {section %title=Scheduling monitoring
+{req %id=simph.msched.1
+The schedule monitoring service shall include a method returning the actual
 state of the scheduler as a schedule list.
 }
 Each entry of the schedule list:
@@ -317,19 +351,17 @@ returned, since when the simulation is running, the scheduler state and its
 internal scheduled event list evolves.
 
       }
-    }
-    {section %title=Bundled service
-      {section %title=Motivation and recommendations
-Implementing strictly the ECSS SMP standard is not enough to deliver a full
-featured simulation system. Additional services are needed. Such are omitted
-mostly because it does not engage simulation model interoperability and exchange
-capabilities that are the main purpose of the standard. Even there are no
-constraints at standard level, the implementer in the frame of the simphonie
-project shall consider to rely as much as possible on the standard itself with
-as less as possible coupling on the specific infrastructure design from
-simphonie. This means those service should be package in a library that can be
-loaded into any SMP infrastructure to enrich it the same way than it is as
-bundled with simphonie.
+      {section %title=Entry point activation monitoring
+{req %id=simph.msched.2
+The scheduler shall emit events before and after each entry point execution to
+enable the tracking of the simulator activity.
+
+{rational
+When debugging and validating a real time simulator, being able to measure the
+execution duration of each entry point is mandatory to identify which models are
+not fast enough to meet the simulator's deadline requirements. 
+}
+}
       }
       {section %title=Simulation stop control
 The simulation stop control service purpose is to let a simulator end the
@@ -494,7 +526,7 @@ services:
 The services are created on the simulator construction to ensure availability at
 the earliest stages of the simulator build.
 
-However those service shall be replaceable {req %id=simph.esmp.svc.1}, meaning
+However those service shall be replaceable {req simph.svc.2}, meaning
 a user may substitute anyone with its own implementation using the {kw AddService}
 method. To do so, this method dynamically checks the type of the service to add
 for each mandatory service type. When it matches a type, the simphonie's default
@@ -623,7 +655,7 @@ stopping the simulation:
     - first {kw SMP_LeaveExecuting}
     - then {kw SMP_EnterStandby}
 
-On start request, the simulator preforms the follwing actions:
+On start request, the simulator preforms the following actions:
   - schedule a start entry point immediately (to be first to execute).
   - emit the {kw SMP_LeaveStandby} event.
   - emit the {kw SMP_EnterExecuting} event.
@@ -644,7 +676,7 @@ argument:
 
 To do so, the simulator on Hold request, according the boolean
 argument, schedules its own stop processing entry point:
-  - immediatly (being the first entry point in the schedule list),
+  - immediately (being the first entry point in the schedule list),
     when argument is true.
   - at simulation time now (being the last for the current simulation time in
     the schedule list), when the Hold argument is false.
@@ -709,8 +741,117 @@ When an entry point execution is completed, each of its owner's output field
 Push method is invoked to forward the possibly updated data to each connected
 input field. 
     }
-    {section %title=aperiodic out of clock scheduling
-      {section %title=Simulation time change triggered by external event
+    {section %title=Meta scheduler
+      {section %title=Static architecture, role and responsibility
+The meta scheduler is an optional service providing on event scheduling policies
+but delegating the execution of the entry points to the kernel's scheduler. 
+
+{fig %src=MetaScheduler_class_uml.png %title=Meta scheduler class diagram}
+{#
+@startuml MetaScheduler_class_uml.png
+
+class smpdk.Service {
+}
+
+class MetaScheduler {
++ [ep] preExec()
++ [ep] postExec()
++ GetSchedule(ev: EventId): Schedule
++ NewSchedule(ep: Smp::IEntryPoint): Schedule
+}
+
+interface IScheduleListener {
++ notifyExecBegin(s: Schedule)
++ notifyExecEnd(s: Schedule)
+}
+
+class Schedule {
++ [ep] activate()
++ [ep] deactivate()
+- eventId: Smp.EventId
++ Schedule(ep: Smp.IEntryPoint, scheduler: Smp.Services.IScheduler)
++ setStartDelay(delay: Smp.Duration)
++ setPeriod(period: Smp.Duration)
++ setAperiodic()
++ setCount()
+}
+
+smpdk.Service <|-- MetaScheduler
+MetaScheduler *- "*" Schedule
+MetaScheduler *-- "*" IScheduleListener
+Schedule o- "1" Smp.Services.IScheduler
+@enduml
+#}
+      }
+      {section %title=Entry point execution monitoring
+{fig %src=ep_exec_monitoring_seq.png %title=Entry point execution monitoring sequence}
+{#
+@startuml ep_exec_monitoring_seq.png
+participant Scheduler
+participant EventManager
+participant MetaScheduler
+participant IScheduleListener
+participant IEntryPoint
+
+loop scheduler thread
+  Scheduler -> EventManager++: Emit("PreExec")
+    EventManager -> MetaScheduler++: preExec()
+      MetaScheduler -> Scheduler++: GetCurrentEvent()
+      return
+      loop for each listener
+        MetaScheduler -> IScheduleListener++: notifyExecBegin(s)
+	return
+      end
+    return
+  return
+  Scheduler -> IEntryPoint++: Execute()
+  return
+  Scheduler -> EventManager++: Emit("PostExec")
+    EventManager -> MetaScheduler++: postExec()
+      loop for each listener
+        MetaScheduler -> IScheduleListener++: notifyExecEnd(s)
+	return
+      end
+    return
+  return
+end
+@enduml
+#}
+
+      }
+      {section %title=On event periodic schedule activation and deactivation
+
+{fig %src=ep_exec_monitoring_seq.png %title=Entry point execution monitoring sequence}
+{#
+@startuml ep_exec_monitoring_seq.png
+participant Anything
+participant EventManager
+participant Schedule
+participant Scheduler
+
+group activation
+  Anything -> EventManager++: Emit("evActivate")
+    EventManager -> Schedule++: activate()
+      Schedule -> Scheduler++: SetEventSimulationTime(eventId, startDelay)
+      return
+    return
+  return
+end
+group deactivation
+  Anything -> EventManager++: Emit("evDeactivate")
+    EventManager -> Schedule++: deactivate()
+      Schedule -> Scheduler++: SetEventSimulationTime(eventId, END_OF_SIM_TIME)
+      return
+    return
+  return
+end
+@end
+#}
+
+
+      }
+      {section %title=aperiodic out of clock scheduling
+        {section %title=Simulation time change triggered by external event
 Implementation strategy does not need a specific scheduler. The aperiodic and
 asynchronous event will synchronized the as fast as possible default scheduler behavior through the following strategy based on two entry points:
   - 1st, a synchronization entry point that shall wait (block) until the next
@@ -730,8 +871,8 @@ asynchronous event will synchronized the as fast as possible default scheduler b
     simulation time. It finally reschedule the synchronisation entry point at
     the simulation time from which no more entry points are scheduled until the
     next synchronisation time.
-      }
-      {section %title=Entry points scheduled on data event
+        }
+        {section %title=Entry points scheduled on data event
 In order to let entry point be activated (and consume CPU ressource) only when
 relevent, that is when the computed output shall be refreshed because of the
 update of an input, some specific Smp::IField subclass shall be implemented to
@@ -743,6 +884,7 @@ output field:
      - immediate, now or delay.
      - with a period and repetition count.
    - {tbd how to restrict the schedule when many fields are assign to a single entry point and avoid many shcedule of the same entry point at the same time}.
+        }
       }
     }
     {section %title=Logging service
