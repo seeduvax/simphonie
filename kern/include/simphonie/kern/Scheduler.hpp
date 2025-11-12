@@ -16,9 +16,13 @@
 #include "Smp/Services/ITimeKeeper.h"
 #include "simdeck/Component.hpp"
 #include "simdeck/EntryPointPublisher.hpp"
+
+/* TODO: about what's commented and related to IObservableScheduler:
+ * Design thinking still in progress. Scheduler observability still under study
+ * and actual implementation is removed for now.
 #include "simdeck/smpext/IObservableScheduler.hpp"
 #include "simdeck/smpext/ISchedulerObserver.hpp"
-#include "simdeck/smpext/ISchedulerOnEvent.hpp"
+ */
 #include "simphonie/sys/Synchro.hpp"
 #include "simphonie/sys/Thread.hpp"
 
@@ -29,12 +33,13 @@ using namespace simdeck;
 class TimeKeeper;
 class Schedule;
 
+#define DURATION_MAX INT64_MAX
+
 class Scheduler : public Component,
                   virtual public simphonie::sys::Runnable,
                   virtual public EntryPointPublisher,
-                  virtual public Smp::Services::IScheduler,
-                  virtual public smpext::ISchedulerOnEvent,
-                  virtual public smpext::IObservableScheduler {
+                  virtual public Smp::Services::IScheduler  //,
+/* virtual public smpext::IObservableScheduler */ {
 public:
     Scheduler(Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
     virtual ~Scheduler();
@@ -57,17 +62,16 @@ public:
     void SetEventZuluTime(Smp::Services::EventId eventId, Smp::DateTime zuluTime) override;
     void SetEventCycleTime(Smp::Services::EventId event, Smp::Duration cycleTime) override;
     void SetEventRepeat(Smp::Services::EventId event, Smp::Int64 repeat) override;
-    void SetEventPriority(Smp::Services::EventId event, Smp::UInt64 priority); /* TODO add to simdeck::smpext::? */
-    void SetEventStartOnEvent(Smp::Services::EventId eventId, Smp::Services::EventId triggerEventId) override;
-    void SetEventStopOnEvent(Smp::Services::EventId eventId, Smp::Services::EventId triggerEventId) override;
     void RemoveEvent(Smp::Services::EventId event) override;
     Smp::Services::EventId GetCurrentEventId() const override;
     Smp::Duration GetNextScheduledEventTime() const override;
     Smp::Bool IsEventScheduled(Smp::Services::EventId eventId) const override;
 
-    void RegisterObserver(smpext::ISchedulerObserver* observer) override;
-    void RemoveObserver(smpext::ISchedulerObserver* observer) override;
-    const smpext::ISchedule* GetSchedule() const override;
+    /* TODO to be reconsidered
+        void RegisterObserver(smpext::ISchedulerObserver* observer) override;
+        void RemoveObserver(smpext::ISchedulerObserver* observer) override;
+        const smpext::ISchedule* GetSchedule() const override;
+     */
 
     /**
      * Run next schedule event.
@@ -85,7 +89,7 @@ protected:
     void connect() override;
 
     Smp::Services::EventId schedule(const Smp::IEntryPoint* entryPoint, Smp::Duration absoluteSimTime,
-                                    Smp::Duration cycleTime = 0, Smp::Int64 repeat = 0, Smp::UInt64 priority = 18);
+                                    Smp::Duration cycleTime = 0, Smp::Int64 repeat = 0);
     void schedule(Smp::Services::EventId event, Smp::Duration absoluteSimTime);
 
     void updateSchedule(Smp::Services::EventId eventId);
@@ -145,7 +149,16 @@ private:
     void epLeaveExecuting();
     Smp::IEntryPoint* _epLeaveExecuting;
 
-    std::vector<smpext::ISchedulerObserver*> _observers;
+    /* TODO to be reconsidered
+        std::vector<smpext::ISchedulerObserver*> _observers;
+    */
+    inline Smp::Duration getAbsoluteTime(Smp::Duration relativeTime) {
+        // saturate absolute simulation time to avoid overflow and possibly
+        // negative resulting value.
+        return relativeTime >= (DURATION_MAX - _timeKeeper->GetSimulationTime())
+                   ? DURATION_MAX
+                   : _timeKeeper->GetSimulationTime() + relativeTime;
+    }
 };
 
 } /* namespace kern */
