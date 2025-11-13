@@ -22,6 +22,7 @@
 #define EV_NAME_PRE_EVENT_EXECUTE "Scheduler_PreEventExecute"
 #define EV_NAME_POST_EVENT_EXECUTE "Scheduler_PostEventExecute"
 #define CONTAINER_NAME "Observers"
+#define IMMEDIATE_SIMULATION_TIME -1
 
 namespace simphonie {
 namespace kern {
@@ -95,7 +96,7 @@ void Scheduler::connect() {
 // ..........................................................
 Smp::Services::EventId Scheduler::AddImmediateEvent(const Smp::IEntryPoint* entryPoint) {
     // TODO shall insert first, check using simulation time -1 is OK there.
-    return schedule(entryPoint, -1, 0, 0);
+    return schedule(entryPoint, IMMEDIATE_SIMULATION_TIME, 0, 0);
 }
 // ..........................................................
 Smp::Services::EventId Scheduler::schedule(const Smp::IEntryPoint* entryPoint, Smp::Duration absoluteSimTime,
@@ -250,7 +251,12 @@ Smp::Services::EventId Scheduler::GetCurrentEventId() const {
 // ..........................................................
 inline Smp::Duration Scheduler::getNextScheduledEventTime() const {
     if (_activableCount > 0) {
-        return (*_scheduled.begin())->GetTime();
+        auto time=(*_scheduled.begin())->GetTime();
+        return time!=IMMEDIATE_SIMULATION_TIME?time:
+                // when next event is immediate event, the simulation
+                // time is unchanged then next event simulation time is
+                // the current time from the time keeper.
+                _timeKeeper->GetSimulationTime();
     }
     return DURATION_MAX;
 }
