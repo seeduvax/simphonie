@@ -62,7 +62,10 @@ void Schedule::run() {
         }
         if (_counterActivation != _repeat) {
             if (_period > 0) {
-                setTime(_absoluteSimTime + _period);
+                setTime(
+                    _period >= (DURATION_MAX - _absoluteSimTime) 
+                    ? DURATION_MAX
+                    : _absoluteSimTime + _period);
             }
         }
         else {

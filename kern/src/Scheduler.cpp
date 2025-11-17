@@ -24,6 +24,12 @@
 #define CONTAINER_NAME "Observers"
 #define IMMEDIATE_SIMULATION_TIME -1
 
+
+// TODO : to be reconsidered according the comments from the IScheduler header.
+//   - use of -1 as IMMEDIATE_SIMULATION_TIME magic value.
+//   - simulation time saturation policy. It is specified a simulation time too
+//     far shall throw an invalid simulation time exception.
+
 namespace simphonie {
 namespace kern {
 
@@ -299,16 +305,24 @@ const smpext::ISchedule* Scheduler::GetSchedule() const {
     return nullptr;
 }
 */
+#define TRACE(expr) std::cout << __FILE__ << ":" <<  __LINE__ << ":" << __FUNCTION__ << ": " << #expr << " = " << (expr) << std::endl;
 
 // ..........................................................
 void Scheduler::step() {
     Schedule* toRun = nullptr;
     {
         Synchronized(_mutex);
-        while (_run && getNextScheduledEventTime() >= DURATION_MAX) {
+TRACE(getNextScheduledEventTime());
+TRACE(DURATION_MAX);
+TRACE(getNextScheduledEventTime() >= DURATION_MAX)
+_run = getNextScheduledEventTime() < DURATION_MAX;
+TRACE(_run)
+/*        while (_run && getNextScheduledEventTime() >= DURATION_MAX) {
             logInfo("No activable event left. The scheduler has been paused.");
-            MonitorWait(_monitor);
+//            MonitorWait(_monitor);
+_run=false;
         }
+*/
         if (!_run) {
             // wait state exited because stop was requested
             return;
@@ -354,6 +368,9 @@ void Scheduler::run() {
     while (_run) {
         step();
     }
+TRACE(_run)
+    getSimulator()->Hold(true);
+TRACE(_run)
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -366,10 +383,12 @@ void Scheduler::epEnterExecuting() {
 }
 // ..........................................................
 void Scheduler::epLeaveExecuting() {
+TRACE(_run)
     {
         Synchronized(_mutex)
         _run=false;
     }
+TRACE(_run)
     _monitor.notify_all();
     if (_th != nullptr && !_th->isCurrentThread()) {
         _th->join();

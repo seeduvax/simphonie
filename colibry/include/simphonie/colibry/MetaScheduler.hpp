@@ -15,6 +15,8 @@
 #include "simdeck/CompositeService.hpp"
 #include "Smp/Services/IScheduler.h"
 #include "Smp/Services/ITimeKeeper.h"
+#include "Smp/ISimulator.h"
+#include "Smp/Services/IEventManager.h"
 
 #define SMP_DURATION_MAX INT64_MAX
 
@@ -57,6 +59,26 @@ public:
             _repeat=repeat;
             return *this;
         }
+        inline Schedule& setActive(bool active) {
+            _active=active;
+            return *this;
+        }
+        inline Schedule& subscribeActivateEvent(Smp::Services::EventId event) {
+            _metaScheduler->getSimulator()->GetEventManager()->Subscribe(event,_epActivate);
+            return *this;
+        }
+        inline Schedule& unsubscribeActivateEvent(Smp::Services::EventId event) {
+            _metaScheduler->getSimulator()->GetEventManager()->Unsubscribe(event,_epActivate);
+            return *this;
+        }
+        inline Schedule& subscribeDeactivateEvent(Smp::Services::EventId event) {
+            _metaScheduler->getSimulator()->GetEventManager()->Subscribe(event,_epDeactivate);
+            return *this;
+        }
+        inline Schedule& unsubscribeDeactivateEvent(Smp::Services::EventId event) {
+            _metaScheduler->getSimulator()->GetEventManager()->Unsubscribe(event,_epDeactivate);
+            return *this;
+        }
         void submit();
         inline Smp::Services::EventId getEventId() {
             return _eventId;
@@ -77,6 +99,7 @@ public:
         Smp::Int64 _repeat=0;
         Smp::IEntryPoint* _epActivate;
         Smp::IEntryPoint* _epDeactivate;
+        bool _active=true;
     };
 
     class IScheduleListener: public Smp::IObject {
