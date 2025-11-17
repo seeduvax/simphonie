@@ -19,7 +19,6 @@
 
 namespace simphonie {
 namespace colibry {
-#define TRACE(expr) std::cout << __FILE__ << ":" <<  __LINE__ << ":" << __FUNCTION__ << ": " << #expr << " = " << (expr) << std::endl;
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -34,27 +33,20 @@ MetaScheduler::MetaScheduler(Smp::String8 name, Smp::String8 description,
 }
 // ..........................................................
 MetaScheduler::~MetaScheduler() {
-TRACE(0)
     for (auto entry: _schedList) {
         delete entry.second;
     }
-TRACE(0)
     auto evMgr=getSimulator()->GetEventManager();
     if (evMgr!=nullptr) {
-TRACE(0)
 /*
+ * TODO check why this segfault in TestMetaScheduler
         // TODO service deletion order in the simulator may not be OK with that.
         evMgr->Unsubscribe(evMgr->QueryEventId(EV_NAME_PRE_EVENT_EXECUTE),_epPreEpExec);
-TRACE(0)
         evMgr->Unsubscribe(evMgr->QueryEventId(EV_NAME_POST_EVENT_EXECUTE),_epPostEpExec);
-TRACE(0)
 */
     }
-TRACE(0)
     delete _epPreEpExec;
-TRACE(0)
     delete _epPostEpExec;
-TRACE(0)
 }
 
 // --------------------------------------------------------------------
@@ -123,32 +115,25 @@ MetaScheduler::Schedule::~Schedule() {
     delete _epActivate;
     delete _epDeactivate;
 }
-#define TRACE(expr) std::cout << __FILE__ << ":" <<  __LINE__ << ":" << __FUNCTION__ << ": " << #expr << " = " << (expr) << std::endl;
 
 // ..........................................................
 void MetaScheduler::Schedule::submit() {
-TRACE(0)
     if (_eventId==-1) {
-TRACE((void*)_metaScheduler);
         _eventId=_metaScheduler->getScheduler()->AddSimulationTimeEvent(_ep,
             _active ? _simulationTime : _metaScheduler->getMaxSimTime(), _cycleTime, _repeat);
-TRACE(0)
     }
     else {
-TRACE(0)
         _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId, 
             _active ? _simulationTime : _metaScheduler->getMaxSimTime());
-TRACE(0)
         _metaScheduler->getScheduler()->SetEventCycleTime(_eventId, _cycleTime);
-TRACE(0)
         _metaScheduler->getScheduler()->SetEventRepeat(_eventId, _repeat);
-TRACE(0)
     }
 }
 // ..........................................................
 void MetaScheduler::Schedule::epActivate() {
     // TODO check SetEventSimulationTime also use relative time from now like
     // AddSimulationTimeEvent.
+    _active=true;
     _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId, _simulationTime);
 }
 // ..........................................................
@@ -157,6 +142,7 @@ void MetaScheduler::Schedule::epDeactivate() {
     // AddSimulationTimeEvent.
     // Deactivate the event by setting its next activation time at the end of
     // simulation time.
+    _active=false;
     _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId, _metaScheduler->getMaxSimTime());
 }
 // ..........................................................

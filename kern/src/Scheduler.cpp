@@ -42,8 +42,7 @@ Scheduler::Scheduler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
       _mutex(),
       _th(),
       _currentSchedule(nullptr),
-      _scheduled(),
-      _activableCount(0) {
+      _scheduled() {
     _epEnterExecuting=EntryPoint::Create("enterExecuting",
                                 "simulation enter execute event entry point", 
                                 this, &Scheduler::epEnterExecuting);
@@ -68,9 +67,6 @@ void Scheduler::schedule(Schedule* s, bool newSchedule) {
     {
         Synchronized(_mutex);
         _scheduled.insert(s);
-        if (!s->isWaiting()) {
-            _activableCount++;
-        }
     }
     /* TODO top be reconsidered
         if (newSchedule) {
@@ -83,8 +79,8 @@ void Scheduler::schedule(Schedule* s, bool newSchedule) {
 }
 
 void Scheduler::publish(Smp::IPublication* receiver) {
-    receiver->PublishField("activableCount", "Number of activable event in the scheduled queue.", &_activableCount,
-                           Smp::ViewKind::VK_All, false, false, true);
+    receiver->PublishField("autoStop", "Scheduler stops the simulation when no more entry points are scheduled.", &_autoStop,
+                           Smp::ViewKind::VK_All, false, true, false);
 }
 
 // ..........................................................
@@ -137,9 +133,6 @@ Schedule* Scheduler::findSchedule(Smp::Services::EventId event, bool remove) {
                 auto res = *it;
                 if (remove) {
                     _scheduled.erase(it);
-                    if (!res->isWaiting()) {
-                        _activableCount--;
-                    }
                 }
                 return res;
             }
@@ -256,7 +249,7 @@ Smp::Services::EventId Scheduler::GetCurrentEventId() const {
 }
 // ..........................................................
 inline Smp::Duration Scheduler::getNextScheduledEventTime() const {
-    if (_activableCount > 0) {
+    if (!_scheduled.empty()) {
         auto time=(*_scheduled.begin())->GetTime();
         return time!=IMMEDIATE_SIMULATION_TIME?time:
                 // when next event is immediate event, the simulation
@@ -305,28 +298,28 @@ const smpext::ISchedule* Scheduler::GetSchedule() const {
     return nullptr;
 }
 */
-#define TRACE(expr) std::cout << __FILE__ << ":" <<  __LINE__ << ":" << __FUNCTION__ << ": " << #expr << " = " << (expr) << std::endl;
 
 // ..........................................................
 void Scheduler::step() {
     Schedule* toRun = nullptr;
+    bool completed=false;
     {
         Synchronized(_mutex);
-TRACE(getNextScheduledEventTime());
-TRACE(DURATION_MAX);
-TRACE(getNextScheduledEventTime() >= DURATION_MAX)
-_run = getNextScheduledEventTime() < DURATION_MAX;
-TRACE(_run)
-/*        while (_run && getNextScheduledEventTime() >= DURATION_MAX) {
-            logInfo("No activable event left. The scheduler has been paused.");
-//            MonitorWait(_monitor);
-_run=false;
+        if (!_autoStop) {
+            while (_run && getNextScheduledEventTime() >= DURATION_MAX) {
+                logInfo("No activable event left. The scheduler has been paused.");
+                MonitorWait(_monitor);
+            }
         }
-*/
         if (!_run) {
             // wait state exited because stop was requested
             return;
         }
+        completed=getNextScheduledEventTime() >= DURATION_MAX;
+    }
+    if (_autoStop && completed) {
+        getSimulator()->Hold(true);
+        return;
     }
     _eventMgr->Emit(_preEventExecuteId);
     {
@@ -337,7 +330,6 @@ _run=false;
         if (_run && getNextScheduledEventTime() <= _timeKeeper->GetSimulationTime()) {
             _currentSchedule = *_scheduled.begin();
             _scheduled.erase(_scheduled.begin());
-            _activableCount--;
             toRun = _currentSchedule;
         }
     }
@@ -368,9 +360,6 @@ void Scheduler::run() {
     while (_run) {
         step();
     }
-TRACE(_run)
-    getSimulator()->Hold(true);
-TRACE(_run)
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -383,12 +372,10 @@ void Scheduler::epEnterExecuting() {
 }
 // ..........................................................
 void Scheduler::epLeaveExecuting() {
-TRACE(_run)
     {
         Synchronized(_mutex)
         _run=false;
     }
-TRACE(_run)
     _monitor.notify_all();
     if (_th != nullptr && !_th->isCurrentThread()) {
         _th->join();

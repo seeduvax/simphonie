@@ -105,7 +105,8 @@ private:
     Smp::Services::IEventManager* _eventMgr;
     Smp::Services::EventId _preEventExecuteId;
     Smp::Services::EventId _postEventExecuteId;
-    bool _run;
+    bool _run=false;
+    bool _autoStop=true;
     mutable std::mutex _mutex; /* mutable keryword use to be able to modify the mutex from const functions too */
     std::condition_variable _monitor;
     std::unique_ptr<simphonie::sys::Thread> _th;

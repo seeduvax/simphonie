@@ -21,7 +21,6 @@
 #define EVENT1 "TestEvent1"
 #define EVENT2 "TestEvent2"
 
-#define TRACE(expr) std::cout << __FILE__ << ":" <<  __LINE__ << ":" << __FUNCTION__ << ": " << #expr << " = " << (expr) << std::endl;
 
  
  // ----------------------------------------------------------
@@ -75,8 +74,6 @@
 
         void epHoldOnTimeElapsed() {
             auto sim=getSimulator();
-TRACE(_endSimTime);
-TRACE(sim->GetTimeKeeper()->GetSimulationTime());
             if (sim->GetTimeKeeper()->GetSimulationTime()>=_endSimTime) {
                 sim->Hold(true);
             }
@@ -130,9 +127,7 @@ public:
     }
      
     void tearDown() {
-TRACE(0)
         delete _sim;
-TRACE(0)
     }
  
  
@@ -147,9 +142,7 @@ TRACE(0)
         scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("ev1"),3001); 
         // schedule one ep periodically and on event
         auto evMgr=_sim->GetEventManager();
-TRACE((void*)evMgr)
         auto s=_metaScheduler->newSchedule(_mdl->GetEntryPoint("date"));
-TRACE(0)
         s->setSimulationTime(0)
             .setCycleTime(_metaScheduler->getMaxSimTime())
             .setRepeat(-1)
@@ -158,9 +151,7 @@ TRACE(0)
             .submit();
         // go sim
         _sim->Run();
-TRACE(0)
         _mdl->waitLeaveExecuting();
-TRACE(0)
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)100,_mdl->_dates[0]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)1017,_mdl->_dates[1]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)2017,_mdl->_dates[2]);
