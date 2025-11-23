@@ -142,13 +142,13 @@ public:
         scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("ev1"),3001); 
         // schedule one ep periodically and on event
         auto evMgr=_sim->GetEventManager();
-        auto s=_metaScheduler->newSchedule(_mdl->GetEntryPoint("date"));
-        s->setSimulationTime(0)
-            .setCycleTime(_metaScheduler->getMaxSimTime())
-            .setRepeat(-1)
-            .setActive(false)
-            .subscribeActivateEvent(evMgr->QueryEventId(EVENT1))
-            .submit();
+        auto s=_metaScheduler->NewSchedule(_mdl->GetEntryPoint("date"));
+        s->SetSimulationTime(0)
+            .SetCycleTime(_metaScheduler->getMaxSimTime())
+            .SetRepeat(-1)
+            .SetActive(false)
+            .SubscribeActivateEvent(evMgr->QueryEventId(EVENT1))
+            .Submit();
         // go sim
         _sim->Run();
         _mdl->waitLeaveExecuting();
@@ -170,22 +170,22 @@ public:
         scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("ev2"),200); 
 
         // schedule one ep periodically
-        auto s1=_metaScheduler->newSchedule(_mdl->GetEntryPoint("cpt1"));
-        s1->setSimulationTime(0)
-            .setCycleTime(10)
-            .setRepeat(-1)
-            .submit();
+        auto s1=_metaScheduler->NewSchedule(_mdl->GetEntryPoint("cpt1"));
+        s1->SetSimulationTime(0)
+            .SetCycleTime(10)
+            .SetRepeat(-1)
+            .Submit();
 
         // schedule one ep periodically and on event
         auto evMgr=_sim->GetEventManager();
-        auto s2=_metaScheduler->newSchedule(_mdl->GetEntryPoint("cpt2"));
-        s2->setSimulationTime(0)
-            .setCycleTime(10)
-            .setRepeat(-1)
-            .setActive(false)
-            .subscribeActivateEvent(evMgr->QueryEventId(EVENT1))
-            .subscribeDeactivateEvent(evMgr->QueryEventId(EVENT2))
-            .submit();
+        auto s2=_metaScheduler->NewSchedule(_mdl->GetEntryPoint("cpt2"));
+        s2->SetSimulationTime(0)
+            .SetCycleTime(10)
+            .SetRepeat(-1)
+            .SetActive(false)
+            .SubscribeActivateEvent(evMgr->QueryEventId(EVENT1))
+            .SubscribeDeactivateEvent(evMgr->QueryEventId(EVENT2))
+            .Submit();
 
         // define end simulation time
         _mdl->_endSimTime=300;

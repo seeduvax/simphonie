@@ -17,6 +17,7 @@
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/ISimulator.h"
 #include "Smp/Services/IEventManager.h"
+#include "simdeck/smpext/IMetaScheduler.hpp"
 
 #define SMP_DURATION_MAX INT64_MAX
 
@@ -26,7 +27,8 @@ namespace colibry {
 /**
  *
  */
-class MetaScheduler: public simdeck::CompositeService {
+class MetaScheduler: public simdeck::CompositeService,
+            virtual public simdeck::smpext::IMetaScheduler {
     typedef simdeck::CompositeService Parent;
 public:
     /**
@@ -40,47 +42,48 @@ public:
     virtual ~MetaScheduler();
 
 
-    class Schedule: public Smp::IObject {
+    class Schedule: public Smp::IObject, 
+            virtual public simdeck::smpext::IMetaScheduler::ISchedule {
     public:
         Schedule(MetaScheduler* mScheduler,
                 Smp::IEntryPoint* ep);
         Schedule(MetaScheduler* mScheduler,
                 Smp::Services::EventId evId);
         virtual ~Schedule();
-        inline Schedule& setSimulationTime(Smp::Duration simTime) {
+        Schedule& SetSimulationTime(Smp::Duration simTime) override {
             _simulationTime=simTime;
             return *this;
         }
-        inline Schedule& setCycleTime(Smp::Duration cycleTime) {
+        Schedule& SetCycleTime(Smp::Duration cycleTime) override {
             _cycleTime=cycleTime;
             return *this;
         }
-        inline Schedule& setRepeat(Smp::Int64 repeat) {
+        Schedule& SetRepeat(Smp::Int64 repeat) override {
             _repeat=repeat;
             return *this;
         }
-        inline Schedule& setActive(bool active) {
+        Schedule& SetActive(bool active) override {
             _active=active;
             return *this;
         }
-        inline Schedule& subscribeActivateEvent(Smp::Services::EventId event) {
+        Schedule& SubscribeActivateEvent(Smp::Services::EventId event) override {
             _metaScheduler->getSimulator()->GetEventManager()->Subscribe(event,_epActivate);
             return *this;
         }
-        inline Schedule& unsubscribeActivateEvent(Smp::Services::EventId event) {
+        Schedule& UnsubscribeActivateEvent(Smp::Services::EventId event) override {
             _metaScheduler->getSimulator()->GetEventManager()->Unsubscribe(event,_epActivate);
             return *this;
         }
-        inline Schedule& subscribeDeactivateEvent(Smp::Services::EventId event) {
+        Schedule& SubscribeDeactivateEvent(Smp::Services::EventId event)  override {
             _metaScheduler->getSimulator()->GetEventManager()->Subscribe(event,_epDeactivate);
             return *this;
         }
-        inline Schedule& unsubscribeDeactivateEvent(Smp::Services::EventId event) {
+        Schedule& UnsubscribeDeactivateEvent(Smp::Services::EventId event) override {
             _metaScheduler->getSimulator()->GetEventManager()->Unsubscribe(event,_epDeactivate);
             return *this;
         }
-        void submit();
-        inline Smp::Services::EventId getEventId() {
+        void Submit() override;
+        Smp::Services::EventId GetEventId() const override {
             return _eventId;
         }
         void epActivate();
@@ -102,19 +105,13 @@ public:
         bool _active=true;
     };
 
-    class IScheduleListener: public Smp::IObject {
-    public:
-        virtual void notifyEpBegin(Schedule* s);
-        virtual void notifyEpEnd(Schedule* s);
-    };
-
-    inline Schedule* getSchedule(Smp::Services::EventId ev) const {
+    Schedule* GetSchedule(Smp::Services::EventId ev) const override {
         auto it=_schedList.find(ev);
         return it!=_schedList.end()?it->second:nullptr;
     }
-    inline Schedule* newSchedule(Smp::IEntryPoint* ep) {
+    Schedule* NewSchedule(Smp::IEntryPoint* ep) override {
         Schedule* s=new Schedule(this, ep);
-        _schedList[s->getEventId()]=s;
+        _schedList[s->GetEventId()]=s;
         return s;
     }
 
@@ -150,7 +147,7 @@ private:
     /** list of schedule */
     std::map<Smp::Services::EventId, Schedule*> _schedList;
     /** list of registered schedule listeners */
-    std::vector<IScheduleListener*> _listeners;
+    std::vector<simdeck::smpext::IMetaScheduler::IScheduleListener*> _listeners;
     /** Current schedule (from last event id fetched as current from the scheduler on preEpExec()) */
     Schedule* _currentSchedule=nullptr;
     /** Pre entry point execute event handler */

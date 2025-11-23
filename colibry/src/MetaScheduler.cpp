@@ -62,7 +62,7 @@ void MetaScheduler::connect() {
 // ..........................................................
 void MetaScheduler::epPreEpExec() {
     auto currentEventId=_scheduler->GetCurrentEventId();
-    _currentSchedule=getSchedule(currentEventId);
+    _currentSchedule=GetSchedule(currentEventId);
     if (_currentSchedule==nullptr) {
         // TODO find a way to retrieve entry point or schedule attributes from
         // the scheduler. 
@@ -71,14 +71,14 @@ void MetaScheduler::epPreEpExec() {
         _schedList[currentEventId]=_currentSchedule;
     }
     for (auto l: _listeners) {
-        l->notifyEpBegin(_currentSchedule);
+        l->NotifyExecBegin(_currentSchedule);
     }
 }
 // ..........................................................
 void MetaScheduler::epPostEpExec() {
     if (_currentSchedule!=nullptr) {
         for (auto l: _listeners) {
-            l->notifyEpEnd(_currentSchedule);
+            l->NotifyExecEnd(_currentSchedule);
         }
         _currentSchedule=nullptr;
     }
@@ -117,7 +117,7 @@ MetaScheduler::Schedule::~Schedule() {
 }
 
 // ..........................................................
-void MetaScheduler::Schedule::submit() {
+void MetaScheduler::Schedule::Submit() {
     if (_eventId==-1) {
         _eventId=_metaScheduler->getScheduler()->AddSimulationTimeEvent(_ep,
             _active ? _simulationTime : _metaScheduler->getMaxSimTime(), _cycleTime, _repeat);
