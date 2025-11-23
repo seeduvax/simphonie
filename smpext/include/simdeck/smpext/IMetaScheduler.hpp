@@ -44,13 +44,13 @@ public:
 
     class IScheduleListener {
     public:
-        virtual ~IEntryPointExecListener() noexcept = default;
-        void NotifyExecBegin(const ISchedule* s) = 0;
-        void NotifyExecEnd(const ISchedule* s) = 0;
+        virtual ~IScheduleListener() noexcept = default;
+        virtual void NotifyExecBegin(const ISchedule* s) = 0;
+        virtual void NotifyExecEnd(const ISchedule* s) = 0;
     };
 
     virtual ISchedule* GetSchedule(Smp::Services::EventId id) const = 0;
-    virtual ISchedule* NewSchedule(Smp::IentryPoint* ep) = 0;
+    virtual ISchedule* NewSchedule(Smp::IEntryPoint* ep) = 0;
 };
 
 }} // namespace simdeck::smpext
