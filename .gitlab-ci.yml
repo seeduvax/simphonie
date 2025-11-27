@@ -25,6 +25,8 @@ stages:
         # FIXME: abs workaround to force MODE env var value when calling test target
         TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST"
     script: 
+        # remove CROSS_ARCH env variable to avoid warning in abs compilation
+        - if [ "$CROSS_ARCH" != "" ]; then export HWNAME=$CROSS_ARCH; unset CROSS_ARCH; fi
         - echo make test $TASK_OPTVAR ABSWS=`pwd`/.abs `test -n "$VABS" && echo "VABS=$VABS"`
         # change ABSWS to have a new ABS directory to avoid impacting others compilations.
         - make test $TASK_OPTVAR ABSWS=`pwd`/.abs `test -n "$VABS" && echo "VABS=$VABS"` | tee execution.log
@@ -46,6 +48,8 @@ stages:
     variables:
         TASK_OPTVAR: "$USER_TASK_OPTVAR MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST"
     script:
+        # remove CROSS_ARCH env variable to avoid warning in abs compilation
+        - if [ "$CROSS_ARCH" != "" ]; then export HWNAME=$CROSS_ARCH; unset CROSS_ARCH; fi
         - echo make pubdist $TASK_OPTVAR ABSWS=`pwd`/.abs `test -n "$VABS" && echo "VABS=$VABS"`
         # change ABSWS to have a new ABS directory to avoid impacting others compilations.
         - make pubdist $TASK_OPTVAR ABSWS=`pwd`/.abs `test -n "$VABS" && echo "VABS=$VABS"`
@@ -58,6 +62,8 @@ sanitize_debian11:
         # FIXME: abs workaround to force MODE env var value when calling cint target
         TASK_OPTVAR: "$USER_TASK_OPTVAR MAXJOBS=8 MODE=release ABS_REPO=$ABS_REPO DISTHOST=$DIST_HOST ACTIVATE_SANITIZER=true"
     script: 
+        # remove CROSS_ARCH env variable to avoid warning in abs compilation
+        - if [ "$CROSS_ARCH" != "" ]; then export HWNAME=$CROSS_ARCH; unset CROSS_ARCH; fi
         - echo make test $TASK_OPTVAR ABSWS=`pwd`/.abs `test -n "$VABS" && echo "VABS=$VABS"`
         # change ABSWS to have a new ABS directory to avoid impacting others compilations.
         - make test $TASK_OPTVAR ABSWS=`pwd`/.abs `test -n "$VABS" && echo "VABS=$VABS"` | tee execution.log
