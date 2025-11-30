@@ -18,9 +18,9 @@
 #include "Smp/ISimulator.h"
 #include "Smp/Services/IScheduler.h"
 #include "Smp/Services/ITimeKeeper.h"
-#include "cppfmu/cppfmu_cs.hpp"
 #include "simdeck/EntryPointPublisher.hpp"
 #include "simdeck/Object.hpp"
+#include "fmi2Functions.h"
 
 namespace simphonie {
 namespace fmi {
@@ -31,62 +31,62 @@ namespace fmi {
  * It enables to export Simphonie-based simulation as a FMU co-simulation, that
  * can then be loaded by a third-party host simulation that supports such standard.
  */
-class FMIBridge : public cppfmu::SlaveInstance, public simdeck::EntryPointPublisher, public simdeck::Object {
+class FMIBridge : public simdeck::EntryPointPublisher, public simdeck::Object {
 public:
     FMIBridge(Smp::ISimulator* sim, Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
     ~FMIBridge() = default;
 
     /**
-     * @brief Overrided from `cppfmu::SlaveInstance`
+     * @brief Overrided from `SlaveInstance`
      */
-    void SetupExperiment(cppfmu::FMIBoolean toleranceDefined, cppfmu::FMIReal tolerance, cppfmu::FMIReal tStart,
-                         cppfmu::FMIBoolean stopTimeDefined, cppfmu::FMIReal tStop) override;
+    void SetupExperiment(fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real tStart,
+                         fmi2Boolean stopTimeDefined, fmi2Real tStop);
     /**
-     * @brief Overrided from `cppfmu::SlaveInstance`
+     * @brief Overrided from `SlaveInstance`
      */
 
-    void Terminate() override;
+    void Terminate();
     /**
-     * @brief Overrided from `cppfmu::SlaveInstance`
+     * @brief Overrided from `SlaveInstance`
      */
-    void Reset() override;
+    void Reset();
     /**
-     * @brief Overrided from `cppfmu::SlaveInstance`
+     * @brief Overrided from `SlaveInstance`
      */
-    void SetReal(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIReal value[]) override;
+    void SetReal(const fmi2ValueReference vr[], std::size_t nvr, const fmi2Real value[]);
     /**
-     * @brief Overrided from `cppfmu::SlaveInstance`
+     * @brief Overrided from `SlaveInstance`
      */
-    void SetInteger(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIInteger value[]) override;
+    void SetInteger(const fmi2ValueReference vr[], std::size_t nvr, const fmi2Integer value[]);
     /**
-     * @brief Overrided from `cppfmu::SlaveInstance`
+     * @brief Overrided from `SlaveInstance`
      */
-    void SetBoolean(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIBoolean value[]) override;
+    void SetBoolean(const fmi2ValueReference vr[], std::size_t nvr, const fmi2Boolean value[]);
     /**
-     * @brief Overrided from `cppfmu::SlaveInstance`
+     * @brief Overrided from `SlaveInstance`
      */
-    void SetString(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIString value[]) override;
+    void SetString(const fmi2ValueReference vr[], std::size_t nvr, const fmi2String value[]);
     /**
-     * @brief Overrided from `cppfmu::SlaveInstance`
+     * @brief Overrided from `SlaveInstance`
      */
-    void GetReal(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIReal value[]) const override;
+    void GetReal(const fmi2ValueReference vr[], std::size_t nvr, fmi2Real value[]) const;
     /**
-     * @brief Overrided from `cppfmu::SlaveInstance`
+     * @brief Overrided from `SlaveInstance`
      */
-    void GetInteger(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIInteger value[]) const override;
+    void GetInteger(const fmi2ValueReference vr[], std::size_t nvr, fmi2Integer value[]) const;
     /**
-     * @brief Overrided from `cppfmu::SlaveInstance`
+     * @brief Overrided from `SlaveInstance`
      */
-    void GetBoolean(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIBoolean value[]) const override;
+    void GetBoolean(const fmi2ValueReference vr[], std::size_t nvr, fmi2Boolean value[]) const;
     /**
-     * @brief Overrided from `cppfmu::SlaveInstance`
+     * @brief Overrided from `SlaveInstance`
      */
-    void GetString(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIString value[]) const override;
+    void GetString(const fmi2ValueReference vr[], std::size_t nvr, fmi2String value[]) const;
     /**
-     * @brief Overrided from `cppfmu::SlaveInstance`
+     * @brief Overrided from `SlaveInstance`
      */
-    bool DoStep(cppfmu::FMIReal currentCommunicationPoint, cppfmu::FMIReal communicationStepSize,
-                cppfmu::FMIBoolean newStep, cppfmu::FMIReal& endOfStep) override;
+    bool DoStep(fmi2Real currentCommunicationPoint, fmi2Real communicationStepSize,
+                fmi2Boolean newStep, fmi2Real& endOfStep);
 
 private:
     /**
@@ -112,11 +112,11 @@ private:
     void onLeaveExecuting();
     void onSimTimeChanged();
 
-    /* Wrappers for Set* and Get* from cppfmu::SlaveInstance */
+    /* Wrappers for Set* and Get* from SlaveInstance */
     template <typename T>
-    void SetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]);
+    void SetGeneric(const fmi2ValueReference vr[], std::size_t nvr, T value[]);
     template <typename T>
-    void GetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) const;
+    void GetGeneric(const fmi2ValueReference vr[], std::size_t nvr, T value[]) const;
 
     Smp::ISimulator* _sim;
     Smp::Services::IScheduler* _sched;
