@@ -55,23 +55,13 @@ public:
         return _completed;
     }
 
-    void setTime(Smp::Duration absoluteSimTime, Smp::Bool updateScheduler = true);
+    void setTime(Smp::Duration absoluteSimTime);
     inline void setPeriod(Smp::Duration period) { _period = period; }
     inline void setRepeat(Smp::Int64 repeat) { _repeat = repeat; }
-
-    void setIsWaiting(Smp::Bool isWaiting, Smp::Bool updateScheduler = true);
-
-    inline Smp::Bool isWaiting() const { return _isWaiting; }
 
     void run();
 
     bool operator<(const Schedule& other) const {
-        if (_isWaiting && !other.isWaiting()) {
-            return false;
-        }
-        if (other.isWaiting() && !_isWaiting) {
-            return true;
-        }
         if (_absoluteSimTime != other.GetTime()) {
             return _absoluteSimTime < other.GetTime();
         }
@@ -92,7 +82,6 @@ private:
     Smp::Services::EventId _id;
     Smp::Bool _completed;
     Smp::Int64 _counterActivation;
-    Smp::Bool _isWaiting;
 };
 
 } /* kern */

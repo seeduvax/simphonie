@@ -48,6 +48,7 @@
 
         void epDate() {
             _dates.push_back(getSimulator()->GetTimeKeeper()->GetSimulationTime());
+            _order.append(1,'d');
         }
         void epIncCpt1() {
             _lastDate1=getSimulator()->GetTimeKeeper()->GetSimulationTime();
@@ -55,6 +56,7 @@
                 _firstDate1=_lastDate1;
             }
             _cpt1++;
+            _order.append(1,'1');
         }
         void epIncCpt2() {
             _lastDate2=getSimulator()->GetTimeKeeper()->GetSimulationTime();
@@ -62,6 +64,7 @@
                 _firstDate2=_lastDate2;
             }
             _cpt2++;
+            _order.append(1,'2');
         }
         void epEmitEv1() {
             auto evMgr=getSimulator()->GetEventManager();
@@ -99,6 +102,7 @@
         Smp::Duration _lastDate1=-1;
         Smp::Duration _lastDate2=-1;
         std::vector<Smp::Duration> _dates;
+        std::string _order="";
         bool _run=true;
         std::mutex _mutex;
         std::condition_variable _monitor;
@@ -133,6 +137,9 @@ public:
  
     ABS_TEST_CASE_BEGIN(OnEventACyclicSched) {
         ABS_TEST_DESCR(Schedule one ep, to run once each time one event is emitted)
+        // CAUTION partial coverage of simph.evsched.1. Something should
+        // test emitting events on field change.
+        ABS_TEST_CASE_REQ(simph.evsched.1)
         auto scheduler=_sim->GetScheduler();
         // schedule event emit at few arbitrary dates
         scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("ev1"),100); 
@@ -163,7 +170,8 @@ public:
     ABS_TEST_CASE_BEGIN(OnEventCyclicSched) {
         ABS_TEST_DESCR(Schedule 2 ep, one periodically, the other periodicall and one on event)
         ABS_TEST_DESCR(Send events at fixed date, check results with activation dates and counters values)
-        ABS_TEST_CASE_REQ(req.id)
+        ABS_TEST_CASE_REQ(simph.evsched.3)
+        ABS_TEST_CASE_REQ(simph.evsched.4)
         // schedule events emitting at fixed date
         auto scheduler=_sim->GetScheduler();
         scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("ev1"),100); 
@@ -187,6 +195,16 @@ public:
             .SubscribeDeactivateEvent(evMgr->QueryEventId(EVENT2))
             .Submit();
 
+        // schedule a last ep periofically like first.
+        // to test exec order and good insertion of on event activated ep in
+        // between 1st and 3rd.
+        auto s3=_metaScheduler->NewSchedule(_mdl->GetEntryPoint("date"));
+        s3->SetSimulationTime(0)
+            .SetCycleTime(10)
+            .SetRepeat(-1)
+            .Submit();
+        
+
         // define end simulation time
         _mdl->_endSimTime=300;
      
@@ -194,13 +212,17 @@ public:
         _sim->Run();
         _mdl->waitLeaveExecuting();
      
-        // check sim results
+        // check sim results, then activation count
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)0,_mdl->_firstDate1);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)290,_mdl->_lastDate1);
         CPPUNIT_ASSERT_EQUAL(30,_mdl->_cpt1);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)100,_mdl->_firstDate2);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)190,_mdl->_lastDate2);
         CPPUNIT_ASSERT_EQUAL(10,_mdl->_cpt2);
+
+        // check activation sequence.
+        std::string expected="1d1d1d1d1d1d1d1d1d1d12d12d12d12d12d12d12d12d12d12d1d1d1d1d1d1d1d1d1d1d";
+        CPPUNIT_ASSERT_EQUAL(expected, _mdl->_order);
     }
     ABS_TEST_CASE_END
 ABS_TEST_SUITE_END

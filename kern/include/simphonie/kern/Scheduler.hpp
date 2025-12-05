@@ -91,10 +91,7 @@ protected:
     Smp::Services::EventId schedule(const Smp::IEntryPoint* entryPoint, Smp::Duration absoluteSimTime,
                                     Smp::Duration cycleTime = 0, Smp::Int64 repeat = 0);
     void schedule(Smp::Services::EventId event, Smp::Duration absoluteSimTime);
-
-    void updateSchedule(Smp::Services::EventId eventId);
-    friend Schedule;
-
+    friend class Schedule;
 private:
     struct _compareSchedule {
         bool operator()(const Schedule* a, const Schedule* b) const;
@@ -127,14 +124,11 @@ private:
      * to iterate the _scheduled once again when the found event is to be
      * removed.cd lu
      * @param event event id.
-     * @param remove
-     *   - false, just return the schedule.
-     *   - true, the found schedule is removed from _scheduled.
      * @return 1st schedule in scheduled having matching id or nullptr if not
      * any.
      */
-    Schedule* findSchedule(Smp::Services::EventId event, bool remove = false);
-    void schedule(Schedule* s, bool newSchedule = true);
+    Schedule* findSchedule(Smp::Services::EventId event);
+    void schedule(Schedule* s);
     // For internal use when mutex is already owned.
     inline Smp::Duration getNextScheduledEventTime() const;
     /**

@@ -25,24 +25,14 @@ Schedule::Schedule(Scheduler* scheduler, const Smp::IEntryPoint* ep, const std::
       _period(period),
       _repeat(repeat),
       _completed(false),
-      _counterActivation(0),
-      _isWaiting(false) {
+      _counterActivation(0) {
     static std::atomic<Smp::Services::EventId> _nextId(0);
     _id = _nextId++;
 }
 
-void Schedule::setTime(Smp::Duration absoluteSimTime, Smp::Bool updateScheduler) {
+void Schedule::setTime(Smp::Duration absoluteSimTime) {
     _absoluteSimTime = absoluteSimTime;
-    if (updateScheduler) {
-        _scheduler->updateSchedule(_id);
-    }
-}
-
-void Schedule::setIsWaiting(Smp::Bool isWaiting, Smp::Bool updateScheduler) {
-    _isWaiting = isWaiting;
-    if (updateScheduler) {
-        _scheduler->updateSchedule(_id);
-    }
+    _scheduler->schedule(this);
 }
 
 void Schedule::run() {

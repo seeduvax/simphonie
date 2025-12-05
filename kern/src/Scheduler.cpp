@@ -33,6 +33,10 @@
 namespace simphonie {
 namespace kern {
 
+#undef TRACE
+#define TRACE(expr) std::cout << __FILE__ << ":" <<  __LINE__ << ":" << __FUNCTION__ << ": " << #expr << " = " << expr << std::endl;
+
+
 // --------------------------------------------------------------------
 // ..........................................................
 Scheduler::Scheduler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
@@ -63,10 +67,21 @@ Scheduler::~Scheduler() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-void Scheduler::schedule(Schedule* s, bool newSchedule) {
+void Scheduler::schedule(Schedule* s) {
     {
         Synchronized(_mutex);
+        bool erased=false;
+        for (auto it=_scheduled.begin(); it!=_scheduled.end(); ++it) {
+            if (s->GetId() == (*it)->GetId()) {
+                _scheduled.erase(it);
+                break;
+            }
+        }
         _scheduled.insert(s);
+TRACE(getSimulator()->GetTimeKeeper()->GetSimulationTime())
+for (auto s: _scheduled) {
+TRACE(s->GetId()<<' '<<s->GetTime()<<' '<<s->GetEP()->GetParent()->GetName())
+}
     }
     /* TODO top be reconsidered
         if (newSchedule) {
@@ -97,6 +112,7 @@ void Scheduler::connect() {
 
 // ..........................................................
 Smp::Services::EventId Scheduler::AddImmediateEvent(const Smp::IEntryPoint* entryPoint) {
+TRACE(entryPoint->GetName());
     // TODO shall insert first, check using simulation time -1 is OK there.
     return schedule(entryPoint, IMMEDIATE_SIMULATION_TIME, 0, 0);
 }
@@ -122,7 +138,7 @@ Smp::Services::EventId Scheduler::schedule(const Smp::IEntryPoint* entryPoint, S
     return mySchedule->GetId();
 }
 // ..........................................................
-Schedule* Scheduler::findSchedule(Smp::Services::EventId event, bool remove) {
+Schedule* Scheduler::findSchedule(Smp::Services::EventId event) {
     Synchronized(_mutex);
     if (_currentSchedule != nullptr && _currentSchedule->GetId() == event) {
         return _currentSchedule;
@@ -130,11 +146,7 @@ Schedule* Scheduler::findSchedule(Smp::Services::EventId event, bool remove) {
     else {
         for (auto it = _scheduled.begin(); it != _scheduled.end(); ++it) {
             if ((*it)->GetId() == event) {
-                auto res = *it;
-                if (remove) {
-                    _scheduled.erase(it);
-                }
-                return res;
+                return *it;
             }
         }
     }
@@ -142,27 +154,18 @@ Schedule* Scheduler::findSchedule(Smp::Services::EventId event, bool remove) {
 }
 // ..........................................................
 void Scheduler::schedule(Smp::Services::EventId event, Smp::Duration absoluteSimTime) {
-    // TODO think about it is valid to do that from the
-    // scheduled entry point itself. Or what does it means if an entry
-    // point change its own simulation time (and only simulation time if
-    // scheduled once (with no repeat).
-    auto s = findSchedule(event, true);
+    auto s = findSchedule(event);
     if (s) {
         s->setTime(absoluteSimTime);
         schedule(s);
     }
 }
 
-void Scheduler::updateSchedule(Smp::Services::EventId eventId) {
-    auto s = findSchedule(eventId, true);
-    if (s != nullptr) {
-        schedule(s, false);
-    }
-}
 // ..........................................................
 Smp::Services::EventId Scheduler::AddSimulationTimeEvent(const Smp::IEntryPoint* entryPoint,
                                                          Smp::Duration simulationTime, Smp::Duration cycleTime,
                                                          Smp::Int64 repeat) {
+TRACE(entryPoint->GetName() << ' ' << simulationTime << ' '  << cycleTime << ' ' << repeat);
     return schedule(entryPoint, getAbsoluteTime(simulationTime), cycleTime, repeat);
 };
 // ..........................................................
@@ -196,6 +199,7 @@ Smp::Services::EventId Scheduler::AddRelativeZuluTimeEvent(
 }
 // ..........................................................
 void Scheduler::SetEventSimulationTime(Smp::Services::EventId event, Smp::Duration simulationTime) {
+TRACE(event << ' ' << simulationTime );
     schedule(event, getAbsoluteTime(simulationTime));
 }
 // ..........................................................
@@ -229,14 +233,11 @@ void Scheduler::SetEventRepeat(Smp::Services::EventId event, Smp::Int64 repeat) 
 
 // ..........................................................
 void Scheduler::RemoveEvent(Smp::Services::EventId event) {
-    Schedule* s = findSchedule(event, true);
-    if (s != nullptr && s != _currentSchedule) {
-        /* TODO to be reconsidered
-                for (auto observer : _observers) {
-                    observer->notifyCanceled(s->GetId());
-                }
-        */
-        delete s;
+    Synchronized(_mutex);
+    for (auto it=_scheduled.begin(); it!=_scheduled.end(); ++it) {
+        if (event==(*it)->GetId()) {
+            _scheduled.erase(it);
+        }
     }
 }
 // ..........................................................
