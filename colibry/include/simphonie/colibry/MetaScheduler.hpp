@@ -111,7 +111,6 @@ public:
     }
     Schedule* NewSchedule(Smp::IEntryPoint* ep) override {
         Schedule* s=new Schedule(this, ep);
-        _schedList[s->GetEventId()]=s;
         return s;
     }
 
@@ -120,6 +119,12 @@ public:
     }
     inline Smp::Services::IScheduler* getScheduler() {
         return _scheduler;
+    }
+    inline void registerSchedule(Schedule* s) {
+        auto id=s->GetEventId();
+        if (id!=-1) {
+            _schedList[id]=s;
+        }
     }
 
 protected:
