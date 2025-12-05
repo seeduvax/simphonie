@@ -12,7 +12,6 @@
 
 #include "Smp/IObject.h"
 #include "Smp/String8.h"
-#include "cppfmu/cppfmu_common.hpp"
 #include "simdeck/Component.hpp"
 #include "simphonie/kern/ILoggerBackend.hpp"
 #include "simphonie/kern/LoggerEvent.hpp"
@@ -28,7 +27,9 @@ public:
     void log(const simphonie::kern::LoggerEvent& event) override;
 
 private:
+/* TODO find what fmi standard use to refer to the logger.
     cppfmu::Logger _logger;
+ */
 };
 
 } /* namespace fmi */

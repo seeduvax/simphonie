@@ -45,7 +45,7 @@ public:
             sp.sched_priority=sched_get_priority_max(schedPolicy);
             int cr=pthread_setschedparam(pthread_self(), schedPolicy, &sp);
             if (cr!=0) {
-                std::cerr << "!!!!!!!!!!!!!! " << strerror(errno) << std::endl;
+                std::cerr << "Can't set thread schedule parameters: " << strerror(errno) << std::endl;
             }
         }
         std::this_thread::sleep_for(_sleep);

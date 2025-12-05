@@ -27,7 +27,7 @@ public:
     void tearDown() {}
 
     ABS_TEST_CASE_BEGIN(LuaApi) {
-        ABS_TEST_DESCR(Integration test using a lua scrip for simulator configuration)
+        ABS_TEST_DESCR(Integration test using a lua script for simulator configuration)
         sol::state lua;
         lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::os, sol::lib::math,
                            sol::lib::table, sol::lib::debug);

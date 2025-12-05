@@ -183,6 +183,11 @@ void Simulator::Initialise() {
         for (auto ep : _initEntryPoints) {
             ep->Execute();
         }
+        // remove just executed entry points as requested by SMP standard
+        // clause 5.3.7 f.9. (p108 in ECSS-E-ST-40-07C Rev1 5 August 2025) 
+        Collection<Smp::IEntryPoint> emptyCollection;
+        _initEntryPoints.clear();
+        
         setState(Smp::SimulatorStateKind::SSK_Standby);
     }
 }

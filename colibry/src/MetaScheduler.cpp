@@ -40,7 +40,7 @@ MetaScheduler::~MetaScheduler() {
     if (evMgr!=nullptr) {
 /*
  * TODO check why this segfault in TestMetaScheduler
-        // TODO service deletion order in the simulator may not be OK with that.
+ * TODO service deletion order in the simulator may not be OK with that.
         evMgr->Unsubscribe(evMgr->QueryEventId(EV_NAME_PRE_EVENT_EXECUTE),_epPreEpExec);
         evMgr->Unsubscribe(evMgr->QueryEventId(EV_NAME_POST_EVENT_EXECUTE),_epPostEpExec);
 */
@@ -121,6 +121,7 @@ void MetaScheduler::Schedule::Submit() {
     if (_eventId==-1) {
         _eventId=_metaScheduler->getScheduler()->AddSimulationTimeEvent(_ep,
             _active ? _simulationTime : _metaScheduler->getMaxSimTime(), _cycleTime, _repeat);
+        _metaScheduler->registerSchedule(this);
     }
     else {
         _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId, 

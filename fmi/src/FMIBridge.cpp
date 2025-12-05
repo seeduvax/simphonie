@@ -19,8 +19,6 @@
 #include "Smp/Services/ILogger.h"
 #include "Smp/Services/IResolver.h"
 #include "simdeck/ExInvalidFile.hpp"
-#include "simphonie/fmi/FMILoggerBackend.hpp"
-#include "simphonie/kern/Logger.hpp"
 #include "simphonie/sys/Synchro.hpp"
 #include "sol/sol.hpp"
 
@@ -240,54 +238,12 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
     cppfmu::FMIString mimeType, cppfmu::FMIReal timeout, cppfmu::FMIBoolean visible, cppfmu::FMIBoolean interactive,
     cppfmu::Memory memory, cppfmu::Logger logger) {
     /* Set the path to the resources folder */
-    /**
-     * TODO We have to supprt the URI standard IETF RFC3986. However, sol::state::safe_script_file
-     * looks like it is unable to read non-local files. A good workaround might be to download
-     * a local copy of the file and to call sol's function on it.
-     */
-    if (std::strncmp(fmuResourceLocation, "file://", 7) != 0) {
-        std::ostringstream oss;
-        oss << "The URI to the fmu file should start with file://: \"" << fmuResourceLocation << "\" received";
-        logger.Log(cppfmu::FMIStatus::fmi2Error, "Instantiation", oss.str().c_str());
-        throw new cppfmu::FatalError(oss.str().c_str());
-    }
-    const auto resources = std::string(fmuResourceLocation).substr(7);
 
-    /* Setup lua */
-    {
-        /* adding resources/../binaries/?/lib/ to sol2 libray path as well as adding resources/ to sol2 lua file path.
-         * The latter is only useful if setup.lua has a 'require something.lua' */
-        std::string path;
-        for (const auto& dir : std::filesystem::directory_iterator(resources + "/../binaries/")) {
-            path += (!path.empty() ? ";" : "") + dir.path().string() + "/lib/lib?.so";
-        }
-        path += ";;"; /* appends default paths too
-                         https://stackoverflow.com/questions/26446333/how-to-set-the-lua-path-and-lua-cpath-for-the-zerobrane-studio-in-linux
-                       */
-#if defined(_WIN64) || defined(_WIN32)
-        _putenv_s("LUA_CPATH", path.c_str());
-        _putenv_s("LUA_PATH", (resources + "/?;;").c_str());
-#else
-        setenv("LUA_CPATH", path.c_str(), 1);
-        setenv("LUA_PATH", (resources + "/?;;").c_str(), 1);
-#endif /* defined(_WIN64) || defined(_WIN32) */
-    }
 
     logger.Log(cppfmu::FMIStatus::fmi2Warning, "Instantiation",
                "Simphonie's logging system cannot be override for now: all the logs will be internally handle by "
                "simphonie during its setup.");
 
-    /* Run the setup lua script to setup and retrieve the simulator */
-    sol::state lua;
-    lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::os, sol::lib::math,
-                       sol::lib::table, sol::lib::debug);
-    const auto res = lua.safe_script_file((resources + "/setup.lua").c_str());
-    if (!res.valid()) {
-        const auto msg("The result from the Lua setup script failed");
-        logger.Log(cppfmu::FMIStatus::fmi2Error, "Instantiation", msg);
-        throw new cppfmu::FatalError(msg);
-    }
-    auto sim = res.get<Smp::ISimulator*>(0);
 
     /* Setup the logger */
     auto simLgr = dynamic_cast<simphonie::kern::Logger*>(sim->GetLogger());
@@ -307,3 +263,325 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
 
     return fmu;
 }
+
+
+// --------------------------------------------------------------------
+// FMI 2.0 API binding
+// ..........................................................
+extern "C" {
+// ..........................................................
+const char* fmi2GetTypesPlatform() {
+    return // TODO;
+}
+// ..........................................................
+const char* fmi2GetVersion() {
+    return "2.0";
+}
+// ..........................................................
+fmi2Component fmi2Instantiate(
+                fmi2String instanceName,
+                fmi2Type fmuType,
+                fmi2String fmuGUID,
+                fmi2String fmuResourceLocation,
+                const fmi2CallbackFunctions* functions,
+                fmi2Boolean visible,
+                fmi2Boolean loggingOn) {
+    auto sim=new simphonie::kern::Simulator(instanceName);
+    sim->AddService(new Logger(instanceName, env, functions->logger, sim));
+    auto bridge=new simphonie::fmi::FMIBridge("FMI","FMI/SMP bridge",sim);
+    /**
+     * TODO We have to supprt the URI standard IETF RFC3986. However, sol::state::safe_script_file
+     * looks like it is unable to read non-local files. A good workaround might be to download
+     * a local copy of the file and to call sol's function on it.
+     */
+    if (std::strncmp(fmuResourceLocation, "file://", 7) != 0) {
+        std::ostringstream oss;
+        oss << "The URI to the fmu file should start with file://: \"" << fmuResourceLocation << "\" received";
+        functions->logger(functions->componentEnvironment,
+                        instanceName,
+                        fmi2Fatal,
+                        "instantiation",
+                        oss.str().c_str());
+        return nullptr;
+    }
+    const auto resources = std::string(fmuResourceLocation).substr(7);
+    /* Setup lua */
+    {
+        /* adding resources/../binaries/?/lib/ to sol2 libray path as well as adding resources/ to sol2 lua file path.
+         * The latter is only useful if setup.lua has a 'require something.lua' */
+        std::string path;
+        for (const auto& dir : std::filesystem::directory_iterator(resources + "/../binaries/")) {
+            path += (!path.empty() ? ";" : "") + dir.path().string() + "/lib/lib?.so";
+            path += (!path.empty() ? ";" : "") + dir.path().string() + "/bin/?.dll";
+        }
+        path += ";;"; /* appends default paths too
+                         https://stackoverflow.com/questions/26446333/how-to-set-the-lua-path-and-lua-cpath-for-the-zerobrane-studio-in-linux
+                       */
+#if defined(_WIN64) || defined(_WIN32)
+        _putenv_s("LUA_CPATH", path.c_str());
+        _putenv_s("LUA_PATH", (resources + "/?;;").c_str());
+#else
+        setenv("LUA_CPATH", path.c_str(), 1);
+        setenv("LUA_PATH", (resources + "/?;;").c_str(), 1);
+#endif /* defined(_WIN64) || defined(_WIN32) */
+    }
+    /* Run the setup lua script to setup and retrieve the simulator */
+    sol::state lua;
+    lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::os, sol::lib::math,
+                       sol::lib::table, sol::lib::debug);
+    sol::table g= lua.globals();
+    lua.safe_script("Sim=require \"simphonie_lua\"")
+    g["simulator"]=sim;
+    const auto res = lua.safe_script_file((resources + "/setup.lua").c_str());
+    if (!res.valid()) {
+        const auto msg("The result from the Lua setup script failed");
+        logger.Log(cppfmu::FMIStatus::fmi2Error, "Instantiation", msg);
+        functions->logger(functions->componentEnvironment,
+                        instanceName,
+                        fmi2Fatal,
+                        "instantiation",
+                        msg.c_str());
+        return nullptr;
+    }
+
+    sim->Publish();
+    sim->Configure();
+    sim->connect();
+    return reinterpret_cast<fmi2Component>(bridge);
+}
+// ..........................................................
+void fmi2FreeInstance(fmi2Component c) {
+    auto bridge=reinterpret_cast<FMIBridge*>(c);
+    auto sim=bridge->GetParent();
+    delete sim;
+}
+// ..........................................................
+fmi2Status fmi2SetDebugLogging(
+                fmi2Component c,
+                fmi2Boolean loggingOn,
+                size_t nCategories,
+                const fmi2String categories[]) {
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2SetupExperiment(
+                fmi2Component c,
+                fmi2Boolean   toleranceDefined,
+                fmi2Real      tolerance,
+                fmi2Real      startTime,
+                fmi2Boolean   stopTimeDefined,
+                fmi2Real      stopTime) {
+    reinterpret_cast<FMIBridge*>(c)->SetupExperiment(toleranceDefined,
+                                                     tolerance,
+                                                     startTime,
+                                                     stoptimeDefined,
+                                                     stopTime);
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2EnterInitializationMode(fmi2Component c) {
+    // TODO
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2ExitInitializationMode(fmi2Component c) {
+    // TODO
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2Terminate(fmi2Component c) {
+    reinterpret_cast<FMIBridge*>(c)->Terminate();
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2Reset(fmi2Component c) {
+    reinterpret_cast<FMIBridge*>(c)->Reset();
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2GetReal(
+                fmi2Component c,
+                const fmi2ValueReference vr[],
+                size_t nvr,
+                fmi2Real value[]) {
+    reinterpret_cast<FMIBridge*>(c)->GetReal(vr, nvr, value);
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2GetInteger(
+                fmi2Component c,
+                const fmi2ValueReference vr[],
+                size_t nvr,
+                fmi2Integer value[]) {
+    reinterpret_cast<FMIBridge*>(c)->GetIntegrer(vr, nvr, value);
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2GetBoolean(
+                fmi2Component c,
+                const fmi2ValueReference vr[],
+                size_t nvr,
+                fmi2Boolean value[]) {
+    reinterpret_cast<FMIBridge*>(c)->GetBoolean(vr, nvr, value);
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2GetString(
+                fmi2Component c,
+                const fmi2ValueReference vr[],
+                size_t nvr,
+                fmi2String value[]) {
+    reinterpret_cast<FMIBridge*>(c)->GetString(vr, nvr, value);
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2SetReal(
+                fmi2Component c,
+                const fmi2ValueReference vr[],
+                size_t nvr,
+                const fmi2Real value[]) {
+    reinterpret_cast<FMIBridge*>(c)->SetReal(vr, nvr, value);
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2SetInteger(
+                fmi2Component c,
+                const fmi2ValueReference vr[],
+                size_t nvr,
+                const fmi2Integer value[]) {
+    reinterpret_cast<FMIBridge*>(c)->SetInteger(vr, nvr, value);
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2SetBoolean(
+                fmi2Component c,
+                const fmi2ValueReference vr[],
+                size_t nvr,
+                const fmi2Boolean value[]) {
+    reinterpret_cast<FMIBridge*>(c)->SetBoolean(vr, nvr, value);
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2SetString(
+                fmi2Component c,
+                const fmi2ValueReference vr[],
+                size_t nvr,
+                const fmi2String value[]) {
+    reinterpret_cast<FMIBridge*>(c)->SetString(vr, nvr, value);
+    return fmi2OK;
+}
+// ..........................................................
+fmi2Status fmi2GetFMUstate(
+                fmi2Component c,
+                fmi2FMUstate* s) {
+}
+// ..........................................................
+fmi2Status fmi2SetFMUstate(
+                fmi2Component c,
+                fmi2FMUstate s) {
+}
+// ..........................................................
+fmi2Status fmi2FreeFMUstate(
+                fmi2Component c,
+                fmi2FMUstate*) {
+}
+// ..........................................................
+fmi2Status fmi2SerializedFMUstateSize(
+                fmi2Component c,
+                fmi2FMUstate,
+                size_t*) {
+    return fmi2Error;
+}
+// ..........................................................
+
+fmi2Status fmi2SerializeFMUstate(
+                fmi2Component c,
+                fmi2FMUstate,
+                fmi2Byte[],
+                size_t) {
+    return fmi2Error;
+}
+// ..........................................................
+fmi2Status fmi2DeSerializeFMUstate(
+                fmi2Component c,
+                const fmi2Byte[],
+                size_t,
+                fmi2FMUstate*) {
+    return fmi2Error;
+}
+// ..........................................................
+fmi2Status fmi2GetDirectionalDerivative(
+                fmi2Component c,
+                const fmi2ValueReference[],
+                size_t,
+                const fmi2ValueReference[],
+                size_t,
+                const fmi2Real[],
+                fmi2Real[]) {
+    return fmi2Error;
+}
+// ..........................................................
+fmi2Status fmi2SetRealInputDerivatives(
+                fmi2Component c,
+                const fmi2ValueReference[],
+                size_t,
+                const fmi2Integer[],
+                const fmi2Real[]) {
+    return fmi2Error;
+}
+// ..........................................................
+fmi2Status fmi2GetRealOutputDerivatives(
+                fmi2Component c,
+                const fmi2ValueReference [],
+                size_t,
+                const fmi2Integer[],
+                fmi2Real[]) {
+    return fmi2Error;
+}
+// ..........................................................
+fmi2Status fmi2DoStep(
+                fmi2Component c,
+                fmi2Real currentCommunicationPoint,
+                fmi2Real communicationStepSize,
+                fmi2Boolean noSetFMUStatePriorToCurrentPoint) {
+}
+// ..........................................................
+fmi2Status fmi2CancelStep(fmi2Component c) {
+    return fmi2Error;
+}
+// ..........................................................
+fmi2Status fmi2GetStatus(
+                fmi2Component c,
+                const fmi2StatusKind,
+                fmi2Status*) {
+    return fmi2Error;
+}
+// ..........................................................
+fmi2Status fmi2GetRealStatus(
+                fmi2Component c,
+                const fmi2StatusKind s,
+                fmi2Real* value) {
+}
+// ..........................................................
+fmi2Status fmi2GetIntegerStatus(
+                fmi2Component c,
+                const fmi2StatusKind,
+                fmi2Integer*) {
+    return fmi2Error;
+}
+// ..........................................................
+fmi2Status fmi2GetBooleanStatus(
+                fmi2Component c, const fmi2StatusKind,
+                fmi2Boolean*) {
+    return fmi2Error;
+}
+// ..........................................................
+fmi2Status fmi2GetStringStatus(
+                fmi2Component c,
+                const fmi2StatusKind,
+                fmi2String*) {
+    return fmi2Error;
+}
+// ..........................................................
+
+} // extern "C"
