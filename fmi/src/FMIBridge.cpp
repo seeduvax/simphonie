@@ -19,8 +19,6 @@
 #include "Smp/Services/ILogger.h"
 #include "Smp/Services/IResolver.h"
 #include "simdeck/ExInvalidFile.hpp"
-#include "simphonie/fmi/FMILoggerBackend.hpp"
-#include "simphonie/kern/Logger.hpp"
 #include "simphonie/sys/Synchro.hpp"
 #include "sol/sol.hpp"
 
@@ -289,6 +287,7 @@ fmi2Component fmi2Instantiate(
                 fmi2Boolean visible,
                 fmi2Boolean loggingOn) {
     auto sim=new simphonie::kern::Simulator(instanceName);
+    sim->AddService(new Logger(instanceName, env, functions->logger, sim));
     auto bridge=new simphonie::fmi::FMIBridge("FMI","FMI/SMP bridge",sim);
     /**
      * TODO We have to supprt the URI standard IETF RFC3986. However, sol::state::safe_script_file
