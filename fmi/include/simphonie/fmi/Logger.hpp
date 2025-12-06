@@ -12,6 +12,7 @@
 
 #include "simdeck/Service.hpp"
 #include "Smp/Services/ILogger.h"
+#include "fmi2Functions.h"
 
 namespace simphonie {
 namespace fmi {
@@ -19,7 +20,8 @@ namespace fmi {
 /**
  *
  */
-class Logger: public simdeck::Service, virtual public Smp::IServices::Logger {
+class Logger: public simdeck::Service, virtual public Smp::Services::ILogger {
+    typedef simdeck::Service Parent;
 public:
     /**
      * Default constructor.

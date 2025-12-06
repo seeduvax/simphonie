@@ -19,7 +19,9 @@
 #include "Smp/Services/ILogger.h"
 #include "Smp/Services/IResolver.h"
 #include "simdeck/ExInvalidFile.hpp"
+#include "simphonie/kern/Simulator.hpp"
 #include "simphonie/sys/Synchro.hpp"
+#include "simphonie/fmi/Logger.hpp"
 #include "sol/sol.hpp"
 
 namespace simphonie {
@@ -55,11 +57,11 @@ FMIBridge::FMIBridge(Smp::ISimulator* sim, Smp::String8 name, Smp::String8 descr
     _sim->GetLogger()->Log(this, oss.str().c_str(), Smp::Services::ILogger::LMK_Debug);
 }
 // ..........................................................
-void FMIBridge::SetupExperiment(cppfmu::FMIBoolean toleranceDefined, cppfmu::FMIReal tolerance, cppfmu::FMIReal tStart,
-                                cppfmu::FMIBoolean stopTimeDefined, cppfmu::FMIReal tStop) {
+void FMIBridge::SetupExperiment(fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real tStart,
+                                fmi2Boolean stopTimeDefined, fmi2Real tStop) {
     /* TODO What to do with the experiment stop time? */
     if (toleranceDefined) {
-        _sim->GetLogger()->Log(_sim, "tolerance argument is not used, even if provided",
+        _sim->GetLogger()->Log(_sim, "FMI setup experiment tolerance argument is not used, even if provided",
                                Smp::Services::ILogger::LMK_Warning);
     }
     _tk->SetSimulationTime(static_cast<Smp::Duration>(tStart));
@@ -73,40 +75,40 @@ void FMIBridge::Reset() {
     _sim->GetLogger()->Log(_sim, "The simulator cannot be resetted", Smp::Services::ILogger::LMK_Error);
 }
 // ..........................................................
-void FMIBridge::SetReal(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIReal value[]) {
+void FMIBridge::SetReal(const fmi2ValueReference vr[], std::size_t nvr, const fmi2Real value[]) {
     SetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMIBridge::SetInteger(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIInteger value[]) {
+void FMIBridge::SetInteger(const fmi2ValueReference vr[], std::size_t nvr, const fmi2Integer value[]) {
     SetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMIBridge::SetBoolean(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIBoolean value[]) {
+void FMIBridge::SetBoolean(const fmi2ValueReference vr[], std::size_t nvr, const fmi2Boolean value[]) {
     SetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMIBridge::SetString(const cppfmu::FMIValueReference vr[], std::size_t nvr, const cppfmu::FMIString value[]) {
+void FMIBridge::SetString(const fmi2ValueReference vr[], std::size_t nvr, const fmi2String value[]) {
     SetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMIBridge::GetReal(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIReal value[]) const {
+void FMIBridge::GetReal(const fmi2ValueReference vr[], std::size_t nvr, fmi2Real value[]) const {
     GetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMIBridge::GetInteger(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIInteger value[]) const {
+void FMIBridge::GetInteger(const fmi2ValueReference vr[], std::size_t nvr, fmi2Integer value[]) const {
     GetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMIBridge::GetBoolean(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIBoolean value[]) const {
+void FMIBridge::GetBoolean(const fmi2ValueReference vr[], std::size_t nvr, fmi2Boolean value[]) const {
     GetGeneric(vr, nvr, value);
 }
 // ..........................................................
-void FMIBridge::GetString(const cppfmu::FMIValueReference vr[], std::size_t nvr, cppfmu::FMIString value[]) const {
+void FMIBridge::GetString(const fmi2ValueReference vr[], std::size_t nvr, fmi2String value[]) const {
     GetGeneric(vr, nvr, value);
 }
 // ..........................................................
 template <typename T>
-void FMIBridge::SetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) {
+void FMIBridge::SetGeneric(const fmi2ValueReference vr[], std::size_t nvr, T value[]) {
     for (std::size_t i = 0; i < nvr; ++i) {
         const auto id = vr[i];
         if (id >= _fmiRef2Field.size()) {
@@ -122,7 +124,7 @@ void FMIBridge::SetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr
 }
 // ..........................................................
 template <typename T>
-void FMIBridge::GetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr, T value[]) const {
+void FMIBridge::GetGeneric(const fmi2ValueReference vr[], std::size_t nvr, T value[]) const {
     for (std::size_t i = 0; i < nvr; ++i) {
         const auto id = vr[i];
         if (id >= _fmiRef2Field.size()) {
@@ -136,8 +138,8 @@ void FMIBridge::GetGeneric(const cppfmu::FMIValueReference vr[], std::size_t nvr
     }
 }
 // ..........................................................
-bool FMIBridge::DoStep(cppfmu::FMIReal currentCommunicationPoint, cppfmu::FMIReal communicationStepSize,
-                       cppfmu::FMIBoolean newStep, cppfmu::FMIReal& endOfStep) {
+bool FMIBridge::DoStep(fmi2Real currentCommunicationPoint, fmi2Real communicationStepSize,
+                       fmi2Boolean newStep, fmi2Real& endOfStep) {
     /**
      * TOOD what is the use of newStep & endOfStep?
      * From cppfmu/fmi_functions.cpp: newStep=fmi2True and endOfStep=currentCommunicationPoint (ref to local) anyways
@@ -233,19 +235,20 @@ bool FMIBridge::compareFields(const Smp::ISimpleField* a, const Smp::ISimpleFiel
 } /* namespace fmi */
 } /* namespace simphonie */
 
+/* TODO what's reaaly neede fromt this ?
 cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
-    cppfmu::FMIString instanceName, cppfmu::FMIString fmuGUID, cppfmu::FMIString fmuResourceLocation,
-    cppfmu::FMIString mimeType, cppfmu::FMIReal timeout, cppfmu::FMIBoolean visible, cppfmu::FMIBoolean interactive,
+    fmi2String instanceName, fmi2String fmuGUID, fmi2String fmuResourceLocation,
+    fmi2String mimeType, fmi2Real timeout, fmi2Boolean visible, fmi2Boolean interactive,
     cppfmu::Memory memory, cppfmu::Logger logger) {
-    /* Set the path to the resources folder */
+    // Set the path to the resources folder 
 
 
-    logger.Log(cppfmu::FMIStatus::fmi2Warning, "Instantiation",
+    logger.Log(fmi2Status::fmi2Warning, "Instantiation",
                "Simphonie's logging system cannot be override for now: all the logs will be internally handle by "
                "simphonie during its setup.");
 
 
-    /* Setup the logger */
+    // Setup the logger 
     auto simLgr = dynamic_cast<simphonie::kern::Logger*>(sim->GetLogger());
     if (simLgr != nullptr) {
         auto fmiLgr = new simphonie::fmi::FMILoggerBackend(logger, "FMILogger",
@@ -255,7 +258,7 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
     }
     else {
         logger.Log(
-            cppfmu::FMIStatus::fmi2Warning, "Instantiation",
+            fmi2Status::fmi2Warning, "Instantiation",
             "Simphonie's logging system cannot be override: all the logs will be internally handle by simphonie.");
     }
 
@@ -263,7 +266,7 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
 
     return fmu;
 }
-
+*/
 
 // --------------------------------------------------------------------
 // FMI 2.0 API binding
@@ -271,7 +274,7 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
 extern "C" {
 // ..........................................................
 const char* fmi2GetTypesPlatform() {
-    return // TODO;
+    return fmi2TypesPlatform;
 }
 // ..........................................................
 const char* fmi2GetVersion() {
@@ -287,8 +290,11 @@ fmi2Component fmi2Instantiate(
                 fmi2Boolean visible,
                 fmi2Boolean loggingOn) {
     auto sim=new simphonie::kern::Simulator(instanceName);
-    sim->AddService(new Logger(instanceName, env, functions->logger, sim));
-    auto bridge=new simphonie::fmi::FMIBridge("FMI","FMI/SMP bridge",sim);
+    sim->AddService(new simphonie::fmi::Logger(instanceName,
+                                               functions->componentEnvironment,
+                                               functions->logger,
+                                               sim));
+    auto bridge=new simphonie::fmi::FMIBridge(sim, "FMI","FMI/SMP bridge");
     /**
      * TODO We have to supprt the URI standard IETF RFC3986. However, sol::state::safe_script_file
      * looks like it is unable to read non-local files. A good workaround might be to download
@@ -330,28 +336,27 @@ fmi2Component fmi2Instantiate(
     lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::os, sol::lib::math,
                        sol::lib::table, sol::lib::debug);
     sol::table g= lua.globals();
-    lua.safe_script("Sim=require \"simphonie_lua\"")
+    lua.safe_script("Sim=require \"simphonie_lua\"");
     g["simulator"]=sim;
     const auto res = lua.safe_script_file((resources + "/setup.lua").c_str());
     if (!res.valid()) {
         const auto msg("The result from the Lua setup script failed");
-        logger.Log(cppfmu::FMIStatus::fmi2Error, "Instantiation", msg);
         functions->logger(functions->componentEnvironment,
                         instanceName,
                         fmi2Fatal,
                         "instantiation",
-                        msg.c_str());
+                        msg);
         return nullptr;
     }
 
     sim->Publish();
     sim->Configure();
-    sim->connect();
+    sim->Connect();
     return reinterpret_cast<fmi2Component>(bridge);
 }
 // ..........................................................
 void fmi2FreeInstance(fmi2Component c) {
-    auto bridge=reinterpret_cast<FMIBridge*>(c);
+    auto bridge=reinterpret_cast<simphonie::fmi::FMIBridge*>(c);
     auto sim=bridge->GetParent();
     delete sim;
 }
@@ -371,10 +376,10 @@ fmi2Status fmi2SetupExperiment(
                 fmi2Real      startTime,
                 fmi2Boolean   stopTimeDefined,
                 fmi2Real      stopTime) {
-    reinterpret_cast<FMIBridge*>(c)->SetupExperiment(toleranceDefined,
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->SetupExperiment(toleranceDefined,
                                                      tolerance,
                                                      startTime,
-                                                     stoptimeDefined,
+                                                     stopTimeDefined,
                                                      stopTime);
     return fmi2OK;
 }
@@ -390,12 +395,12 @@ fmi2Status fmi2ExitInitializationMode(fmi2Component c) {
 }
 // ..........................................................
 fmi2Status fmi2Terminate(fmi2Component c) {
-    reinterpret_cast<FMIBridge*>(c)->Terminate();
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->Terminate();
     return fmi2OK;
 }
 // ..........................................................
 fmi2Status fmi2Reset(fmi2Component c) {
-    reinterpret_cast<FMIBridge*>(c)->Reset();
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->Reset();
     return fmi2OK;
 }
 // ..........................................................
@@ -404,7 +409,7 @@ fmi2Status fmi2GetReal(
                 const fmi2ValueReference vr[],
                 size_t nvr,
                 fmi2Real value[]) {
-    reinterpret_cast<FMIBridge*>(c)->GetReal(vr, nvr, value);
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->GetReal(vr, nvr, value);
     return fmi2OK;
 }
 // ..........................................................
@@ -413,7 +418,7 @@ fmi2Status fmi2GetInteger(
                 const fmi2ValueReference vr[],
                 size_t nvr,
                 fmi2Integer value[]) {
-    reinterpret_cast<FMIBridge*>(c)->GetIntegrer(vr, nvr, value);
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->GetInteger(vr, nvr, value);
     return fmi2OK;
 }
 // ..........................................................
@@ -422,7 +427,7 @@ fmi2Status fmi2GetBoolean(
                 const fmi2ValueReference vr[],
                 size_t nvr,
                 fmi2Boolean value[]) {
-    reinterpret_cast<FMIBridge*>(c)->GetBoolean(vr, nvr, value);
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->GetBoolean(vr, nvr, value);
     return fmi2OK;
 }
 // ..........................................................
@@ -431,7 +436,7 @@ fmi2Status fmi2GetString(
                 const fmi2ValueReference vr[],
                 size_t nvr,
                 fmi2String value[]) {
-    reinterpret_cast<FMIBridge*>(c)->GetString(vr, nvr, value);
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->GetString(vr, nvr, value);
     return fmi2OK;
 }
 // ..........................................................
@@ -440,7 +445,7 @@ fmi2Status fmi2SetReal(
                 const fmi2ValueReference vr[],
                 size_t nvr,
                 const fmi2Real value[]) {
-    reinterpret_cast<FMIBridge*>(c)->SetReal(vr, nvr, value);
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->SetReal(vr, nvr, value);
     return fmi2OK;
 }
 // ..........................................................
@@ -449,7 +454,7 @@ fmi2Status fmi2SetInteger(
                 const fmi2ValueReference vr[],
                 size_t nvr,
                 const fmi2Integer value[]) {
-    reinterpret_cast<FMIBridge*>(c)->SetInteger(vr, nvr, value);
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->SetInteger(vr, nvr, value);
     return fmi2OK;
 }
 // ..........................................................
@@ -458,7 +463,7 @@ fmi2Status fmi2SetBoolean(
                 const fmi2ValueReference vr[],
                 size_t nvr,
                 const fmi2Boolean value[]) {
-    reinterpret_cast<FMIBridge*>(c)->SetBoolean(vr, nvr, value);
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->SetBoolean(vr, nvr, value);
     return fmi2OK;
 }
 // ..........................................................
@@ -467,29 +472,36 @@ fmi2Status fmi2SetString(
                 const fmi2ValueReference vr[],
                 size_t nvr,
                 const fmi2String value[]) {
-    reinterpret_cast<FMIBridge*>(c)->SetString(vr, nvr, value);
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->SetString(vr, nvr, value);
     return fmi2OK;
 }
 // ..........................................................
 fmi2Status fmi2GetFMUstate(
                 fmi2Component c,
                 fmi2FMUstate* s) {
+    // TODO not supporeted yet
+    return fmi2Error;
 }
 // ..........................................................
 fmi2Status fmi2SetFMUstate(
                 fmi2Component c,
                 fmi2FMUstate s) {
+    // TODO not supporeted yet
+    return fmi2Error;
 }
 // ..........................................................
 fmi2Status fmi2FreeFMUstate(
                 fmi2Component c,
                 fmi2FMUstate*) {
+    // TODO not supporeted yet
+    return fmi2Error;
 }
 // ..........................................................
 fmi2Status fmi2SerializedFMUstateSize(
                 fmi2Component c,
                 fmi2FMUstate,
                 size_t*) {
+    // TODO not supporeted yet
     return fmi2Error;
 }
 // ..........................................................
@@ -499,6 +511,7 @@ fmi2Status fmi2SerializeFMUstate(
                 fmi2FMUstate,
                 fmi2Byte[],
                 size_t) {
+    // TODO not supporeted yet
     return fmi2Error;
 }
 // ..........................................................
@@ -507,6 +520,7 @@ fmi2Status fmi2DeSerializeFMUstate(
                 const fmi2Byte[],
                 size_t,
                 fmi2FMUstate*) {
+    // TODO not supporeted yet
     return fmi2Error;
 }
 // ..........................................................
@@ -518,6 +532,7 @@ fmi2Status fmi2GetDirectionalDerivative(
                 size_t,
                 const fmi2Real[],
                 fmi2Real[]) {
+    // TODO not supporeted yet
     return fmi2Error;
 }
 // ..........................................................
@@ -527,6 +542,7 @@ fmi2Status fmi2SetRealInputDerivatives(
                 size_t,
                 const fmi2Integer[],
                 const fmi2Real[]) {
+    // TODO not supporeted yet
     return fmi2Error;
 }
 // ..........................................................
@@ -536,6 +552,7 @@ fmi2Status fmi2GetRealOutputDerivatives(
                 size_t,
                 const fmi2Integer[],
                 fmi2Real[]) {
+    // TODO not supporeted yet
     return fmi2Error;
 }
 // ..........................................................
@@ -544,6 +561,12 @@ fmi2Status fmi2DoStep(
                 fmi2Real currentCommunicationPoint,
                 fmi2Real communicationStepSize,
                 fmi2Boolean noSetFMUStatePriorToCurrentPoint) {
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->DoStep(
+                                            currentCommunicationPoint,
+                                            communicationStepSize,
+                                            true,
+                                            currentCommunicationPoint);
+    return fmi2OK;
 }
 // ..........................................................
 fmi2Status fmi2CancelStep(fmi2Component c) {
@@ -561,18 +584,23 @@ fmi2Status fmi2GetRealStatus(
                 fmi2Component c,
                 const fmi2StatusKind s,
                 fmi2Real* value) {
+    // TODO not supporeted yet
+    return fmi2Error;
+
 }
 // ..........................................................
 fmi2Status fmi2GetIntegerStatus(
                 fmi2Component c,
                 const fmi2StatusKind,
                 fmi2Integer*) {
+    // TODO not supporeted yet
     return fmi2Error;
 }
 // ..........................................................
 fmi2Status fmi2GetBooleanStatus(
                 fmi2Component c, const fmi2StatusKind,
                 fmi2Boolean*) {
+    // TODO not supporeted yet
     return fmi2Error;
 }
 // ..........................................................
@@ -580,6 +608,7 @@ fmi2Status fmi2GetStringStatus(
                 fmi2Component c,
                 const fmi2StatusKind,
                 fmi2String*) {
+    // TODO not supporeted yet
     return fmi2Error;
 }
 // ..........................................................

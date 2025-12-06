@@ -14,7 +14,7 @@ namespace fmi {
 // --------------------------------------------------------------------
 // ..........................................................
 Logger::Logger(fmi2String instanceName, fmi2ComponentEnvironment env,
-               fmi2CallbackLogger logger, Smp::Iobject* parent):
+               fmi2CallbackLogger logger, Smp::IObject* parent):
             Parent("FMILogger","FMI guest bridge to host logger", parent),
             _instanceName(instanceName),
             _env(env),
@@ -44,7 +44,7 @@ Smp::Services::LogMessageKind Logger::QueryLogMessageKind(Smp::String8 messageKi
     return Smp::Services::ILogger::LMK_Information;
 }
 // ..........................................................
-static _fmiLogLevels={fmi2OK, fmi2Discard, fmi2Error, fmi2Warning, fmi2OK};
+static fmi2Status _fmiLogLevels[]={fmi2OK, fmi2Discard, fmi2Error, fmi2Warning, fmi2OK};
 // ..........................................................
 void Logger::Log( const Smp::IObject* sender,
                 Smp::String8 message,
