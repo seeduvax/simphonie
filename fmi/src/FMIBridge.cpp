@@ -57,6 +57,10 @@ FMIBridge::FMIBridge(Smp::ISimulator* sim, Smp::String8 name, Smp::String8 descr
     _sim->GetLogger()->Log(this, oss.str().c_str(), Smp::Services::ILogger::LMK_Debug);
 }
 // ..........................................................
+FMIBridge::~FMIBridge() {
+    delete _sim;
+}
+// ..........................................................
 void FMIBridge::SetupExperiment(fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real tStart,
                                 fmi2Boolean stopTimeDefined, fmi2Real tStop) {
     /* TODO What to do with the experiment stop time? */
@@ -232,41 +236,35 @@ bool FMIBridge::compareFields(const Smp::ISimpleField* a, const Smp::ISimpleFiel
     return std::string((*ia)->GetName()).compare((*ib)->GetName()) < 0;
 }
 
+// ..........................................................
+void FMIBridge::EnterInitializationMode() {
+    // unsure what to do on fmi2EnterInitializationMode
+    // and why ther is an Enter and an Exit. Guess this to let host simulator
+    // override few fields. Then just start simulator building leaving
+    // final init to further exit. May be Configure should be moved
+    // to exit init.
+    _sim->Publish();
+    _sim->Configure();
+}
+// ..........................................................
+void FMIBridge::ExitInitializationMode() {
+    // unsure what to do on fmi2EnterInitializationMode
+    // see EnterInitializationMode comment.
+    _sim->Connect();
+}
+// ..........................................................
+bool FMIBridge::SetDebugLogging(fmi2Boolean logginOn,
+                        size_t nCategories, const fmi2String categories[]) {
+    // Don't know how to map logger configuration to SMP. So ingore the
+    // request.
+    logWarning("fmi2SetDebugLogging request ignored.");
+    return true;
+}
+
+
 } /* namespace fmi */
 } /* namespace simphonie */
 
-/* TODO what's reaaly neede fromt this ?
-cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
-    fmi2String instanceName, fmi2String fmuGUID, fmi2String fmuResourceLocation,
-    fmi2String mimeType, fmi2Real timeout, fmi2Boolean visible, fmi2Boolean interactive,
-    cppfmu::Memory memory, cppfmu::Logger logger) {
-    // Set the path to the resources folder 
-
-
-    logger.Log(fmi2Status::fmi2Warning, "Instantiation",
-               "Simphonie's logging system cannot be override for now: all the logs will be internally handle by "
-               "simphonie during its setup.");
-
-
-    // Setup the logger 
-    auto simLgr = dynamic_cast<simphonie::kern::Logger*>(sim->GetLogger());
-    if (simLgr != nullptr) {
-        auto fmiLgr = new simphonie::fmi::FMILoggerBackend(logger, "FMILogger",
-                                                           "Sends logs to the host simulation logging system", simLgr);
-        simLgr->clearBackends();
-        simLgr->addBackend(fmiLgr);
-    }
-    else {
-        logger.Log(
-            fmi2Status::fmi2Warning, "Instantiation",
-            "Simphonie's logging system cannot be override: all the logs will be internally handle by simphonie.");
-    }
-
-    auto fmu = cppfmu::AllocateUnique<simphonie::fmi::FMIBridge>(memory, sim, "FMIBridge");
-
-    return fmu;
-}
-*/
 
 // --------------------------------------------------------------------
 // FMI 2.0 API binding
@@ -294,7 +292,7 @@ fmi2Component fmi2Instantiate(
                                                functions->componentEnvironment,
                                                functions->logger,
                                                sim));
-    auto bridge=new simphonie::fmi::FMIBridge(sim, "FMI","FMI/SMP bridge");
+    auto bridge=new simphonie::fmi::FMIBridge(sim, instanceName,"FMI/SMP bridge");
     /**
      * TODO We have to supprt the URI standard IETF RFC3986. However, sol::state::safe_script_file
      * looks like it is unable to read non-local files. A good workaround might be to download
@@ -349,16 +347,12 @@ fmi2Component fmi2Instantiate(
         return nullptr;
     }
 
-    sim->Publish();
-    sim->Configure();
-    sim->Connect();
     return reinterpret_cast<fmi2Component>(bridge);
 }
 // ..........................................................
 void fmi2FreeInstance(fmi2Component c) {
     auto bridge=reinterpret_cast<simphonie::fmi::FMIBridge*>(c);
-    auto sim=bridge->GetParent();
-    delete sim;
+    delete bridge;
 }
 // ..........................................................
 fmi2Status fmi2SetDebugLogging(
@@ -366,7 +360,9 @@ fmi2Status fmi2SetDebugLogging(
                 fmi2Boolean loggingOn,
                 size_t nCategories,
                 const fmi2String categories[]) {
-    return fmi2OK;
+    auto bridge=reinterpret_cast<simphonie::fmi::FMIBridge*>(c);
+    return bridge->SetDebugLogging(loggingOn, nCategories, categories)?
+                    fmi2OK:fmi2Error;
 }
 // ..........................................................
 fmi2Status fmi2SetupExperiment(
@@ -385,12 +381,12 @@ fmi2Status fmi2SetupExperiment(
 }
 // ..........................................................
 fmi2Status fmi2EnterInitializationMode(fmi2Component c) {
-    // TODO
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->EnterInitializationMode();
     return fmi2OK;
 }
 // ..........................................................
 fmi2Status fmi2ExitInitializationMode(fmi2Component c) {
-    // TODO
+    reinterpret_cast<simphonie::fmi::FMIBridge*>(c)->ExitInitializationMode();
     return fmi2OK;
 }
 // ..........................................................
@@ -585,7 +581,7 @@ fmi2Status fmi2GetRealStatus(
                 const fmi2StatusKind s,
                 fmi2Real* value) {
     // TODO not supporeted yet
-    return fmi2Error;
+    return fmi2Discard;
 
 }
 // ..........................................................
@@ -594,14 +590,14 @@ fmi2Status fmi2GetIntegerStatus(
                 const fmi2StatusKind,
                 fmi2Integer*) {
     // TODO not supporeted yet
-    return fmi2Error;
+    return fmi2Discard;
 }
 // ..........................................................
 fmi2Status fmi2GetBooleanStatus(
                 fmi2Component c, const fmi2StatusKind,
                 fmi2Boolean*) {
     // TODO not supporeted yet
-    return fmi2Error;
+    return fmi2Discard;
 }
 // ..........................................................
 fmi2Status fmi2GetStringStatus(
@@ -609,7 +605,7 @@ fmi2Status fmi2GetStringStatus(
                 const fmi2StatusKind,
                 fmi2String*) {
     // TODO not supporeted yet
-    return fmi2Error;
+    return fmi2Discard;
 }
 // ..........................................................
 

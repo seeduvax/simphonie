@@ -34,59 +34,26 @@ namespace fmi {
 class FMIBridge : public simdeck::EntryPointPublisher, public simdeck::Object {
 public:
     FMIBridge(Smp::ISimulator* sim, Smp::String8 name, Smp::String8 descr = "", Smp::IObject* parent = nullptr);
-    ~FMIBridge() = default;
+    virtual ~FMIBridge();
 
-    /**
-     * @brief Overrided from `SlaveInstance`
-     */
     void SetupExperiment(fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real tStart,
                          fmi2Boolean stopTimeDefined, fmi2Real tStop);
-    /**
-     * @brief Overrided from `SlaveInstance`
-     */
-
     void Terminate();
-    /**
-     * @brief Overrided from `SlaveInstance`
-     */
     void Reset();
-    /**
-     * @brief Overrided from `SlaveInstance`
-     */
     void SetReal(const fmi2ValueReference vr[], std::size_t nvr, const fmi2Real value[]);
-    /**
-     * @brief Overrided from `SlaveInstance`
-     */
     void SetInteger(const fmi2ValueReference vr[], std::size_t nvr, const fmi2Integer value[]);
-    /**
-     * @brief Overrided from `SlaveInstance`
-     */
     void SetBoolean(const fmi2ValueReference vr[], std::size_t nvr, const fmi2Boolean value[]);
-    /**
-     * @brief Overrided from `SlaveInstance`
-     */
     void SetString(const fmi2ValueReference vr[], std::size_t nvr, const fmi2String value[]);
-    /**
-     * @brief Overrided from `SlaveInstance`
-     */
     void GetReal(const fmi2ValueReference vr[], std::size_t nvr, fmi2Real value[]) const;
-    /**
-     * @brief Overrided from `SlaveInstance`
-     */
     void GetInteger(const fmi2ValueReference vr[], std::size_t nvr, fmi2Integer value[]) const;
-    /**
-     * @brief Overrided from `SlaveInstance`
-     */
     void GetBoolean(const fmi2ValueReference vr[], std::size_t nvr, fmi2Boolean value[]) const;
-    /**
-     * @brief Overrided from `SlaveInstance`
-     */
     void GetString(const fmi2ValueReference vr[], std::size_t nvr, fmi2String value[]) const;
-    /**
-     * @brief Overrided from `SlaveInstance`
-     */
     bool DoStep(fmi2Real currentCommunicationPoint, fmi2Real communicationStepSize,
                 fmi2Boolean newStep, fmi2Real& endOfStep);
+    void EnterInitializationMode();
+    void ExitInitializationMode();
+    bool SetDebugLogging(fmi2Boolean loggingOn, 
+                        size_t nCategories, const fmi2String categories[]);
 
 private:
     /**
