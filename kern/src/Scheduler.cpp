@@ -33,10 +33,6 @@
 namespace simphonie {
 namespace kern {
 
-#undef TRACE
-#define TRACE(expr) std::cout << __FILE__ << ":" <<  __LINE__ << ":" << __FUNCTION__ << ": " << #expr << " = " << expr << std::endl;
-
-
 // --------------------------------------------------------------------
 // ..........................................................
 Scheduler::Scheduler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
@@ -78,18 +74,7 @@ void Scheduler::schedule(Schedule* s) {
             }
         }
         _scheduled.insert(s);
-TRACE(getSimulator()->GetTimeKeeper()->GetSimulationTime())
-for (auto s: _scheduled) {
-TRACE(s->GetId()<<' '<<s->GetTime()<<' '<<s->GetEP()->GetParent()->GetName())
-}
     }
-    /* TODO top be reconsidered
-        if (newSchedule) {
-            for (auto observer : _observers) {
-                observer->notifyScheduled(s);
-            }
-        }
-    */
     _monitor.notify_all();
 }
 
@@ -112,7 +97,6 @@ void Scheduler::connect() {
 
 // ..........................................................
 Smp::Services::EventId Scheduler::AddImmediateEvent(const Smp::IEntryPoint* entryPoint) {
-TRACE(entryPoint->GetName());
     // TODO shall insert first, check using simulation time -1 is OK there.
     return schedule(entryPoint, IMMEDIATE_SIMULATION_TIME, 0, 0);
 }
@@ -165,7 +149,6 @@ void Scheduler::schedule(Smp::Services::EventId event, Smp::Duration absoluteSim
 Smp::Services::EventId Scheduler::AddSimulationTimeEvent(const Smp::IEntryPoint* entryPoint,
                                                          Smp::Duration simulationTime, Smp::Duration cycleTime,
                                                          Smp::Int64 repeat) {
-TRACE(entryPoint->GetName() << ' ' << simulationTime << ' '  << cycleTime << ' ' << repeat);
     return schedule(entryPoint, getAbsoluteTime(simulationTime), cycleTime, repeat);
 };
 // ..........................................................
@@ -199,7 +182,6 @@ Smp::Services::EventId Scheduler::AddRelativeZuluTimeEvent(
 }
 // ..........................................................
 void Scheduler::SetEventSimulationTime(Smp::Services::EventId event, Smp::Duration simulationTime) {
-TRACE(event << ' ' << simulationTime );
     schedule(event, getAbsoluteTime(simulationTime));
 }
 // ..........................................................
@@ -258,7 +240,7 @@ inline Smp::Duration Scheduler::getNextScheduledEventTime() const {
                 // the current time from the time keeper.
                 _timeKeeper->GetSimulationTime();
     }
-    return DURATION_MAX;
+    return -1;
 }
 // ..........................................................
 Smp::Duration Scheduler::GetNextScheduledEventTime() const {
@@ -276,30 +258,6 @@ Smp::Bool Scheduler::IsEventScheduled(Smp::Services::EventId eventId) const {
     return false;
 }
 
-/* TODO to be reconsidered
-void Scheduler::RegisterObserver(smpext::ISchedulerObserver* observer) {
-    _observers.push_back(observer);
-}
-
-void Scheduler::RemoveObserver(smpext::ISchedulerObserver* observer) {
-    for (auto it = _observers.begin(); it != _observers.end(); ++it) {
-        if (*it == observer) {
-            _observers.erase(it);
-        }
-    }
-}
-
-const smpext::ISchedule* Scheduler::GetSchedule() const {
-    if (_currentSchedule != nullptr) {
-        return _currentSchedule;
-    }
-    if (_scheduled.size() > 0) {
-        return *_scheduled.begin();
-    }
-    return nullptr;
-}
-*/
-
 // ..........................................................
 void Scheduler::step() {
     Schedule* toRun = nullptr;
@@ -307,7 +265,7 @@ void Scheduler::step() {
     {
         Synchronized(_mutex);
         if (!_autoStop) {
-            while (_run && getNextScheduledEventTime() >= DURATION_MAX) {
+            while (_run && getNextScheduledEventTime() != -1) {
                 logInfo("No activable event left. The scheduler has been paused.");
                 MonitorWait(_monitor);
             }
@@ -316,7 +274,8 @@ void Scheduler::step() {
             // wait state exited because stop was requested
             return;
         }
-        completed=getNextScheduledEventTime() >= DURATION_MAX;
+        completed=getNextScheduledEventTime() == -1 
+                || getNextScheduledEventTime()==DURATION_MAX;
     }
     if (_autoStop && completed) {
         getSimulator()->Hold(true);
@@ -328,7 +287,8 @@ void Scheduler::step() {
         // after event emit, timekeeper should have updated current time,
         // run next event only if its scheduled time is not ahead the new
         // current simulation time.
-        if (_run && getNextScheduledEventTime() <= _timeKeeper->GetSimulationTime()) {
+        if (_run && getNextScheduledEventTime() <= _timeKeeper->GetSimulationTime() 
+                 && getNextScheduledEventTime()!=-1) {
             _currentSchedule = *_scheduled.begin();
             _scheduled.erase(_scheduled.begin());
             toRun = _currentSchedule;
@@ -346,11 +306,6 @@ void Scheduler::step() {
         _currentSchedule = nullptr;
         const auto eventId = toRun->GetId();
         if (toRun->IsCompleted()) {
-            /* TODO to be reconsidered
-                        for (auto observer : _observers) {
-                            observer->notifyCompleted(eventId);
-                        }
-            */
             delete toRun;
         }
     }

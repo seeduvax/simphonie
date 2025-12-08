@@ -21,7 +21,8 @@
 #define EVENT1 "TestEvent1"
 #define EVENT2 "TestEvent2"
 
-
+#undef TRACE
+#define TRACE(expr) std::cout << __FILE__ << ":" <<  __LINE__ << ":" << __FUNCTION__ << ": " << #expr << " = " << (expr) << std::endl;
  
  // ----------------------------------------------------------
  // test suite implementation
@@ -77,7 +78,12 @@
 
         void epHoldOnTimeElapsed() {
             auto sim=getSimulator();
-            if (sim->GetTimeKeeper()->GetSimulationTime()>=_endSimTime) {
+TRACE(sim->GetTimeKeeper()->GetSimulationTime());
+TRACE(sim->GetScheduler()->GetNextScheduledEventTime());
+TRACE(_endSimTime)
+            if (sim->GetTimeKeeper()->GetSimulationTime()>=_endSimTime 
+                || sim->GetScheduler()->GetNextScheduledEventTime()==-1) {
+TRACE(0);
                 sim->Hold(true);
             }
         }
@@ -89,6 +95,7 @@
             MonitorNotifyAll(_monitor);
         }
         void waitLeaveExecuting() {
+TRACE(0)
             Synchronized(_mutex);
             while (_run) {
                 MonitorWait(_monitor);
@@ -140,13 +147,16 @@ public:
         // CAUTION partial coverage of simph.evsched.1. Something should
         // test emitting events on field change.
         ABS_TEST_CASE_REQ(simph.evsched.1)
+TRACE(0)
         auto scheduler=_sim->GetScheduler();
+TRACE(0)
         // schedule event emit at few arbitrary dates
         scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("ev1"),100); 
         scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("ev1"),1017); 
         scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("ev1"),2017); 
         scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("ev1"),2038); 
         scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("ev1"),3001); 
+TRACE(0)
         // schedule one ep periodically and on event
         auto evMgr=_sim->GetEventManager();
         auto s=_metaScheduler->NewSchedule(_mdl->GetEntryPoint("date"));
@@ -157,8 +167,11 @@ public:
             .SubscribeActivateEvent(evMgr->QueryEventId(EVENT1))
             .Submit();
         // go sim
+TRACE(0)
         _sim->Run();
+TRACE(0)
         _mdl->waitLeaveExecuting();
+TRACE(0)
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)100,_mdl->_dates[0]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)1017,_mdl->_dates[1]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)2017,_mdl->_dates[2]);

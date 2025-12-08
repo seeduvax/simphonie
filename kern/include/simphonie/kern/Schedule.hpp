@@ -63,7 +63,10 @@ public:
 
     bool operator<(const Schedule& other) const {
         if (_absoluteSimTime != other.GetTime()) {
-            return _absoluteSimTime < other.GetTime();
+            
+            return _absoluteSimTime < other.GetTime()
+                  || other.GetTime()==-1; // -1 means somehow far away after
+                                          // simulation end, that is do not run.
         }
         return _id < other.GetId();
     }

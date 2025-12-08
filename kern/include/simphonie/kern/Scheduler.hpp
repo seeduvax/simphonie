@@ -150,6 +150,9 @@ private:
     inline Smp::Duration getAbsoluteTime(Smp::Duration relativeTime) {
         // saturate absolute simulation time to avoid overflow and possibly
         // negative resulting value.
+        if (relativeTime==-1) {
+            return -1;
+        }
         return relativeTime >= (DURATION_MAX - _timeKeeper->GetSimulationTime())
                    ? DURATION_MAX
                    : _timeKeeper->GetSimulationTime() + relativeTime;

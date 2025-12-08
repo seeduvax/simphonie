@@ -43,13 +43,11 @@ void Schedule::run() {
         epName = epName + ".";
         epName = epName + _ep->GetName();
         PROFILER_REGION(epName.c_str());
-        _ep->Execute();
-    }
-    {
-        PROFILER_REGION("Propagate data");
-        for (auto f : _fields) {
-            f->Push();
-        }
+        _counterActivation++;
+        // update next activation date first,to let next activation time
+        // overridable with Scheduler::SetEventSimulationTime during the entry
+        // point execution itself.
+        // see clause 5.3.3 l.2.f (p91 in ECSS-E-ST-40-07C Rev.1 5 august 2025)
         if (_counterActivation != _repeat) {
             if (_period > 0) {
                 setTime(
@@ -61,8 +59,16 @@ void Schedule::run() {
         else {
             _completed = true;
         }
+        // now run entry point.
+        _ep->Execute();
     }
-    _counterActivation++;
+    {
+        // entry point executed. Push the related output fields.
+        PROFILER_REGION("Propagate data");
+        for (auto f : _fields) {
+            f->Push();
+        }
+    }
 }
 
 }  /* namespace kern */
