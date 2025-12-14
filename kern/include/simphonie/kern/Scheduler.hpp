@@ -16,6 +16,7 @@
 #include "Smp/Services/ITimeKeeper.h"
 #include "simdeck/Component.hpp"
 #include "simdeck/EntryPointPublisher.hpp"
+#include "Smp/IOutputField.h"
 
 /* TODO: about what's commented and related to IObservableScheduler:
  * Design thinking still in progress. Scheduler observability still under study
@@ -91,8 +92,57 @@ protected:
     Smp::Services::EventId schedule(const Smp::IEntryPoint* entryPoint, Smp::Duration absoluteSimTime,
                                     Smp::Duration cycleTime = 0, Smp::Int64 repeat = 0);
     void schedule(Smp::Services::EventId event, Smp::Duration absoluteSimTime);
-    friend class Schedule;
 private:
+    class Schedule {
+    public:
+        Schedule(Scheduler* scheduler, const Smp::IEntryPoint* ep, const std::vector<Smp::IOutputField*>& fields,
+                 Smp::Duration simTime, Smp::Duration period = 0, Smp::Int64 repeat = 0);
+
+        inline Smp::Services::EventId GetId() const {
+            return _id;
+        }
+        inline Smp::Duration GetTime() const {
+            return _absoluteSimTime;
+        }
+        inline Smp::Duration GetPeriod() const {
+            return _period;
+        }
+        inline Smp::Int64 GetRepeat() const {
+            return _repeat;
+        }
+        inline const Smp::IEntryPoint* GetEP() const {
+            return _ep;
+        }
+        inline Smp::Bool IsCompleted() const {
+            return _completed;
+        }
+
+        void setTime(Smp::Duration absoluteSimTime);
+        inline void setPeriod(Smp::Duration period) { _period = period; }
+        inline void setRepeat(Smp::Int64 repeat) { _repeat = repeat; }
+
+        void run();
+
+        bool operator<(const Schedule& other) const {
+            if ( GetTime() != other.GetTime()) {
+                return GetTime()!=-1 && GetTime() < other.GetTime()
+                      || other.GetTime()==-1; 
+                                              // -1 means somehow far away after
+                                              // simulation end, that is do not run.
+            }
+            return GetId() < other.GetId();
+        }
+
+    private:
+        Scheduler* _scheduler;
+        const Smp::IEntryPoint* _ep;
+        std::vector<Smp::IOutputField*> _fields;
+        Smp::Duration _absoluteSimTime;
+        Smp::Duration _period;
+        Smp::Int64 _repeat;
+        Smp::Services::EventId _id;
+        Smp::Bool _completed;
+    };
     struct _compareSchedule {
         bool operator()(const Schedule* a, const Schedule* b) const;
     };
@@ -144,9 +194,6 @@ private:
     void epLeaveExecuting();
     Smp::IEntryPoint* _epLeaveExecuting;
 
-    /* TODO to be reconsidered
-        std::vector<smpext::ISchedulerObserver*> _observers;
-    */
     inline Smp::Duration getAbsoluteTime(Smp::Duration relativeTime) {
         // saturate absolute simulation time to avoid overflow and possibly
         // negative resulting value.

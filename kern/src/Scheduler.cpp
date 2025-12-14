@@ -16,13 +16,13 @@
 #include "assert.h"
 #include "simphonie/kern/ExInvalidEventId.hpp"
 #include "simphonie/kern/Resolver.hpp"
-#include "simphonie/kern/Schedule.hpp"
 #include "simphonie/sys/Logger.hpp"
+#include "abs/profiler.h"
 
 #define EV_NAME_PRE_EVENT_EXECUTE "Scheduler_PreEventExecute"
 #define EV_NAME_POST_EVENT_EXECUTE "Scheduler_PostEventExecute"
 #define CONTAINER_NAME "Observers"
-#define IMMEDIATE_SIMULATION_TIME -1
+#define IMMEDIATE_SIMULATION_TIME -2
 
 
 // TODO : to be reconsidered according the comments from the IScheduler header.
@@ -32,6 +32,58 @@
 
 namespace simphonie {
 namespace kern {
+
+Scheduler::Schedule::Schedule(Scheduler* scheduler, const Smp::IEntryPoint* ep, const std::vector<Smp::IOutputField*>& fields,
+                   Smp::Duration absoluteSimTime, Smp::Duration period, Smp::Int64 repeat)
+    : _scheduler(scheduler),
+      _ep(ep),
+      _fields(fields),
+      _absoluteSimTime(absoluteSimTime),
+      _period(period),
+      _repeat(repeat),
+      _completed(false) { 
+    static std::atomic<Smp::Services::EventId> _nextId(0);
+    _id = _nextId++;
+}
+
+void Scheduler::Schedule::setTime(Smp::Duration absoluteSimTime) {
+    _absoluteSimTime = absoluteSimTime;
+    _scheduler->schedule(this);
+}
+
+void Scheduler::Schedule::run() {
+    PROFILER_REGION("Schedule::run");
+    {
+        std::string epName = _ep->GetParent() != nullptr ?
+            _ep->GetParent()->GetName() : "";
+        epName = epName + ".";
+        epName = epName + _ep->GetName();
+        PROFILER_REGION(epName.c_str());
+        // update next activation date first,to let next activation time
+        // overridable with Scheduler::SetEventSimulationTime during the entry
+        // point execution itself.
+        // see clause 5.3.3 l.2.f (p91 in ECSS-E-ST-40-07C Rev.1 5 august 2025)
+        _completed = _repeat == 0;
+        if ( _repeat > 0) {
+            _repeat--;
+        }
+        if ( !_completed && _period > 0 ) {
+            setTime(
+                _period >= (DURATION_MAX - _absoluteSimTime) 
+                ? DURATION_MAX
+                : _absoluteSimTime + _period);
+        }
+        // now run entry point.
+        _ep->Execute();
+    }
+    {
+        // entry point executed. Push the related output fields.
+        PROFILER_REGION("Propagate data");
+        for (auto f : _fields) {
+            f->Push();
+        }
+    }
+}
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -97,7 +149,6 @@ void Scheduler::connect() {
 
 // ..........................................................
 Smp::Services::EventId Scheduler::AddImmediateEvent(const Smp::IEntryPoint* entryPoint) {
-    // TODO shall insert first, check using simulation time -1 is OK there.
     return schedule(entryPoint, IMMEDIATE_SIMULATION_TIME, 0, 0);
 }
 // ..........................................................
@@ -122,7 +173,7 @@ Smp::Services::EventId Scheduler::schedule(const Smp::IEntryPoint* entryPoint, S
     return mySchedule->GetId();
 }
 // ..........................................................
-Schedule* Scheduler::findSchedule(Smp::Services::EventId event) {
+Scheduler::Schedule* Scheduler::findSchedule(Smp::Services::EventId event) {
     Synchronized(_mutex);
     if (_currentSchedule != nullptr && _currentSchedule->GetId() == event) {
         return _currentSchedule;
