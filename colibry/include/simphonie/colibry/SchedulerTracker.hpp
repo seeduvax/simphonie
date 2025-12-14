@@ -13,9 +13,9 @@
 #include "Smp/String8.h"
 #include "Smp/Services/EventId.h"
 #include "Smp/Services/ITimeKeeper.h"
+#include "Smp/Services/IScheduler.h"
 #include "simdeck/EntryPointPublisher.hpp"
 #include "simdeck/Service.hpp"
-#include "simdeck/smpext/IObservableScheduler.hpp"
 #include <unordered_map>
 
 namespace simphonie {
@@ -31,25 +31,24 @@ protected:
     void connect() override;
 
 private:
-    struct _Event {
-        struct Call {
+    struct ExecStat {
+        struct ExecDates {
             const Smp::Duration start;
             Smp::Duration stop;
         };
 
         const Smp::Services::EventId id;
-        const std::string name;
-        std::vector<Call> calls;
+        std::vector<ExecDates> dates;
     };
 
-    void _preEventEP();
-    void _postEventEP();
-    void _logStats();
+    void epPreExec();
+    void epPostExec();
+    void epLogStats();
 
-    simdeck::smpext::IObservableScheduler *_scheduler;
-    Smp::Services::ITimeKeeper *_timeKeeper;
-    _Event *_currentEvent;
-    std::unordered_map<Smp::Services::EventId, _Event> _events;
+    Smp::Services::IScheduler* _scheduler;
+    Smp::Services::ITimeKeeper* _timeKeeper;
+    ExecStat* _currentStat;
+    std::unordered_map<Smp::Services::EventId, ExecStat> _stats;
 
 };
 

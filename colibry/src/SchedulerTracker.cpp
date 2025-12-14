@@ -21,59 +21,56 @@ namespace simphonie {
 namespace colibry {
 
 SchedulerTracker::SchedulerTracker(Smp::String8 name, Smp::String8 descr, Smp::IObject *parent) :
-    Service(name, descr, parent), _currentEvent(nullptr)
+    Service(name, descr, parent), _currentStat(nullptr)
 {
-    _scheduler = dynamic_cast<simdeck::smpext::IObservableScheduler*>
-        (getSimulator()->GetScheduler());
-    if (!_scheduler) {
-        throw simdeck::Exception(this,
-            "simphonie::colibry::ScheduleTracker cannot be use with a non simdeck::smpext::IObservableScheduler scheduler.");
-    }
-    _timeKeeper = getSimulator()->GetTimeKeeper();
     addEP(PRE_EP, "Handler for the Scheduler_PreEventExecute event.", this,
-        &SchedulerTracker::_preEventEP);
+        &SchedulerTracker::epPreExec);
     addEP(POST_EP, "Handler for the Scheduler_PostEventExecute event.", this,
-        &SchedulerTracker::_postEventEP);
-    addEP("logStats", "Log scheduling statistics.", this, &SchedulerTracker::_logStats);
+        &SchedulerTracker::epPostExec);
+    addEP("logStats", "Log scheduling statistics.", this, &SchedulerTracker::epLogStats);
 }
 
 void SchedulerTracker::connect() {
+    _scheduler = getSimulator()->GetScheduler();
+    _timeKeeper = getSimulator()->GetTimeKeeper();
     auto evntMngr = getSimulator()->GetEventManager();
     evntMngr->Subscribe(evntMngr->QueryEventId("Scheduler_PreEventExecute"), GetEntryPoint(PRE_EP));
     evntMngr->Subscribe(evntMngr->QueryEventId("Scheduler_PostEventExecute"), GetEntryPoint(POST_EP));
 }
 
-void SchedulerTracker::_preEventEP() {
-    if (_currentEvent) {
+void SchedulerTracker::epPreExec() {
+    if ( _currentStat != nullptr ) {
         throw simdeck::Exception(this,
             "Scheduler_PreEventExecute has been emitted while waiting for a Scheduler_PostEventExecute event.");
     }
     const auto start = _timeKeeper->GetZuluTime();
-    auto schedule = _scheduler->GetSchedule();
-    auto it = _events.find(schedule->GetId());
-    if (it == _events.end()) {
-        _events.insert({schedule->GetId(), {schedule->GetId(), schedule->GetEP()->GetName(), {}}});
-        it = _events.find(schedule->GetId());
+    auto evId=_scheduler->GetCurrentEventId();
+    auto it = _stats.find(evId);
+    if (it == _stats.end()) {
+        _stats.insert({evId, { evId , {}}});
+        _currentStat = &(_stats.find(evId)->second);
     }
-    _currentEvent = &it->second;
-    _currentEvent->calls.push_back({start, 0});
+    else {
+        _currentStat = &it->second;
+    }
+    _currentStat->dates.push_back({start, 0});
 }
 
-void SchedulerTracker::_postEventEP() {
-    if (!_currentEvent) {
+void SchedulerTracker::epPostExec() {
+    if ( _currentStat == nullptr ) {
         throw simdeck::Exception(this,
             "Scheduler_PostEventExecute has been emitted while waiting for a Scheduler_PreEventExecute event.");
     }
-    _currentEvent->calls.back().stop = _timeKeeper->GetZuluTime();
-    _currentEvent = nullptr;
+    _currentStat->dates.back().stop = _timeKeeper->GetZuluTime();
+    _currentStat = nullptr;
 }
 
-void SchedulerTracker::_logStats() {
+void SchedulerTracker::epLogStats() {
     std::ostringstream oss;
-    oss << "Event <id> (<name>) (<#calls> calls): <min> - <avg> - <max>";
-    for (auto event : _events) {
+    oss << "Event <id> (<#calls> calls): <min> - <avg> - <max>";
+    for (auto event : _stats) {
         Smp::Duration min = INT64_MAX, max = 0, sum = 0;
-        for (auto call : event.second.calls) {
+        for (auto call : event.second.dates) {
             const auto duration = call.stop - call.start;
             sum += duration;
             if (duration < min) {
@@ -83,9 +80,9 @@ void SchedulerTracker::_logStats() {
                 max = duration;
             }
         }
-        oss << std::endl << "Event " << event.second.id << " (" << event.second.name
-            << ") (" << event.second.calls.size() << " calls) : "
-            << min << " - " << sum / event.second.calls.size() << " - " << max;
+        oss << std::endl << "Event " << event.second.id
+            << " (" << event.second.dates.size() << " calls) : "
+            << min << " - " << sum / event.second.dates.size() << " - " << max;
     }
     logInfo(oss.str().c_str());
 }

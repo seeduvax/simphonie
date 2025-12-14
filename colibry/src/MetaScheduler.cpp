@@ -120,15 +120,27 @@ MetaScheduler::Schedule::~Schedule() {
 void MetaScheduler::Schedule::Submit() {
     if (_eventId==-1) {
         _eventId=_metaScheduler->getScheduler()->AddSimulationTimeEvent(_ep,
-            _active ? _simulationTime : _metaScheduler->getMaxSimTime(), _cycleTime, _repeat);
+            _active ? _simulationTime : -1, 
+            _cycleTime == -1 ? getMaxCycleTime() : _cycleTime,
+            _repeat);
         _metaScheduler->registerSchedule(this);
     }
     else {
-        _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId, 
-            _active ? _simulationTime : _metaScheduler->getMaxSimTime());
-        _metaScheduler->getScheduler()->SetEventCycleTime(_eventId, _cycleTime);
-        _metaScheduler->getScheduler()->SetEventRepeat(_eventId, _repeat);
+        if (_simulationTimeChanged) {
+            _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId, 
+                _active ? _simulationTime : -1);
+        }
+        if (_cycleTimeChanged) {
+            _metaScheduler->getScheduler()->SetEventCycleTime(_eventId, 
+                _cycleTime == -1 ? getMaxCycleTime() : _cycleTime);
+        }
+        if (_repeatChanged) {
+            _metaScheduler->getScheduler()->SetEventRepeat(_eventId, _repeat);
+        }
     }
+    _simulationTimeChanged=false;
+    _cycleTimeChanged=false;
+    _repeatChanged=false;
 }
 // ..........................................................
 void MetaScheduler::Schedule::epActivate() {
@@ -144,7 +156,7 @@ void MetaScheduler::Schedule::epDeactivate() {
     // Deactivate the event by setting its next activation time at the end of
     // simulation time.
     _active=false;
-    _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId, _metaScheduler->getMaxSimTime());
+    _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId, -1);
 }
 // ..........................................................
 Smp::String8 MetaScheduler::Schedule::GetName() const {

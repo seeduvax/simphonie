@@ -60,6 +60,7 @@ public:
         }
         Schedule& SetRepeat(Smp::Int64 repeat) override {
             _repeat=repeat;
+            _repeatChanged=true;
             return *this;
         }
         Schedule& SetActive(bool active) override {
@@ -94,12 +95,20 @@ public:
         Smp::IObject* GetParent() const override;
         Smp::IObject* GetChild(Smp::String8) const override;
     private:
+        inline Smp::Duration getMaxCycleTime() {
+            return SMP_DURATION_MAX
+                    - _metaScheduler->_timeKeeper->GetSimulationTime()
+                    - _simulationTime;
+        }
         MetaScheduler* _metaScheduler=nullptr;
         Smp::IEntryPoint* _ep=nullptr;
         Smp::Services::EventId _eventId=-1;
         Smp::Duration _simulationTime;
+        bool _simulationTimeChanged=false;
         Smp::Duration _cycleTime=0;
+        bool _cycleTimeChanged=false;
         Smp::Int64 _repeat=0;
+        bool _repeatChanged=false;
         Smp::IEntryPoint* _epActivate;
         Smp::IEntryPoint* _epDeactivate;
         bool _active=true;
@@ -112,10 +121,6 @@ public:
     Schedule* NewSchedule(Smp::IEntryPoint* ep) override {
         Schedule* s=new Schedule(this, ep);
         return s;
-    }
-
-    inline Smp::Duration getMaxSimTime() {
-        return SMP_DURATION_MAX - _timeKeeper->GetSimulationTime();
     }
     inline Smp::Services::IScheduler* getScheduler() {
         return _scheduler;
