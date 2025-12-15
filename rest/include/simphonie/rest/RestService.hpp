@@ -23,12 +23,11 @@
 #include "Smp/IStorageReader.h"
 #include "Smp/IStorageWriter.h"
 #include "Smp/Services/IResolver.h"
+#include "Smp/Services/IScheduler.h"
 #include "Smp/Services/ITimeKeeper.h"
 #include "simdeck/EntryPointPublisher.hpp"
 #include "simdeck/Object.hpp"
 #include "simdeck/Service.hpp"
-#include "simdeck/smpext/ISchedule.hpp"
-#include "simdeck/smpext/ISchedulerObserver.hpp"
 #include "wfrest/HttpServer.h"
 #include "wfrest/Json.h"
 
@@ -38,19 +37,10 @@ namespace rest {
 using namespace wfrest;
 
 class RestService : public simdeck::Service,
-                    public simdeck::EntryPointPublisher,
-                    virtual public simdeck::smpext::ISchedulerObserver {
+                    public simdeck::EntryPointPublisher {
 public:
     RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent);
     ~RestService();
-
-    void notifyScheduled(const simdeck::smpext::ISchedule* event) override;
-    inline void notifyCompleted(Smp::Services::EventId eventId) override {
-        removeSchedule(eventId);
-    }
-    inline void notifyCanceled(Smp::Services::EventId eventId) override {
-        removeSchedule(eventId);
-    }
 
 private:
     class FieldHandler : public simdeck::Object,
@@ -80,7 +70,7 @@ private:
             return (c <= '9') ? c - '0' : c - 'a' + 10;
         }
 
-        Smp::Services::IScheduler* _schdl;
+        Smp::Services::IScheduler* _scheduler;
         Smp::IEntryPoint* _updateEP;
 
         Smp::IField* _field;
@@ -96,10 +86,6 @@ private:
         bool _updated;
         bool* _simIsRunning;
         std::condition_variable _updatedCovar;
-    };
-
-    struct _compareSchedule {
-        bool operator()(const simdeck::smpext::ISchedule* a, const simdeck::smpext::ISchedule* b) const;
     };
 
     void publish(Smp::IPublication* reciever) override;
@@ -121,14 +107,12 @@ private:
     static Json::Object parseKind(const T& kind);
     Json::Object parseField(Smp::IField* field);
     static Json::Object parseEP(const Smp::IEntryPoint* ep);
-    static Json::Object parseSchedule(const simdeck::smpext::ISchedule* schedule);
     Json::Array parseFields(const Smp::IComponent* Component);
     static Json::Array parseEPs(const Smp::IComponent* Component);
     Json::Object parseComponent(const Smp::IComponent* component, bool recursive);
     Json::Array parseContainer(const Smp::IContainer* container, bool recursive);
-    void getSimulator(const HttpReq* req, HttpResp* resp);
+    void getSimulatorStatus(const HttpReq* req, HttpResp* resp);
     void getState(const HttpReq* req, HttpResp* resp) const;
-    void getScheduleQueue(const HttpReq* req, HttpResp* resp);
     void postState(const HttpReq* req, HttpResp* resp);
     void postScheduleQueue(const HttpReq* req, HttpResp* resp);
     void defaultGetHandler(const HttpReq* req, HttpResp* resp);
@@ -139,11 +123,9 @@ private:
     std::string _host;
     Smp::UInt16 _port;
     Smp::ISimulator* _sim;
-    Smp::Services::IResolver* _rslv;
-    Smp::Services::ITimeKeeper* _tk;
-    Smp::Services::IScheduler* _schdl;
-    std::mutex _schdlMutex;
-    std::multiset<const simdeck::smpext::ISchedule*, _compareSchedule> _scheduleQueue;
+    Smp::Services::IResolver* _resolver;
+    Smp::Services::ITimeKeeper* _timeKeeper;
+    Smp::Services::IScheduler* _scheduler;
     std::mutex _simIsRunningMutex;
     bool _simIsRunning;
 };

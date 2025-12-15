@@ -14,13 +14,11 @@
 
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/Publication/IType.h"
-#include "Smp/Services/IScheduler.h"
+#include "Smp/Services/IEventManager.h"
 #include "Smp/SimulatorStateKind.h"
 #include "Smp/ViewKind.h"
 #include "simdeck/ExInvalidParent.hpp"
 #include "simdeck/StringType.hpp"
-#include "simdeck/smpext/IObservableScheduler.hpp"
-#include "simphonie/kern/Schedule.hpp" /* c.f. RestService::_compareSchedule::operator() */
 #include "wfrest/ErrorCode.h"
 #include "wfrest/HttpMsg.h"
 
@@ -38,35 +36,7 @@ RestService::RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* pa
     : simdeck::Service(name, descr, parent),
       _family(AF_INET),
       _host("localhost"),
-      _port(8080),
-      _sim(dynamic_cast<Smp::ISimulator*>(parent)) {
-    if (_sim != nullptr) {
-        std::string root = "/api/v1/";
-        root += _sim->GetName();
-        _server.GET(root, [=](const HttpReq* req, HttpResp* resp) { this->getSimulator(req, resp); });
-        _server.GET(root + "/state", [=](const HttpReq* req, HttpResp* resp) { this->getState(req, resp); });
-        _server.GET(root + "/scheduleQueue",
-                    [=](const HttpReq* req, HttpResp* resp) { this->getScheduleQueue(req, resp); });
-        _server.GET(root + "/*", [=](const HttpReq* req, HttpResp* resp) { this->defaultGetHandler(req, resp); });
-        _server.POST(root + "/state", [=](const HttpReq* req, HttpResp* resp) { this->postState(req, resp); });
-        _server.POST(root + "/scheduleQueue",
-                     [=](const HttpReq* req, HttpResp* resp) { this->postScheduleQueue(req, resp); });
-        _server.POST(root + "/*", [=](const HttpReq* req, HttpResp* resp) { this->defaultPostHandler(req, resp); });
-    }
-    else {
-        simdeck::ExInvalidParent ex(this, parent, nullptr);
-        // TODO need a way to add info on exception...
-        //        ex.setDescription("Parent is not a Smp::ISimulator");
-        throw ex;
-    }
-    const auto schObsv = dynamic_cast<simdeck::smpext::IObservableScheduler*>(_sim->GetScheduler());
-    if (schObsv) {
-        schObsv->RegisterObserver(this);
-    }
-    {
-        std::lock_guard<std::mutex> lock(_simIsRunningMutex);
-        _simIsRunning = (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing);
-    }
+      _port(8080) {
 
     addEP(ON_SIM_EXECUTING, "Internal use only", this, &RestService::onSimExecuting);
     addEP(ON_SIM_LEAVEEXEC, "Internal use only", this, &RestService::onSimLeavingExec);
@@ -74,27 +44,8 @@ RestService::RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* pa
 
 RestService::~RestService() {
     _server.stop();
-    const auto schObsv = dynamic_cast<simdeck::smpext::IObservableScheduler*>(_sim->GetScheduler());
-    if (schObsv) {
-        schObsv->RemoveObserver(this);
-    }
 }
 
-void RestService::notifyScheduled(const simdeck::smpext::ISchedule* event) {
-    std::lock_guard<std::mutex> lock(_schdlMutex);
-    _scheduleQueue.insert(event);
-}
-
-bool RestService::removeSchedule(Smp::Services::EventId eventId) {
-    std::lock_guard<std::mutex> lock(_schdlMutex);
-    for (auto it = _scheduleQueue.begin(); it != _scheduleQueue.end(); ++it) {
-        if ((*it)->GetId() == eventId) {
-            _scheduleQueue.erase(it);
-            return true;
-        }
-    }
-    return false;
-}
 
 RestService::FieldHandler::FieldHandler(Smp::IField* field, Smp::Services::IScheduler* scheduler, bool* simIsRunning,
                                         Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
@@ -103,7 +54,7 @@ RestService::FieldHandler::FieldHandler(Smp::IField* field, Smp::Services::ISche
       _simplefield(dynamic_cast<Smp::ISimpleField*>(_field)),
       _simplearrayfield(dynamic_cast<Smp::ISimpleArrayField*>(_field)),
       _updated(false),
-      _schdl(scheduler),
+      _scheduler(scheduler),
       _simIsRunning(simIsRunning) {
     _updateEP = addEP("update", "Update the value of the handled fields.", this, &RestService::FieldHandler::update);
 }
@@ -146,7 +97,7 @@ void RestService::FieldHandler::update() {
 
 void RestService::FieldHandler::scheduleUpdate() {
     if (*_simIsRunning) {
-        _schdl->AddImmediateEvent(_updateEP);
+        _scheduler->AddImmediateEvent(_updateEP);
     }
     else {
         update();
@@ -208,12 +159,29 @@ void RestService::publish(Smp::IPublication* receiver) {
 }
 
 void RestService::connect() {
-    _tk = _sim->GetTimeKeeper();
-    _rslv = _sim->GetResolver();
-    _schdl = _sim->GetScheduler();
-    _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_EnterExecutingId,
+    _sim=getSimulator();
+    if (_sim != nullptr) {
+        std::string root = "/api/v1/";
+        root += _sim->GetName();
+        _server.GET(root, [=](const HttpReq* req, HttpResp* resp) { this->getSimulatorStatus(req, resp); });
+        _server.GET(root + "/state", [=](const HttpReq* req, HttpResp* resp) { this->getState(req, resp); });
+        _server.GET(root + "/*", [=](const HttpReq* req, HttpResp* resp) { this->defaultGetHandler(req, resp); });
+        _server.POST(root + "/state", [=](const HttpReq* req, HttpResp* resp) { this->postState(req, resp); });
+        _server.POST(root + "/scheduleQueue",
+                     [=](const HttpReq* req, HttpResp* resp) { this->postScheduleQueue(req, resp); });
+        _server.POST(root + "/*", [=](const HttpReq* req, HttpResp* resp) { this->defaultPostHandler(req, resp); });
+    }
+    {
+        std::lock_guard<std::mutex> lock(_simIsRunningMutex);
+        _simIsRunning = (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing);
+    }
+    _timeKeeper = _sim->GetTimeKeeper();
+    _resolver = _sim->GetResolver();
+    _scheduler = _sim->GetScheduler();
+    auto eventManager=_sim->GetEventManager();
+    eventManager->Subscribe(Smp::Services::IEventManager::SMP_EnterExecutingId,
                                        GetEntryPoint(ON_SIM_EXECUTING));
-    _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_EnterExecutingId,
+    eventManager->Subscribe(Smp::Services::IEventManager::SMP_EnterExecutingId,
                                        GetEntryPoint(ON_SIM_LEAVEEXEC));
     _server.start(_family, _host.c_str(), _port);
 }
@@ -239,10 +207,10 @@ std::string RestService::extractLastElemPath(std::string& path) {
 
 Json::Object RestService::parseTimestamp() const {
     return Json::Object{
-        {"zulu", _tk->GetZuluTime()},
-        {"simulation", _tk->GetSimulationTime()},
-        {"epoch", _tk->GetEpochTime()},
-        {"mission", _tk->GetMissionTime()},
+        {"zulu", _timeKeeper->GetZuluTime()},
+        {"simulation", _timeKeeper->GetSimulationTime()},
+        {"epoch", _timeKeeper->GetEpochTime()},
+        {"mission", _timeKeeper->GetMissionTime()},
     };
 }
 
@@ -287,7 +255,7 @@ Json::Object RestService::parseField(Smp::IField* field) {
         std::vector<std::string> value;
         {
             std::lock_guard<std::mutex> lock(_simIsRunningMutex);
-            value = FieldHandler(field, _schdl, &_simIsRunning, "FieldHandler", "", this).getValue();
+            value = FieldHandler(field, _scheduler, &_simIsRunning, "FieldHandler", "", this).getValue();
         }
         if (value.size() == 1) {
             json.push_back("value", value.front());
@@ -308,25 +276,6 @@ Json::Object RestService::parseEP(const Smp::IEntryPoint* ep) {
         {"name", ep->GetName()},
         {"description", ep->GetDescription()},
     };
-}
-
-Json::Object RestService::parseSchedule(const simdeck::smpext::ISchedule* schedule) {
-    Json::Object json{
-        {"id", schedule->GetId()},
-        {"name", schedule->GetEP()->GetName()},
-        {"description", schedule->GetEP()->GetDescription()},
-        {"time", schedule->GetTime()},
-        {"period", schedule->GetPeriod()},
-        {"repeat", schedule->GetRepeat()},
-        {"activationCounter", schedule->GetActivationCounter()},
-    };
-    if (schedule->GetStartEventId() >= 0) {
-        json.push_back("startOnEventId", schedule->GetStartEventId());
-    }
-    if (schedule->GetStopEventId() >= 0) {
-        json.push_back("stopEventId", schedule->GetStopEventId());
-    }
-    return json;
 }
 
 Json::Array RestService::parseFields(const Smp::IComponent* component) {
@@ -426,16 +375,6 @@ void RestService::getState(const HttpReq* req, HttpResp* resp) const {
     resp->Json(json);
 }
 
-void RestService::getScheduleQueue(const HttpReq* req, HttpResp* resp) {
-    setupResponse(resp);
-    Json::Object json;
-    for (const auto schedule : _scheduleQueue) {
-        json["queue"].push_back(parseSchedule(schedule));
-    }
-    json.push_back("timestamp", parseTimestamp());
-    resp->Json(json);
-}
-
 void RestService::postScheduleQueue(const HttpReq* req, HttpResp* resp) {
     setupResponse(resp);
     const auto json = Json::parse(req->body());
@@ -449,7 +388,7 @@ void RestService::postScheduleQueue(const HttpReq* req, HttpResp* resp) {
     Smp::IEntryPoint* entrypoint;
     try {
         const auto path = json["entrypoint"].get<std::string>();
-        const auto obj = _rslv->ResolveAbsolute(path.c_str());
+        const auto obj = _resolver->ResolveAbsolute(path.c_str());
         entrypoint = dynamic_cast<Smp::IEntryPoint*>(obj);
         if (!entrypoint) {
             throw std::exception();
@@ -462,7 +401,7 @@ void RestService::postScheduleQueue(const HttpReq* req, HttpResp* resp) {
     }
 
     if (json.has("immediate") && json["immediate"].get<Smp::Bool>()) {
-        _schdl->AddImmediateEvent(entrypoint);
+        _scheduler->AddImmediateEvent(entrypoint);
         return;
     }
 
@@ -509,7 +448,7 @@ void RestService::postScheduleQueue(const HttpReq* req, HttpResp* resp) {
     const auto repeat = json.has("repeat") ? json["repeat"].get<Smp::Int64>() : -1LL;
 
     try {
-        _schdl->AddSimulationTimeEvent(entrypoint, time, period, repeat);
+        _scheduler->AddSimulationTimeEvent(entrypoint, time, period, repeat);
     }
     catch (...) {
         resp->String("Scheduling failed.");
@@ -566,7 +505,7 @@ void RestService::postState(const HttpReq* req, HttpResp* resp) {
     }
 }
 
-void RestService::getSimulator(const HttpReq* req, HttpResp* resp) {
+void RestService::getSimulatorStatus(const HttpReq* req, HttpResp* resp) {
     setupResponse(resp);
     Json::Object json;
     json.push_back("name", _sim->GetName());
@@ -606,7 +545,7 @@ void RestService::defaultGetHandler(const HttpReq* req, HttpResp* resp) {
         }
     }
 
-    const auto comp = dynamic_cast<Smp::IComponent*>(_rslv->ResolveAbsolute(objPath.c_str()));
+    const auto comp = dynamic_cast<Smp::IComponent*>(_resolver->ResolveAbsolute(objPath.c_str()));
     if (!comp) {
         const std::string msg = "the path '" + objPath + "' does not lead to a component.";
         resp->Error(ErrorCode::StatusNotFound, msg);
@@ -649,7 +588,7 @@ void RestService::defaultPostHandler(const HttpReq* req, HttpResp* resp) {
             resp->Error(ErrorCode::StatusNotFound, msg);
             return;
         }
-        const auto comp = dynamic_cast<Smp::IComponent*>(_rslv->ResolveAbsolute(objPath.c_str()));
+        const auto comp = dynamic_cast<Smp::IComponent*>(_resolver->ResolveAbsolute(objPath.c_str()));
         if (!comp) {
             const std::string msg = "the path '" + objPath + "' does not lead to a component.";
             resp->Error(ErrorCode::StatusNotFound, msg);
@@ -675,19 +614,8 @@ void RestService::defaultPostHandler(const HttpReq* req, HttpResp* resp) {
     }
     {
         std::lock_guard<std::mutex> lock(_simIsRunningMutex);
-        FieldHandler(field, _schdl, &_simIsRunning, "FieldHandler", "", this).setBinValue(value);
+        FieldHandler(field, _scheduler, &_simIsRunning, "FieldHandler", "", this).setBinValue(value);
     }
-}
-
-/**
- * Dirty tricks to get the scheduler's comparaison function.
- * It may be cleaner to define a `virtual bool operator<(const ISchedule& other) const = 0;` within the
- * simdeck::smpext::ISchedule class
- */
-bool RestService::_compareSchedule::operator()(const simdeck::smpext::ISchedule* a,
-                                               const simdeck::smpext::ISchedule* b) const {
-    return *reinterpret_cast<const simphonie::kern::Schedule*>(a)
-           < *reinterpret_cast<const simphonie::kern::Schedule*>(b);
 }
 
 } /* namespace rest */
