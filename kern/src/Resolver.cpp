@@ -86,7 +86,10 @@ void Resolver::dumpObj(const Smp::IObject* from, int level) const {
         if (f->IsOutput()) {
             std::cout << ":out";
         }
-        std::cout << ":" << f->GetType()->GetPrimitiveTypeKind();
+        auto t = f->GetType();
+        if (t != nullptr) {
+            std::cout << ":" << f->GetType()->GetPrimitiveTypeKind();
+        }
         auto af = dynamic_cast<const Smp::ISimpleArrayField*>(from);
         if (af != nullptr) {
             std::cout << "[" << af->GetSize() << "]";
