@@ -88,7 +88,8 @@ public:
         CPPUNIT_ASSERT_EQUAL(3, cC._value);
         bool exThrown = false;
         try {
-            evMgr.Emit(Smp::Services::IEventManager::SMP_PostSimTimeChangeId + 1);
+            // emit invalid event id.
+            evMgr.Emit(4096);
         }
         catch (Smp::Services::InvalidEventId& ex) {
             exThrown = true;

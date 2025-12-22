@@ -34,6 +34,8 @@ EventManager::EventManager(Smp::String8 name, Smp::String8 descr, Smp::IObject* 
     for (int evtIdx = 1; evtIdx <= Smp::Services::IEventManager::SMP_PostSimTimeChangeId; ++evtIdx) {
         _evRegistry.emplace(std::piecewise_construct, std::forward_as_tuple(evtIdx),
                             std::forward_as_tuple());
+        _idIndex[_SMP_EventNamesTable[evtIdx-1]]=evtIdx;
+        _nextId++;
     }
 }
 // ..........................................................
@@ -41,35 +43,24 @@ EventManager::~EventManager() {}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::Services::EventId EventManager::QueryEventId(Smp::String8 eventName) {
-    for (int i = 1; i <= Smp::Services::IEventManager::SMP_PostSimTimeChangeId; ++i) {
-        if (strcmp(eventName, _SMP_EventNamesTable[i - 1]) == 0) {
-            return i;
-        }
+    Synchronized(_mutex);
+    Smp::Services::EventId id=0;
+    auto it=_idIndex.find(eventName);
+    if (it!=_idIndex.end()) {
+        id = it->second;
     }
-    const char* c = eventName;
-    // max uint64 to avoid an overflow error when multiplying by 31
-    uint64_t maxU64 = std::numeric_limits<uint64_t>::max() >> 4;
-    Smp::Services::EventId id = 32;
-    while (*c != '\0') {
-        id = (id % maxU64) * 31 + (int)(*c);
-        c++;
-    }
-    auto itEps = _evRegistry.find(id);
-    if (itEps == _evRegistry.end()) {
-        // Create new slot in registry for the queried event if not yet
-        // existing.
+    else {
+        _idIndex[eventName] = _nextId;
+        id = _nextId;
         _evRegistry.emplace(std::piecewise_construct, std::forward_as_tuple(id),
                             std::forward_as_tuple());
+        _nextId++;
     }
-    // TODO may be it is possible to check for collisition by checking
-    // collection's name against provided event name when there is already
-    // something in the registry with the same id.
     return id;
 }
 // ..........................................................
 void EventManager::Subscribe(Smp::Services::EventId event, const Smp::IEntryPoint* entryPoint) {
-    // TODO make it thread safe.
-    // Or restrict use from a single scheduler...
+    Synchronized(_mutex);
     if (entryPoint != nullptr) {
         auto itEps = _evRegistry.find(event);
         if (itEps != _evRegistry.end()) {
@@ -85,8 +76,7 @@ void EventManager::Subscribe(Smp::Services::EventId event, const Smp::IEntryPoin
 }
 // ..........................................................
 void EventManager::Unsubscribe(Smp::Services::EventId event, const Smp::IEntryPoint* entryPoint) {
-    // TODO make it thread safe.
-    // Or restrict use from a single scheduler...
+    Synchronized(_mutex);
     auto itEps = _evRegistry.find(event);
     if (itEps != _evRegistry.end()) {
         bool res = itEps->second.remove(entryPoint);

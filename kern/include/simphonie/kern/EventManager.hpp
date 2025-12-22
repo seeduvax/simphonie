@@ -13,6 +13,7 @@
 #include "Smp/Services/IEventManager.h"
 #include "simdeck/Collection.hpp"
 #include "simdeck/Component.hpp"
+#include "simphonie/sys/Synchro.hpp"
 
 namespace simphonie {
 namespace kern {
@@ -42,6 +43,9 @@ public:
 private:
     typedef std::unordered_map<Smp::Services::EventId, Collection<const Smp::IEntryPoint> > EventRegistryMap;
     EventRegistryMap _evRegistry;
+    std::unordered_map<std::string, Smp::Services::EventId> _idIndex;
+    Smp::Services::EventId _nextId=1;
+    std::mutex _mutex;
 };
 
 }  // namespace kern
