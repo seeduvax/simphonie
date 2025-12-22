@@ -257,8 +257,7 @@ bool FMIBridge::SetDebugLogging(fmi2Boolean logginOn,
                         size_t nCategories, const fmi2String categories[]) {
     // Don't know how to map logger configuration to SMP. So ingore the
     // request.
-    logWarning("fmi2SetDebugLogging request ignored.");
-    return true;
+    return false;
 }
 
 
