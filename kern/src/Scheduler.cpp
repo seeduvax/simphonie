@@ -21,14 +21,7 @@
 
 #define EV_NAME_PRE_EVENT_EXECUTE "Scheduler_PreEventExecute"
 #define EV_NAME_POST_EVENT_EXECUTE "Scheduler_PostEventExecute"
-#define CONTAINER_NAME "Observers"
 #define IMMEDIATE_SIMULATION_TIME -2
-
-
-// TODO : to be reconsidered according the comments from the IScheduler header.
-//   - use of -1 as IMMEDIATE_SIMULATION_TIME magic value.
-//   - simulation time saturation policy. It is specified a simulation time too
-//     far shall throw an invalid simulation time exception.
 
 namespace simphonie {
 namespace kern {
@@ -70,7 +63,7 @@ void Scheduler::Schedule::run() {
         if ( !_completed && _period > 0 ) {
             setTime(
                 _period >= (DURATION_MAX - _absoluteSimTime) 
-                ? DURATION_MAX
+                ? -1 // won't repeat anymore, not enough simulation time left
                 : _absoluteSimTime + _period);
         }
         // now run entry point.
@@ -114,6 +107,22 @@ Scheduler::~Scheduler() {
     delete _epLeaveExecuting;
 }
 // --------------------------------------------------------------------
+// ..........................................................
+Smp::Duration Scheduler::getAbsoluteTime(Smp::Duration relativeTime) {
+    if (relativeTime!=-1) {
+        auto ctime = _timeKeeper->GetSimulationTime();
+        auto maxTime = DURATION_MAX - ctime;
+        if ( relativeTime >= maxTime ) {
+            throw ExInvalidSimulationTime(this, ctime,
+                    relativeTime,
+                    maxTime);
+        }
+        else {
+            return ctime + relativeTime;
+        }
+    }
+    return -1;
+}
 // ..........................................................
 void Scheduler::schedule(Schedule* s) {
     {

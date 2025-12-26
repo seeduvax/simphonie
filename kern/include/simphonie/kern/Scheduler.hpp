@@ -17,6 +17,7 @@
 #include "simdeck/Component.hpp"
 #include "simdeck/EntryPointPublisher.hpp"
 #include "Smp/IOutputField.h"
+#include "simphonie/kern/ExInvalidSimulationTime.hpp"
 
 /* TODO: about what's commented and related to IObservableScheduler:
  * Design thinking still in progress. Scheduler observability still under study
@@ -194,16 +195,15 @@ private:
     void epLeaveExecuting();
     Smp::IEntryPoint* _epLeaveExecuting;
 
-    inline Smp::Duration getAbsoluteTime(Smp::Duration relativeTime) {
-        // saturate absolute simulation time to avoid overflow and possibly
-        // negative resulting value.
-        if (relativeTime==-1) {
-            return -1;
-        }
-        return relativeTime >= (DURATION_MAX - _timeKeeper->GetSimulationTime())
-                   ? DURATION_MAX
-                   : _timeKeeper->GetSimulationTime() + relativeTime;
-    }
+    /**
+     * check relative time and compute absolute simulation time.
+     * Throws invalid simulation time exception when relative time is too
+     * big against current simulation time, leading to a simulation time 
+     * overflow.
+     * @param relativeTime relative time.
+     * @return absolute simulation time.
+     */  
+    Smp::Duration getAbsoluteTime(Smp::Duration relativeTime);
 };
 
 } /* namespace kern */
