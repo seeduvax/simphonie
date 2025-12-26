@@ -70,7 +70,6 @@ public:
         _sim->AddModel(_incr);
         _sim->Publish();
         _sim->Configure();
-        _sim->Connect();
     }
 
     void tearDown() {
@@ -82,8 +81,8 @@ public:
         ABS_TEST_CASE_REQ(simph.expr .1)
         ABS_TEST_CASE_REQ(simph.expr .2)
 
-        _ctrl->setCondition("(>= /TimeKeeper/simTime 80)");
-        _ctrl->applyCondition();
+        _ctrl->setExpression("(>= /TimeKeeper/simTime 80)");
+        _sim->Connect();
         _sim->Run();
         while (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing) {}
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)80, _sim->GetTimeKeeper()->GetSimulationTime());
@@ -95,8 +94,8 @@ public:
         ABS_TEST_CASE_REQ(simph.expr .1)
         ABS_TEST_CASE_REQ(simph.expr .3)
 
-        _ctrl->setCondition("(= TheEvent 10)");
-        _ctrl->applyCondition();
+        _ctrl->setExpression("(= TheEvent 10)");
+        _sim->Connect();
         _sim->Run();
         while (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing) {}
         CPPUNIT_ASSERT_EQUAL((Smp::Int64)10, _incr->getCounter());
@@ -108,8 +107,8 @@ public:
         ABS_TEST_CASE_REQ(simph.expr .1)
         ABS_TEST_CASE_REQ(simph.expr .4)
 
-        _ctrl->setCondition("(> /TestSimControlMdlCounter/counter 5)");
-        _ctrl->applyCondition();
+        _ctrl->setExpression("(> /TestSimControlMdlCounter/counter 5)");
+        _sim->Connect();
         _sim->Run();
         while (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing) {}
         CPPUNIT_ASSERT_EQUAL((Smp::Int64)6, _incr->getCounter());

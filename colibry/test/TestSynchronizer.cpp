@@ -119,8 +119,8 @@ void tearDown() {
 }
 
 void runSim() {
-    _ctrl->setCondition("(>= /TimeKeeper/simTime 3000000000)");
-    _ctrl->applyCondition();
+    _ctrl->setExpression("(>= /TimeKeeper/simTime 3000000000)");
+    _sim->Connect();
     WaitEndEp wep(_sim);
     _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId,&wep);
     _sim->Run();
