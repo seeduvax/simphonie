@@ -12,18 +12,32 @@
 #include <limits>
 
 #include "Smp/ISimulator.h"
+#include "Smp/Services/IEventManager.h"
 
 namespace simphonie {
 namespace colibry {
 
+// --------------------------------------------------------------------
+// ..........................................................
 SimControl::SimControl(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
     : Parent(name, descr, parent) {
 }
 
+// ..........................................................
 SimControl::~SimControl() {
 }
 
 
+// --------------------------------------------------------------------
+// ..........................................................
+void SimControl::connect() {
+    Parent::connect();
+    getSimulator()->GetEventManager()->Subscribe(
+            Smp::Services::IEventManager::SMP_PostSimTimeChangeId,
+            GetEntryPoint(EVALUATE_EP_NAME)
+        );
+}
+// ..........................................................
 void SimControl::onChange(Smp::Float64 value) {
     if (std::abs(value) > std::numeric_limits<Smp::Float64>::epsilon()) {
         logInfo("Request simulation stop");

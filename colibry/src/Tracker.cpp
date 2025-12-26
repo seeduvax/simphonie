@@ -17,7 +17,6 @@
 #include "simdeck/ExInvalidFieldName.hpp"
 #include "simdeck/ExInvalidAnyType.hpp"
 
-#define EVALUATE_EP_NAME "Evaluate"
 #define INIT_EP_NAME "Init"
 #define CONTAINER_NAME "EventCounters"
 
@@ -143,14 +142,14 @@ void Tracker::epInit() {
     };
 
     try {
-        _evaluator->build(_expression, ownResolver, encapsulatedResolver);
+        _evaluator.build(_expression, ownResolver, encapsulatedResolver);
         std::ostringstream ss;
         ss << "Condition updated to \"" << _expression << "\"";
         logInfo(ss.str().c_str());
     }
     catch (const std::exception& e) {
         std::ostringstream ss;
-        ss << "Fatal error during the SimControl::_evaluator's building: " << e.what();
+        ss << "Fatal error during the S-expression evaluator building: " << e.what();
         throw simdeck::Exception(this, ss.str().c_str());
     }
 }
@@ -159,13 +158,15 @@ void Tracker::epInit() {
 // ..........................................................
 void Tracker::onChange(Smp::Float64 value) {
 }
+
+
 // ..........................................................
 void Tracker::epEvaluate() {
-    auto out = _evaluator->execute();
+    auto out = _evaluator.execute();
     if (out != _out) {
         _changed=true;
         _changeCount++;
-        onChange(out);
+        this->onChange(out);
     }
     else {
         _changed=false;

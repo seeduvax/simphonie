@@ -19,6 +19,7 @@
 namespace simphonie {
 namespace colibry {
 
+#define EVALUATE_EP_NAME "Evaluate"
 /**
  *
  */
@@ -80,7 +81,7 @@ private:
     /** the expression to evaluate */
     std::string _expression="";
     /** the expression interpreter */
-    std::unique_ptr<sxeval::SXEval<Smp::Float64> > _evaluator;
+    sxeval::SXEval<Smp::Float64> _evaluator;
 };
 
 }} // namespace simphonie::colibry

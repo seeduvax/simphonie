@@ -23,6 +23,7 @@ public:
     ~SimControl();
 
 protected:
+    void connect() override;
     void onChange(Smp::Float64 value) override;
 };
 

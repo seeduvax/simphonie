@@ -111,6 +111,7 @@ void setUp() {
         dynamic_cast<Smp::ISimpleField*>(_sync->GetField("period"))
             ->SetValue(Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int64, period));
     }
+    _ctrl->setExpression("(>= /TimeKeeper/simTime 3000000000)");
     _sim->Connect();
 }
 
@@ -119,8 +120,6 @@ void tearDown() {
 }
 
 void runSim() {
-    _ctrl->setExpression("(>= /TimeKeeper/simTime 3000000000)");
-    _sim->Connect();
     WaitEndEp wep(_sim);
     _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId,&wep);
     _sim->Run();
