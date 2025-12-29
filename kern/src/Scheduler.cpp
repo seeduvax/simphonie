@@ -15,6 +15,7 @@
 #include "Smp/ISimulator.h"
 #include "assert.h"
 #include "simphonie/kern/ExInvalidEventId.hpp"
+#include "simphonie/kern/ExInvalidCycleTime.hpp"
 #include "simphonie/kern/Resolver.hpp"
 #include "simphonie/sys/Logger.hpp"
 #include "abs/profiler.h"
@@ -62,12 +63,16 @@ void Scheduler::Schedule::run() {
         }
         if ( !_completed && _period > 0 ) {
             setTime(
-                _period >= (DURATION_MAX - _absoluteSimTime) 
+                _period == -1 || _period >= (DURATION_MAX - _absoluteSimTime) 
                 ? -1 // won't repeat anymore, not enough simulation time left
                 : _absoluteSimTime + _period);
         }
         // now run entry point.
         _ep->Execute();
+        // unschedule if set aperiodic
+        if ( (!_completed) && _absoluteSimTime != -1 && _period == -1) {
+            setTime(-1);
+        }
     }
     {
         // entry point executed. Push the related output fields.
@@ -209,6 +214,9 @@ void Scheduler::schedule(Smp::Services::EventId event, Smp::Duration absoluteSim
 Smp::Services::EventId Scheduler::AddSimulationTimeEvent(const Smp::IEntryPoint* entryPoint,
                                                          Smp::Duration simulationTime, Smp::Duration cycleTime,
                                                          Smp::Int64 repeat) {
+    if ( repeat>0 && ( cycleTime<-1 || cycleTime==0 ) ) {
+        throw ExInvalidCycleTime(this);
+    }
     return schedule(entryPoint, getAbsoluteTime(simulationTime), cycleTime, repeat);
 };
 // ..........................................................
@@ -260,6 +268,9 @@ void Scheduler::SetEventZuluTime(Smp::Services::EventId event, Smp::DateTime zul
 }
 // ..........................................................
 void Scheduler::SetEventCycleTime(Smp::Services::EventId event, Smp::Duration cycleTime) {
+    if ( cycleTime<-1 || cycleTime==0 ) {
+        throw ExInvalidCycleTime(this);
+    }
     auto s = findSchedule(event);
     if (s) {
         s->setPeriod(cycleTime);

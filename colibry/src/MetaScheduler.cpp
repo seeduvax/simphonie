@@ -121,7 +121,7 @@ void MetaScheduler::Schedule::Submit() {
     if (_eventId==-1) {
         _eventId=_metaScheduler->getScheduler()->AddSimulationTimeEvent(_ep,
             _active ? _simulationTime : -1, 
-            _cycleTime == -1 ? getMaxCycleTime() : _cycleTime,
+            _cycleTime,
             _repeat);
         _metaScheduler->registerSchedule(this);
     }
@@ -131,8 +131,7 @@ void MetaScheduler::Schedule::Submit() {
                 _active ? _simulationTime : -1);
         }
         if (_cycleTimeChanged) {
-            _metaScheduler->getScheduler()->SetEventCycleTime(_eventId, 
-                _cycleTime == -1 ? getMaxCycleTime() : _cycleTime);
+            _metaScheduler->getScheduler()->SetEventCycleTime(_eventId, _cycleTime);
         }
         if (_repeatChanged) {
             _metaScheduler->getScheduler()->SetEventRepeat(_eventId, _repeat);
