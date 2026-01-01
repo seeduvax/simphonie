@@ -46,6 +46,15 @@ private:
     std::unordered_map<std::string, Smp::Services::EventId> _idIndex;
     Smp::Services::EventId _nextId=1;
     std::mutex _mutex;
+    bool _emitting=false;
+
+    struct SubQuery {
+    public:
+        Smp::Services::EventId _event;
+        bool _sub;
+        const Smp::IEntryPoint* _ep;
+    };
+    std::vector<SubQuery> _subQueries;
 };
 
 }  // namespace kern

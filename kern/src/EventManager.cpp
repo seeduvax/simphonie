@@ -11,6 +11,7 @@
 #include "simphonie/kern/ExEntryPointAlreadySubscribed.hpp"
 #include "simphonie/kern/ExEntryPointNotSubscribed.hpp"
 #include "simphonie/kern/ExInvalidEventId.hpp"
+#include "simphonie/kern/ExInvalidEventName.hpp"
 #include "simphonie/sys/Logger.hpp"
 #include "Smp/IEntryPoint.h"
 
@@ -45,6 +46,9 @@ EventManager::~EventManager() {}
 Smp::Services::EventId EventManager::QueryEventId(Smp::String8 eventName) {
     Synchronized(_mutex);
     Smp::Services::EventId id=0;
+    if ( eventName[0] == '\0' ) {
+        throw ExInvalidEventName(this);
+    }
     auto it=_idIndex.find(eventName);
     if (it!=_idIndex.end()) {
         id = it->second;
@@ -67,7 +71,15 @@ void EventManager::Subscribe(Smp::Services::EventId event, const Smp::IEntryPoin
             if (itEps->second.contain(entryPoint)) {
                 throw ExEntryPointAlreadySubscribed(this, entryPoint, _SMP_EventNamesTable[itEps->first]);
             }
-            itEps->second.push_back(entryPoint);
+            if ( _emitting ) {
+                // Event emit in progress, registration requiest is OK, add to 
+                // registration list, to be processed later.
+                SubQuery sq={event, true, entryPoint};
+                _subQueries.push_back(sq);
+            }
+            else {
+                itEps->second.push_back(entryPoint);
+            }
         }
         else {
             throw ExInvalidEventId(this, event);
@@ -79,9 +91,18 @@ void EventManager::Unsubscribe(Smp::Services::EventId event, const Smp::IEntryPo
     Synchronized(_mutex);
     auto itEps = _evRegistry.find(event);
     if (itEps != _evRegistry.end()) {
-        bool res = itEps->second.remove(entryPoint);
+        bool res = itEps->second.contain(entryPoint);
         if (!res) {
             new ExEntryPointNotSubscribed(this, entryPoint, _SMP_EventNamesTable[event]);
+        }
+        if ( _emitting ) {
+            // Event emit in progress, registration requiest is OK, add to 
+            // registration list, to be processed later.
+            SubQuery sq={event, false, entryPoint};
+            _subQueries.push_back(sq);
+        }
+        else {
+            itEps->second.remove(entryPoint);
         }
     }
     else {
@@ -94,6 +115,11 @@ void EventManager::Emit(Smp::Services::EventId event, Smp::Bool synchronous) {
     if (!synchronous) {
         LOGW("EventManager asynchronous Emit mode not implemented, handling synchronously.")
     }
+    {
+        Synchronized(_mutex);
+        _emitting=true;
+
+    }
     // TODO add some flag and checks to forbid recursive Emit
     auto itEps = _evRegistry.find(event);
     if (itEps != _evRegistry.end()) {
@@ -103,6 +129,24 @@ void EventManager::Emit(Smp::Services::EventId event, Smp::Bool synchronous) {
     }
     else {
         throw ExInvalidEventId(this, event);
+    }
+    {
+        Synchronized(_mutex);
+        _emitting=false;
+        // Once emit loop completed, process subscription requests receveived
+        // during the emit loop.
+        for (auto q: _subQueries) {
+            auto it = _evRegistry.find(q._event);
+            if (it != _evRegistry.end()) {
+                if ( q._sub ) {
+                    it->second.push_back(q._ep);
+                }
+                else {
+                    it->second.remove(q._ep);
+                }
+            }
+        }
+        _subQueries.clear();
     }
 }
 
