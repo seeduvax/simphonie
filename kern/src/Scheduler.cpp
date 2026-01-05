@@ -296,8 +296,11 @@ void Scheduler::RemoveEvent(Smp::Services::EventId event) {
 // ..........................................................
 Smp::Services::EventId Scheduler::GetCurrentEventId() const {
     Synchronized(_mutex);
-    if (_currentSchedule) {
+    if ( _currentSchedule!=nullptr ) {
         return _currentSchedule->GetId();
+    }
+    else if ( !_scheduled.empty() ) {
+        return (*_scheduled.begin())->GetId();
     }
     return -1;
 }
@@ -379,6 +382,10 @@ void Scheduler::step() {
         if (toRun->IsCompleted()) {
             delete toRun;
         }
+    }
+    else {
+        Synchronized(_mutex);
+        _currentSchedule = nullptr;
     }
 }
 // ..........................................................

@@ -119,12 +119,11 @@ void runAndTest() {
     dynamic_cast<Smp::IOutputField*>(_slave->GetField("inputs"))->Connect(_mdl2->GetField("recv"));
     dynamic_cast<Smp::IOutputField*>(_slave->GetField("outputs"))->Connect(_mdl2->GetField("canIRecv"));
     _sim->Configure();
+    _ctrl->setExpression("(>= /TimeKeeper/simTime 1000000000)");
     _sim->Connect();
 
     _sim->GetScheduler()->AddSimulationTimeEvent(_master->GetEntryPoint("sync"), 0, 500000000, -1);
     _sim2->GetScheduler()->AddSimulationTimeEvent(_slave->GetEntryPoint("sync"), 300000000, 500000000, -1);
-    _ctrl->setCondition("(>= /TimeKeeper/simTime 1000000000)");
-    _ctrl->applyCondition();
     {
         WaitEndEp wep(_sim);
         _sim->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId, &wep);

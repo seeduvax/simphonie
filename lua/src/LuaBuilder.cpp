@@ -24,9 +24,12 @@
 #include "simdeck/ExInvalidParent.hpp"
 #include "simdeck/ExInvalidType.hpp"
 #include "simphonie/sys/Logger.hpp"
+#include "simphonie/colibry/MetaScheduler.hpp"
 
 namespace simphonie {
 namespace lua {
+
+using namespace simphonie::colibry;
 // --------------------------------------------------------------------
 // ..........................................................
 LuaBuilder::LuaBuilder(Smp::String8 name, Smp::String8 description, Smp::IObject* parent):
@@ -153,7 +156,21 @@ void LuaBuilder::connect() {
 
     // iterate on schedul list to schedule entry points
     sol::table schedule = _config["schedule"];
-    auto scheduler = _sim->GetScheduler();
+    simdeck::smpext::IMetaScheduler* scheduler = nullptr;
+    for (auto service: *(_sim->GetContainer(Smp::ISimulator::SMP_SimulatorServices)->GetComponents())) {
+        scheduler=dynamic_cast<simdeck::smpext::IMetaScheduler*>(service);
+        if (scheduler!=nullptr) {
+            break;
+        }
+    }
+    if (scheduler == nullptr) {
+        logInfo("No meta scheduler found, creating and registering meta scheduler from colibry.");
+        scheduler=new MetaScheduler("MetaScheduler", "Meta-scheduler", _sim);
+        _sim->AddService(scheduler);
+        scheduler->Publish(nullptr);
+        scheduler->Configure(_sim->GetLogger(), _sim->GetLinkRegistry());
+        scheduler->Connect(_sim);
+    }
     auto resolver = _sim->GetResolver();
     auto evntMgr = _sim->GetEventManager();
     for (auto entry : schedule) {
@@ -164,8 +181,8 @@ void LuaBuilder::connect() {
         }
         const auto ep = dynamic_cast<Smp::IEntryPoint*>(resolver->ResolveAbsolute(name.c_str()));
         if (ep != nullptr) {
+            auto s=scheduler->NewSchedule(ep);
             std::ostringstream msg;
-            Smp::Services::EventId eventId;
             Smp::Duration cycleTime = t.get_or("cycleTime_s", 0.0) * 1000000000ULL;
             if (cycleTime == 0) {
                 cycleTime = t.get_or("cycleTime_ms", 0.0) * 1000000ULL;
@@ -176,21 +193,36 @@ void LuaBuilder::connect() {
             if (cycleTime == 0) {
                 cycleTime = t.get_or("cycleTime_ns", 0.0);
             }
-            Smp::Duration time = t.get_or("offset_s", 0.0) * 1000000000ULL;
+            if (cycleTime == 0) {
+                cycleTime=-1;
+            }
+            s->SetCycleTime(cycleTime);
+            Smp::Duration time = t.get_or("simTime_s", 0.0) * 1000000000ULL;
             if (time == 0) {
-                time = t.get_or("offset_ms", 0.0) * 1000000ULL;
+                time = t.get_or("simTime_ms", 0.0) * 1000000ULL;
             }
             if (time == 0) {
-                time = t.get_or("offset_us", 0.0) * 1000ULL;
+                time = t.get_or("simTime_us", 0.0) * 1000ULL;
             }
             if (time == 0) {
-                time = t.get_or("offset_ns", 0.0);
+                time = t.get_or("simTime_ns", 0.0);
             }
-            const Smp::Int64 repeat = t.get_or("repetitions", -1LL);
-            // TODO schedule with meta scheduler
-            // TODO add arguments for acyclic schedule and on event schedule
-            eventId = scheduler->AddSimulationTimeEvent(ep, time, cycleTime, repeat);
-            msg << "scheduled " << name << ": cycleTime=" << cycleTime << "ns, repeat=" << repeat
+            s->SetSimulationTime(time);
+            const Smp::Int64 repeat = t.get_or("repeat", -1LL);
+            s->SetRepeat(repeat);
+            std::string evName=t.get_or<std::string>("startEvent","");
+            if (evName!="") {
+                auto ev=evntMgr->QueryEventId(evName.c_str());
+                s->SubscribeActivateEvent(ev);
+            }
+            evName=t.get_or<std::string>("stopEvent","");
+            if (evName!="") {
+                auto ev=evntMgr->QueryEventId(evName.c_str());
+                s->SubscribeDeactivateEvent(ev);
+            }
+            s->Submit();
+            msg << "scheduled " << name << " as " << s->GetEventId()
+                << ": cycleTime=" << cycleTime << "ns, repeat=" << repeat
                 << ", simulationTime=" << time << "ns";
             logDebug(msg.str().c_str());
         }
