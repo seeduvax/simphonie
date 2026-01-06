@@ -21,8 +21,8 @@ namespace simphonie {
 namespace colibry {
 
 SchedulerTracker::SchedulerTracker(Smp::String8 name, Smp::String8 descr, Smp::IObject *parent) :
-    Service(name, descr, parent), _currentStat(nullptr)
-{
+    Service(name, descr, parent),
+    _start(0) {
     addEP(PRE_EP, "Handler for the Scheduler_PreEventExecute event.", this,
         &SchedulerTracker::epPreExec);
     addEP(POST_EP, "Handler for the Scheduler_PostEventExecute event.", this,
@@ -39,50 +39,43 @@ void SchedulerTracker::connect() {
 }
 
 void SchedulerTracker::epPreExec() {
-    if ( _currentStat != nullptr ) {
-        throw simdeck::Exception(this,
-            "Scheduler_PreEventExecute has been emitted while waiting for a Scheduler_PostEventExecute event.");
-    }
-    const auto start = _timeKeeper->GetZuluTime();
-    auto evId=_scheduler->GetCurrentEventId();
-    auto it = _stats.find(evId);
-    if (it == _stats.end()) {
-        _stats.insert({evId, { evId , {}}});
-        _currentStat = &(_stats.find(evId)->second);
-    }
-    else {
-        _currentStat = &it->second;
-    }
-    _currentStat->dates.push_back({start, 0});
+    _start = _timeKeeper->GetZuluTime();
 }
 
 void SchedulerTracker::epPostExec() {
-    if ( _currentStat == nullptr ) {
-        throw simdeck::Exception(this,
-            "Scheduler_PostEventExecute has been emitted while waiting for a Scheduler_PreEventExecute event.");
+    auto stop = _timeKeeper->GetZuluTime();
+    auto evId=_scheduler->GetCurrentEventId();
+    auto it = _stats.find(evId);
+    auto duration = stop - _start;
+    if (it!=_stats.end()) {
+        auto& stat=it->second;
+        stat.duration = duration;
+        stat.count++;
+        if (stat.min > stat.duration) {
+            stat.min = stat.duration;
+        }
+        if (stat.max < stat.duration) {
+            stat.max = stat.duration;
+        }
+        stat.mean=(stat.mean * (stat.count - 1) + stat.duration) / stat.count; 
     }
-    _currentStat->dates.back().stop = _timeKeeper->GetZuluTime();
-    _currentStat = nullptr;
+    else {
+        _stats.insert({evId, { duration, duration, duration, (Smp::Float64)duration, 1}});
+        
+    }
+    _start = 0;
 }
 
 void SchedulerTracker::epLogStats() {
     std::ostringstream oss;
-    oss << "Event <id> (<#calls> calls): <min> - <avg> - <max>";
+    oss << std::endl << "Event <id>\t(<#calls> calls):\t<min>\t <avg>\t <max>"
+        << std::endl;
     for (auto event : _stats) {
-        Smp::Duration min = INT64_MAX, max = 0, sum = 0;
-        for (auto call : event.second.dates) {
-            const auto duration = call.stop - call.start;
-            sum += duration;
-            if (duration < min) {
-                min = duration;
-            }
-            if (duration > max) {
-                max = duration;
-            }
-        }
-        oss << std::endl << "Event " << event.second.id
-            << " (" << event.second.dates.size() << " calls) : "
-            << min << " - " << sum / event.second.dates.size() << " - " << max;
+        oss << "Event " << event.first
+            << " \t(" << event.second.count << " calls):\t"
+            << event.second.min << "\t " << event.second.mean << "\t " << event.second.max
+            << std::endl;
+
     }
     logInfo(oss.str().c_str());
 }

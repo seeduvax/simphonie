@@ -16,7 +16,7 @@
 #include "Smp/Services/IScheduler.h"
 #include "simdeck/EntryPointPublisher.hpp"
 #include "simdeck/Service.hpp"
-#include <unordered_map>
+#include <map>
 
 namespace simphonie {
 namespace colibry {
@@ -32,13 +32,11 @@ protected:
 
 private:
     struct ExecStat {
-        struct ExecDates {
-            const Smp::Duration start;
-            Smp::Duration stop;
-        };
-
-        const Smp::Services::EventId id;
-        std::vector<ExecDates> dates;
+        Smp::Duration duration;
+        Smp::Duration min;
+        Smp::Duration max;
+        Smp::Float64 mean;
+        uint64_t count;
     };
 
     void epPreExec();
@@ -47,9 +45,8 @@ private:
 
     Smp::Services::IScheduler* _scheduler;
     Smp::Services::ITimeKeeper* _timeKeeper;
-    ExecStat* _currentStat;
-    std::unordered_map<Smp::Services::EventId, ExecStat> _stats;
-
+    Smp::Duration _start;
+    std::map<Smp::Services::EventId, ExecStat> _stats;
 };
 
 } /* namespace colibry */

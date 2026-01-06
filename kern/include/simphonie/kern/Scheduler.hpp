@@ -133,6 +133,11 @@ private:
             }
             return GetId() < other.GetId();
         }
+        inline void setId() {
+            if (_id==-1) {
+                _id=_scheduler->_nextId++;
+            }
+        }
 
     private:
         Scheduler* _scheduler;
@@ -158,6 +163,7 @@ private:
     mutable std::mutex _mutex; /* mutable keryword use to be able to modify the mutex from const functions too */
     std::condition_variable _monitor;
     std::unique_ptr<simphonie::sys::Thread> _th;
+    Smp::Services::EventId _nextId=0;
 
     /*
      * No more used shared_ptr/weak_ptr but just reguular pointer since the

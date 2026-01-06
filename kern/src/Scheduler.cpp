@@ -35,9 +35,8 @@ Scheduler::Schedule::Schedule(Scheduler* scheduler, const Smp::IEntryPoint* ep, 
       _absoluteSimTime(absoluteSimTime),
       _period(period),
       _repeat(repeat),
+      _id(-1),
       _completed(false) { 
-    static std::atomic<Smp::Services::EventId> _nextId(0);
-    _id = _nextId++;
 }
 
 void Scheduler::Schedule::setTime(Smp::Duration absoluteSimTime) {
@@ -132,6 +131,7 @@ Smp::Duration Scheduler::getAbsoluteTime(Smp::Duration relativeTime) {
 void Scheduler::schedule(Schedule* s) {
     {
         Synchronized(_mutex);
+        s->setId();
         bool erased=false;
         for (auto it=_scheduled.begin(); it!=_scheduled.end(); ++it) {
             if (s->GetId() == (*it)->GetId()) {
