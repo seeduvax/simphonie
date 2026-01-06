@@ -39,6 +39,7 @@ public:
         virtual ISchedule& SubscribeDeactivateEvent(Smp::Services::EventId event) = 0;
         virtual ISchedule& UnsubscribeDeactivateEvent(Smp::Services::EventId event) = 0;
         virtual void Submit() = 0;
+        virtual void SubmitImmediate() = 0;
         virtual Smp::Services::EventId GetEventId() const  = 0;
     };
 
