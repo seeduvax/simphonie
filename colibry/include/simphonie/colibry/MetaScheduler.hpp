@@ -84,6 +84,7 @@ public:
             return *this;
         }
         void Submit() override;
+        void SubmitImmediate() override;
         Smp::Services::EventId GetEventId() const override {
             return _eventId;
         }
@@ -130,6 +131,9 @@ public:
         if (id!=-1) {
             _schedList[id]=s;
         }
+    }
+    inline void registerSchedule(Smp::Services::EventId eventId, Schedule* s) {
+        _schedList[eventId]=s;
     }
 
 protected:

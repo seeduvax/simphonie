@@ -142,6 +142,11 @@ void MetaScheduler::Schedule::Submit() {
     _repeatChanged=false;
 }
 // ..........................................................
+void MetaScheduler::Schedule::SubmitImmediate() {
+    auto eventId=_metaScheduler->getScheduler()->AddImmediateEvent(_ep);
+    _metaScheduler->registerSchedule(eventId,this);
+}
+// ..........................................................
 void MetaScheduler::Schedule::epActivate() {
     // TODO check SetEventSimulationTime also use relative time from now like
     // AddSimulationTimeEvent.
