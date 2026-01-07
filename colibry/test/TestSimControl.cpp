@@ -25,11 +25,11 @@ using namespace simphonie::colibry;
 ABS_TEST_SUITE_BEGIN( SimControl )
 
 private:
-    class _ModelCounter : public simdeck::EPPModel {
+    class ModelCounter : public simdeck::EPPModel {
     public:
-        inline _ModelCounter(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
+        inline ModelCounter(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
             : EPPModel(name, descr, parent), _counter(0) {
-            addEP("step", "Main model entry point", this, &_ModelCounter::step);
+            addEP("step", "Main model entry point", this, &ModelCounter::step);
         }
         inline void step() {
             logInfo("call");
@@ -57,15 +57,14 @@ private:
 
     simphonie::kern::Simulator* _sim;
     SimControl* _ctrl;
-    _ModelCounter* _incr;
+    ModelCounter* _incr;
 
 public:
     void setUp() {
         _sim = new simphonie::kern::Simulator("TestSimControlSimu", "", nullptr);
         _ctrl = new SimControl("TestSimControlSimCtrl", "", _sim);
-        _incr = new _ModelCounter("TestSimControlMdlCounter", "", _sim);
+        _incr = new ModelCounter("TestSimControlMdlCounter", "", _sim);
 
-        _sim->Initialise();
         _sim->AddService(_ctrl);
         _sim->AddModel(_incr);
         _sim->Publish();
@@ -77,9 +76,9 @@ public:
     }
 
     ABS_TEST_CASE_BEGIN(SimControlSimTime) {
-        ABS_TEST_CASE_REQ(simph.simctrl .1)
-        ABS_TEST_CASE_REQ(simph.expr .1)
-        ABS_TEST_CASE_REQ(simph.expr .2)
+        ABS_TEST_CASE_REQ(simph.simctrl.1)
+        ABS_TEST_CASE_REQ(simph.expr.1)
+        ABS_TEST_CASE_REQ(simph.expr.2)
 
         _ctrl->setExpression("(>= /TimeKeeper/simTime 80)");
         _sim->Connect();
@@ -90,9 +89,9 @@ public:
     ABS_TEST_CASE_END
 
     ABS_TEST_CASE_BEGIN(SimControlEvent) {
-        ABS_TEST_CASE_REQ(simph.simctrl .1)
-        ABS_TEST_CASE_REQ(simph.expr .1)
-        ABS_TEST_CASE_REQ(simph.expr .3)
+        ABS_TEST_CASE_REQ(simph.simctrl.1)
+        ABS_TEST_CASE_REQ(simph.expr.1)
+        ABS_TEST_CASE_REQ(simph.expr.3)
 
         _ctrl->setExpression("(= TheEvent 10)");
         _sim->Connect();
@@ -103,14 +102,16 @@ public:
     ABS_TEST_CASE_END
 
     ABS_TEST_CASE_BEGIN(SimControlField) {
-        ABS_TEST_CASE_REQ(simph.simctrl .1)
-        ABS_TEST_CASE_REQ(simph.expr .1)
-        ABS_TEST_CASE_REQ(simph.expr .4)
+        ABS_TEST_CASE_REQ(simph.simctrl.1)
+        ABS_TEST_CASE_REQ(simph.expr.1)
+        ABS_TEST_CASE_REQ(simph.expr.4)
 
         _ctrl->setExpression("(> /TestSimControlMdlCounter/counter 5)");
         _sim->Connect();
         _sim->Run();
-        while (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing) {}
+        while (_sim->GetState() == Smp::SimulatorStateKind::SSK_Executing) {
+            usleep(1000);
+        }
         CPPUNIT_ASSERT_EQUAL((Smp::Int64)6, _incr->getCounter());
     }
     ABS_TEST_CASE_END

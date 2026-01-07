@@ -26,12 +26,13 @@ using namespace simphonie::colibry;
 // ----------------------------------------------------------
 // test suite implementation
 ABS_TEST_SUITE_BEGIN(Synchronizer)
+#define PERIOD 100000000lu
 
 private:
 class UselessModel : public simdeck::EPPModel {
 public:
     inline UselessModel(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent)
-        : EPPModel(name, descr, parent), _sleep(10000000lu) {
+        : EPPModel(name, descr, parent), _sleep(PERIOD + PERIOD / 2) {
         addEP("step", "", this, &UselessModel::step);
     }
     inline void step() {
@@ -48,9 +49,8 @@ public:
                 std::cerr << "Can't set thread schedule parameters: " << strerror(errno) << std::endl;
             }
         }
-        std::this_thread::sleep_for(_sleep);
         if (_overflowFlag && (_cpt % 10) == 3) {
-            std::this_thread::sleep_for(_sleep*10);
+            std::this_thread::sleep_for(_sleep);
         }
         _cpt++;
     }
@@ -58,7 +58,7 @@ public:
     bool _overflowFlag = false;
 private:
     inline void connect() {
-        getSimulator()->GetScheduler()->AddSimulationTimeEvent(GetEntryPoint("step"), 0l, 100000000l, -1);
+        getSimulator()->GetScheduler()->AddSimulationTimeEvent(GetEntryPoint("step"), 0l, PERIOD, -1);
     }
 
     std::chrono::nanoseconds _sleep;
@@ -107,8 +107,8 @@ void setUp() {
     _sim->Publish();
     _sim->Configure();
     {
-        const Smp::Duration period = 100000000lu;
-        dynamic_cast<Smp::ISimpleField*>(_sync->GetField("period"))
+        const Smp::Duration period = PERIOD;
+        dynamic_cast<Smp::ISimpleField*>(_sync->GetField("Period"))
             ->SetValue(Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Int64, period));
     }
     _ctrl->setExpression("(>= /TimeKeeper/simTime 3000000000)");
@@ -135,7 +135,7 @@ ABS_TEST_CASE_BEGIN(NoOverFlow) {
     ABS_TEST_CASE_REQ(simph.sync.5)
     runSim();
     const auto overflowCount =
-        dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveRelative("overflowCounter", _sync))
+        dynamic_cast<Smp::ISimpleField*>(_sync->GetField("OverflowCount"))
             ->GetValue()
             .value.uInt64Value;
     CPPUNIT_ASSERT_EQUAL((uint64_t)0,overflowCount);
@@ -146,7 +146,7 @@ ABS_TEST_CASE_BEGIN(OverFlow) {
     _model->_overflowFlag = true;
     runSim();
     const auto overflowCount =
-        dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveRelative("overflowCounter", _sync))
+        dynamic_cast<Smp::ISimpleField*>(_sync->GetField("OverflowCount"))
             ->GetValue()
             .value.uInt64Value;
     CPPUNIT_ASSERT_EQUAL((uint64_t)3,overflowCount);
