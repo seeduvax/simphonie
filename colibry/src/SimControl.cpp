@@ -38,8 +38,9 @@ void SimControl::connect() {
         );
 }
 // ..........................................................
-void SimControl::onChange(Smp::Float64 value) {
-    if (std::abs(value) > std::numeric_limits<Smp::Float64>::epsilon()) {
+void SimControl::onEvaluate() {
+    if (getChanged() && 
+            std::abs(getOut()) > std::numeric_limits<Smp::Float64>::epsilon()) {
         logInfo("Request simulation stop");
         getSimulator()->Hold(true);
     }

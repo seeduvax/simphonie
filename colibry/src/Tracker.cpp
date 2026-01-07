@@ -49,7 +49,7 @@ void Tracker::publish(Smp::IPublication* receiver) {
         &_changed, Smp::ViewKind::VK_All, false, false, true);
     receiver->PublishField(
         "ChangedCount", "S-expression evaluation result changes count since simulation start.",
-        &_changeCount, Smp::ViewKind::VK_All, false, false, true);
+        &_changedCount, Smp::ViewKind::VK_All, false, false, true);
 }
 // ..........................................................
 void Tracker::connect() {
@@ -156,7 +156,7 @@ void Tracker::epInit() {
 
 // --------------------------------------------------------------------
 // ..........................................................
-void Tracker::onChange(Smp::Float64 value) {
+void Tracker::onEvaluate() {
 }
 
 
@@ -165,13 +165,13 @@ void Tracker::epEvaluate() {
     auto out = _evaluator.execute();
     if (out != _out) {
         _changed=true;
-        _changeCount++;
-        this->onChange(out);
+        _changedCount++;
     }
     else {
         _changed=false;
     }
     _out = out;
+    onEvaluate();
 }
 
 // --------------------------------------------------------------------
