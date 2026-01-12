@@ -9,14 +9,14 @@
  */
 #include "Smp/ISimulator.h"
 #include "simdeck/Factory.hpp"
+#include "simphonie/colibry/EventTrigger.hpp"
 #include "simphonie/colibry/FieldRecorderCsv.hpp"
 #include "simphonie/colibry/FieldRecorderHDF5.hpp"
+#include "simphonie/colibry/MetaScheduler.hpp"
 #include "simphonie/colibry/SchedulerTracker.hpp"
 #include "simphonie/colibry/SimControl.hpp"
-#include "simphonie/colibry/Tracker.hpp"
-#include "simphonie/colibry/EventTrigger.hpp"
 #include "simphonie/colibry/Synchronizer.hpp"
-#include "simphonie/colibry/MetaScheduler.hpp"
+#include "simphonie/colibry/Tracker.hpp"
 #include "simphonie/sys/DlDef.h"
 
 namespace simphonie {
