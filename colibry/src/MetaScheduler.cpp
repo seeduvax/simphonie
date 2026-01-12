@@ -151,14 +151,18 @@ void MetaScheduler::Schedule::epActivate() {
     // TODO check SetEventSimulationTime also use relative time from now like
     // AddSimulationTimeEvent.
     _active=true;
-    _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId, _simulationTime);
+    _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId,
+                _simulationTime==-1?0:_simulationTime);
+                // _simulationTime == -1 is related to an inactive schedule
+                // event not explicitely defined with setActive(). On event,
+                // such schedule shall be reset to run now (0 relative
+                // simulation time)
 }
 // ..........................................................
 void MetaScheduler::Schedule::epDeactivate() {
     // TODO check SetEventSimulationTime also use relative time from now like
     // AddSimulationTimeEvent.
-    // Deactivate the event by setting its next activation time at the end of
-    // simulation time.
+    // Deactivate the event by setting its next activation time at -1
     _active=false;
     _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId, -1);
 }

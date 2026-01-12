@@ -191,10 +191,7 @@ void LuaBuilder::connect() {
                 cycleTime = t.get_or("cycleTime_us", 0.0) * 1000ULL;
             }
             if (cycleTime == 0) {
-                cycleTime = t.get_or("cycleTime_ns", 0.0);
-            }
-            if (cycleTime == 0) {
-                cycleTime=-1;
+                cycleTime = t.get_or<Smp::Duration>("cycleTime_ns", -1);
             }
             s->SetCycleTime(cycleTime);
             Smp::Duration time = t.get_or("simTime_s", 0.0) * 1000000000ULL;
@@ -208,22 +205,35 @@ void LuaBuilder::connect() {
                 time = t.get_or("simTime_ns", 0.0);
             }
             s->SetSimulationTime(time);
-            const Smp::Int64 repeat = t.get_or("repeat", -1LL);
+            Smp::Int64 repeat = t.get_or("repeat", -1LL);
+            if (repeat==-1) {
+                // since repeat is a lua keyword (repeat instruction), 
+                // repeatCount is provided as an alternatvie to let user
+                // avoid to put key name in brackets (`["repeat"]=12` is then 
+                // equivalent to `repeatCount=12` ) .
+                repeat = t.get_or("repeatCount", -1LL);
+            }
             s->SetRepeat(repeat);
-            std::string evName=t.get_or<std::string>("startEvent","");
-            if (evName!="") {
-                auto ev=evntMgr->QueryEventId(evName.c_str());
+            std::string startEvName=t.get_or<std::string>("startEvent","");
+            if (startEvName!="") {
+                auto ev=evntMgr->QueryEventId(startEvName.c_str());
                 s->SubscribeActivateEvent(ev);
             }
-            evName=t.get_or<std::string>("stopEvent","");
-            if (evName!="") {
-                auto ev=evntMgr->QueryEventId(evName.c_str());
+            std::string stopEvName=t.get_or<std::string>("stopEvent","");
+            if (stopEvName!="") {
+                auto ev=evntMgr->QueryEventId(stopEvName.c_str());
                 s->SubscribeDeactivateEvent(ev);
             }
+            bool active=t.get_or<bool>("active", 1);
+            s->SetActive(active);
             s->Submit();
             msg << "scheduled " << name << " as " << s->GetEventId()
                 << ": cycleTime=" << cycleTime << "ns, repeat=" << repeat
-                << ", simulationTime=" << time << "ns";
+                << ", simulationTime=" << time << "ns "
+                << ", active=" << active 
+                << ", startEvent='" << startEvName 
+                << "', stopEvent='" << stopEvName 
+                << "'";
             logDebug(msg.str().c_str());
         }
         else {
