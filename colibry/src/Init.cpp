@@ -13,6 +13,8 @@
 #include "simphonie/colibry/FieldRecorderHDF5.hpp"
 #include "simphonie/colibry/SchedulerTracker.hpp"
 #include "simphonie/colibry/SimControl.hpp"
+#include "simphonie/colibry/Tracker.hpp"
+#include "simphonie/colibry/EventTrigger.hpp"
 #include "simphonie/colibry/Synchronizer.hpp"
 #include "simphonie/colibry/MetaScheduler.hpp"
 #include "simphonie/sys/DlDef.h"
@@ -27,6 +29,8 @@ ADD_SMP_FACTORY("SimControl", SimControl);
 ADD_SMP_FACTORY("SchedulerTracker", SchedulerTracker);
 ADD_SMP_FACTORY("Synchronizer", Synchronizer);
 ADD_SMP_FACTORY("MetaScheduler", MetaScheduler);
+ADD_SMP_FACTORY("Tracker", Tracker);
+ADD_SMP_FACTORY("EventTrigger", EventTrigger);
 
 }  // namespace colibry
 }  // namespace simph
