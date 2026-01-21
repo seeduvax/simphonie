@@ -137,6 +137,7 @@ MetaScheduler::ImmediateSchedule::~ImmediateSchedule() {
 // ..........................................................
 void MetaScheduler::Schedule::Submit() {
     if (GetEventId()==-1) {
+        // first submit: add event to the SMP scheduler.
         setEventId(getMetaScheduler()->getScheduler()->AddSimulationTimeEvent(
             getEntryPoint(),
             IsActive() ? _simulationTime : -1, 
@@ -145,6 +146,7 @@ void MetaScheduler::Schedule::Submit() {
         getMetaScheduler()->registerSchedule(this);
     }
     else {
+        // evenet already submitted, update the schedule attributes.
         if (_simulationTimeChanged) {
             getMetaScheduler()->getScheduler()->SetEventSimulationTime(GetEventId(), 
                 IsActive() ? _simulationTime : -1);
@@ -163,6 +165,7 @@ void MetaScheduler::Schedule::Submit() {
 // ..........................................................
 void MetaScheduler::ImmediateSchedule::Submit() {
     if (IsActive()) {
+        // when active add immediate event.
         setEventId(getMetaScheduler()->getScheduler()->AddImmediateEvent(getEntryPoint()));
         getMetaScheduler()->registerSchedule(GetEventId(),this);
     }
