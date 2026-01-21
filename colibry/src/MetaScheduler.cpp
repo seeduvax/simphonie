@@ -67,7 +67,7 @@ void MetaScheduler::epPreEpExec() {
         // TODO find a way to retrieve entry point or schedule attributes from
         // the scheduler. 
         // S.Devaux: I fear SMP does not define anything to do so.
-        _currentSchedule=new Schedule(this,currentEventId);
+        _currentSchedule=new BaseSchedule(this,currentEventId);
         _schedList[currentEventId]=_currentSchedule;
     }
     for (auto l: _listeners) {
@@ -80,6 +80,10 @@ void MetaScheduler::epPostEpExec() {
         for (auto l: _listeners) {
             l->NotifyExecEnd(_currentSchedule);
         }
+        if  (_currentSchedule->IsImmediate()) {
+            auto it=_schedList.find(_currentSchedule->GetEventId());
+            _schedList.erase(it);
+        }
         _currentSchedule=nullptr;
     }
     // TODO log error or warning when current schedule is nullptr. Such 
@@ -89,52 +93,67 @@ void MetaScheduler::epPostEpExec() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-MetaScheduler::Schedule::Schedule(MetaScheduler* mScheduler, Smp::IEntryPoint* ep):
+MetaScheduler::BaseSchedule::BaseSchedule(MetaScheduler* mScheduler, Smp::IEntryPoint* ep):
         _metaScheduler(mScheduler),
         _ep(ep) {
     _epActivate=simdeck::EntryPoint::Create("scheduleActivate",
                                 "Schedule activation entry point", 
-                                this, &MetaScheduler::Schedule::epActivate);
+                                this, &MetaScheduler::BaseSchedule::epActivate);
     _epDeactivate=simdeck::EntryPoint::Create("scheduleDeactivate",
                                 "Schedule deactivation entry point", 
-                                this, &MetaScheduler::Schedule::epDeactivate);
+                                this, &MetaScheduler::BaseSchedule::epDeactivate);
 }
 // ..........................................................
-MetaScheduler::Schedule::Schedule(MetaScheduler* mScheduler, Smp::Services::EventId evId):
+MetaScheduler::BaseSchedule::BaseSchedule(MetaScheduler* mScheduler, Smp::Services::EventId evId):
         _metaScheduler(mScheduler),
         _eventId(evId) {
     _epActivate=simdeck::EntryPoint::Create("scheduleActivate",
                                 "Schedule activation entry point", 
-                                this, &MetaScheduler::Schedule::epActivate);
+                                this, &MetaScheduler::BaseSchedule::epActivate);
     _epDeactivate=simdeck::EntryPoint::Create("scheduleDeactivate",
                                 "Schedule deactivation entry point", 
-                                this, &MetaScheduler::Schedule::epDeactivate);
+                                this, &MetaScheduler::BaseSchedule::epDeactivate);
+}
+// ..........................................................
+MetaScheduler::BaseSchedule::~BaseSchedule() {
+    delete _epActivate;
+    delete _epDeactivate;
+}
+// ..........................................................
+MetaScheduler::Schedule::Schedule(MetaScheduler* mScheduler, Smp::IEntryPoint* ep)
+            : MetaScheduler::BaseSchedule(mScheduler, ep) {
+}
+// ..........................................................
+MetaScheduler::ImmediateSchedule::ImmediateSchedule(MetaScheduler* mScheduler, Smp::IEntryPoint* ep)
+            : MetaScheduler::BaseSchedule(mScheduler, ep) {
 }
 // ..........................................................
 MetaScheduler::Schedule::~Schedule() {
-    delete _epActivate;
-    delete _epDeactivate;
+}
+// ..........................................................
+MetaScheduler::ImmediateSchedule::~ImmediateSchedule() {
 }
 
 // ..........................................................
 void MetaScheduler::Schedule::Submit() {
-    if (_eventId==-1) {
-        _eventId=_metaScheduler->getScheduler()->AddSimulationTimeEvent(_ep,
-            _active ? _simulationTime : -1, 
+    if (GetEventId()==-1) {
+        setEventId(getMetaScheduler()->getScheduler()->AddSimulationTimeEvent(
+            getEntryPoint(),
+            IsActive() ? _simulationTime : -1, 
             _cycleTime,
-            _repeat);
-        _metaScheduler->registerSchedule(this);
+            _repeat));
+        getMetaScheduler()->registerSchedule(this);
     }
     else {
         if (_simulationTimeChanged) {
-            _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId, 
-                _active ? _simulationTime : -1);
+            getMetaScheduler()->getScheduler()->SetEventSimulationTime(GetEventId(), 
+                IsActive() ? _simulationTime : -1);
         }
         if (_cycleTimeChanged) {
-            _metaScheduler->getScheduler()->SetEventCycleTime(_eventId, _cycleTime);
+            getMetaScheduler()->getScheduler()->SetEventCycleTime(GetEventId(), _cycleTime);
         }
         if (_repeatChanged) {
-            _metaScheduler->getScheduler()->SetEventRepeat(_eventId, _repeat);
+            getMetaScheduler()->getScheduler()->SetEventRepeat(GetEventId(), _repeat);
         }
     }
     _simulationTimeChanged=false;
@@ -142,41 +161,49 @@ void MetaScheduler::Schedule::Submit() {
     _repeatChanged=false;
 }
 // ..........................................................
-void MetaScheduler::Schedule::SubmitImmediate() {
-    auto eventId=_metaScheduler->getScheduler()->AddImmediateEvent(_ep);
-    _metaScheduler->registerSchedule(eventId,this);
+void MetaScheduler::ImmediateSchedule::Submit() {
+    if (IsActive()) {
+        setEventId(getMetaScheduler()->getScheduler()->AddImmediateEvent(getEntryPoint()));
+        getMetaScheduler()->registerSchedule(GetEventId(),this);
+    }
+}
+// ..........................................................
+void MetaScheduler::BaseSchedule::epActivate() {
+    _active=true;
 }
 // ..........................................................
 void MetaScheduler::Schedule::epActivate() {
     // TODO check SetEventSimulationTime also use relative time from now like
     // AddSimulationTimeEvent.
-    _active=true;
-    _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId,
-                _simulationTime==-1?0:_simulationTime);
-                // _simulationTime == -1 is related to an inactive schedule
-                // event not explicitely defined with setActive(). On event,
-                // such schedule shall be reset to run now (0 relative
-                // simulation time)
+    MetaScheduler::BaseSchedule::epActivate();
+    getMetaScheduler()->getScheduler()->SetEventSimulationTime(GetEventId(),
+            _simulationTime==-1?0:_simulationTime);
+            // _simulationTime == -1 is related to an inactive schedule
+            // event not explicitely defined with setActive(). On event,
+            // such schedule shall be reset to run now (0 relative
+            // simulation time)
+}
+// ..........................................................
+void MetaScheduler::BaseSchedule::epDeactivate() {
+    _active=false;
 }
 // ..........................................................
 void MetaScheduler::Schedule::epDeactivate() {
-    // TODO check SetEventSimulationTime also use relative time from now like
-    // AddSimulationTimeEvent.
+    MetaScheduler::BaseSchedule::epActivate();
     // Deactivate the event by setting its next activation time at -1
-    _active=false;
-    _metaScheduler->getScheduler()->SetEventSimulationTime(_eventId, -1);
+    getMetaScheduler()->getScheduler()->SetEventSimulationTime(GetEventId(), -1);
 }
 // ..........................................................
-Smp::String8 MetaScheduler::Schedule::GetName() const {
+Smp::String8 MetaScheduler::BaseSchedule::GetName() const {
     return _ep!=nullptr?_ep->GetName():"";
 }
-Smp::String8 MetaScheduler::Schedule::GetDescription() const {
+Smp::String8 MetaScheduler::BaseSchedule::GetDescription() const {
     return "Entry point schedule";
 }
-Smp::IObject* MetaScheduler::Schedule::GetParent() const {
+Smp::IObject* MetaScheduler::BaseSchedule::GetParent() const {
     return _metaScheduler;
 }
-Smp::IObject* MetaScheduler::Schedule::GetChild(Smp::String8) const {
+Smp::IObject* MetaScheduler::BaseSchedule::GetChild(Smp::String8) const {
     return nullptr;
 }
 }} // namespace simphonie::colibry

@@ -136,6 +136,33 @@ public:
         delete _sim;
     }
  
+    ABS_TEST_CASE_BEGIN(ImmediateActiveSched) {
+        // schedule events emitting at fixed date
+        auto scheduler=_sim->GetScheduler();
+        scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("cpt1"),0); 
+        scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("cpt2"),0); 
+        auto s=_metaScheduler->NewSchedule(_mdl->GetEntryPoint("date"), true);
+        s->Submit();
+        _sim->Run();
+        _mdl->waitLeaveExecuting();
+        std::string expected="d12";
+        CPPUNIT_ASSERT_EQUAL(expected, _mdl->_order);
+    }
+    ABS_TEST_CASE_END
+
+    ABS_TEST_CASE_BEGIN(ImmediateInactiveSched) {
+        // schedule events emitting at fixed date
+        auto scheduler=_sim->GetScheduler();
+        scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("cpt1"),0); 
+        scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("cpt2"),0); 
+        auto s=_metaScheduler->NewSchedule(_mdl->GetEntryPoint("date"), true);
+        s->SetActive(false).Submit();
+        _sim->Run();
+        _mdl->waitLeaveExecuting();
+        std::string expected="12";
+        CPPUNIT_ASSERT_EQUAL(expected, _mdl->_order);
+    }
+    ABS_TEST_CASE_END
  
     ABS_TEST_CASE_BEGIN(OnEventACyclicSched) {
         ABS_TEST_DESCR(Schedule one ep, to run once each time one event is emitted)
