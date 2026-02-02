@@ -17,6 +17,7 @@
 #include "simphonie/kern/Simulator.hpp"
 #include "simphonie/sys/Callback.hpp"
 #include "simphonie/sys/Logger.hpp"
+#include "simdeck/front/SimFront.hpp"
 
 namespace test {
 using namespace simphonie::kern;
@@ -72,15 +73,8 @@ private:
             }
             _sequence.append(1,'I');
         }
-        void epEndSimuCtrl() {
-            if (_ts._sim->GetTimeKeeper()->GetSimulationTime()>_endSimTime) {
-                TRACE("Requesting simulation end");
-                _ts._sim->Hold(true);
-            }
-        }
         TestScheduler& _ts;
         std::vector<Smp::Duration>* _vv=nullptr;
-        Smp::Duration _endSimTime = 3600000000000ULL; 
         std::string _sequence="";
         Smp::IEntryPoint* _immediateEp=nullptr;
         Scheduler* _scheduler;
@@ -92,6 +86,7 @@ private:
     Smp::IEntryPoint* _epLeaveExecuting;
     bool _run=false;
     EPSet* _epset;
+    Smp::Duration _endSimTime = 3600000000000ULL; 
 
 public:
     void setUp() {
@@ -112,21 +107,6 @@ public:
         delete _sim;
     }
 
-    void simStart() {
-        {
-            Synchronized(_mutex);
-            _run=true;
-        }
-        _sim->Run();
-    }
-
-    void waitSimEnd() {
-        Synchronized(_mutex);
-        while (_run!=false) {
-            MonitorWait(_monitor);
-        }
-    }
-
     ABS_TEST_CASE_BEGIN(Schedule) {
         std::vector<Smp::Duration> scheduledTime;
         _epset->_vv=&scheduledTime;
@@ -136,8 +116,12 @@ public:
         _scheduler->AddSimulationTimeEvent(ep, 30);
         _scheduler->AddSimulationTimeEvent(ep, 20);
         _scheduler->AddSimulationTimeEvent(ep, 20);
-        simStart();
-        waitSimEnd();
+
+        simdeck::front::SimFront front(_sim);
+        front.SetEndSimulationTime(_endSimTime);
+        front.Run();
+        // wait simulation end with 10sec zulu timeout.
+        CPPUNIT_ASSERT(front.Wait(Smp::SimulatorStateKind::SSK_Standby, 10000000000L));
         delete ep;
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)10, scheduledTime[0]);
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)20, scheduledTime[1]);
@@ -159,17 +143,10 @@ public:
         _scheduler->AddSimulationTimeEvent(epcb, 10);
 
 
-
-        _epset->_endSimTime=10;
-        auto epf=EntryPoint::Create("end","",_epset,
-                &EPSet::epEndSimuCtrl);
-        _sim->GetEventManager()->Subscribe(
-                Smp::Services::IEventManager::SMP_PostSimTimeChangeId,
-                epf);
-        simStart();
-        waitSimEnd();
+        simdeck::front::SimFront front(_sim); 
+        front.Run();
+        CPPUNIT_ASSERT(front.Wait(Smp::SimulatorStateKind::SSK_Standby, 10000000000L));
         delete epcb;
-        delete epf;
 
         CPPUNIT_ASSERT_EQUAL(4,(int)scheduledTime.size());
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)10, scheduledTime[0]);
@@ -190,9 +167,11 @@ public:
         _scheduler->AddSimulationTimeEvent(ep, 10);
         _scheduler->AddSimulationTimeEvent(ep, 10);
 
+        simdeck::front::SimFront front(_sim); 
+        front.SetEndSimulationTime(_endSimTime);
         const auto start = std::chrono::steady_clock::now();
-        simStart();
-        waitSimEnd();
+        front.Run();
+        CPPUNIT_ASSERT(front.Wait(Smp::SimulatorStateKind::SSK_Standby, 10000000000L));
         const auto end = std::chrono::steady_clock::now();
 
         auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -220,8 +199,11 @@ public:
         _scheduler->AddSimulationTimeEvent(ep2, 0,20,10);
         _scheduler->AddSimulationTimeEvent(ep3, 0,10,10);
         _scheduler->AddSimulationTimeEvent(epDelay, -1,10,10); // shall never run.
-        simStart();
-        waitSimEnd();
+        simdeck::front::SimFront front(_sim); 
+        front.SetEndSimulationTime(_endSimTime);
+        const auto start = std::chrono::steady_clock::now();
+        front.Run();
+        CPPUNIT_ASSERT(front.Wait(Smp::SimulatorStateKind::SSK_Standby, 10000000000L));
         //                  0  1 2  3 4    5 6  7 8  9 A
         std::string expSeq="12313123131IR2313123131231312322222";
         CPPUNIT_ASSERT_EQUAL(expSeq,_epset->_sequence);

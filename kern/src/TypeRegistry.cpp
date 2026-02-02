@@ -169,11 +169,12 @@ Smp::Publication::IType* TypeRegistry::AddFloatType(Smp::String8 name, Smp::Stri
     if (res != nullptr) {
         throw ExTypeAlreadyRegistered(this, name, res);
     }
-    res = new SimpleType(typeUuid, type, name, descr, this);
-    // TODO create Type subclass to store min, max, unit, etc. Once I can
-    // find what to do with such additional attributes....
-    _types.push_back(res);
-    return res;
+    auto t = new SimpleType(typeUuid, type, name, descr, this);
+    t->setUnit(unit);
+    t->setMin({type, minimum});
+    t->setMax({type, maximum});
+    _types.push_back(t);
+    return t;
 }
 // ..........................................................
 Smp::Publication::IType* TypeRegistry::AddIntegerType(Smp::String8 name, Smp::String8 descr, Smp::Uuid typeUuid,
@@ -203,11 +204,12 @@ Smp::Publication::IType* TypeRegistry::AddIntegerType(Smp::String8 name, Smp::St
         default:
             throw ExInvalidPrimitiveType(this, type);
     }
-    res = new SimpleType(typeUuid, type, name, descr, this);
-    // TODO create Type subclass to store min, max, unit, etc. Once I can
-    // find what to do with such additional attributes....
-    _types.push_back(res);
-    return res;
+    auto t=new SimpleType(typeUuid, type, name, descr, this);
+    t->setUnit(unit);
+    t->setMin({type, minimum});
+    t->setMax({type, maximum});
+    _types.push_back(t);
+    return t;
 }
 // ..........................................................
 Smp::Publication::IEnumerationType* TypeRegistry::AddEnumerationType(

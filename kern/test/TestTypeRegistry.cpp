@@ -39,7 +39,7 @@ public:
 
     void testPublishTypes() {
         Smp::Uuid degreUuid("00000000-0000-0000-0000-000000000001");
-        Smp::Publication::IType* t = _reg->AddFloatType("degre", "angle unit", degreUuid, -360, 360, true, true, "'");
+        Smp::Publication::IType* t = _reg->AddFloatType("degre", "angle unit", degreUuid, -360, 360, true, true, "deg");
         CPPUNIT_ASSERT(t != nullptr);
         bool exception = false;
         try {
