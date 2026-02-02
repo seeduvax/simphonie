@@ -25,6 +25,11 @@ public:
     }
     virtual ~SimpleType() {
     }
+
+    Smp::IObject* GetChild(Smp::String8 name) const override;
+    void setUnit(Smp::String8 unit);
+    void setMin(Smp::AnySimple min);
+    void setMax(Smp::AnySimple max);
 protected:
     Smp::IField* createField(
         Smp::String8 name,
@@ -37,6 +42,12 @@ protected:
         Smp::Bool output) const override {
             return SimpleField::Create(name, description, view, this, address, state, input, output, parent);
     }
+private:
+    simdeck::Object* _unit=nullptr;
+    Smp::ISimpleField* _min=nullptr;
+    Smp::AnySimple _minValue;
+    Smp::ISimpleField* _max=nullptr;
+    Smp::AnySimple _maxValue;
 };
 
 } // namespace simdeck

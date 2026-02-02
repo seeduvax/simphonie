@@ -11,6 +11,7 @@
 #define __simdeck_Type_HPP__
 #include "simdeck/Object.hpp"
 #include "Smp/Publication/IType.h"
+#include "Smp/ISimpleField.h"
 #include "Smp/IPublication.h"
 
 namespace simdeck {
@@ -42,6 +43,7 @@ public:
         Smp::Bool state = true,
         Smp::Bool input = false,
         Smp::Bool output = false) override;
+
 
 protected:
     virtual Smp::IField* createField(

@@ -18,11 +18,9 @@ Persist::~Persist() {}
 // --------------------------------------------------------------------
 // ..........................................................
 void Persist::Restore(Smp::IStorageReader* reader) {
-// TODO    LOGE("simdeck::Persist::Restore not implemented yet!!!!")
 }
 // ..........................................................
 void Persist::Store(Smp::IStorageWriter* reader) {
-// TODO    LOGE("simdeck::Persist::Store not implemented yet!!!!")
 }
 
 }  // namespace simdeck

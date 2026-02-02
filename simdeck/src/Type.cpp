@@ -10,7 +10,6 @@
 #include "simdeck/Type.hpp"
 #include "Smp/IPublication.h"
 #include "Smp/IComponent.h"
-#include "simdeck/SimpleArrayField.hpp"
 
 namespace simdeck {
 
