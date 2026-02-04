@@ -27,6 +27,7 @@
 #include "simphonie/lua/LuaModel.hpp"
 #include "simphonie/sys/DLib.hpp"
 #include "sol/sol.hpp"
+#include "simdeck/front/SimFront.hpp"
 
 // --------------------------------------------------------------------
 // ..........................................................
@@ -227,9 +228,17 @@ sol::object CreateSimulator(sol::lua_table cfg, sol::this_state L) {
     }
     return sol::nil;
 }
+sol::object CreateFront(Smp::ISimulator* sim, sol::this_state L) {
+    if (sim!=nullptr) {
+        return sol::object(L, sol::in_place, new simdeck::front::SimFront(sim));
+    }
+    return sol::nil;
+}
 
 // --------------------------------------------------------------------
 // ..........................................................
+#define TRACE(expr) std::cout << __FILE__ << ":" <<  __LINE__ << ":" << __FUNCTION__ << ": " << #expr << " = " << (expr) << std::endl;
+ 
 extern "C" {
 int luaopen_libsimph_lua(lua_State* L) {
     sol::state_view lua = L;
@@ -238,6 +247,14 @@ int luaopen_libsimph_lua(lua_State* L) {
     t["Uuid"] = [](std::string c) { return Smp::Uuid(c.c_str()); };
     t["GenerateUuid"] = [](std::string c) { return simdeck::Utils::GenerateUuid(c.c_str()); };
     t["CreateSimulator"] = [](sol::lua_table cfg, sol::this_state LS) { return CreateSimulator(cfg, LS); };
+    t["DisposeSimulator"] = [](Smp::ISimulator* sim) { 
+TRACE((void*)sim)
+TRACE(sim->GetName())
+            delete sim;
+TRACE(0)
+         };
+    t["CreateFront"] = [](Smp::ISimulator* sim, sol::this_state LS) { return CreateFront(sim, LS); };
+    t["DisposeFront"] = [](simdeck::front::SimFront* front) { delete front; };
     auto nsSmp = t["Smp"].get_or_create<sol::table>();
 
     // clang-format off
@@ -336,6 +353,20 @@ int luaopen_libsimph_lua(lua_State* L) {
         "CreateComponent", &simphonie::lua::LuaBuilder::simulatorCreateComponent,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComposite>()
     );
+    nsSmp.new_usertype<simdeck::front::SimFront>("SimFront",
+        "EndSimulationTime", sol::property(&simdeck::front::SimFront::GetEndSimulationTime,
+                                           &simdeck::front::SimFront::SetEndSimulationTime),
+        "Simulator", sol::property(&simdeck::front::SimFront::GetSimulator),
+        "Init", &simdeck::front::SimFront::Init,
+        "Run", &simdeck::front::SimFront::Run,
+        "Wait", &simdeck::front::SimFront::Wait,
+        "WaitStandby", [](simdeck::front::SimFront* f, Smp::Duration timeout) {
+            return f->Wait(Smp::SimulatorStateKind::SSK_Standby, timeout);
+        },
+        "WaitExecuting", [](simdeck::front::SimFront* f, Smp::Duration timeout) {
+            return f->Wait(Smp::SimulatorStateKind::SSK_Executing, timeout);
+        }
+    );
     nsSmp.new_usertype<Smp::Services::ITimeKeeper>("ITimeKeeper",
         sol::meta_function::index, &objectIndex,
         "GetSimulationTime", &Smp::Services::ITimeKeeper::GetSimulationTime,
@@ -375,6 +406,9 @@ int luaopen_libsimph_lua(lua_State* L) {
 }
 // according to lib name resolution policy, let short lib name works.
 int luaopen_simphonie_lua(lua_State* L) {
+    return luaopen_libsimph_lua(L);
+}
+int luaopen_libsimphonie_lua(lua_State* L) {
     return luaopen_libsimph_lua(L);
 }
 }

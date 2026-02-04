@@ -146,22 +146,17 @@ sim.recorderCsv.step:Execute()
 sim.inc1.step:Execute()
 sim.recorderCsv.step:Execute()
 --sim.recorderH5.step:Execute()
-sim:Run()
-
--- this is a bad way to wait the simulation is completed.
--- it is good enough waiting for more specific feature for that.
-while sim.State~=3 do
-end
+front=s.CreateFront(sim)
+front:Run()
+front:WaitStandby(0)
 
 sim.ctrl.Expression.Value = "(and (> (sqrt /TimeKeeper/simTime) 1234.0) (> /inc1/output 20.0))"
 sim.ctrl.Init:Execute()
 eventId=sim:GetEventManager():QueryEventId("TheEvent")
 sim:GetEventManager():Emit(eventId, true)
 
-sim:Run()
-
-while sim.State~=3 do
-end
+front:Run()
+front:WaitStandby(0)
 
 sim:Store("mySimu.cp")
 -- sim:Restore("mySimu.cp")
@@ -173,3 +168,11 @@ print("Nb. of Event logs: "..sim.logger.EventCounter.Value)
 print("Nb. of Information logs: "..sim.logger.InformationCounter.Value)
 print("Nb. of Debug logs: "..sim.logger.DebugCounter.Value)
 print("Nb. of logs: "..sim.logger.Counter.Value)
+
+s.DisposeFront(front)
+print("front disposed")
+s.DisposeSimulator(sim2)
+print("sim2 disposed")
+-- TODO should dispose also sim but segfault in LuaModel destructor, see comment there
+-- s.DisposeSimulator(sim)
+-- print("sim disposed")
