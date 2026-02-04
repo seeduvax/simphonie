@@ -7,7 +7,7 @@
  * $Id$
  * $Date$
  */
-#include <cppunit/extensions/HelperMacros.h>
+#include "abs/test.h"
 #include "simphonie/kern/Simulator.hpp"
 #include "simphonie/kern/EventManager.hpp"
 #include "simphonie/sys/Logger.hpp"
@@ -18,6 +18,7 @@
 #include "Smp/Services/ITimeKeeper.h"
 #include "Smp/Services/IScheduler.h"
 #include "Smp/Services/IEventManager.h"
+#include "simdeck/front/SimFront.hpp"
 
 
 namespace test {
@@ -59,37 +60,9 @@ private:
 
 // ----------------------------------------------------------
 // test fixture implementation
-class TestSimulator : public CppUnit::TestFixture {
-    CPPUNIT_TEST_SUITE(TestSimulator);
-    CPPUNIT_TEST(testStates);
-    CPPUNIT_TEST_SUITE_END();
+ABS_TEST_SUITE_BEGIN(Simulator)
 
 private:
-    class EPSet: public Object {
-    public:
-        EPSet(TestSimulator& ts): 
-                Object("epset","",nullptr), _ts(ts) 
-        {
-        } 
-        virtual ~EPSet() {}
-        void checkEndSim() {
-            if (_ts._sim->GetTimeKeeper()->GetSimulationTime()>=_ts._endSimTime) {
-                if (!_ts._endReached) {
-                   _ts._sim->Hold(true);
-                }
-                _ts._endReached=true;
-            }
-        }
-        void notifyEndSim() {
-            {
-                Synchronized(_ts._mutex);
-                _ts._completed=true;
-            }
-            _ts._monitor.notify_all();
-        }
-        TestSimulator& _ts;
-    };
-
     Smp::ISimulator* _sim=nullptr;
     bool _completed=false;
     Smp::Duration _endSimTime=1e9;
@@ -98,26 +71,19 @@ private:
     Smp::IEntryPoint* _checkEndSim;
     Smp::IEntryPoint* _notifyEndSim;
     bool _endReached=false;
-    EPSet* _epset;
 
     typedef simdeck::TEntryPoint<TestSimulator*, void (TestSimulator::*)()> EP;
 
 public:
     void setUp() {
-        _epset=new EPSet(*this);
-        _checkEndSim = EntryPoint::Create("checkEndSim", "", _epset, &EPSet::checkEndSim);
-        _notifyEndSim = EntryPoint::Create("notifyEndSim", "", _epset, &EPSet::notifyEndSim);
+        _sim=new Simulator();
     }
 
     void tearDown() {
-        delete _checkEndSim;
-        delete _notifyEndSim;
-        delete _epset;
         delete _sim;
     }
 
-    void testStates() {
-        _sim=new Simulator();
+    ABS_TEST_CASE_BEGIN(States) {
         _sim->AddModel(new CModel("parentMdl","",_sim));
         _sim->Publish();
         // after publish, only parent model is expected.
@@ -140,17 +106,14 @@ public:
 
         CPPUNIT_ASSERT_EQUAL((Smp::Duration)0,_sim->GetTimeKeeper()->GetSimulationTime());
         _completed=false;
-        _sim->Run();
-        {
-            Synchronized(_mutex);
-            while(!_completed) {
-                MonitorWait(_monitor);
-            }
-        }
+        simdeck::front::SimFront front(_sim);
+        front.SetEndSimulationTime(_endSimTime);
+        front.Run();
+        CPPUNIT_ASSERT(front.Wait(Smp::SimulatorStateKind::SSK_Standby, 10000000000L));
         CPPUNIT_ASSERT(_sim->GetTimeKeeper()->GetSimulationTime()>=_endSimTime);
         CPPUNIT_ASSERT_EQUAL(Smp::SimulatorStateKind::SSK_Standby, _sim->GetState());
     }
-};
+    ABS_TEST_CASE_END
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestSimulator);
+ABS_TEST_SUITE_END
 }  // namespace test

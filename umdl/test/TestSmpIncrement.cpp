@@ -16,7 +16,7 @@
 #include "simdeck/Utils.hpp"
 #include "simphonie/sys/Logger.hpp"
 #include "simphonie/umdl/SmpIncrement.hpp"
-#include "SimControlEnd.hpp"
+#include "simdeck/front/SimFront.hpp"
 
 namespace test {
 using namespace simphonie::umdl;
@@ -96,12 +96,13 @@ public:
                                           1000000,  // 1000000ns period
                                           -1);  //
         
-        SimControlEnd simCtl(&sim,10000000);
+        simdeck::front::SimFront front(&sim); 
+        front.SetEndSimulationTime(10000000); // 10ms simulation
         sim.Run();
-        simCtl.wait();
+        CPPUNIT_ASSERT(front.Wait(Smp::SimulatorStateKind::SSK_Standby, 10000000000L));
 
-        CPPUNIT_ASSERT_EQUAL((double)11, input->GetValue().value.float64Value);
-        CPPUNIT_ASSERT_EQUAL((double)11, dynamic_cast<Smp::ISimpleField*>(output)->GetValue().value.float64Value);
+        CPPUNIT_ASSERT_EQUAL((double)10, input->GetValue().value.float64Value);
+        CPPUNIT_ASSERT_EQUAL((double)10, dynamic_cast<Smp::ISimpleField*>(output)->GetValue().value.float64Value);
     }
 };
 
