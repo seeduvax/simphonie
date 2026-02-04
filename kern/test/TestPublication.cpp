@@ -12,6 +12,8 @@
 #include "Smp/ISimpleArrayField.h"
 #include "Smp/ISimpleField.h"
 #include "Smp/ISimulator.h"
+#include "Smp/Publication/IStructureType.h"
+#include "Smp/IStructureField.h"
 #include "abs/test.h"
 #include "simdeck/Component.hpp"
 #include "simdeck/StringField.hpp"
@@ -193,5 +195,52 @@ public:
         CPPUNIT_ASSERT(retrieve == "String Field");
     }
     ABS_TEST_CASE_END
+
+    ABS_TEST_CASE_BEGIN(PublishStructureField) {
+        FakeSimulator sim;
+        struct MyStruct {
+            Smp::UInt16 word;
+            Smp::Float64 number;
+        };
+
+        // register structure type
+        Smp::Uuid uuid("ba580576-39c0-4ea5-922c-b584cc8358c9");
+        auto tReg=sim.GetTypeRegistry();
+        auto myStructType=tReg->AddStructureType(
+                    "MyStructType",
+                    "",
+                    uuid);
+        myStructType->AddField("word","",Smp::Uuids::Uuid_UInt16,offsetof(struct MyStruct, word));
+        myStructType->AddField("number","",Smp::Uuids::Uuid_Float64,offsetof(struct MyStruct, number));
+
+        // dummy simulation component to which add the field.
+        std::unique_ptr<simdeck::Component> component(
+            new simdeck::Component("testObj", "dummy object for testing", nullptr));
+        // and its publication receiver.
+        Publication pub(component.get(), &sim);
+
+        // struct instance and its publication
+        struct MyStruct structField={12, 42.42};
+        auto f = dynamic_cast<Smp::IStructureField*>(pub.PublishField("structField", "", &structField, uuid,
+                        Smp::ViewKind::VK_All, false, false, true));
+
+        // check the returned field is OK.
+        CPPUNIT_ASSERT(f != nullptr);
+        auto child = component->GetField("structField");
+        CPPUNIT_ASSERT(f == child);
+        auto f1 = dynamic_cast<Smp::ISimpleField*>(f->GetField("word"));
+        CPPUNIT_ASSERT(f1 != nullptr);
+        auto f2 = dynamic_cast<Smp::ISimpleField*>(f->GetField("number"));
+        CPPUNIT_ASSERT(f2 != nullptr);
+        CPPUNIT_ASSERT(f1 != f2);
+        auto f3 = f->GetChild("plop");
+        CPPUNIT_ASSERT(f3 == nullptr);
+        Smp::UInt16 w=f1->GetValue();
+        CPPUNIT_ASSERT_EQUAL((Smp::UInt16)12, w);
+        Smp::Float64 d=f2->GetValue();
+        CPPUNIT_ASSERT_EQUAL((Smp::Float64)42.42, d);
+    }
+    ABS_TEST_CASE_END
+
     ABS_TEST_SUITE_END
 }  // namespace test
