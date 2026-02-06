@@ -10,9 +10,11 @@
 #ifndef __simdeck_StructureField_HPP__
 #define __simdeck_StructureField_HPP__
 
+#include <tuple>
+#include "Smp/IOutputField.h"
 #include "Smp/IStructureField.h"
-#include "simdeck/Field.hpp"
 #include "simdeck/Collection.hpp"
+#include "simdeck/Field.hpp"
 #include "simdeck/StructureType.hpp"
 
 namespace simdeck {
@@ -42,6 +44,30 @@ protected:
 
 private:
     OwnedCollection<Smp::IField> _fields;
+};
+
+// ..........................................................
+class StructureOutputField : public StructureField, virtual public Smp::IOutputField {
+public:
+    StructureOutputField(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, void* address,
+                         const Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+                         Smp::IObject* parent)
+        : StructureField(name, description, viewKind, address, type, isState, isInput, isOutput, parent) {}
+    virtual ~StructureOutputField() {}
+    // Smp::IOutputField implementation
+    void Push() override;
+    void Connect(Smp::IField* target) override;
+    void Disconnect(Smp::IField* target) override;
+    const Smp::FieldCollection* GetInputFields() const override {
+        return &_targets;
+    }
+    Smp::Bool IsAutomatic() const override {
+        return false;
+    }
+
+private:
+    std::vector<std::tuple<Smp::IOutputField*, int> > _outputFields;
+    Collection<Smp::IField> _targets;
 };
 
 } // namespace simdeck
