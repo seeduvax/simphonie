@@ -37,6 +37,7 @@ public:
         CPPUNIT_ASSERT_EQUAL(0, o.as<int>());
         o = g["sim"]["logger"]["Counter"]["Value"];
         CPPUNIT_ASSERT(0 < o.as<int>());
+        lua.safe_script("s.DisposeSimulator(sim)");
     }
     ABS_TEST_CASE_END
     ABS_TEST_SUITE_END

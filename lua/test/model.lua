@@ -10,7 +10,7 @@ model={
             }
         })
         print(":::: pub 2")
-        self:AddEntryPoint("step", "main model step",function (self)
+        self:AddEntryPoint("step", "main model step",function(self)
             print("::::: lua model step")
             self.cpt = self.cpt + 1
             print(self.cpt)
@@ -22,5 +22,5 @@ model={
     end,
     connect=function(self)
         print(":::::: Connect from lua") 
-    end
+    end,
 }

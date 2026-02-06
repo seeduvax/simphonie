@@ -81,6 +81,7 @@ void simulatorNewIndex(Smp::ISimulator& th, sol::stack_object k, sol::stack_obje
         }
     }
 }
+
 // ..........................................................
 sol::object objectIndex(Smp::IObject* obj, sol::stack_object k, sol::this_state L) {
     std::string kstr;
@@ -237,8 +238,6 @@ sol::object CreateFront(Smp::ISimulator* sim, sol::this_state L) {
 
 // --------------------------------------------------------------------
 // ..........................................................
-#define TRACE(expr) std::cout << __FILE__ << ":" <<  __LINE__ << ":" << __FUNCTION__ << ": " << #expr << " = " << (expr) << std::endl;
- 
 extern "C" {
 int luaopen_libsimph_lua(lua_State* L) {
     sol::state_view lua = L;
@@ -248,10 +247,7 @@ int luaopen_libsimph_lua(lua_State* L) {
     t["GenerateUuid"] = [](std::string c) { return simdeck::Utils::GenerateUuid(c.c_str()); };
     t["CreateSimulator"] = [](sol::lua_table cfg, sol::this_state LS) { return CreateSimulator(cfg, LS); };
     t["DisposeSimulator"] = [](Smp::ISimulator* sim) { 
-TRACE((void*)sim)
-TRACE(sim->GetName())
             delete sim;
-TRACE(0)
          };
     t["CreateFront"] = [](Smp::ISimulator* sim, sol::this_state LS) { return CreateFront(sim, LS); };
     t["DisposeFront"] = [](simdeck::front::SimFront* front) { delete front; };

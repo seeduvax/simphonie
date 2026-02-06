@@ -21,7 +21,7 @@ class LuaModel::EntryPoint: public simdeck::EntryPoint {
 public:
     EntryPoint(Smp::String8 name, Smp::String8 description, 
                 sol::protected_function luaEP,
-                sol::object self, LuaModel* parent):
+                sol::table self, LuaModel* parent):
             Parent(name, description, parent), 
             _luaEP(luaEP),
             _self(self),
@@ -36,12 +36,12 @@ public:
             sol::error err = res;
             _owner->getSimulator()->GetLogger()->Log(this, err.what(), Smp::Services::ILogger::LMK_Error);
         }
-    }
+   }
 
 
 private:
     sol::protected_function _luaEP;
-    sol::object _self;
+    sol::table _self;
     LuaModel* _owner;
 };
 
@@ -55,31 +55,37 @@ LuaModel::LuaModel(Smp::String8 name, Smp::String8 description, Smp::IObject* pa
     if ( loc != std::string::npos ) {
         _scriptPath=s.substr(loc+1);
     }
-
-    _lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::os, sol::lib::math,
+    _lua=new sol::state();
+    _lua->open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::os, sol::lib::math,
                        sol::lib::table, sol::lib::debug);
-    _lua.safe_script_file(_scriptPath.c_str());
-    _lua.safe_script("Smp=require 'simphonie_lua'");
-    sol::table g=_lua.globals();
-    _luaModel=g["model"];
+    _lua->safe_script_file(_scriptPath.c_str());
+    _lua->safe_script("Smp=require 'simphonie_lua'");
+    sol::table g=_lua->globals();
+    _luaModel=new sol::table();
+    *_luaModel=g["model"];
 }
 // ..........................................................
 LuaModel::~LuaModel() {
+    for (auto ep: _epList) {
+        delete ep;
+    }
     for (const auto& data : _publishedIntData) {
         delete[] data;
     }
     for (const auto& data : _publishedDoubleData) {
         delete[] data;
     }
+    delete _luaModel;
+    delete _lua;
     // TODO SegFault table's destructor: may be related to github.com/ThePhd/sol2/issues/335
 }
 
 // --------------------------------------------------------------------
 // ..........................................................
 void LuaModel::call(const char* name) {
-    sol::protected_function pf = _luaModel[name];
+    sol::protected_function pf = (*_luaModel)[name];
     if (pf != sol::nil) {
-        auto res = pf(sol::object(_lua, sol::in_place, this));
+        auto res = pf(sol::object(*_lua, sol::in_place, this));
         if (!res.valid()) {
             sol::error err = res;
             getSimulator()->GetLogger()->Log(this, err.what(), Smp::Services::ILogger::LMK_Error);
@@ -111,9 +117,9 @@ Smp::IEntryPoint* LuaModel::GetEntryPoint(Smp::String8 name) const {
 }
 // ..........................................................
 void LuaModel::addEntryPoint(Smp::String8 name, Smp::String8 description, sol::protected_function func) {
-     _epList.push_back(new LuaModel::EntryPoint(name, description, 
+      _epList.push_back(new LuaModel::EntryPoint(name, description, 
                 func,
-                sol::object(_lua, sol::in_place, this), this));
+                sol::object(*_lua, sol::in_place, this), this));
 }
 
 // --------------------------------------------------------------------

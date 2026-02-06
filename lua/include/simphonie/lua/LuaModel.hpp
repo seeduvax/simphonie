@@ -50,13 +50,15 @@ protected:
     void connect() override;
 
 private:
-    sol::table _luaModel;
-    sol::state _lua;
+    // using pointers and dynamic alloc of lua stuff to master
+    // order of deallocation.
+    sol::table *_luaModel;
+    sol::state *_lua;
     std::string _scriptPath;
 
     std::string buildName(Smp::String8 spec);
     void call(const char* name);
-    simdeck::OwnedCollection<Smp::IEntryPoint> _epList;
+    simdeck::Collection<Smp::IEntryPoint> _epList;
     std::vector<int64_t*> _publishedIntData;
     std::vector<double*> _publishedDoubleData;
 

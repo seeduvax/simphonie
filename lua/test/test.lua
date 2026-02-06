@@ -170,9 +170,5 @@ print("Nb. of Debug logs: "..sim.logger.DebugCounter.Value)
 print("Nb. of logs: "..sim.logger.Counter.Value)
 
 s.DisposeFront(front)
-print("front disposed")
 s.DisposeSimulator(sim2)
-print("sim2 disposed")
--- TODO should dispose also sim but segfault in LuaModel destructor, see comment there
--- s.DisposeSimulator(sim)
--- print("sim disposed")
+-- do not dispose sim because cppunit test case will do some assert on it.
