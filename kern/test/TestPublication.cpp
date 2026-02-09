@@ -34,6 +34,9 @@ private:
     class FakeSimulator : public virtual Smp::ISimulator {
     public:
         inline FakeSimulator() : _treg(new TypeRegistry("TypeRegistry", "", nullptr)) {}
+        virtual ~FakeSimulator() {
+            delete _treg;
+        }
         inline Smp::Publication::ITypeRegistry* GetTypeRegistry() const override {
             return _treg;
         }
@@ -175,19 +178,24 @@ public:
         CPPUNIT_ASSERT_EQUAL(12, (int32_t)f->GetValue(0));
         CPPUNIT_ASSERT_EQUAL(17, (int32_t)f->GetValue(1));
         CPPUNIT_ASSERT_EQUAL(42, (int32_t)f->GetValue(2));
+        Smp::ISimpleField* sf = dynamic_cast<Smp::ISimpleField*>(f->GetChild("[0]"));
+        CPPUNIT_ASSERT_EQUAL(12, (int32_t)sf->GetValue());
+        sf = dynamic_cast<Smp::ISimpleField*>(f->GetChild("[1]"));
+        CPPUNIT_ASSERT_EQUAL(17, (int32_t)sf->GetValue());
+        sf = dynamic_cast<Smp::ISimpleField*>(f->GetChild("[2]"));
+        CPPUNIT_ASSERT_EQUAL(42, (int32_t)sf->GetValue());
     }
     ABS_TEST_CASE_END
 
     ABS_TEST_CASE_BEGIN(PublishStringField) {
         FakeSimulator sim;
-        std::unique_ptr<simdeck::Component> component(
-            new simdeck::Component("testObj", "dummy object for testing", nullptr));
-        Publication pub(component.get(), &sim);
+        simdeck::Component component("testObj", "dummy object for testing", nullptr);
+        Publication pub(&component, &sim);
 
         std::string stringField = "String Field";
         auto f = pub.PublishField("strField", "std::string test pub", &stringField, StringType::UuidString);
         CPPUNIT_ASSERT(f != nullptr);
-        auto child = component->GetField("strField");
+        auto child = component.GetField("strField");
         CPPUNIT_ASSERT(f == child);
         auto sf = dynamic_cast<StringField*>(f);
         CPPUNIT_ASSERT(sf != nullptr);
