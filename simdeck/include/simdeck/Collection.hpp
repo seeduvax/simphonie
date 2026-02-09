@@ -64,7 +64,7 @@ public:
     void push_back(T* t) {
         _content.push_back(t);
     }
-    bool remove(const T* t) {
+    virtual bool remove(const T* t) {
         size_t initialSize = _content.size();
 
         // This is better than the iterator shift loop O(n^2)
@@ -104,6 +104,13 @@ public:
             delete field;
         }
     };
+    bool remove(const T* t) override {
+        auto res=Collection<T>::remove(t);
+        if (res) {
+            delete t;
+        }
+        return res;
+    }
 };
 
 }  // namespace simdeck
