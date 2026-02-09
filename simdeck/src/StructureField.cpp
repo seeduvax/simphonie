@@ -7,13 +7,11 @@
  * $Id$
  * $Date$
  */
-#include <tuple>
 #include "simdeck/StructureField.hpp"
 #include "simdeck/SimpleField.hpp"
 #include "simdeck/SimpleArrayField.hpp"
 #include "simdeck/ExInvalidTarget.hpp"
 #include "Smp/Publication/IArrayType.h"
-#include "Smp/IOutputField.h"
 
 namespace simdeck {
 // ..........................................................
@@ -37,71 +35,7 @@ void StructureField::Restore(Smp::IStorageReader* reader) {
         f->Restore(reader);
     }
 }
-// ..........................................................
-// ..........................................................
-class StructureOutputField: public StructureField, virtual public Smp::IOutputField {
-public:
-    StructureOutputField(Smp::String8 name, Smp::String8 description, Smp::ViewKind viewKind, void* address,
-                               const Smp::Publication::IType* type, Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
-                               Smp::IObject* parent):
-            StructureField(name, description, viewKind, address, type, isState, isInput, isOutput, parent) {
-    }
-    virtual ~StructureOutputField() {
-    }
-    // Smp::IOutputField implementation
-    void Push() override {
-        for (auto f : _outputFields) {
-            std::get<0>(f)->Push();
-        }
-    }
-    void Connect(Smp::IField* target) override {
-        if (_outputFields.empty()) {
-            // probably 1st connect, iterated structure fields to retrieve them
-            // as output fields.
-            int i=0;
-            for (auto f: *(this->GetFields())) {
 
-                auto o=dynamic_cast<Smp::IOutputField*>(f);
-                if (o!=nullptr) {
-                    _outputFields.push_back(std::tuple<Smp::IOutputField *, int>(o, i));
-                }
-                i++;
-            }
-        }
-        auto f = dynamic_cast<Smp::IStructureField*>(target);
-        if (f != nullptr && f->GetType()->GetUuid() == this->GetType()->GetUuid() && f->IsInput()
-            && this->GetFields()->size() == f->GetFields()->size()) {
-            auto targetFields=f->GetFields();
-            for (auto of: _outputFields) {
-                // TODO check index is OK in target collection and throw invalid target exception otherwise.
-                std::get<0>(of)->Connect(targetFields->at(std::get<1>(of)));
-            }
-        }
-        else {
-            throw ExInvalidTarget(this, target);
-        }
-        _targets.push_back(target);
-    }
-    void Disconnect(Smp::IField* target) override {
-        auto tsf=dynamic_cast<Smp::IStructureField*>(target);
-        if (tsf!=nullptr && _targets.contain(target)) {
-            _targets.remove(target);
-            auto targetFields=tsf->GetFields();
-            for (auto f : _outputFields) {
-                std::get<0>(f)->Disconnect(targetFields->at(std::get<1>(f)));
-            }
-        }
-    }
-    const Smp::FieldCollection* GetInputFields() const override {
-        return &_targets;
-    } 
-    Smp::Bool IsAutomatic() const override {
-        return false;
-    }
-private:
-    std::vector<std::tuple<Smp::IOutputField*,int> > _outputFields;
-    Collection<Smp::IField> _targets;
-};
 
 // ..........................................................
 // ..........................................................
@@ -142,4 +76,51 @@ Smp::IField* StructureField::Create(Smp::String8 name, Smp::String8 description,
     }
     return sf;
 }
+
+// ..........................................................
+void StructureOutputField::Push() {
+    for (auto f : _outputFields) {
+        std::get<0>(f)->Push();
+    }
+}
+
+void StructureOutputField::Connect(Smp::IField* target) {
+    if (_outputFields.empty()) {
+        // probably 1st connect, iterated structure fields to retrieve them
+        // as output fields.
+        int i = 0;
+        for (auto f : *(this->GetFields())) {
+            auto o = dynamic_cast<Smp::IOutputField*>(f);
+            if (o != nullptr) {
+                _outputFields.push_back(std::tuple<Smp::IOutputField*, int>(o, i));
+            }
+            i++;
+        }
+    }
+    auto f = dynamic_cast<Smp::IStructureField*>(target);
+    if (f != nullptr && f->GetType()->GetUuid() == this->GetType()->GetUuid() && f->IsInput()
+        && this->GetFields()->size() == f->GetFields()->size()) {
+        auto targetFields = f->GetFields();
+        for (auto of : _outputFields) {
+            // TODO check index is OK in target collection and throw invalid target exception otherwise.
+            std::get<0>(of)->Connect(targetFields->at(std::get<1>(of)));
+        }
+    }
+    else {
+        throw ExInvalidTarget(this, target);
+    }
+    _targets.push_back(target);
+}
+
+void StructureOutputField::Disconnect(Smp::IField* target) {
+    auto tsf = dynamic_cast<Smp::IStructureField*>(target);
+    if (tsf != nullptr && _targets.contain(target)) {
+        _targets.remove(target);
+        auto targetFields = tsf->GetFields();
+        for (auto f : _outputFields) {
+            std::get<0>(f)->Disconnect(targetFields->at(std::get<1>(f)));
+        }
+    }
+}
+
 } // namespace simdeck
