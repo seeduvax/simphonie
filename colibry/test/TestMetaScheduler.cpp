@@ -136,6 +136,28 @@ public:
         delete _sim;
     }
  
+    ABS_TEST_CASE_BEGIN(CycleTimeChangeEvent) {
+        auto scheduler=_sim->GetScheduler();
+        scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("ev1"),100); 
+        scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("ev2"),200); 
+        scheduler->AddSimulationTimeEvent(_mdl->GetEntryPoint("cpt1"),0,10,-1); 
+        auto evMgr=_sim->GetEventManager();
+        auto s=_metaScheduler->NewSchedule(_mdl->GetEntryPoint("cpt2"));
+        s->SetRepeat(-1)
+            .SetCycleTime(10)
+            // twice less activations starting from event 1
+            .SubscribeCycleTimeChangeEvent(evMgr->QueryEventId(EVENT1),20) 
+            // twice more activations starting from event 2
+            .SubscribeCycleTimeChangeEvent(evMgr->QueryEventId(EVENT2),5) 
+            .Submit();
+        _mdl->_endSimTime=300;
+        _sim->Run();
+        _mdl->waitLeaveExecuting();
+        std::string expected="12121212121212121212121121121121121122122122122122122122122122122";
+        CPPUNIT_ASSERT_EQUAL(expected, _mdl->_order);
+    }
+    ABS_TEST_CASE_END
+
     ABS_TEST_CASE_BEGIN(ImmediateActiveSched) {
         // schedule events emitting at fixed date
         auto scheduler=_sim->GetScheduler();
