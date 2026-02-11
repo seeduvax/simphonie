@@ -113,6 +113,23 @@ public:
          */
         virtual ISchedule& UnsubscribeDeactivateEvent(Smp::Services::EventId event) = 0;
         /**
+         * Register to an event to trigger a cycle time change.
+         * @param event Event manager's event id to subsbscribe to.
+         * @param cycleTime new cycle time to set after event is emmitted.
+         * @param delay simulation time delay before cycle time change 
+         *        application from the time the event is emitted.
+         * @return this schedule for further configuration.
+         */
+        virtual ISchedule& SubscribeCycleTimeChangeEvent(
+                            Smp::Services::EventId event,
+                            Smp::Duration cycleTime,
+                            Smp::Duration delay = 0) = 0;
+        /**
+         * Cancel event subscription for a cycle time change.
+         * @return this schedule for further configuration.
+         */
+        virtual ISchedule& UnsubscribeCycleTimeChangeEvent(Smp::Services::EventId event) = 0;
+        /**
          * Submit the schedule to the Smp scheduler.
          * Translate the schedule configuration to a SMP schedule add event call
          * or already scheduled event attributes update sequence.
