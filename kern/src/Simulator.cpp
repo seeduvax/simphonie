@@ -26,6 +26,7 @@
 #include "simphonie/kern/StorageWriter.hpp"
 #include "simphonie/kern/TimeKeeper.hpp"
 #include "simphonie/kern/TypeRegistry.hpp"
+#include "simphonie/kern/UnitRegistry.hpp"
 #include "simphonie/sys/Synchro.hpp"
 
 #define SMPLOGEV(msg) _logger->Log(this, msg, Smp::Services::ILogger::LMK_Event);
@@ -52,6 +53,7 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
     _timeKeeper = new TimeKeeper("TimeKeeper", "Time service", this);
     _eventMgr = new EventManager("EventManager", "Event handling service", this);
     _linkRegistry = new LinkRegistry("LinkRegistry", "Link registry service", this);
+    _services->AddComponent(new UnitRegistry("UnitRegistry", "Unit registry", this));
     TypeRegistry* tr = new TypeRegistry("TypeRegistry", "Type registry service", this);
     _typeRegistry = tr;
 

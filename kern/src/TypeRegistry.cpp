@@ -11,6 +11,7 @@
 
 #include <iostream>
 
+#include "Smp/ISimulator.h"
 #include "simdeck/ArrayType.hpp"
 #include "simdeck/ClassType.hpp"
 #include "simdeck/EnumerationType.hpp"
@@ -56,6 +57,16 @@ TypeRegistry::TypeRegistry(Smp::String8 name, Smp::String8 description, Smp::IOb
     _types.push_back(new SimpleType(Smp::Uuids::Uuid_Float64, Smp::PrimitiveTypeKind::PTK_Float64, "Float64",
                                     "Eight bytes float data type", this));
     _types.push_back(new StringType("StdString", "C++ std::string data type", this));
+
+    auto sim=dynamic_cast<Smp::ISimulator*>(parent);
+    if (sim!=nullptr) {
+        for (auto svc: *(sim->GetContainer(Smp::ISimulator::SMP_SimulatorServices)->GetComponents())) {
+            auto ur=dynamic_cast<simdeck::smpext::IUnitRegistry*>(svc);
+            if (ur!=nullptr) {
+                _unitRegistry=ur;
+            }
+        }
+    }
 }
 // ..........................................................
 TypeRegistry::~TypeRegistry() {
@@ -156,6 +167,18 @@ Smp::Publication::IType* TypeRegistry::GetType(Smp::Uuid typeUuid) const {
     }
     return nullptr;
 }
+// ..........................................................
+Smp::IObject* TypeRegistry::getUnit(Smp::String8 name) const {
+    Smp::IObject* res=nullptr;
+    if (_unitRegistry!=nullptr) {
+        // search either by name or by symbol
+        res=_unitRegistry->GetUnits()->at(name);
+        if (res == nullptr) {
+            res=_unitRegistry->GetUnit(name);
+        }
+    }
+    return res;
+}
 // --------------------------------------------------------------------
 // ..........................................................
 Smp::Publication::IType* TypeRegistry::AddFloatType(Smp::String8 name, Smp::String8 descr, Smp::Uuid typeUuid,
@@ -170,7 +193,10 @@ Smp::Publication::IType* TypeRegistry::AddFloatType(Smp::String8 name, Smp::Stri
         throw ExTypeAlreadyRegistered(this, name, res);
     }
     auto t = new SimpleType(typeUuid, type, name, descr, this);
-    t->setUnit(unit);
+    auto u=getUnit(unit);
+    if (u!=nullptr) {
+        t->setUnit(unit);
+    }
     t->setMin({type, minimum});
     t->setMax({type, maximum});
     _types.push_back(t);
@@ -205,7 +231,10 @@ Smp::Publication::IType* TypeRegistry::AddIntegerType(Smp::String8 name, Smp::St
             throw ExInvalidPrimitiveType(this, type);
     }
     auto t=new SimpleType(typeUuid, type, name, descr, this);
-    t->setUnit(unit);
+    auto u=getUnit(unit);
+    if (u!=nullptr) {
+        t->setUnit(unit);
+    }
     t->setMin({type, minimum});
     t->setMax({type, maximum});
     _types.push_back(t);

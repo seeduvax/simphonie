@@ -14,6 +14,7 @@
 #include "simdeck/Collection.hpp"
 #include "simdeck/Component.hpp"
 #include "simdeck/smpext/ICustomTypeRegistry.hpp"
+#include "simdeck/smpext/IUnitRegistry.hpp"
 
 namespace simphonie {
 namespace kern {
@@ -80,6 +81,9 @@ public:
 
 private:
     OwnedCollection<Smp::Publication::IType> _types;
+    simdeck::smpext::IUnitRegistry* _unitRegistry = nullptr;
+
+    Smp::IObject* getUnit(Smp::String8 name) const;
 };
 
 }  // namespace kern
