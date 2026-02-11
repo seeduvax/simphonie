@@ -20,14 +20,14 @@ namespace simdeck {
  */
 class SimpleType: public Type {
 public:
-    SimpleType(Smp::Uuid uuid, Smp::PrimitiveTypeKind ptk, Smp::String8 name, Smp::String8 descr="", Smp::IObject* parent=nullptr):
-                Type(uuid, ptk, name, descr, parent) {
-    }
-    virtual ~SimpleType() {
-    }
-
+    SimpleType(Smp::Uuid uuid, Smp::PrimitiveTypeKind ptk, Smp::String8 name, Smp::String8 descr="", Smp::IObject* parent=nullptr);
+    virtual ~SimpleType();
+    // Smp::IObject specialization.
     Smp::IObject* GetChild(Smp::String8 name) const override;
-    void setUnit(Smp::String8 unit);
+    // specific services.
+    inline void setUnit(Smp::IObject* unit) {
+        _unit=unit;
+    }
     void setMin(Smp::AnySimple min);
     void setMax(Smp::AnySimple max);
 protected:
@@ -43,7 +43,7 @@ protected:
             return SimpleField::Create(name, description, view, this, address, state, input, output, parent);
     }
 private:
-    simdeck::Object* _unit=nullptr;
+    Smp::IObject* _unit=nullptr;
     Smp::ISimpleField* _min=nullptr;
     Smp::AnySimple _minValue;
     Smp::ISimpleField* _max=nullptr;

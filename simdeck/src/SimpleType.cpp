@@ -52,6 +52,19 @@ private:
 };
 
 
+// ..........................................................
+SimpleType::SimpleType(Smp::Uuid uuid, Smp::PrimitiveTypeKind ptk, Smp::String8 name, Smp::String8 descr, Smp::IObject* parent):
+            Type(uuid, ptk, name, descr, parent) {
+}
+// ..........................................................
+SimpleType::~SimpleType() {
+    if (_min != nullptr) {
+        delete _min;
+    }
+    if (_max != nullptr) {
+        delete _max;
+    }
+}
 
 // ..........................................................
 Smp::IObject* SimpleType::GetChild(Smp::String8 name) const {
@@ -66,13 +79,6 @@ Smp::IObject* SimpleType::GetChild(Smp::String8 name) const {
         ret=_max;
     }
     return ret;
-}
-// ..........................................................
-void SimpleType::setUnit(Smp::String8 unit) {
-    if (_unit!=nullptr) {
-        delete _unit;
-    }
-    _unit=new Object(unit,"unit",this);
 }
 // ..........................................................
 void SimpleType::setMin(Smp::AnySimple min) {
