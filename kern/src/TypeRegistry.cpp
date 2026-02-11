@@ -195,7 +195,7 @@ Smp::Publication::IType* TypeRegistry::AddFloatType(Smp::String8 name, Smp::Stri
     auto t = new SimpleType(typeUuid, type, name, descr, this);
     auto u=getUnit(unit);
     if (u!=nullptr) {
-        t->setUnit(unit);
+        t->setUnit(u);
     }
     t->setMin({type, minimum});
     t->setMax({type, maximum});
@@ -233,7 +233,7 @@ Smp::Publication::IType* TypeRegistry::AddIntegerType(Smp::String8 name, Smp::St
     auto t=new SimpleType(typeUuid, type, name, descr, this);
     auto u=getUnit(unit);
     if (u!=nullptr) {
-        t->setUnit(unit);
+        t->setUnit(u);
     }
     t->setMin({type, minimum});
     t->setMax({type, maximum});
