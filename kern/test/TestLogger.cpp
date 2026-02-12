@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <filesystem>
 #include <unordered_map>
 #include "Smp/ISimpleField.h"
 #include "Smp/Int32.h"
@@ -72,7 +73,6 @@ ABS_TEST_CASE_BEGIN(TestLoggerCounters) {
         {Smp::Services::ILogger::LMK_Debug,
          {Smp::Services::ILogger::LMK_DebugName, Smp::Services::ILogger::LMK_Debug, 5}}};
 
-    _sim->Initialise();
     _sim->AddService(_ownedLogger.release());
     _sim->Publish();
 
@@ -110,7 +110,7 @@ ABS_TEST_CASE_BEGIN(TestLoggerCounters) {
 }
 ABS_TEST_CASE_END
 
-ABS_TEST_CASE_BEGIN(TestLoggerFileAndContent) {
+ABS_TEST_CASE_BEGIN(LoggerFileAndContent) {
     ABS_TEST_CASE_REQ(simph.log.cfg .1)
     ABS_TEST_CASE_REQ(simph.log.cfg .2)
     ABS_TEST_CASE_REQ(simph.log.ev .3)
@@ -118,19 +118,28 @@ ABS_TEST_CASE_BEGIN(TestLoggerFileAndContent) {
     ABS_TEST_CASE_REQ(simph.log.ev .5)
     ABS_TEST_CASE_REQ(simph.log.ev .6)
 
+    // logger file into test output directory
+    std::string testLogFilePath=getenv("TTARGETDIR");
+    testLogFilePath=testLogFilePath+"/TestLogger.log";
+    // remove file if exist to avoid side effects from one test run to another
+    std::filesystem::remove(testLogFilePath);
+
     std::unique_ptr<LoggerFile> loggerFile(new LoggerFile("loggerFile", "", _logger));
     _logger->GetContainer("Backends")->AddComponent(loggerFile.get());
-    _sim->Initialise();
     _sim->AddService(_ownedLogger.release());
     _sim->Publish();
 
     auto filepath = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveRelative("filePath", loggerFile.get()));
     CPPUNIT_ASSERT(nullptr != filepath);
     {
+        // check default name
         std::ostringstream s;
         s << _sim->GetName() << ".log";
         CPPUNIT_ASSERT(0 == std::strcmp(s.str().c_str(), filepath->GetValue().value.string8Value));
     }
+    // finally change file name beceaus we don't want to pollute the project
+    // source tree.
+    filepath->SetValue({Smp::PrimitiveTypeKind::PTK_String8, testLogFilePath.c_str()});
 
     _sim->Configure();
 
@@ -164,7 +173,6 @@ ABS_TEST_CASE_BEGIN(TestLoggerAsync) {
     std::unique_ptr<LoggerOStream> loggerOStream(new LoggerOStream("loggerOStream", "", _logger));
     _logger->GetContainer("Backends")->AddComponent(loggerAsync.get());
     _logger->GetContainer("Backends")->AddComponent(loggerOStream.get());
-    _sim->Initialise();
     _sim->AddService(_ownedLogger.release());
     _sim->Publish();
     _sim->Configure();
