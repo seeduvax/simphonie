@@ -26,10 +26,10 @@ public:
     FieldRecorderHDF5(Smp::String8 name, Smp::String8 description = "", Smp::IObject* parent = nullptr);
     ~FieldRecorderHDF5();
     void step() override;
+    void init() override;
 
 protected:
     void flush() override;
-    void connect() override;
     void disconnect() override;
 
 private:
@@ -51,7 +51,7 @@ private:
     };
 
     H5::PredType _SmpType2H5Type(Smp::PrimitiveTypeKind type);
-    void _addField(const char* name, Smp::IField* field = nullptr);
+    void addField(const char* name, Smp::IField* field = nullptr);
     H5::H5File _file;
     std::vector<_field> _fields;
 };

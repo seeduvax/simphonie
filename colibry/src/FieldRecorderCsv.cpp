@@ -27,8 +27,7 @@ FieldRecorderCsv::~FieldRecorderCsv() {
 }
 // --------------------------------------------------------------------
 // ..........................................................
-void FieldRecorderCsv::connect() {
-    FieldRecorder::connect();
+void FieldRecorderCsv::init() {
     _file.open(getFilePath(), std::ofstream::out);
     _file.precision(std::numeric_limits<double>::max_digits10 - 1);
     _file << "#time";
@@ -36,8 +35,9 @@ void FieldRecorderCsv::connect() {
         auto sf=dynamic_cast<Smp::ISimpleField*>(f);
         std::string absoluteName = f->GetName();
         Smp::IObject* obj = f->GetParent();
-        while (obj!=static_cast<Smp::IObject*>(getSimulator())) {
-            absoluteName.insert (0,std::string(obj->GetName())+"/");
+        while (obj!=nullptr && obj!=static_cast<Smp::IObject*>(getSimulator())) {
+            absoluteName.insert (0,"/");
+            absoluteName.insert (0,obj->GetName());
             obj=obj->GetParent();
         }
         if (sf!=nullptr) {

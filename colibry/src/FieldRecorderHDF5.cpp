@@ -19,7 +19,8 @@ namespace simphonie {
 namespace colibry {
 
 FieldRecorderHDF5::FieldRecorderHDF5(Smp::String8 name, Smp::String8 description, Smp::IObject* parent)
-    : FieldRecorder(name, description, parent, "h5") {}
+    : FieldRecorder(name, description, parent, "h5") {
+}
 
 FieldRecorderHDF5::~FieldRecorderHDF5() {
     disconnect();
@@ -77,7 +78,7 @@ H5::PredType FieldRecorderHDF5::_SmpType2H5Type(Smp::PrimitiveTypeKind type) {
     }
 }
 
-void FieldRecorderHDF5::_addField(const char* name, Smp::IField* field) {
+void FieldRecorderHDF5::addField(const char* name, Smp::IField* field) {
     hsize_t size = 1;
     Smp::Bool isArray = false;
     {
@@ -113,23 +114,21 @@ void FieldRecorderHDF5::flush() {
     _file.flush(H5F_SCOPE_GLOBAL);
 }
 
-void FieldRecorderHDF5::connect() {
-    FieldRecorder::connect();
-
+void FieldRecorderHDF5::init() {
     _file = H5::H5File(getFilePath(), H5F_ACC_TRUNC);
 
-    _addField("#time");
-
+    addField("SimTime");
     for (auto field : *getInputFields()) {
         std::string name = field->GetName();
         auto obj = field->GetParent();
-        while (obj != static_cast<Smp::IObject*>(getSimulator())) {
+        while (obj!=nullptr && obj != static_cast<Smp::IObject*>(getSimulator())) {
             name.insert(0, std::string(obj->GetName()) + "::");
             obj = obj->GetParent();
         }
-        _addField(name.c_str(), field);
+        addField(name.c_str(), field);
     }
 }
+
 
 void FieldRecorderHDF5::step() {
     for (auto& field : _fields) {
@@ -155,7 +154,9 @@ void FieldRecorderHDF5::step() {
          **/
         std::vector<Smp::Int64> data;
         if (!field.field) {
-            /* assuming it is a simulation time field */
+            
+            /* assuming it is a simulation time field 
+             * TODO shall not guess like this. */
             data.push_back(Smp::AnySimple(Smp::PrimitiveTypeKind::PTK_Duration,
                                           getSimulator()->GetTimeKeeper()->GetSimulationTime())
                                .value.int64Value);
@@ -168,7 +169,6 @@ void FieldRecorderHDF5::step() {
         else {
             data.push_back(field.simplefield->GetValue().value.int64Value);
         }
-
         field.dataset.write(data.data(), field.h5Type, memspace, fspace);
     }
 }

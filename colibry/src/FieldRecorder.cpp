@@ -57,6 +57,7 @@ FieldRecorder::FieldRecorder(Smp::String8 name, Smp::String8 description, Smp::I
         _filePath = _filePath + "frec";
     }
     addEP("step","record fields snapshot", this, &FieldRecorder::step);
+    addEP("init","record fields snapshot", this, &FieldRecorder::init);
     addEP("flush", "Flush record file", this, &FieldRecorder::flush);
 }
 // ..........................................................
@@ -76,6 +77,7 @@ void FieldRecorder::publish(Smp::IPublication* receiver) {
 void FieldRecorder::connect() {
     getSimulator()->GetEventManager()->Subscribe(Smp::Services::IEventManager::SMP_LeaveExecutingId,
                                                  GetEntryPoint("flush"));
+    getSimulator()->AddInitEntryPoint(GetEntryPoint("init"));
 }
 
 // --------------------------------------------------------------------

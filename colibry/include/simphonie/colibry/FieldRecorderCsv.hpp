@@ -34,11 +34,11 @@ public:
     // FieldRecorder step specialization. Output fields' value as text line into
     // the file.
     void step() override;
+    void init() override;
 
 protected:
     void flush() override;
     // Component specialization to open/close file on simulator connect/disconnect
-    void connect() override;
     void disconnect() override;
 
 private:

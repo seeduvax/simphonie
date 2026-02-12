@@ -44,12 +44,12 @@ public:
      * point to be scheduled when data shall be recorded.
      */ 
     virtual void step() = 0;
-
-    // those two using to make c++ compiler happy whith the Connect/Disconnect
-    // from both IComponent and IOutputField.
-    using Parent::Connect;
-    using Parent::Disconnect;
-
+    /**
+     * Initialise recorder.
+     * Scan list of connected fields to setup the data writer.
+     * Open the output file for recording.
+     */
+    virtual void init() = 0;
 
 protected:
     virtual void flush() = 0;
