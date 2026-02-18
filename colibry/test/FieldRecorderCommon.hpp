@@ -46,6 +46,8 @@ void recordSimpleFieldsCase(const char * fileExt) {
     dblV-=1.1;
     intV++;
     recorder->step();
+    delete dblF;
+    delete intF;
 }
 } // namespace test
 #endif // __simphonie_colibry_test_FieldRecordCommon_hpp__

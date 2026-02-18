@@ -34,6 +34,9 @@ Tracker::Tracker(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent):
 }
 // ..........................................................
 Tracker::~Tracker() {
+    for (auto evc: *(GetContainer(CONTAINER_NAME)->GetComponents())) {
+        delete evc;
+    }
 }
 // --------------------------------------------------------------------
 // ..........................................................

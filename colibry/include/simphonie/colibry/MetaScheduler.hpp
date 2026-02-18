@@ -46,8 +46,8 @@ public:
 
     // IMetaScheduler implementation
     ISchedule* GetSchedule(Smp::Services::EventId ev) const override {
-        auto it=_schedList.find(ev);
-        return it!=_schedList.end()?it->second:nullptr;
+        auto it=_schedIndex.find(ev);
+        return it!=_schedIndex.end()?it->second:nullptr;
     }
     simdeck::smpext::IMetaScheduler::ISchedule* NewSchedule(Smp::IEntryPoint* ep, Smp::Bool immediate=false) override;
 
@@ -74,8 +74,10 @@ protected:
 
 
 private:
-    /** list of schedule */
-    std::map<Smp::Services::EventId, simdeck::smpext::IMetaScheduler::ISchedule*> _schedList;
+    /** schedule index by event id */
+    std::map<Smp::Services::EventId, simdeck::smpext::IMetaScheduler::ISchedule*> _schedIndex;
+    /** list of all created schedule */
+    std::vector<simdeck::smpext::IMetaScheduler::ISchedule*> _allSched;
     /** list of registered schedule listeners */
     std::vector<simdeck::smpext::IMetaScheduler::IScheduleListener*> _listeners;
     /** Current schedule (from last event id fetched as current from the scheduler on preEpExec()) */
@@ -97,11 +99,11 @@ private:
     inline void registerSchedule(simdeck::smpext::IMetaScheduler::ISchedule* s) {
         auto id=s->GetEventId();
         if (id!=-1) {
-            _schedList[id]=s;
+            _schedIndex[id]=s;
         }
     }
     inline void registerSchedule(Smp::Services::EventId eventId, simdeck::smpext::IMetaScheduler::ISchedule* s) {
-        _schedList[eventId]=s;
+        _schedIndex[eventId]=s;
     }
 };
 

@@ -337,7 +337,7 @@ public:
     void Submit() override {
         if (IsActive()) {
             // avoid this schedule to be store many times in the schedule list.
-            auto& sl=getMetaScheduler()->_schedList;
+            auto& sl=getMetaScheduler()->_schedIndex;
             auto it=sl.find(GetEventId());
             if (it!=sl.end()) {
                 sl.erase(it);
@@ -364,8 +364,8 @@ MetaScheduler::MetaScheduler(Smp::String8 name, Smp::String8 description,
 // ..........................................................
 
 MetaScheduler::~MetaScheduler() {
-    for (auto entry: _schedList) {
-        delete entry.second;
+    for (auto entry: _allSched) {
+        delete entry;
     }
     auto evMgr=getSimulator()->GetEventManager();
     if (evMgr!=nullptr) {
@@ -399,7 +399,8 @@ void MetaScheduler::epPreEpExec() {
         // the scheduler. 
         // S.Devaux: I fear SMP does not define anything to do so.
         _currentSchedule=new BaseSchedule(this,currentEventId);
-        _schedList[currentEventId]=_currentSchedule;
+        _allSched.push_back(_currentSchedule);
+        _schedIndex[currentEventId]=_currentSchedule;
     }
     for (auto l: _listeners) {
         l->NotifyExecBegin(_currentSchedule);
@@ -427,6 +428,7 @@ simdeck::smpext::IMetaScheduler::ISchedule* MetaScheduler::NewSchedule(Smp::IEnt
     else {
         s=new Schedule(this, ep);
     }
+    _allSched.push_back(s);
     return s;
 }
 
