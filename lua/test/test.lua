@@ -1,6 +1,12 @@
 -- TODO find why h5 recorder fails randomly on very few specific machine.
 -- thread safe issue ? Pointer init issue ?
 
+outputDir = os.getenv("TTARGETDIR")
+if outputDir == nil then
+    outputDir = "."
+end
+
+
 s=require "simphonie_lua"
 sim2=s.CreateSimulator({
     name="MySim2",
@@ -15,7 +21,7 @@ sim2=s.CreateSimulator({
         inc1Slave={type="simphonie::umdl::SmpIncrement"},
         inc2Slave={type="simphonie::umdl::SmpIncrement"},
 --        recorder={type="simphonie::colibry::FieldRecorderHDF5",
---            filePath="myRecSim2.h5"},
+--            filePath=outputDir.."/myRecSim2.h5"},
         slave={type="simphonie::mt::SimSyncSlave"},
     },
     connections={
@@ -54,13 +60,13 @@ sim=s.CreateSimulator({
             Expression="(> SmpIncrementEvent 10)"
         },
         recorderCsv={type="simphonie::colibry::FieldRecorderCsv",
-            filePath="myRec.csv"},
+            filePath=outputDir.."/myRec.csv"},
 --        recorderH5={type="simphonie::colibry::FieldRecorderHDF5",
---            filePath="myRec.h5"},
+--            filePath=outputDir.."/myRec.h5"},
         logger={type="simphonie::kern::Logger",
             Backends={
                 loggerFile={type="simphonie::kern::LoggerFile",
-                    filePath="myLogger.log"},
+                    filePath=outputDir.."/lua_test.log"},
                 loggerOStream={type="simphonie::kern::LoggerOStream"}
             }
         },
@@ -158,8 +164,8 @@ sim:GetEventManager():Emit(eventId, true)
 front:Run()
 front:WaitStandby(0)
 
-sim:Store("mySimu.cp")
--- sim:Restore("mySimu.cp")
+sim:Store(outputDir.."/mySimu.cp")
+-- sim:Restore(outputDir.."/mySimu.cp")
 
 sim.schedulerTracker.logStats:Execute()
 print("Nb. of Error logs: "..sim.logger.ErrorCounter.Value)
