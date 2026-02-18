@@ -336,6 +336,12 @@ public:
     }
     void Submit() override {
         if (IsActive()) {
+            // avoid this schedule to be store many times in the schedule list.
+            auto& sl=getMetaScheduler()->_schedList;
+            auto it=sl.find(GetEventId());
+            if (it!=sl.end()) {
+                sl.erase(it);
+            }
             // when active add immediate event.
             setEventId(getMetaScheduler()->_scheduler->AddImmediateEvent(getEntryPoint()));
             getMetaScheduler()->registerSchedule(GetEventId(),this);
@@ -356,6 +362,7 @@ MetaScheduler::MetaScheduler(Smp::String8 name, Smp::String8 description,
                                 this, &MetaScheduler::epPostEpExec);
 }
 // ..........................................................
+
 MetaScheduler::~MetaScheduler() {
     for (auto entry: _schedList) {
         delete entry.second;
@@ -403,10 +410,6 @@ void MetaScheduler::epPostEpExec() {
     if (_currentSchedule!=nullptr) {
         for (auto l: _listeners) {
             l->NotifyExecEnd(_currentSchedule);
-        }
-        if  (_currentSchedule->IsImmediate()) {
-            auto it=_schedList.find(_currentSchedule->GetEventId());
-            _schedList.erase(it);
         }
         _currentSchedule=nullptr;
     }
