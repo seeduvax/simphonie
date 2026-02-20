@@ -23,7 +23,7 @@ public:
     /**
      * Destructor.
      */
-    virtual ~AComposite() = default;
+    virtual ~AComposite();
 
     const Smp::ContainerCollection* GetContainers() const override;
     Smp::IContainer* GetContainer(Smp::String8 name) const override;

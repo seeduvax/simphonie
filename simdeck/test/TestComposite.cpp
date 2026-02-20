@@ -37,16 +37,16 @@ public:
 
     void testComposite() {
         SampleComposite composite("composite");
-        DummyComponent one("one","",&composite);
-        DummyComponent two("two","",&composite);
-        DummyComponent three("three","",&composite);
+        DummyComponent* one=new DummyComponent("one","",&composite);
+        DummyComponent* two=new DummyComponent("two","",&composite);
+        DummyComponent* three=new DummyComponent("three","",&composite);
         Container* ct1 = dynamic_cast<Container*>(composite.GetContainer("c1"));
         CPPUNIT_ASSERT(ct1 != NULL);
         Container* ct2 = dynamic_cast<Container*>(composite.GetContainer("c2"));
         CPPUNIT_ASSERT(ct2 != NULL);
-        ct1->AddComponent(&one);
-        ct1->AddComponent(&two);
-        ct2->AddComponent(&three);
+        ct1->AddComponent(one);
+        ct1->AddComponent(two);
+        ct2->AddComponent(three);
     }
 };
 

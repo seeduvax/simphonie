@@ -14,6 +14,14 @@ namespace simdeck {
 
 AComposite::AComposite() : _containers() {}
 
+AComposite::~AComposite() {
+    for (auto container: *(GetContainers())) {
+        for (auto component: *(container->GetComponents())) {
+            delete component;
+        }
+    }
+}
+
 Composite::Composite(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent) 
     : Object(name, descr, parent) {
 }
