@@ -36,18 +36,15 @@ private:
     };
 
     std::unique_ptr<Simulator> _sim;
-    std::unique_ptr<Logger> _ownedLogger;
     Logger* _logger;
 
 public:
 void setUp() {
     _sim.reset(new Simulator("simulator", "", nullptr));
-    _ownedLogger.reset(new Logger("logger", "", _sim.get()));
-    _logger = _ownedLogger.get();
+    _logger=new Logger("logger", "", _sim.get());
 }
 
 void tearDown() {
-    _ownedLogger.reset();
     _sim.reset();
 }
 
@@ -72,8 +69,7 @@ ABS_TEST_CASE_BEGIN(TestLoggerCounters) {
          {Smp::Services::ILogger::LMK_ErrorName, Smp::Services::ILogger::LMK_Error, 4}},
         {Smp::Services::ILogger::LMK_Debug,
          {Smp::Services::ILogger::LMK_DebugName, Smp::Services::ILogger::LMK_Debug, 5}}};
-
-    _sim->AddService(_ownedLogger.release());
+    _sim->AddService(_logger);
     _sim->Publish();
 
     _logger->GetEntryPoint("resetCounters")->Execute();
@@ -124,12 +120,12 @@ ABS_TEST_CASE_BEGIN(LoggerFileAndContent) {
     // remove file if exist to avoid side effects from one test run to another
     std::filesystem::remove(testLogFilePath);
 
-    std::unique_ptr<LoggerFile> loggerFile(new LoggerFile("loggerFile", "", _logger));
-    _logger->GetContainer("Backends")->AddComponent(loggerFile.get());
-    _sim->AddService(_ownedLogger.release());
+    LoggerFile* loggerFile(new LoggerFile("loggerFile", "", _logger));
+    _logger->GetContainer("Backends")->AddComponent(loggerFile);
+    _sim->AddService(_logger);
     _sim->Publish();
 
-    auto filepath = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveRelative("filePath", loggerFile.get()));
+    auto filepath = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveRelative("filePath", loggerFile));
     CPPUNIT_ASSERT(nullptr != filepath);
     {
         // check default name
@@ -169,15 +165,15 @@ ABS_TEST_CASE_BEGIN(TestLoggerAsync) {
     ABS_TEST_CASE_REQ(simph.log.cfg .5)
     ABS_TEST_CASE_REQ(simph.log.unsync .1)
 
-    std::unique_ptr<LoggerAsync> loggerAsync(new LoggerAsync("loggerAsync", "", _logger));
-    std::unique_ptr<LoggerOStream> loggerOStream(new LoggerOStream("loggerOStream", "", _logger));
-    _logger->GetContainer("Backends")->AddComponent(loggerAsync.get());
-    _logger->GetContainer("Backends")->AddComponent(loggerOStream.get());
-    _sim->AddService(_ownedLogger.release());
+    LoggerAsync* loggerAsync(new LoggerAsync("loggerAsync", "", _logger));
+    LoggerOStream* loggerOStream(new LoggerOStream("loggerOStream", "", _logger));
+    _logger->GetContainer("Backends")->AddComponent(loggerAsync);
+    _logger->GetContainer("Backends")->AddComponent(loggerOStream);
+    _sim->AddService(_logger);
     _sim->Publish();
     _sim->Configure();
 
-    auto bufferSize = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveRelative("bufferSize", loggerAsync.get()));
+    auto bufferSize = dynamic_cast<Smp::ISimpleField*>(_sim->GetResolver()->ResolveRelative("bufferSize", loggerAsync));
     CPPUNIT_ASSERT(nullptr != bufferSize);
 
     const auto threadId = std::this_thread::get_id();

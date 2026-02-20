@@ -78,7 +78,7 @@ public:
         simphonie::kern::Simulator simu("simu", "Resovler owner", nullptr);
         auto mdl1 = new Model("to1", "test obj 1", &simu);
         simu.AddModel(mdl1);
-        std::unique_ptr<Model> mdl2(new Model("to2", "test obj 2", mdl1));
+        auto mdl2=new Model("to2", "test obj 2", mdl1);
         Smp::Int32 iArray[] = {12, 17, 42};
         mdl2->_i3DVect = iArray;
 
@@ -94,13 +94,13 @@ public:
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveAbsolute("plop"));
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)mdl1, resolver.ResolveAbsolute("to1"));
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveAbsolute("to2"));
-        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)mdl2.get(), resolver.ResolveAbsolute("to1/to2"));
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)mdl2, resolver.ResolveAbsolute("to1/to2"));
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)mdl1, resolver.ResolveAbsolute("to1/to2/.."));
-        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)mdl2.get(), resolver.ResolveAbsolute("to1/../to1/to2"));
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)mdl2, resolver.ResolveAbsolute("to1/../to1/to2"));
         CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveAbsolute("to1/to2/..."));
 
-        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveRelative("to1", mdl2.get()));
-        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)mdl2.get(), resolver.ResolveRelative("to2", mdl1));
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)nullptr, resolver.ResolveRelative("to1", mdl2));
+        CPPUNIT_ASSERT_EQUAL((Smp::IObject*)mdl2, resolver.ResolveRelative("to2", mdl1));
         auto arrField = resolver.ResolveAbsolute("to1.to2.iArray");
 
         CPPUNIT_ASSERT(dynamic_cast<Smp::ISimpleArrayField*>(arrField) != nullptr);

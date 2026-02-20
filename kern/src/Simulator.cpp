@@ -81,6 +81,7 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
     setState(Smp::SimulatorStateKind::SSK_Building);
 }
 // ..........................................................
+
 Simulator::~Simulator() {
     for (auto pub : _publications) {
         // TODO consider delete the publication earlier in the simulator
@@ -88,12 +89,8 @@ Simulator::~Simulator() {
         // simulator building phase.
         delete pub;
     }
-    for (auto model : *(_models->GetComponents())) {
-        delete model;
-    }
-    for (auto service : *(_services->GetComponents())) {
-        delete service;
-    }
+    // No need to delete services and models, this is achieved through
+    // simdeck::AComposite inheritance
     for (auto lib : _libs) {
         auto finalizeFunc = lib->getEntry<bool (*)()>("Finalise");
         if (finalizeFunc != nullptr) {

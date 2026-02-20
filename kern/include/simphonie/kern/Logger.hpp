@@ -27,6 +27,7 @@
 
 namespace simphonie {
 namespace kern {
+class LoggerOStream;
 
 class Logger : public Component,
                virtual public Smp::Services::ILogger,
@@ -58,7 +59,7 @@ private:
     static Smp::Int32 _logCounter;
     static std::mutex _countersMutex;
     std::mutex _logMutex;
-    std::unique_ptr<Component> _defaultLogger;
+    LoggerOStream* _defaultBackend;
     std::vector<ILoggerBackend*> _backends;
 
     void resetCounters();
