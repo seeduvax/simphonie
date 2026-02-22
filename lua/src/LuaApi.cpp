@@ -205,14 +205,43 @@ void fieldSetValue(Smp::IField* field, sol::object value) {
     }
 }
 
+
+class LibRegistry {
+public:
+    LibRegistry() {
+    }
+    virtual ~LibRegistry() {
+        for(auto it: _reg) {
+            delete it.second;
+        }
+    }
+    simphonie::sys::DLib* get(const char* libSpec) {
+        auto it=_reg.find(libSpec);
+        if (it!=_reg.end()) {
+            return it->second;
+        }
+        else {
+            auto l=new simphonie::sys::DLib(libSpec);
+            _reg[libSpec]=l;
+            return l;
+        }
+    }
+
+private:
+    std::map<std::string, simphonie::sys::DLib*> _reg;
+};
+static LibRegistry _simLibRegistry;
+
+
+
+
 sol::object CreateSimulator(sol::lua_table cfg, sol::this_state L) {
     // charger symbol CreateSimulator
     std::string libName = cfg["lib"];
     std::string simName = cfg.get_or<std::string>("name", "simulator");
     std::string descr = cfg.get_or<std::string>("description", "");
     try {
-        // TODO do something to delete this DLib at least on shutdown.
-        auto simLib=new simphonie::sys::DLib(libName.c_str());
+        auto simLib=_simLibRegistry.get(libName.c_str());
         auto createSim =
             simLib->getEntry<Smp::ISimulator* (*)(Smp::String8 name, Smp::String8 description, Smp::IObject * parent)>(
                 "CreateSimulator");
