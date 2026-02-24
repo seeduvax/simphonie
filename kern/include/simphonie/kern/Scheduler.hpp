@@ -158,6 +158,7 @@ private:
     Smp::Services::IEventManager* _eventMgr;
     Smp::Services::EventId _preEventExecuteId;
     Smp::Services::EventId _postEventExecuteId;
+    Smp::Duration _simulationTime=0;
     bool _run=false;
     bool _autoStop=true;
     mutable std::mutex _mutex; /* mutable keryword use to be able to modify the mutex from const functions too */

@@ -36,7 +36,7 @@ Scheduler::Schedule::Schedule(Scheduler* scheduler, const Smp::IEntryPoint* ep, 
       _period(period),
       _repeat(repeat),
       _id(-1),
-      _completed(false) { 
+      _completed(false) {
 }
 
 void Scheduler::Schedule::setTime(Smp::Duration absoluteSimTime) {
@@ -62,7 +62,7 @@ void Scheduler::Schedule::run() {
         }
         if ( !_completed && _period > 0 ) {
             setTime(
-                _period == -1 || _period >= (DURATION_MAX - _absoluteSimTime) 
+                _period == -1 || _period >= (DURATION_MAX - _absoluteSimTime)
                 ? -1 // won't repeat anymore, not enough simulation time left
                 : _absoluteSimTime + _period);
         }
@@ -93,7 +93,7 @@ Scheduler::Scheduler(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
       _currentSchedule(nullptr),
       _scheduled() {
     _epEnterExecuting=EntryPoint::Create("enterExecuting",
-                                "simulation enter execute event entry point", 
+                                "simulation enter execute event entry point",
                                 this, &Scheduler::epEnterExecuting);
     _epLeaveExecuting=EntryPoint::Create("leaveExecuting",
                                 "simulation leave execute event entry point",
@@ -114,15 +114,14 @@ Scheduler::~Scheduler() {
 // ..........................................................
 Smp::Duration Scheduler::getAbsoluteTime(Smp::Duration relativeTime) {
     if (relativeTime!=-1) {
-        auto ctime = _timeKeeper->GetSimulationTime();
-        auto maxTime = DURATION_MAX - ctime;
+        auto maxTime = DURATION_MAX - _simulationTime;
         if ( relativeTime >= maxTime ) {
-            throw ExInvalidSimulationTime(this, ctime,
+            throw ExInvalidSimulationTime(this, _simulationTime,
                     relativeTime,
                     maxTime);
         }
         else {
-            return ctime + relativeTime;
+            return _simulationTime + relativeTime;
         }
     }
     return -1;
@@ -312,7 +311,7 @@ inline Smp::Duration Scheduler::getNextScheduledEventTime() const {
                 // when next event is immediate event, the simulation
                 // time is unchanged then next event simulation time is
                 // the current time from the time keeper.
-                _timeKeeper->GetSimulationTime();
+                _simulationTime;
     }
     return -1;
 }
@@ -348,7 +347,7 @@ void Scheduler::step() {
             // wait state exited because stop was requested
             return;
         }
-        completed=getNextScheduledEventTime() == -1 
+        completed=getNextScheduledEventTime() == -1
                 || getNextScheduledEventTime()==DURATION_MAX;
     }
     if (_autoStop && completed) {
@@ -361,7 +360,8 @@ void Scheduler::step() {
         // after event emit, timekeeper should have updated current time,
         // run next event only if its scheduled time is not ahead the new
         // current simulation time.
-        if (_run && getNextScheduledEventTime() <= _timeKeeper->GetSimulationTime() 
+        _simulationTime=_timeKeeper->GetSimulationTime();
+        if (_run && getNextScheduledEventTime() <= _simulationTime
                  && getNextScheduledEventTime()!=-1) {
             _currentSchedule = *_scheduled.begin();
             _scheduled.erase(_scheduled.begin());
@@ -371,6 +371,8 @@ void Scheduler::step() {
     if (toRun != nullptr) {
         toRun->run();
         _eventMgr->Emit(_postEventExecuteId);
+        // simulation time may have changed reacting to post event execute.
+        _simulationTime=_timeKeeper->GetSimulationTime();
         Synchronized(_mutex);
         if (toRun != _currentSchedule) {
             logWarning(
@@ -391,6 +393,7 @@ void Scheduler::step() {
 // ..........................................................
 void Scheduler::run() {
     _run = true;
+    _simulationTime=_timeKeeper->GetSimulationTime();
     while (_run) {
         step();
     }
