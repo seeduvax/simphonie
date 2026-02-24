@@ -204,53 +204,40 @@ void fieldSetValue(Smp::IField* field, sol::object value) {
         }
     }
 }
+/*
+ * Simulation kernel library  registry.
+ * Tracks from which lib is loaded each kernel instance to be able to delete it
+ * (close it) when a kernel instance is disposed.
+ */
+static std::map<Smp::ISimulator*, simphonie::sys::DLib*> _simLibRegistry;
 
-
-class LibRegistry {
-public:
-    LibRegistry() {
-    }
-    virtual ~LibRegistry() {
-        for(auto it: _reg) {
-            delete it.second;
-        }
-    }
-    simphonie::sys::DLib* get(const char* libSpec) {
-        auto it=_reg.find(libSpec);
-        if (it!=_reg.end()) {
-            return it->second;
-        }
-        else {
-            auto l=new simphonie::sys::DLib(libSpec);
-            _reg[libSpec]=l;
-            return l;
-        }
-    }
-
-private:
-    std::map<std::string, simphonie::sys::DLib*> _reg;
-};
-static LibRegistry _simLibRegistry;
-
-
-
-
+/**
+ * Create a simulator instance.
+ * @param cfg lua table holding the configuration of the simulator to be
+ *        created.
+ * @param L calling lua state
+ * @return the created simulator as lua object.
+ */
 sol::object CreateSimulator(sol::lua_table cfg, sol::this_state L) {
     // charger symbol CreateSimulator
     std::string libName = cfg["lib"];
     std::string simName = cfg.get_or<std::string>("name", "simulator");
     std::string descr = cfg.get_or<std::string>("description", "");
     try {
-        auto simLib=_simLibRegistry.get(libName.c_str());
+        auto simLib=new simphonie::sys::DLib(libName.c_str());
         auto createSim =
             simLib->getEntry<Smp::ISimulator* (*)(Smp::String8 name, Smp::String8 description, Smp::IObject * parent)>(
                 "CreateSimulator");
         if (createSim != nullptr) {
             Smp::ISimulator* sim = createSim(simName.c_str(), descr.c_str(), nullptr);
+            _simLibRegistry[sim]=simLib;
             auto b = new simphonie::lua::LuaBuilder("LuaBuilder", "Simulation builder from lua script", sim);
             sim->AddService(b);
             b->setConfiguration(cfg);
             return sol::object(L, sol::in_place, sim);
+        }
+        else {
+            delete simLib;
         }
     }
     catch (std::runtime_error& ex) {
@@ -258,6 +245,14 @@ sol::object CreateSimulator(sol::lua_table cfg, sol::this_state L) {
     }
     return sol::nil;
 }
+
+/**
+ * Wrap a simulator into a new simulator front.
+ * @param sim simulator to wrap.
+ * @param L calling lua state.
+ * @return new front wrapping the simulator. nil in case the given simulator is
+ *         itself nullptr.
+ */
 sol::object CreateFront(Smp::ISimulator* sim, sol::this_state L) {
     if (sim!=nullptr) {
         return sol::object(L, sol::in_place, new simdeck::front::SimFront(sim));
@@ -275,8 +270,12 @@ int luaopen_libsimph_lua(lua_State* L) {
     t["Uuid"] = [](std::string c) { return Smp::Uuid(c.c_str()); };
     t["GenerateUuid"] = [](std::string c) { return simdeck::Utils::GenerateUuid(c.c_str()); };
     t["CreateSimulator"] = [](sol::lua_table cfg, sol::this_state LS) { return CreateSimulator(cfg, LS); };
-    t["DisposeSimulator"] = [](Smp::ISimulator* sim) { 
+    t["DisposeSimulator"] = [](Smp::ISimulator* sim) {
+            auto it=_simLibRegistry.find(sim);
             delete sim;
+            if (it!=_simLibRegistry.end()) {
+                delete it->second;
+            }
          };
     t["CreateFront"] = [](Smp::ISimulator* sim, sol::this_state LS) { return CreateFront(sim, LS); };
     t["DisposeFront"] = [](simdeck::front::SimFront* front) { delete front; };
@@ -286,22 +285,22 @@ int luaopen_libsimph_lua(lua_State* L) {
     nsSmp.new_usertype<Smp::IObject>( "IObject",
         "Name", sol::property(&Smp::IObject::GetName),
         "Description", sol::property(&Smp::IObject::GetDescription),
-        "Parent", sol::property([](Smp::IObject* o,sol::this_state L) { 
+        "Parent", sol::property([](Smp::IObject* o,sol::this_state L) {
                 return solCastObject(o->GetParent(),L);
         }),
-        "RawPtr", sol::property([](Smp::IObject* o,sol::this_state L) { 
+        "RawPtr", sol::property([](Smp::IObject* o,sol::this_state L) {
                 return uint64_t(o);
         }),
         "Type", sol::property([](Smp::IObject* o) { return simdeck::Utils::Demangle(typeid(*o).name()); }),
-        sol::meta_function::index, &objectIndex 
+        sol::meta_function::index, &objectIndex
     );
-    nsSmp.new_usertype<Smp::IEntryPoint>("IEntryPoint", 
+    nsSmp.new_usertype<Smp::IEntryPoint>("IEntryPoint",
         "Execute", [](Smp::IEntryPoint* th) {
             th->Execute();
         },
         sol::base_classes, sol::bases<Smp::IObject>()
     );
-    nsSmp.new_usertype<Smp::IComponent>("IComponent", 
+    nsSmp.new_usertype<Smp::IComponent>("IComponent",
         sol::meta_function::index, &objectIndex,
         "State", sol::property(&Smp::IComponent::GetState),
         "GetField", &Smp::IComponent::GetField,
@@ -337,12 +336,12 @@ int luaopen_libsimph_lua(lua_State* L) {
             }
             return cl;
         },
-        "CreateChild", &componentCreateChild, 
+        "CreateChild", &componentCreateChild,
         sol::base_classes, sol::bases<Smp::IObject>()
     );
     nsSmp.new_usertype<Smp::IField>("IField",
         sol::meta_function::index, &objectIndex,
-        "Value", sol::property(&fieldGetValue, &fieldSetValue), 
+        "Value", sol::property(&fieldGetValue, &fieldSetValue),
         sol::base_classes, sol::bases<Smp::IObject>()
     );
     nsSmp.new_usertype<Smp::IOutputField>("IOutputField",
@@ -418,7 +417,7 @@ int luaopen_libsimph_lua(lua_State* L) {
         "QueryEventId", &Smp::Services::IEventManager::QueryEventId,
         sol::base_classes, sol::bases<Smp::IObject, Smp::IComponent>()
     );
-    nsSmp.new_usertype<simphonie::lua::LuaModel>("LuaModel", 
+    nsSmp.new_usertype<simphonie::lua::LuaModel>("LuaModel",
         sol::meta_function::new_index, &simphonie::lua::LuaModel::setValue,
         sol::meta_function::index, &simphonie::lua::LuaModel::getValue,
         "AddEntryPoint", &simphonie::lua::LuaModel::addEntryPoint,
