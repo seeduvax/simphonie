@@ -12,6 +12,7 @@
 
 #include "Smp/ISimulator.h"
 #include "Smp/Services/ITimeKeeper.h"
+#include "simdeck/Utils.hpp"
 
 namespace simdeck {
 namespace front {
@@ -55,6 +56,15 @@ public:
     }
     inline void Hold(Smp::Bool immediate=false) {
         _sim->Hold(immediate);
+    }
+    /**
+     * Print on console the simulator structure.
+     * Print the tree of components found in the simulator.
+     * @param o tree root: objet from which dumm the tree, default is nullptr
+     *   meaning dump all from the wrapped simulator itself.
+     */
+    inline void Dump(Smp::IObject* o=nullptr) {
+        simdeck::Utils::Dump(o==nullptr?_sim:o, 0, _sim);
     }
     /**
      * Wait for the simulator reaches a specific state.
