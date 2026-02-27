@@ -16,6 +16,7 @@
 #include <cxxabi.h>
 #include "Smp/Uuid.h"
 #include "Smp/ISimulator.h"
+#include "simdeck/Collection.hpp"
 
 #define UTILS_MD5_DIGEST_LENGTH 16
 
@@ -44,6 +45,7 @@ struct Utils {
 
     static std::string GetFullName(const Smp::IObject* o);
     static void Dump(const Smp::IObject* from, int level=0, const Smp::ISimulator* sim=nullptr);
+    static const Collection<Smp::IObject> GetChildren(const Smp::IObject* from);
 };
 
 }  // namespace simdeck

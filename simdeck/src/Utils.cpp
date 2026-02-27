@@ -14,7 +14,8 @@
 #include "simdeck/MD5.hpp"
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/IComposite.h"
-#include "Smp/ISimpleArrayField.h"
+#include "Smp/IArrayField.h"
+#include "Smp/IStructureField.h"
 #include "Smp/IOutputField.h"
 #include "Smp/IModel.h"
 #include "Smp/IService.h"
@@ -63,6 +64,7 @@ void Utils::Dump(const Smp::IObject* from, int level, const Smp::ISimulator* sim
     for (int i=0; i<level; i++) {
         std::cout << "    ";
     }
+    int l=level+1;
     std::cout << from->GetName() << " ";
     if (dynamic_cast<const Smp::IService*>(from)!=nullptr) {
         std::cout << "[Service]";
@@ -83,7 +85,7 @@ void Utils::Dump(const Smp::IObject* from, int level, const Smp::ISimulator* sim
         if (t != nullptr) {
             std::cout << ":" << f->GetType()->GetPrimitiveTypeKind();
         }
-        auto af = dynamic_cast<const Smp::ISimpleArrayField*>(from);
+        auto af = dynamic_cast<const Smp::IArrayField*>(from);
         if (af != nullptr) {
             std::cout << "[" << af->GetSize() << "]";
         }
@@ -98,6 +100,12 @@ void Utils::Dump(const Smp::IObject* from, int level, const Smp::ISimulator* sim
                 std::cout << "    -> " << GetFullName(in);
             }
         }
+        auto sf=dynamic_cast<const Smp::IStructureField*>(from);
+        if (sf!=nullptr) {
+            for (auto f: *(sf->GetFields())) {
+                Dump(f,l,sim);
+            } 
+        }
     }
     if (dynamic_cast<const Smp::ISimulator*>(from)!=nullptr) {
         std::cout << "[Simulator]";
@@ -111,7 +119,6 @@ void Utils::Dump(const Smp::IObject* from, int level, const Smp::ISimulator* sim
     if (dynamic_cast<const Smp::IEntryPoint*>(from)!=nullptr) {
         std::cout << "[EntryPoint]";
     }
-    int l=level+1;
     std::cout << std::endl;
     auto ctnr=dynamic_cast<const Smp::IContainer*>(from);
     if (ctnr!=nullptr) {
@@ -149,6 +156,49 @@ void Utils::Dump(const Smp::IObject* from, int level, const Smp::ISimulator* sim
             Dump(f,l,sim);
         } 
     }
+}
+// ..........................................................
+const Collection<Smp::IObject> Utils::GetChildren(const Smp::IObject* from) {
+    Collection<Smp::IObject> children;
+    auto af = dynamic_cast<const Smp::IArrayField*>(from);
+    if (af != nullptr) {
+        for (Smp::UInt64 i=0; i<af->GetSize(); i++) {
+            children.push_back(af->GetItem(i));
+        }
+    }
+    auto ctnr=dynamic_cast<const Smp::IContainer*>(from);
+    if (ctnr!=nullptr) {
+        for (auto cp: *(ctnr->GetComponents())) {
+            children.push_back(cp);
+        }
+    }
+    auto cpst=dynamic_cast<const Smp::IComposite*>(from);
+    if (cpst!=nullptr) {
+        for (auto ct: *(cpst->GetContainers())) {
+            for (auto cp: *(ct->GetComponents())) {
+                children.push_back(cp);
+            }
+        }
+    }
+    auto epp=dynamic_cast<const Smp::IEntryPointPublisher*>(from);
+    if (epp!=nullptr) {
+        for (auto ep: *(epp->GetEntryPoints())) {
+            children.push_back(ep);
+        } 
+    }   
+    auto c=dynamic_cast<const Smp::IComponent*>(from);
+    if (c!=nullptr) {
+        for (auto f: *(c->GetFields())) {
+            children.push_back(f);
+        } 
+    }
+    auto sf=dynamic_cast<const Smp::IStructureField*>(from);
+    if (sf!=nullptr) {
+        for (auto f: *(sf->GetFields())) {
+            children.push_back(f);
+        } 
+    }
+    return children;
 }
 
 }  // namespace simdeck
