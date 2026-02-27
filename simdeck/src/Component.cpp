@@ -56,6 +56,9 @@ Component::Component(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
 }
 // ..........................................................
 Component::~Component() {
+    if (_state == Smp::ComponentStateKind::CSK_Connected) {
+        Disconnect();
+    }
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -113,11 +116,11 @@ void Component::Disconnect() {
     if (_state != Smp::ComponentStateKind::CSK_Connected) {
         throw ExInvalidComponentState(this, _state, Smp::ComponentStateKind::CSK_Connected);
     }
+    disconnect();
     _simulator = nullptr;
     _logger = nullptr;
     _linkRegistry->RemoveLinks(this);
     _linkRegistry = nullptr;
-    disconnect();
 }
 // ..........................................................
 Smp::IField* Component::GetField(Smp::String8 fullName) const {
@@ -140,7 +143,6 @@ Smp::AnySimple Component::GetSimpleValue(Smp::String8 fullName) const {
     if (f!=nullptr) {
         return f->GetValue();
     }
-    // TODO throw InvalidFieldName when found field is not a Simple field.
     throw ExInvalidFieldName(this,fullName);
 }
 // ..........................................................
