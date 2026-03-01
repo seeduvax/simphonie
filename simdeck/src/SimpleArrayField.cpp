@@ -146,8 +146,10 @@ public:
     }
     void Push() override {
         for (auto target: _targets) {
-            for (Smp::UInt64 i=0;i<this->GetSize();i++) {
-                dynamic_cast<Smp::ISimpleArrayField*>(target)->SetValue(i,this->GetValue(i));
+            auto t=dynamic_cast<Smp::ISimpleArrayField*>(target);
+            auto max=this->GetSize()<t->GetSize()?this->GetSize():t->GetSize();
+            for (Smp::UInt64 i=0;i<max;i++) {
+                t->SetValue(i,this->GetValue(i));
             }
         }
     }

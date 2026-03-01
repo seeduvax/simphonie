@@ -18,7 +18,6 @@
 <link name="child">4fb0d80a195d61c0585b158c1b55c9aaa7ee33f2c6b9b23f6c5eff9788f5c402</link>
 <link name="child">29208c9feb91b3e3091094562d951e36112572e1c542d5b22be0c56a17e7df73</link>
 <link name="child">c7d5c2844e4469080c1fc1ad0ef92657ab012f9da241496704cf17c8c101a185</link>
-<link name="child"></link>
 </links>
 <cf v="Sebastien Devaux 2026-02-27T13:20:05+01:00"/>
 </cr>
