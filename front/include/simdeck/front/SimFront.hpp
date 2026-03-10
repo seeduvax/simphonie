@@ -12,6 +12,8 @@
 
 #include "Smp/ISimulator.h"
 #include "Smp/Services/ITimeKeeper.h"
+#include "Smp/Services/IResolver.h"
+#include "Smp/IModel.h"
 #include "simdeck/Utils.hpp"
 
 namespace simdeck {
@@ -93,8 +95,53 @@ public:
         SetEndSimulationTime(_sim->GetTimeKeeper()->GetSimulationTime()+duration);
     }
 
+    /**
+     * Get the currently applied end simulation time.
+     * @return end simulation time value.
+     */
     inline Smp::Duration GetEndSimulationTime() const {
         return _endSimulationTime;
+    }
+
+    /**
+     * Get a model by name.
+     * @param fullName searched model's full name.
+     * @return found model, nullptr if none. 
+     */
+    inline Smp::IModel* GetModel(Smp::String8 fullName) {
+        return dynamic_cast<Smp::IModel*>(
+            _sim->GetResolver()->ResolveAbsolute(fullName));
+    }
+
+    /**
+     * Get the simulator's top level services component collection.
+     * @return list of services as component collection
+     */
+    inline const Smp::ComponentCollection* GetServices() {
+        return _sim->GetContainer(Smp::ISimulator::SMP_SimulatorServices)->GetComponents();
+    } 
+
+    /**
+     * Get the simulator's top level models component collection.
+     * @return list of models as component collection
+     */
+    inline const Smp::ComponentCollection* GetModels() {
+        return _sim->GetContainer(Smp::ISimulator::SMP_SimulatorModels)->GetComponents();
+    } 
+
+    /**
+     * Find a service by type.
+     * @return 1st service matching the type, nullptr if none.
+     */
+    template <typename T> 
+    T* GetService() {
+        for (auto svc: *(_sim->GetContainer(Smp::ISimulator::SMP_SimulatorServices)->GetComponents())) {
+            auto found=dynamic_cast<T*>(svc);
+            if (found!=nullptr) {
+                return found;
+            }
+        }
+        return nullptr;
     }
 
 private:
