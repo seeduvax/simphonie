@@ -119,8 +119,10 @@ void Component::Disconnect() {
     disconnect();
     _simulator = nullptr;
     _logger = nullptr;
-    _linkRegistry->RemoveLinks(this);
-    _linkRegistry = nullptr;
+    if (_linkRegistry!=nullptr) {
+        _linkRegistry->RemoveLinks(this);
+        _linkRegistry = nullptr;
+    }
 }
 // ..........................................................
 Smp::IField* Component::GetField(Smp::String8 fullName) const {
