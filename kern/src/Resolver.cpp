@@ -21,6 +21,7 @@
 #include "simphonie/kern/Publication.hpp"
 #include "simphonie/sys/Callback.hpp"
 #include "simphonie/sys/Logger.hpp"
+#include "simdeck/Utils.hpp"
 
 namespace simphonie {
 namespace kern {
@@ -40,7 +41,7 @@ Resolver::~Resolver() {
 // ..........................................................
 void Resolver::connect() {
     _root=getSimulator();
-    _linkeRegistry = getSimulator()->GetLinkRegistry();
+    _linkRegistry = getSimulator()->GetLinkRegistry();
 }
 // --------------------------------------------------------------------
 // ..........................................................
@@ -63,94 +64,7 @@ std::string Resolver::getFullName(Smp::IObject* o) const {
 }
 // ..........................................................
 void Resolver::dump() const {
-    dumpObj(_root);
-}
-// ..........................................................
-void Resolver::dumpObj(const Smp::IObject* from, int level) const {
-    for (int i=0; i<level; i++) {
-        std::cout << "    ";
-    }
-    std::cout << from->GetName() << " ";
-    if (dynamic_cast<const Smp::IService*>(from)!=nullptr) {
-        std::cout << "[Service]";
-    }   
-    if (dynamic_cast<const Smp::IModel*>(from)!=nullptr) {
-        std::cout << "[Model]";
-    }   
-    if (dynamic_cast<const Smp::IField*>(from)!=nullptr) {
-        auto f=dynamic_cast<const Smp::IField*>(from);
-        std::cout << " [Field";
-        if (f->IsInput()) {
-            std::cout << ":in";
-        }
-        if (f->IsOutput()) {
-            std::cout << ":out";
-        }
-        auto t = f->GetType();
-        if (t != nullptr) {
-            std::cout << ":" << f->GetType()->GetPrimitiveTypeKind();
-        }
-        auto af = dynamic_cast<const Smp::ISimpleArrayField*>(from);
-        if (af != nullptr) {
-            std::cout << "[" << af->GetSize() << "]";
-        }
-        std::cout << "]";
-        auto of=dynamic_cast<const Smp::IOutputField*>(f);
-        if (of!=nullptr) {
-            for (auto in: *(of->GetInputFields())) {
-                std::cout << std::endl;
-                for (int i=0; i<level; i++) {
-                    std::cout << "    ";
-                }
-                std::cout << "    -> " << getFullName(in);
-            }
-        }
-    }
-    if (dynamic_cast<const Smp::ISimulator*>(from)!=nullptr) {
-        std::cout << "[Simulator]";
-    }
-    if (dynamic_cast<const Smp::IContainer*>(from)!=nullptr) {
-        std::cout << "[Container]";
-    }
-    if (dynamic_cast<const Smp::IComposite*>(from)!=nullptr) {
-        std::cout << "[Composite]";
-    }
-    if (dynamic_cast<const Smp::IEntryPoint*>(from)!=nullptr) {
-        std::cout << "[EntryPoint]";
-    }
-    int l=level+1;
-    std::cout << std::endl;
-    auto ctnr=dynamic_cast<const Smp::IContainer*>(from);
-    if (ctnr!=nullptr) {
-        for (auto cp: *(ctnr->GetComponents())) {
-            dumpObj(cp,l);
-        }
-    }
-    auto cpst=dynamic_cast<const Smp::IComposite*>(from);
-    if (cpst!=nullptr) {
-        for (auto ct: *(cpst->GetContainers())) {
-            dumpObj(ct,l);
-        }
-    }
-    auto epp=dynamic_cast<const Smp::IEntryPointPublisher*>(from);
-    if (epp!=nullptr) {
-        for (auto ep: *(epp->GetEntryPoints())) {
-            dumpObj(ep,l);
-        } 
-    }   
-    auto c=dynamic_cast<const Smp::IComponent*>(from);
-    if (c!=nullptr) {
-        for (auto source : *(_linkeRegistry->GetLinkSources(c))) {
-            for (int i = 0; i < level; i++) {
-                std::cout << "    ";
-            }
-            std::cout << "    <-[" << _linkeRegistry->GetLinkCount(source, c) << "]- " << getFullName(source)
-                      << std::endl;
-        }
-        for (auto f: *(c->GetFields())) {
-            dumpObj(f,l);
-        } 
-    }
+    simdeck::Utils::Dump(_root, 0, dynamic_cast<const Smp::ISimulator*>(_root));
 }
 
 }  // namespace kern

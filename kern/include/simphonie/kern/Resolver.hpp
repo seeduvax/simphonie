@@ -51,8 +51,7 @@ protected:
 
 private:
     Smp::IObject* _root;
-    Smp::Services::ILinkRegistry* _linkeRegistry;
-    void dumpObj(const Smp::IObject* from, int level = 0) const;
+    Smp::Services::ILinkRegistry* _linkRegistry;
     std::string getFullName(Smp::IObject* o) const;
 };
 

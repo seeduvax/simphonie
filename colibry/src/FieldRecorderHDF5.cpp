@@ -111,7 +111,11 @@ void FieldRecorderHDF5::addField(const char* name, Smp::IField* field) {
 }
 
 void FieldRecorderHDF5::flush() {
-    _file.flush(H5F_SCOPE_GLOBAL);
+    if (_fields.size()>0) {
+        // when no fields configured, nothing to flush. init() probably not
+        // yet called and _file is even not set.
+        _file.flush(H5F_SCOPE_GLOBAL);
+    }
 }
 
 void FieldRecorderHDF5::init() {

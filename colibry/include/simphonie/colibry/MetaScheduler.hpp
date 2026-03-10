@@ -60,6 +60,10 @@ protected:
      *     point execution events emitted by the scheduler.
      */     
     void connect() override;
+    /**
+     * in disconnect, unsubscribe. to all events 
+     */     
+    void disconnect() override;
 
     /** 
      * Action to be done before a scheduled entry point execution begins. 

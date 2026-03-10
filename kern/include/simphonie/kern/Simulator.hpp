@@ -91,6 +91,7 @@ private:
     void doPublish(Smp::IComponent* comp);
     void doConfigure(Smp::IComponent* comp);
     void doConnect(Smp::IComponent* comp);
+    void doDisconnect(Smp::IComponent* comp);
     void setState(Smp::SimulatorStateKind newState);
     bool checkState(Smp::String8 opName, Smp::SimulatorStateKind expState);
     /**

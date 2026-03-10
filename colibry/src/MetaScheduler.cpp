@@ -367,19 +367,6 @@ MetaScheduler::~MetaScheduler() {
     for (auto entry: _allSched) {
         delete entry;
     }
-/*
- * TODO How-to know this meta scheduler is deleted by the simulator being itself
- * destroyed (and shall already no longer be referred nor used for anything) or
- * if it is deleted for any other reasons and the unsubscribe from events shall
- * be done?
- * TODO May be this is the purpose of the Disconnect() call that is currently
- * not really used by simphonie.
-    auto evMgr=getSimulator()->GetEventManager();
-    if (evMgr!=nullptr) {
-        evMgr->Unsubscribe(evMgr->QueryEventId(EV_NAME_PRE_EVENT_EXECUTE),_epPreEpExec);
-        evMgr->Unsubscribe(evMgr->QueryEventId(EV_NAME_POST_EVENT_EXECUTE),_epPostEpExec);
-    }
- */ 
     delete _epPreEpExec;
     delete _epPostEpExec;
 }
@@ -393,6 +380,14 @@ void MetaScheduler::connect() {
     evMgr->Subscribe(evMgr->QueryEventId(EV_NAME_PRE_EVENT_EXECUTE),_epPreEpExec);
     evMgr->Subscribe(evMgr->QueryEventId(EV_NAME_POST_EVENT_EXECUTE),_epPostEpExec);
 
+}
+// ..........................................................
+void MetaScheduler::disconnect() {
+    auto evMgr=getSimulator()->GetEventManager();
+    if (evMgr!=nullptr) {
+        evMgr->Unsubscribe(evMgr->QueryEventId(EV_NAME_PRE_EVENT_EXECUTE),_epPreEpExec);
+        evMgr->Unsubscribe(evMgr->QueryEventId(EV_NAME_POST_EVENT_EXECUTE),_epPostEpExec);
+    }
 }
 // ..........................................................
 void MetaScheduler::epPreEpExec() {

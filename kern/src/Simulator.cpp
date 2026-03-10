@@ -28,6 +28,7 @@
 #include "simphonie/kern/TypeRegistry.hpp"
 #include "simphonie/kern/UnitRegistry.hpp"
 #include "simphonie/sys/Synchro.hpp"
+#include "simdeck/Utils.hpp"
 
 #define SMPLOGEV(msg) _logger->Log(this, msg, Smp::Services::ILogger::LMK_Event);
 #define SMPLOGD(msg) _logger->Log(this, msg, Smp::Services::ILogger::LMK_Debug);
@@ -83,6 +84,17 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
 // ..........................................................
 
 Simulator::~Simulator() {
+    if (_state == Smp::SimulatorStateKind::SSK_Standby) {
+        try {
+            Exit();
+        }
+        catch (Smp::Exception& ex) {
+            Abort();
+        }
+    }
+    else {
+        Abort();
+    }
     for (auto pub : _publications) {
         // TODO consider delete the publication earlier in the simulator
         // life cycle since publication should not be used further the 
@@ -390,18 +402,46 @@ void Simulator::Reconnect(Smp::IComponent* root) {
     }
 }
 // ..........................................................
+void Simulator::doDisconnect(Smp::IComponent* comp) {
+    if (comp->GetState() == Smp::ComponentStateKind::CSK_Connected) {
+        std::ostringstream msg;
+        msg <<"Disconnecting component : " << simdeck::Utils::GetFullName(comp);
+        SMPLOGI(msg.str().c_str());
+        comp->Disconnect();
+        // forward connect to children if component is a composite.
+        auto composite=dynamic_cast<Smp::IComposite*>(comp);
+        if (composite!=nullptr) {
+            for (auto container: *(composite->GetContainers())) {
+                for (auto subcomp: *(container->GetComponents())) {
+                    doDisconnect(subcomp);
+                }
+            }
+        }
+    }
+    else {
+        throw simdeck::ExInvalidComponentState(comp,comp->GetState(),
+                Smp::ComponentStateKind::CSK_Connected);
+    }
+}
+#define TRACE(expr) std::cout << __FILE__ << ":" <<  __LINE__ << ":" << __FUNCTION__ << ": " << #expr << " = " << (expr) << std::endl;
+
+// ..........................................................
 void Simulator::Exit() {
     if (checkState("Exit", Smp::SimulatorStateKind::SSK_Standby)) {
         setState(Smp::SimulatorStateKind::SSK_Exiting);
-        // TODO Tres bien uniquement quand on utilise ISimulator comme un singleton
-        this->~Simulator(); /* cleanup owned objects */
-        exit(EXIT_SUCCESS); /* cleanup static objects and syscall to end program execution */
+        for (auto service : *(_services->GetComponents())) {
+TRACE(service->GetName());
+            doDisconnect(service);
+        }
+        for (auto model : *(_models->GetComponents())) {
+TRACE(model->GetName());
+            doDisconnect(model);
+        }
     }
 }
 // ..........................................................
 void Simulator::Abort() {
     setState(Smp::SimulatorStateKind::SSK_Aborting);
-    abort(); /* syscall to end program execution */
 }
 // ..........................................................
 Smp::SimulatorStateKind Simulator::GetState() const {
