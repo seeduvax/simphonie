@@ -9,6 +9,7 @@
  */
  #include "abs/test.h"
  #include "simdeck/SimpleVectorField.hpp"
+ #include "simdeck/VectorType.hpp"
  
  namespace test {
  using namespace simdeck;
@@ -20,6 +21,7 @@ ABS_TEST_SUITE_BEGIN( SimpleVectorField )
 // ABS_TEST_DESCR(test description)
 
 private:
+    static VectorType _vectorInt64Type;
 
 public:
     void setUp() {
@@ -30,8 +32,8 @@ public:
 
     ABS_TEST_CASE_BEGIN(VectorWrapping) {
         std::vector<Smp::Int32> vint={1,2,4,8,16,32};
-        auto vf=SimpleVectorField::Create("vint","",&vint,nullptr,
-                Smp::ViewKind::VK_All, nullptr,
+        auto vf=SimpleVectorField::Create("vint","",&vint,&_vectorInt64Type,
+                Smp::ViewKind::VK_All, &_vectorInt64Type,
                 false, true, false, nullptr);
         CPPUNIT_ASSERT_EQUAL(vint.size(), vf->GetSize());
         auto v=vf->GetValue(2);
@@ -43,4 +45,7 @@ public:
     }
     ABS_TEST_CASE_END
 ABS_TEST_SUITE_END
+
+VectorType TestSimpleVectorField::_vectorInt64Type(Smp::PrimitiveTypeKind::PTK_Int64, "Int64",
+                    "Eight bytes signed int data type", nullptr);
 } // namespace test
