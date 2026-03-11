@@ -176,32 +176,36 @@ Smp::IField* Publication::PublishField(Smp::String8 name, Smp::String8 descripti
                                Smp::ViewKind view, Smp::Bool state, Smp::Bool input, Smp::Bool output) {
     Type* t = dynamic_cast<Type*>(_typeRegistry->GetType(typeUuid));
     if (t != nullptr) {
+        Smp::IField* f = nullptr;
         if (t == _recursivePubGuard) {
             _sim->GetLogger()->Log(_sim, "A PublishField called itself, stop here to not fail on stack overflow.",
                                    Smp::Services::ILogger::LMK_Error);
             _recursivePubGuard = nullptr;
             return nullptr;
         }
+        else {
+            // At first, delegate the publication to the type, hoping
+            // it will not just call back the current Publication method.
+            _recursivePubGuard = t;
+            f = t->Publish(this, name, description, address, view, state, input, output);
+            _recursivePubGuard = nullptr;
+        }
+
+        if (f!=nullptr) return f;
+
+        // The type did not succeed into creating the field so we try other simple types in last chance.
+
         auto at = dynamic_cast<Smp::Publication::IArrayType*>(t);
-        Smp::IField* f = nullptr;
         if (at != nullptr) {
             Smp::Publication::IType* pt = _typeRegistry->GetType(t->GetPrimitiveTypeKind());
             f = SimpleArrayField::Create(name, description, at->GetSize(), address, pt, view, t, state, input, output,
                                          _pubObj);
         }
-        else {
+        else { 
             f = SimpleField::Create(name, description, view, t, address, state, input, output, _pubObj);
         }
         if (f != nullptr) {
             addField(f);
-            return f;
-        }
-        else {
-            // in last resort, delegate the publication to the type, hoping
-            // it will not just call back the current Publication method.
-            _recursivePubGuard = t;
-            f = t->Publish(this, name, description, address, view, state, input, output);
-            _recursivePubGuard = nullptr;
             return f;
         }
     }
