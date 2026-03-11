@@ -38,6 +38,14 @@ void SimControl::connect() {
         );
 }
 // ..........................................................
+void SimControl::disconnect() {
+    Parent::disconnect();
+    getSimulator()->GetEventManager()->Unsubscribe(
+            Smp::Services::IEventManager::SMP_PostSimTimeChangeId,
+            GetEntryPoint(EVALUATE_EP_NAME)
+        );
+}
+// ..........................................................
 void SimControl::onEvaluate() {
     if (getChanged() && 
             std::abs(getOut()) > std::numeric_limits<Smp::Float64>::epsilon()) {

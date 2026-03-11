@@ -58,6 +58,12 @@ protected:
      * SMP_PostSimTimeChange event.
      */ 
     void connect() override;
+
+    /**
+     * SMP component Disonnect specialization.
+     * Unsubscribe from what was subscribed on connect.
+     */
+    void disconnect() override;
     /** 
      * Tracker onEvaluate callback specialisation.
      * When expression result is updated, the host simulator Hold is requested

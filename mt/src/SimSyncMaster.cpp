@@ -127,13 +127,19 @@ void SimSyncMaster::leaverun() {
 void SimSyncMaster::exit() {
     _slave->setExitFlag(SimSyncSlave::exitFlags::EXIT);
     _barrier.cancel();
-    waitSlaveStandby();
+// TODO wait slave standby no longer works because slave may be already
+// disconnected at this instant.
+// Think about what to really wait for here.
+//    waitSlaveStandby();
 }
 
 void SimSyncMaster::abort() {
     _slave->setExitFlag(SimSyncSlave::exitFlags::ABORT);
     _barrier.cancel();
-    waitSlaveStandby();
+// TODO wait slave standby no longer works because slave may be already
+// disconnected at this instant.
+// Think about what to really wait for here.
+//    waitSlaveStandby();
 }
 
 } /* namespace mt */

@@ -82,13 +82,14 @@ Simulator::Simulator(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent
     setState(Smp::SimulatorStateKind::SSK_Building);
 }
 // ..........................................................
-
 Simulator::~Simulator() {
     if (_state == Smp::SimulatorStateKind::SSK_Standby) {
         try {
             Exit();
         }
         catch (Smp::Exception& ex) {
+            std::cerr << "Aborting on exception on simulator " << GetName()
+                      << " destruction: " << ex.what() << std::endl;
             Abort();
         }
     }
@@ -423,18 +424,14 @@ void Simulator::doDisconnect(Smp::IComponent* comp) {
                 Smp::ComponentStateKind::CSK_Connected);
     }
 }
-#define TRACE(expr) std::cout << __FILE__ << ":" <<  __LINE__ << ":" << __FUNCTION__ << ": " << #expr << " = " << (expr) << std::endl;
-
 // ..........................................................
 void Simulator::Exit() {
     if (checkState("Exit", Smp::SimulatorStateKind::SSK_Standby)) {
         setState(Smp::SimulatorStateKind::SSK_Exiting);
         for (auto service : *(_services->GetComponents())) {
-TRACE(service->GetName());
             doDisconnect(service);
         }
         for (auto model : *(_models->GetComponents())) {
-TRACE(model->GetName());
             doDisconnect(model);
         }
     }

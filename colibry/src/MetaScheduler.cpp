@@ -362,11 +362,11 @@ MetaScheduler::MetaScheduler(Smp::String8 name, Smp::String8 description,
                                 this, &MetaScheduler::epPostEpExec);
 }
 // ..........................................................
-
 MetaScheduler::~MetaScheduler() {
     for (auto entry: _allSched) {
         delete entry;
     }
+    _allSched.clear();
     delete _epPreEpExec;
     delete _epPostEpExec;
 }

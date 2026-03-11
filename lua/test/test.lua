@@ -177,4 +177,5 @@ print("Nb. of logs: "..sim.logger.Counter.Value)
 
 s.DisposeFront(front)
 s.DisposeSimulator(sim2)
+print("///////////////// "..sim.ctrl.State)
 -- do not dispose sim because cppunit test case will do some assert on it.

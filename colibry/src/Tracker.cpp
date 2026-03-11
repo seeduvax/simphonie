@@ -56,7 +56,21 @@ void Tracker::connect() {
     getSimulator()->AddInitEntryPoint(GetEntryPoint(INIT_EP_NAME));
 }
 // ..........................................................
+void Tracker::disconnect() {
+    for (auto ec: _evCounters) {
+        delete ec.second;
+    }
+    _evCounters.clear();
+}
+// ..........................................................
 void Tracker::epInit() {
+    // clean event counters if any.
+    for (auto ec: _evCounters) {
+        delete ec.second;
+    }
+    _evCounters.clear();
+
+    // start real inits.
     auto encapsulatedResolver = [&](const std::string& name) -> std::function<Smp::Float64(void)> {
         Smp::IObject* obj = getSimulator()->GetResolver()->ResolveAbsolute(name.c_str());
         if (obj == nullptr) {
@@ -132,13 +146,16 @@ void Tracker::epInit() {
                 throw std::runtime_error("This is a field (encapsulated variable) instead of an event.");
             }
         }
-        auto evCounter=dynamic_cast<EventCounter*>(GetContainer(CONTAINER_NAME)->GetComponent(name.c_str()));
-        if ( evCounter == nullptr ) {
-            const auto eventId = getSimulator()->GetEventManager()->QueryEventId(name.c_str());
-            evCounter=new EventCounter(name.c_str(), "Event counter", this, eventId);
-            GetContainer(CONTAINER_NAME)->AddComponent(evCounter);
+        auto it=_evCounters.find(name);
+        if (it!=_evCounters.end()) {
+            return it->second->get();
         }
-        return evCounter->get();
+        else {
+            const auto eventId = getSimulator()->GetEventManager()->QueryEventId(name.c_str());
+            auto evCounter=new EventCounter(name.c_str(), "Event counter", this, eventId);
+            _evCounters[name]=evCounter;
+            return evCounter->get();
+        }
     };
 
     try {
@@ -178,9 +195,13 @@ void Tracker::epEvaluate() {
 // ..........................................................
 Tracker::EventCounter::EventCounter(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent,
                                          Smp::Services::EventId eventId)
-    : simdeck::Component(name, descr, parent), _counter(0) {
+    : simdeck::Component(name, descr, parent), _counter(0), _eventId(eventId) {
     addEP("handler", "Internal use only.", this, &EventCounter::handle);
-    dynamic_cast<Tracker*>(parent)->getSimulator()->GetEventManager()->Subscribe(eventId, GetEntryPoint("handler"));
+    dynamic_cast<Tracker*>(parent)->getSimulator()->GetEventManager()->Subscribe(_eventId, GetEntryPoint("handler"));
+}
+// ..........................................................
+Tracker::EventCounter::~EventCounter() {
+    dynamic_cast<Tracker*>(GetParent())->getSimulator()->GetEventManager()->Unsubscribe(_eventId, GetEntryPoint("handler"));
 }
 
 }} // namespace simphonie::colibry

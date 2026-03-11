@@ -21,9 +21,6 @@
 #define EVENT1 "TestEvent1"
 #define EVENT2 "TestEvent2"
 
-#undef TRACE
-#define TRACE(expr) std::cout << __FILE__ << ":" <<  __LINE__ << ":" << __FUNCTION__ << ": " << #expr << " = " << (expr) << std::endl;
- 
  // ----------------------------------------------------------
  // test suite implementation
  ABS_TEST_SUITE_BEGIN( MetaScheduler )

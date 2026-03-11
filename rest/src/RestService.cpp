@@ -43,7 +43,6 @@ RestService::RestService(Smp::String8 name, Smp::String8 descr, Smp::IObject* pa
 }
 
 RestService::~RestService() {
-    _server.stop();
 }
 
 
@@ -184,6 +183,10 @@ void RestService::connect() {
     eventManager->Subscribe(Smp::Services::IEventManager::SMP_EnterExecutingId,
                                        GetEntryPoint(ON_SIM_LEAVEEXEC));
     _server.start(_family, _host.c_str(), _port);
+}
+
+void RestService::disconnect() {
+    _server.stop();
 }
 
 void RestService::setupResponse(HttpResp* resp) {

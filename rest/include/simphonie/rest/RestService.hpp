@@ -90,6 +90,8 @@ private:
 
     void publish(Smp::IPublication* reciever) override;
     void connect() override;
+    void disconnect() override;
+ 
     static void setupResponse(HttpResp* resp);
     inline void onSimExecuting() {
         std::lock_guard<std::mutex> lock(_simIsRunningMutex);

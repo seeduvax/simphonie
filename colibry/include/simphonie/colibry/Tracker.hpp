@@ -15,6 +15,7 @@
 #include "simdeck/Service.hpp"
 #include "sxeval/SXEval.hpp"
 #include "Smp/Services/EventId.h"
+#include <map>
 
 namespace simphonie {
 namespace colibry {
@@ -114,6 +115,7 @@ protected:
     // Component specialization
     void publish(Smp::IPublication* receiver) override;
     void connect() override;
+    void disconnect() override;
 
     /** 
      * additional actions to be done on evaluation.
@@ -147,6 +149,7 @@ private:
     class EventCounter: public simdeck::Component, virtual public simdeck::EntryPointPublisher {
     public:
         EventCounter(Smp::String8 name, Smp::String8 descr, Smp::IObject* parent, Smp::Services::EventId eventId);
+        virtual ~EventCounter();
         inline void handle() {
             _counter+=1.0;
         }
@@ -156,6 +159,7 @@ private:
 
     private:
         Smp::Float64 _counter=0;
+        Smp::Services::EventId _eventId=0;
     };
     /** expressions result */
     Smp::Float64 _out=0;
@@ -169,6 +173,8 @@ private:
     std::string _expression="";
     /** the expression interpreter */
     sxeval::SXEval<Smp::Float64> _evaluator;
+
+    std::map<std::string, EventCounter*> _evCounters;
 };
 
 }} // namespace simphonie::colibry
