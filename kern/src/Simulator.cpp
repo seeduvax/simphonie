@@ -273,7 +273,7 @@ void Simulator::doConfigure(Smp::IComponent* comp) {
         std::ostringstream msg;
         msg <<"Configuring component : " << comp->GetName();
         SMPLOGI(msg.str().c_str());
-        comp->Configure(_logger);
+        comp->Configure(_logger, _linkRegistry);
         // forward configuration to children if component is a composite.
         auto composite=dynamic_cast<Smp::IComposite*>(comp);
         if (composite!=nullptr) {
