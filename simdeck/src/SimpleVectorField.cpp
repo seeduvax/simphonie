@@ -133,7 +133,6 @@ private:
     };
 
     void updateFields() const {
-        
         if (_fields.size() != _tData->size()) {
             _fields.clear();
             for (int i=0;i<_tData->size();i++) {

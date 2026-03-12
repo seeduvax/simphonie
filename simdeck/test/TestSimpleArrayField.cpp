@@ -50,7 +50,7 @@ public:
         aint[2]=42;
         v=af->GetValue(2);
         CPPUNIT_ASSERT_EQUAL(aint[2],(Smp::Int32)v);
-
+        delete af;
     }
     ABS_TEST_CASE_END
 
