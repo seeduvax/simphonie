@@ -17,7 +17,7 @@ stages:
        GIT_CLONE_PATH: $CI_BUILDS_DIR/build
     before_script:
       - echo "before_script"
-      - if [ "$CROSS_ARCH" != "" ] then export HWNAME=$CROSS_ARCH ; unset CROSS_ARCH; fi
+      - if [ "$CROSS_ARCH" != "" ]; then export HWNAME=$CROSS_ARCH ; unset CROSS_ARCH; fi
       
 .test_base:
     extends: .task
