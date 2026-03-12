@@ -17,6 +17,16 @@ namespace simdeck {
 
 class SimpleField : public Field, virtual public Smp::IForcibleField {
 public:
+    template <typename T>
+    static Smp::ISimpleField* Create(  Smp::String8 name,
+                            Smp::String8 description,
+                            Smp::ViewKind viewKind,
+                            T* address,
+                            Smp::Bool isState,
+                            Smp::Bool isInput,
+                            Smp::Bool isOutput,
+                            Smp::IObject* parent,
+                            const Smp::Publication::IType* type);
     static Smp::ISimpleField* Create(  Smp::String8 name,
                         Smp::String8 description,
                         Smp::ViewKind viewKind,
@@ -42,16 +52,6 @@ protected:
                 Smp::Bool isInput, Smp::Bool isOutput,
                 Smp::IObject* parent);
 private:
-    template <typename T>
-    static Smp::ISimpleField* Create(  Smp::String8 name,
-                            Smp::String8 description,
-                            Smp::ViewKind viewKind,
-                            T* address,
-                            Smp::Bool isState,
-                            Smp::Bool isInput,
-                            Smp::Bool isOutput,
-                            Smp::IObject* parent,
-                            const Smp::Publication::IType* type);
 };
 
 std::ostream& toprint(std::ostream& os, const Smp::ISimpleField& obj);
