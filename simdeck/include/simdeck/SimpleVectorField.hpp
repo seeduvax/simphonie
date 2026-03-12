@@ -19,14 +19,7 @@ namespace simdeck {
  */ 
 class SimpleVectorField : public Field, public virtual Smp::ISimpleArrayField {
 public:
-    template <typename T>
-    static Smp::ISimpleArrayField* Create(
-                      Smp::String8 name, Smp::String8 description,
-                      std::vector<T>* address,
-                      const Smp::Publication::IType* ptype, Smp::ViewKind viewKind,
-                      const Smp::Publication::IType* type,
-                      Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
-                      Smp::IObject* parent);
+   
     static Smp::ISimpleArrayField* Create(
                       Smp::String8 name, Smp::String8 description,
                       void* address,
@@ -39,6 +32,15 @@ protected:
     SimpleVectorField(Smp::String8 name, Smp::String8 description,
                       void* address, 
                       Smp::ViewKind viewKind,
+                      const Smp::Publication::IType* type,
+                      Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+                      Smp::IObject* parent);
+private: 
+    template <typename T>
+    static Smp::ISimpleArrayField* Create(
+                      Smp::String8 name, Smp::String8 description,
+                      std::vector<T>* address,
+                      const Smp::Publication::IType* ptype, Smp::ViewKind viewKind,
                       const Smp::Publication::IType* type,
                       Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
                       Smp::IObject* parent);
