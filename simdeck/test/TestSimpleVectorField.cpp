@@ -46,6 +46,6 @@ public:
     ABS_TEST_CASE_END
 ABS_TEST_SUITE_END
 
-SimpleVectorType TestSimpleVectorField::_vectorInt64Type(Smp::PrimitiveTypeKind::PTK_Int64, "Int64",
+SimpleVectorType TestSimpleVectorField::_vectorInt64Type(Smp::PrimitiveTypeKind::PTK_Int32, "Int64",
                     "Eight bytes signed int data type", nullptr);
 } // namespace test
