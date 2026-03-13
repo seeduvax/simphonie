@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 #include "simdeck/MD5.hpp"
 #include "Smp/IEntryPointPublisher.h"
 #include "Smp/IComposite.h"
@@ -19,6 +20,7 @@
 #include "Smp/IOutputField.h"
 #include "Smp/IModel.h"
 #include "Smp/IService.h"
+#include "Smp/Services/ILogger.h"
 #include "Smp/Services/ILinkRegistry.h"
 #include "Smp/Publication/IType.h"
 
@@ -59,45 +61,64 @@ std::string Utils::GetFullName(const Smp::IObject* o) {
         return GetFullName(o->GetParent()) + "/" + o->GetName();
     }
 }
+
+//...........................................................
+void Utils::LogDump(const Smp::IObject* from, int level, const Smp::ISimulator* sim) {
+    Smp::Services::ILogger* logger = nullptr;
+    if (sim != nullptr) {
+        logger = sim->GetLogger();
+    }
+    std::ostringstream output;
+    Dump(from, level, sim, output);
+    if (logger != nullptr) {
+        logger->Log(sim, output.str().c_str(), Smp::Services::ILogger::LMK_Debug);
+    } else {
+        std::cout << "Warning: Cannot use ILogger from simulator" << std::endl;
+        std::cout << output.str();
+    }
+}
+
 // ..........................................................
-void Utils::Dump(const Smp::IObject* from, int level, const Smp::ISimulator* sim) {
+void Utils::Dump(const Smp::IObject* from, int level, const Smp::ISimulator* sim, std::ostream &output)  {
+
+
     for (int i=0; i<level; i++) {
-        std::cout << "    ";
+        output << "    ";
     }
     int l=level+1;
-    std::cout << from->GetName() << " ";
+    output << from->GetName() << " ";
     if (dynamic_cast<const Smp::IService*>(from)!=nullptr) {
-        std::cout << "[Service]";
+        output << "[Service]";
     }   
     if (dynamic_cast<const Smp::IModel*>(from)!=nullptr) {
-        std::cout << "[Model]";
+        output << "[Model]";
     }   
     if (dynamic_cast<const Smp::IField*>(from)!=nullptr) {
         auto f=dynamic_cast<const Smp::IField*>(from);
-        std::cout << " [Field";
+        output << " [Field";
         if (f->IsInput()) {
-            std::cout << ":in";
+            output << ":in";
         }
         if (f->IsOutput()) {
-            std::cout << ":out";
+            output << ":out";
         }
         auto t = f->GetType();
         if (t != nullptr) {
-            std::cout << ":" << f->GetType()->GetPrimitiveTypeKind();
+            output << ":" << f->GetType()->GetPrimitiveTypeKind();
         }
         auto af = dynamic_cast<const Smp::IArrayField*>(from);
         if (af != nullptr) {
-            std::cout << "[" << af->GetSize() << "]";
+            output << "[" << af->GetSize() << "]";
         }
-        std::cout << "]";
+        output << "]";
         auto of=dynamic_cast<const Smp::IOutputField*>(f);
         if (of!=nullptr) {
             for (auto in: *(of->GetInputFields())) {
-                std::cout << std::endl;
+                output << std::endl;
                 for (int i=0; i<level; i++) {
-                    std::cout << "    ";
+                    output << "    ";
                 }
-                std::cout << "    -> " << GetFullName(in);
+                output << "    -> " << GetFullName(in);
             }
         }
         auto sf=dynamic_cast<const Smp::IStructureField*>(from);
@@ -108,18 +129,18 @@ void Utils::Dump(const Smp::IObject* from, int level, const Smp::ISimulator* sim
         }
     }
     if (dynamic_cast<const Smp::ISimulator*>(from)!=nullptr) {
-        std::cout << "[Simulator]";
+        output << "[Simulator]";
     }
     if (dynamic_cast<const Smp::IContainer*>(from)!=nullptr) {
-        std::cout << "[Container]";
+        output << "[Container]";
     }
     if (dynamic_cast<const Smp::IComposite*>(from)!=nullptr) {
-        std::cout << "[Composite]";
+        output << "[Composite]";
     }
     if (dynamic_cast<const Smp::IEntryPoint*>(from)!=nullptr) {
-        std::cout << "[EntryPoint]";
+        output << "[EntryPoint]";
     }
-    std::cout << std::endl;
+    output << std::endl;
     auto ctnr=dynamic_cast<const Smp::IContainer*>(from);
     if (ctnr!=nullptr) {
         for (auto cp: *(ctnr->GetComponents())) {
@@ -145,9 +166,9 @@ void Utils::Dump(const Smp::IObject* from, int level, const Smp::ISimulator* sim
             if (linkRegistry!=nullptr) {
                 for (auto source : *(linkRegistry->GetLinkSources(c))) {
                     for (int i = 0; i < level; i++) {
-                        std::cout << "    ";
+                        output << "    ";
                     }
-                    std::cout << "    <-[" << linkRegistry->GetLinkCount(source, c) << "]- " << GetFullName(source)
+                    output << "    <-[" << linkRegistry->GetLinkCount(source, c) << "]- " << GetFullName(source)
                               << std::endl;
                 }
             }
