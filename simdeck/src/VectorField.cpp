@@ -166,26 +166,28 @@ public:
 
     void recursivePush(Smp::IField* targetItemfield, Smp::IField* itemfield){
         Smp::IArrayField* tArrayField = dynamic_cast<Smp::IArrayField*>(targetItemfield);
-        Smp::ISimpleArrayField* targetSimpleArrayField = dynamic_cast<Smp::ISimpleArrayField*>(targetItemfield);
-        Smp::ISimpleField* targetSimpleField = dynamic_cast<Smp::ISimpleField*>(targetItemfield);
         if(tArrayField != nullptr){
             auto tItemField = dynamic_cast<Smp::IArrayField*>(itemfield);
             for(int i = 0; i< tArrayField->GetSize(); i++){
                 recursivePush(tArrayField->GetItem(i), tItemField->GetItem(i));
             }
         }
-        else if(targetSimpleArrayField != nullptr){
+        
+        Smp::ISimpleArrayField* targetSimpleArrayField = dynamic_cast<Smp::ISimpleArrayField*>(targetItemfield);
+        if(targetSimpleArrayField != nullptr){
             SimpleArrayField* itemSimpleArrayField = dynamic_cast<SimpleArrayField*>(itemfield);
             auto max=itemSimpleArrayField->GetSize()<targetSimpleArrayField->GetSize()?itemSimpleArrayField->GetSize():targetSimpleArrayField->GetSize();
             // TODO define a better copy implementation when target is the exact same type
             for (Smp::UInt64 i=0;i<max;i++) {
                 targetSimpleArrayField->SetValue(i,itemSimpleArrayField->GetValue(i));
             }
-        }else if (targetSimpleField!= nullptr) {
-            Smp::ISimpleField* itemSimpleField = dynamic_cast<Smp::ISimpleField*>(itemfield);
-            targetSimpleField->SetValue(itemSimpleField->GetValue());
-        } else {
             return;
+        }
+        
+        Smp::ISimpleField* targetSimpleField = dynamic_cast<Smp::ISimpleField*>(targetItemfield);
+        if (targetSimpleField!= nullptr) {
+            Smp::ISimpleField* itemSimpleField = dynamic_cast<Smp::ISimpleField*>(itemfield);
+            targetSimpleField->SetValue(itemSimpleField->GetValue());            
         }
     }
 

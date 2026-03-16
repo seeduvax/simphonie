@@ -133,6 +133,7 @@ private:
     Smp::Uuid _uuid;
 };
 
+
  
  // ----------------------------------------------------------
  // test suite implementation
