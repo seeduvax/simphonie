@@ -379,4 +379,26 @@ std::ostream& toprint(std::ostream& os, const Smp::ISimpleArrayField& obj) {
     os << " " << obj.GetValue(obj.GetSize() - 1) << " ]";
     return os;
 }
+
+// tells the compiler/linker never move out soem template even when the local
+// functions using it are not used.
+#define CREATE_TPL_DEF(TYPE) template Smp::ISimpleArrayField* SimpleArrayField::Create(\
+                      Smp::String8 name, Smp::String8 description,\
+                      Smp::UInt64 count, TYPE* address,\
+                      const Smp::Publication::IType* ptype, Smp::ViewKind viewKind,\
+                      const Smp::Publication::IType* type,\
+                      Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,\
+                      Smp::IObject* parent);
+CREATE_TPL_DEF(Smp::Bool)
+CREATE_TPL_DEF(Smp::Char8)
+CREATE_TPL_DEF(Smp::Int8)
+CREATE_TPL_DEF(Smp::Int16)
+CREATE_TPL_DEF(Smp::Int32)
+CREATE_TPL_DEF(Smp::Int64)
+CREATE_TPL_DEF(Smp::UInt8)
+CREATE_TPL_DEF(Smp::UInt16)
+CREATE_TPL_DEF(Smp::UInt32)
+CREATE_TPL_DEF(Smp::UInt64)
+CREATE_TPL_DEF(Smp::Float32)
+CREATE_TPL_DEF(Smp::Float64)
 } // namespace simdeck

@@ -21,6 +21,14 @@ namespace simdeck {
 class SimpleArrayField : public Field, public virtual Smp::ISimpleArrayField {
 public:
    
+    template <typename T>
+    static Smp::ISimpleArrayField* Create(
+                      Smp::String8 name, Smp::String8 description,
+                      Smp::UInt64 count, T* address,
+                      const Smp::Publication::IType* ptype, Smp::ViewKind viewKind,
+                      const Smp::Publication::IType* type,
+                      Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+                      Smp::IObject* parent);
     static Smp::ISimpleArrayField* Create(
                       Smp::String8 name, Smp::String8 description,
                       Smp::UInt64 count, void* address,
@@ -37,14 +45,6 @@ protected:
                       Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
                       Smp::IObject* parent);
 private:
-    template <typename T>
-    static Smp::ISimpleArrayField* Create(
-                      Smp::String8 name, Smp::String8 description,
-                      Smp::UInt64 count, T* address,
-                      const Smp::Publication::IType* ptype, Smp::ViewKind viewKind,
-                      const Smp::Publication::IType* type,
-                      Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
-                      Smp::IObject* parent);
 };
 
 std::ostream& toprint(std::ostream& os, const Smp::ISimpleArrayField& obj);

@@ -42,6 +42,7 @@ public:
         CPPUNIT_ASSERT_EQUAL(vint.size(), vf->GetSize());
         v=vf->GetValue(6);
         CPPUNIT_ASSERT_EQUAL(vint[6],(Smp::Int32)v);
+        delete vf;
     }
     ABS_TEST_CASE_END
 ABS_TEST_SUITE_END

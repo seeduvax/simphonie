@@ -73,12 +73,22 @@ struct Utils {
     static std::string GetFullName(const Smp::IObject* o);
 
     /**
-     * Print on console (stdout) the object tree.
+     * Print into a logger the object tree.
      * @param from object to use as the root of the tree.
      * @param level indentation level (default 0, used internally with recursion)
      * @param sim host simulator.
      */
-    static void Dump(const Smp::IObject* from, int level=0, const Smp::ISimulator* sim=nullptr);
+    static void LogDump(const Smp::IObject* from, int level=0, const Smp::ISimulator* sim=nullptr);
+
+
+    /**
+     * Print on an ostream (stdout by default) the object tree.
+     * @param from object to use as the root of the tree.
+     * @param level indentation level (default 0, used internally with recursion)
+     * @param sim host simulator.
+     * @param output the ostream used (stdout by default).
+     */
+    static void Dump(const Smp::IObject* from, int level=0, const Smp::ISimulator* sim=nullptr, std::ostream &output = std::cout);
 
     /**
      * Get an Object's children collection.
