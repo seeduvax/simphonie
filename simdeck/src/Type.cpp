@@ -38,6 +38,18 @@ Smp::IField* Type::Publish(Smp::Publication::IPublishField* receiver,
                    Smp::Bool state,
                    Smp::Bool input,
                    Smp::Bool output) {
+    if (receiver == nullptr){
+        auto field = this->createField(
+                            name,
+                            description,
+                            nullptr,
+                            address,
+                            view,
+                            state,
+                            input,
+                            output);
+        return field;   
+    } 
     // temporary publish a dummy field to retrieve the parent.
     auto f=receiver->PublishField(name, description, (Smp::UInt8*)address,view, state, input, output);
     if (f!=nullptr) {

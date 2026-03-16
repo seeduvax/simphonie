@@ -8,7 +8,7 @@
  * $Date$
  */
 #include "simdeck/SimpleVectorType.hpp"
-#include "simdeck/SimpleVectorField.hpp"
+#include "simdeck/SimpleVectorField.hpp"    
 #include "simdeck/Component.hpp"
 #include "Smp/IObject.h"
 #include <iostream>
@@ -36,7 +36,7 @@ Smp::IField* SimpleVectorType::createField(
         Smp::Bool input,
         Smp::Bool output) const {
             std::clog << "Create simplevector field" << std::endl;
-            std::clog << "Simplevector field parent: " << parent->GetName()  << std::endl;
+            //std::clog << "Simplevector field parent: " << parent->GetName()  << std::endl;
             return SimpleVectorField::Create(name,
             description,
             address,

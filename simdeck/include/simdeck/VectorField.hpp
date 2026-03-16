@@ -12,66 +12,35 @@
 
 #include "Smp/IArrayField.h"
 #include "simdeck/Field.hpp"
-#include "simdeck/VectorType.hpp"
 
 namespace simdeck {
 
-template<typename T>
-std::vector<Smp::IField*> createItemFieldsFrom(T& data);
-
-template<typename T>
-uint32_t getCurrentVectorSize(T& data);
-
-
-template<typename T>
-class VectorField: public Field, virtual public Smp::IArrayField {
-    typedef Field Parent;
+/**
+ *
+ */
+class VectorField : public Field, public virtual Smp::IArrayField {
 public:
-    VectorField(
-            Smp::String8 name, Smp::String8 description,
-            Smp::ViewKind viewKind, T* address,
-            const VectorType* vectorType,
-            Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
-            Smp::IObject* parent
-    ): Parent(name, description, viewKind, address, 0, vectorType,
-            isState, isInput, isOutput, parent), _pObjT(address) {
-        updateFields();
-    }
+  
+    /**
+     * Destructor.
+     */
+    virtual ~VectorField();
 
-    virtual ~VectorField() {
-        for (auto f : _fields) {
-            delete f;
-        }
-    }
+    static Smp::IArrayField* Create(Smp::String8 name, Smp::String8 description,
+                      void* address,
+                      Smp::Publication::IType* ptype, Smp::ViewKind viewKind,
+                      const Smp::Publication::IType* type,
+                      Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+                      Smp::IObject* parent);
+                      
 
-    // IArrayField implementation
-    Smp::UInt64 GetSize() override {
-        return _fields.size();
-    }
-
-    Smp::IField* GetItem(Smp::UInt64 index) const override {
-        return (index < _fields.size()) ?_fields[index] : nullptr;
-    }
-
-    void updateFields() {
-        if (getCurrentVectorSize(*_pObjT) == _fields.size()) {
-            // do nothing since size matches
-            return;
-        }
-        for (auto f: createItemFieldsFrom(*_pObjT)) {
-            _fields.push_back(f);
-        }
-    }
-
-    // to be used by IOutputField ?
-    void copyFrom(const VectorField<T>& other) {
-        *_pObjT = other._pObjT;
-        updateFields();
-    }
-
-private:
-    T* _pObjT;
-    std::vector< Smp::IField* > _fields;
+protected:
+    VectorField(Smp::String8 name, Smp::String8 description,
+                      void* address,
+                      Smp::ViewKind viewKind,
+                      const Smp::Publication::IType* type,
+                      Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
+                      Smp::IObject* parent);
 };
 
 } // namespace simdeck

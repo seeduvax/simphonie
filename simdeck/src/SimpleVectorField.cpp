@@ -82,7 +82,7 @@ public:
         }
     }
     void Restore(Smp::IStorageReader* reader) override {
-        Smp::UInt64 size;
+        Smp::UInt64 size = _tData->size();
         reader->Restore(&size, sizeof(size));
         _tData->clear();
         for (int i=0; i<size; i++) {

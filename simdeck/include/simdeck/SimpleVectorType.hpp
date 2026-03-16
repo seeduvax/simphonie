@@ -7,8 +7,8 @@
  * $Id$
  * $Date$
  */
-#ifndef __simdeck_VectorType_HPP__
-#define __simdeck_VectorType_HPP__
+#ifndef __simdeck_SimpleVectorType_HPP__
+#define __simdeck_SimpleVectorType_HPP__
 
 #include "simdeck/Type.hpp"
 #include "Smp/IField.h"
