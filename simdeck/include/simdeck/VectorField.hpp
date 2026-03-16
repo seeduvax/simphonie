@@ -26,6 +26,8 @@ public:
      */
     virtual ~VectorField();
 
+  
+
     static Smp::IArrayField* Create(Smp::String8 name, Smp::String8 description,
                       void* address,
                       Smp::Publication::IType* ptype, Smp::ViewKind viewKind,
@@ -41,6 +43,19 @@ protected:
                       const Smp::Publication::IType* type,
                       Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
                       Smp::IObject* parent);
+private:
+  template <typename T>
+    static Smp::IArrayField* Create(
+                            Smp::String8 name,
+                            Smp::String8 description,
+                            std::vector<T*>* address,
+                            Smp::Publication::IType* ptype,
+                            Smp::ViewKind viewKind,
+                            const Smp::Publication::IType* type,
+                            Smp::Bool isState,
+                            Smp::Bool isInput,
+                            Smp::Bool isOutput,
+                            Smp::IObject* parent);                      
 };
 
 } // namespace simdeck

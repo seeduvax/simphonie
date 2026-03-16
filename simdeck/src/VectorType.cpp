@@ -10,6 +10,7 @@
 #include "simdeck/VectorType.hpp"
 #include "simdeck/VectorField.hpp"
 #include "Smp/Publication/ITypeRegistry.h"
+#include <iostream>
 
 namespace simdeck {
 
@@ -32,7 +33,6 @@ Smp::IField* VectorType::createField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) const {
-
             auto typeRegistry = dynamic_cast<Smp::Publication::ITypeRegistry*>(this->GetParent());
             auto ptype = typeRegistry->GetType(_puuid);
             return VectorField::Create(name, description, address, ptype, view, this, 

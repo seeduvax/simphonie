@@ -35,8 +35,6 @@ Smp::IField* SimpleVectorType::createField(
         Smp::Bool state,
         Smp::Bool input,
         Smp::Bool output) const {
-            std::clog << "Create simplevector field" << std::endl;
-            //std::clog << "Simplevector field parent: " << parent->GetName()  << std::endl;
             return SimpleVectorField::Create(name,
             description,
             address,

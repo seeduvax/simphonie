@@ -10,7 +10,14 @@
 #include "simdeck/VectorField.hpp"
 #include "Smp/IStorageReader.h"
 #include "Smp/IStorageWriter.h"
+#include "Smp/Publication/ITypeRegistry.h"
 #include "Smp/IField.h"
+#include "Smp/ISimpleField.h"
+#include "Smp/ISimpleArrayField.h"
+#include "Smp/IArrayField.h"
+#include "Smp/IOutputField.h"
+#include "simdeck/Collection.hpp"
+#include "simdeck/SimpleArrayField.hpp"
 #include <sstream>
 #include <iostream>
 
@@ -100,7 +107,6 @@ class TVectorField: public VectorField, public virtual Smp::IArrayField{
             if (_fields.size() != _tData->size()) {
                 _fields.clear();
                 for (int i=0;i<_tData->size();i++) {
-                   std::clog << "update fields" << std::endl;
                     T* fieldAddress =  (*_tData)[i];
                     std::string name = this->GetName();
                     auto f = _ptype->Publish(nullptr, buildName(name, i).c_str(), "", (void*)fieldAddress, GetView(), IsState(), IsInput(), IsOutput());
@@ -109,6 +115,91 @@ class TVectorField: public VectorField, public virtual Smp::IArrayField{
             }
         }
 };
+
+// ..........................................................
+template <typename T>
+class TVectorOutputField : public TVectorField<T>, public virtual Smp::IOutputField {
+public:
+
+    TVectorOutputField(Smp::String8 name, Smp::String8 description, std::vector<T*>* address,
+                      Smp::Publication::IType* ptype, Smp::ViewKind viewKind, const Smp::Publication::IType* type,
+                      Smp::Bool isState, Smp::Bool isInput,
+                      Smp::IObject* parent)
+                      :TVectorField<T>(name, description, address, ptype, 
+                      viewKind, type, isState, isInput, true, parent)
+                      {                        
+                      }
+
+    ~TVectorOutputField() {
+
+    }
+
+    void Connect(Smp::IField* target) override{
+        auto t = dynamic_cast<Smp::IArrayField*>(target);
+        bool isSameType = target->GetType()->GetUuid() == this->GetType()->GetUuid();
+        if (t!=nullptr 
+            && !_targets.contain(t) 
+            && t->GetSize() >= this->GetSize()
+            && isSameType ){
+            _targets.push_back(t);
+        }
+    }
+
+    void Disconnect(Smp::IField* target) override {
+        auto t = dynamic_cast<Smp::IArrayField*>(target);
+        if (t!=nullptr && _targets.contain(t)) {
+            _targets.remove(t);
+        }
+    }
+
+    void Push() override {
+       for (auto target: _targets) {
+            auto t=dynamic_cast<Smp::IArrayField*>(target);
+            auto max=this->GetSize()<t->GetSize()?this->GetSize():t->GetSize();
+            // TODO define a better copy implementation when target is the exact same type
+            
+            for (Smp::UInt64 i=0;i<max;i++) {
+                recursivePush(t->GetItem(i),this->GetItem(i));
+            }
+        }
+    }
+
+    void recursivePush(Smp::IField* targetItemfield, Smp::IField* itemfield){
+        Smp::IArrayField* tArrayField = dynamic_cast<Smp::IArrayField*>(targetItemfield);
+        Smp::ISimpleArrayField* targetSimpleArrayField = dynamic_cast<Smp::ISimpleArrayField*>(targetItemfield);
+        Smp::ISimpleField* targetSimpleField = dynamic_cast<Smp::ISimpleField*>(targetItemfield);
+        if(tArrayField != nullptr){
+            auto tItemField = dynamic_cast<Smp::IArrayField*>(itemfield);
+            for(int i = 0; i< tArrayField->GetSize(); i++){
+                recursivePush(tArrayField->GetItem(i), tItemField->GetItem(i));
+            }
+        }
+        else if(targetSimpleArrayField != nullptr){
+            SimpleArrayField* itemSimpleArrayField = dynamic_cast<SimpleArrayField*>(itemfield);
+            auto max=itemSimpleArrayField->GetSize()<targetSimpleArrayField->GetSize()?itemSimpleArrayField->GetSize():targetSimpleArrayField->GetSize();
+            // TODO define a better copy implementation when target is the exact same type
+            for (Smp::UInt64 i=0;i<max;i++) {
+                targetSimpleArrayField->SetValue(i,itemSimpleArrayField->GetValue(i));
+            }
+        }else if (targetSimpleField!= nullptr) {
+            Smp::ISimpleField* itemSimpleField = dynamic_cast<Smp::ISimpleField*>(itemfield);
+            targetSimpleField->SetValue(itemSimpleField->GetValue());
+        } else {
+            return;
+        }
+    }
+
+    const Smp::FieldCollection* GetInputFields() const override {
+        return &_targets;
+    }
+    Smp::Bool IsAutomatic() const override {
+        return false;
+    }
+
+private:
+    Collection<Smp::IField> _targets;
+};
+
 
 // ..........................................................
 VectorField::VectorField(
@@ -128,6 +219,35 @@ VectorField::~VectorField() {
 }
 
 // ..........................................................
+template <typename T>
+Smp::IArrayField* VectorField::Create(
+                            Smp::String8 name,
+                            Smp::String8 description,
+                            std::vector<T*>* address,
+                            Smp::Publication::IType* ptype,
+                            Smp::ViewKind viewKind,
+                            const Smp::Publication::IType* type,
+                            Smp::Bool isState,
+                            Smp::Bool isInput,
+                            Smp::Bool isOutput,
+                            Smp::IObject* parent) {
+    if (isOutput) {
+        return new TVectorOutputField<T>(
+                        name, description,
+                        static_cast<std::vector<T*>*>(address), ptype, viewKind, type,
+                        isState, isInput, parent);
+    }
+    else {
+        return new TVectorField<T>(
+                        name, description, 
+                        static_cast<std::vector<T*>*>(address), ptype, viewKind, type,
+                        isState, isInput, false, parent);
+    }
+}
+
+
+
+// ..........................................................
 Smp::IArrayField* VectorField::Create(Smp::String8 name, Smp::String8 description,
                       void* address,
                       Smp::Publication::IType* ptype, Smp::ViewKind viewKind,
@@ -135,7 +255,7 @@ Smp::IArrayField* VectorField::Create(Smp::String8 name, Smp::String8 descriptio
                       Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
                       Smp::IObject* parent){
 
-    return new TVectorField<void>(name, description,
+    return  VectorField::Create<void>(name, description,
                           (std::vector<void*>*)(address),
                           ptype, viewKind, type,
                           isState, isInput, isOutput,
