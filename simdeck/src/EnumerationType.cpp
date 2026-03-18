@@ -47,7 +47,7 @@ void EnumerationType::AddLiteral(Smp::String8 name, Smp::String8 description, Sm
 Smp::IField* EnumerationType::createField(
         Smp::String8 name,
         Smp::String8 description,
-        Smp::IComponent* parent,
+        Smp::IObject* parent,
         void* address,
         Smp::ViewKind view,
         Smp::Bool state,

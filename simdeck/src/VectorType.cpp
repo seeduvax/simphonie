@@ -27,7 +27,7 @@ VectorType::~VectorType() {}
 Smp::IField* VectorType::createField(
         Smp::String8 name,
         Smp::String8 description,
-        Smp::IComponent* parent,
+        Smp::IObject* parent,
         void* address,
         Smp::ViewKind view,
         Smp::Bool state,
@@ -36,7 +36,7 @@ Smp::IField* VectorType::createField(
             auto typeRegistry = dynamic_cast<Smp::Publication::ITypeRegistry*>(this->GetParent());
             auto ptype = typeRegistry->GetType(_puuid);
             return VectorField::Create(name, description, address, ptype, view, this, 
-                                        state, input, output, (Smp::IObject*)parent);
+                                        state, input, output, parent);
             
     }
 

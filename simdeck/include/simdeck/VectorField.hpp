@@ -44,7 +44,7 @@ protected:
                       Smp::Bool isState, Smp::Bool isInput, Smp::Bool isOutput,
                       Smp::IObject* parent);
 private:
-  template <typename T>
+    template <typename T>
     static Smp::IArrayField* Create(
                             Smp::String8 name,
                             Smp::String8 description,

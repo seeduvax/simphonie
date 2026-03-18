@@ -21,6 +21,7 @@
  #include "simdeck/VectorType.hpp"
  #include "simdeck/SimpleType.hpp"
  #include <map>
+ #include <iostream>
  
 namespace test {
 using namespace simdeck;
@@ -132,9 +133,9 @@ typedef simdeck::ArrayType Base;
 private:
     Smp::Uuid _uuid;
 };
-
-
  
+// ----------------------------------------------------------
+
  // ----------------------------------------------------------
  // test suite implementation
  ABS_TEST_SUITE_BEGIN( VectorField )
@@ -168,8 +169,14 @@ private:
 
     _vectorTypeDouble = new VectorType(Uuid_Vector_Array_Double, Uuid_Vector_Double, Smp::PrimitiveTypeKind::PTK_Float64, "float64",
                     "Eight bytes signed dounle data type", dynamic_cast<Smp::IObject*>(_typeRegistry));
+
     _float64Type = new SimpleType(Smp::Uuids::Uuid_Float64, Smp::PrimitiveTypeKind::PTK_Float64, "float64",
                     "Eight bytes signed double data type");
+
+    auto uint8Type = new SimpleType(Smp::Uuids::Uuid_UInt8, Smp::PrimitiveTypeKind::PTK_UInt8, "uint8",
+                    "Eight bytes signed double data type");
+    _typeRegistry->Register(uint8Type);
+
     _simplearrayTypeDouble = new TestSimpleArrayType(Uuid_Vector_Double, "float64", "Eight bytes signed double data type", 
     dynamic_cast<Smp::IObject*>(_typeRegistry), 2, _float64Type);
     
@@ -183,6 +190,7 @@ private:
  void tearDown() {
  }
  
+
  ABS_TEST_CASE_BEGIN(VectorVectorInt) {
         std::vector<Smp::Int32> v1 = {1,2,4,8,16,32};
         std::vector<Smp::Int32> v2 = {64,128,256,512,1028,2048};
@@ -190,7 +198,7 @@ private:
         std::vector<std::vector<Smp::Int32>*> vvint={&v1,&v2};
         auto vf=VectorField::Create("vvint","", (void*)(&vvint), _simplevectorTypeInt32,
                 Smp::ViewKind::VK_All, _vectorTypeInt,
-                false, true, false, nullptr);
+                false, false, true, _typeRegistry);
         CPPUNIT_ASSERT_EQUAL(vvint.size(), vf->GetSize()); 
         auto field1 = vf->GetItem(0);
         auto vfield1 = dynamic_cast<SimpleVectorField*>(field1);
@@ -209,13 +217,12 @@ private:
         std::vector<std::array<Smp::Float64, 2>*> vadouble={&v1,&v2};
         auto vf=VectorField::Create("vadouble","",(void*)(&vadouble),_simplearrayTypeDouble,
                 Smp::ViewKind::VK_All, _vectorTypeDouble,
-                false, true, false, nullptr);
+                false, false, false, _typeRegistry);
         CPPUNIT_ASSERT_EQUAL(vadouble.size(), vf->GetSize()); 
         auto field1 = vf->GetItem(0);
         auto vfield1 = dynamic_cast<SimpleArrayField*>(field1);        
         CPPUNIT_ASSERT_EQUAL(v1.size(), vfield1->GetSize());
         auto value = vfield1->GetValue(1);
-        std::clog << "value: " << value << std::endl;
         CPPUNIT_ASSERT_EQUAL((Smp::Float64)v1[1], (Smp::Float64)value);
         vadouble.push_back(&v3);
         CPPUNIT_ASSERT_EQUAL(vadouble.size(), vf->GetSize());
@@ -242,13 +249,13 @@ private:
         std::vector<std::array<Smp::Float64, 2>*> secondVAdoubleOutput={&v33,&v44};
         std::vector<std::vector<std::array<Smp::Float64, 2>*>*> outputVector = {&firstVAdoubleOutput,&secondVAdoubleOutput};
         
-       auto vf=VectorField::Create("nestedVAdouble","",(void*)(&nestedVector),_vectorTypeDouble,
-                Smp::ViewKind::VK_All, _vectorTypeArrayDouble,
-                false, true, false, nullptr);
+        auto vf=VectorField::Create("nestedVAdouble","",(void*)(&nestedVector),_vectorTypeDouble,
+                    Smp::ViewKind::VK_All, _vectorTypeArrayDouble,
+                    false, false, false, _typeRegistry);
 
-       auto vfOutput=VectorField::Create("nestedVAdoubleOutput","", (void*)(&outputVector),_vectorTypeDouble,
+        auto vfOutput=VectorField::Create("nestedVAdoubleOutput","", (void*)(&outputVector), _vectorTypeDouble,
                 Smp::ViewKind::VK_All,_vectorTypeArrayDouble ,
-                false, false, true, nullptr);
+                false, false, true, _typeRegistry);
 
         CPPUNIT_ASSERT(vfOutput->IsOutput());
         Smp::IOutputField* outputField = dynamic_cast<Smp::IOutputField*>(vfOutput);

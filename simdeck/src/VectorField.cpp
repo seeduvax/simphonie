@@ -17,14 +17,16 @@
 #include "Smp/IArrayField.h"
 #include "Smp/IOutputField.h"
 #include "simdeck/Collection.hpp"
+#include "simdeck/SimpleVectorType.hpp"
 #include "simdeck/SimpleArrayField.hpp"
+#include "simdeck/FieldPublisher.hpp"
 #include <sstream>
 #include <iostream>
 
 namespace simdeck {
 
 template <typename T>
-class TVectorField: public VectorField, public virtual Smp::IArrayField{
+class TVectorField: public VectorField, public virtual Smp::IArrayField {
     public:
         TVectorField(Smp::String8 name, Smp::String8 description, std::vector<T*>* address,
                       Smp::Publication::IType* ptype, Smp::ViewKind viewKind, const Smp::Publication::IType* type,
@@ -35,7 +37,8 @@ class TVectorField: public VectorField, public virtual Smp::IArrayField{
                           isState, isInput, isOutput,
                           parent),
                            _tData((std::vector<T*>*)address),
-                           _ptype(ptype)
+                           _ptype(ptype), 
+                           _pub(new FieldPublisher(this)) // must be initialize to null
                       {
                         updateFields();
                       }
@@ -89,17 +92,20 @@ class TVectorField: public VectorField, public virtual Smp::IArrayField{
             for (Smp::IField* item: _fields) {
                 writer->Store(item, sizeof(item));
             }
-        }   
+        }
+
+        
 
 
     private:
         std::vector<T*>* _tData;
         mutable std::vector<Smp::IField*> _fields;
         Smp::Publication::IType* _ptype;
+        FieldPublisher* _pub;
     
         static std::string buildName(std::string parentName, Smp::UInt64 index) {
             std::ostringstream oss;
-            oss << 'a' << index << 'b';
+            oss << "[" << index << "]";
             return oss.str();
         }
 
@@ -109,7 +115,9 @@ class TVectorField: public VectorField, public virtual Smp::IArrayField{
                 for (int i=0;i<_tData->size();i++) {
                     T* fieldAddress =  (*_tData)[i];
                     std::string name = this->GetName();
-                    auto f = _ptype->Publish(nullptr, buildName(name, i).c_str(), "", (void*)fieldAddress, GetView(), IsState(), IsInput(), IsOutput());
+                    // _pub is a dummy publisher and is only usefull to provide a parent to the created field.
+                    std::string fName = buildName(name, i);
+                    auto f = _ptype->Publish(_pub, fName.c_str(), "", (void*)fieldAddress, GetView(), IsState(), IsInput(), IsOutput());
                     _fields.push_back(f);
                 }
             }
@@ -130,9 +138,7 @@ public:
                       {                        
                       }
 
-    ~TVectorOutputField() {
-
-    }
+    virtual ~TVectorOutputField() {}
 
     void Connect(Smp::IField* target) override{
         auto t = dynamic_cast<Smp::IArrayField*>(target);
@@ -172,7 +178,7 @@ public:
                 recursivePush(tArrayField->GetItem(i), tItemField->GetItem(i));
             }
         }
-        
+
         Smp::ISimpleArrayField* targetSimpleArrayField = dynamic_cast<Smp::ISimpleArrayField*>(targetItemfield);
         if(targetSimpleArrayField != nullptr){
             SimpleArrayField* itemSimpleArrayField = dynamic_cast<SimpleArrayField*>(itemfield);
@@ -235,7 +241,7 @@ Smp::IArrayField* VectorField::Create(
                             Smp::IObject* parent) {
     if (isOutput) {
         return new TVectorOutputField<T>(
-                        name, description,
+                        name, description, 
                         static_cast<std::vector<T*>*>(address), ptype, viewKind, type,
                         isState, isInput, parent);
     }

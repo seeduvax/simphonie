@@ -10,6 +10,8 @@
 #include "simdeck/Type.hpp"
 #include "Smp/IPublication.h"
 #include "Smp/IComponent.h"
+#include <iostream>
+
 
 namespace simdeck {
 
@@ -37,27 +39,25 @@ Smp::IField* Type::Publish(Smp::Publication::IPublishField* receiver,
                    Smp::ViewKind view,
                    Smp::Bool state,
                    Smp::Bool input,
-                   Smp::Bool output) {
-    if (receiver == nullptr){
-        auto field = this->createField(
-                            name,
-                            description,
-                            nullptr,
-                            address,
-                            view,
-                            state,
-                            input,
-                            output);
-        return field;
-    } 
+                   Smp::Bool output) {   
     // temporary publish a dummy field to retrieve the parent.
     auto f=receiver->PublishField(name, description, (Smp::UInt8*)address,view, state, input, output);
     if (f!=nullptr) {
-        auto parent=dynamic_cast<Smp::IComponent*>(f->GetParent());
-        if (parent!=nullptr) {
+
+        Smp::IObject* parent;
+        auto parentComponent=dynamic_cast<Smp::IComponent*>(f->GetParent());
+        if (parentComponent!=nullptr) {
             // and remove the dummy temp field once no more useful.
-            parent->RemoveChild(f, parent->GetFields());
-            auto field = this->createField(
+            parentComponent->RemoveChild(f, parentComponent->GetFields());
+            parent = parentComponent;
+        }
+        auto parentField = dynamic_cast<Smp::IField*>(f->GetParent());
+        if (parentField != nullptr){
+            
+            parent = parentField;
+        }
+        
+        auto field = this->createField(
                                 name,
                                 description,
                                 parent,
@@ -66,9 +66,11 @@ Smp::IField* Type::Publish(Smp::Publication::IPublishField* receiver,
                                 state,
                                 input,
                                 output);
-            receiver->PublishField(field);
-            return field;
-        }
+
+        receiver->PublishField(field);
+        return field;
+
+
     }
     // TODO error management and related exception throwing
     return nullptr;
