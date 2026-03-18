@@ -297,12 +297,22 @@ protected:
         // TODO check SetEventSimulationTime also use relative time from now like
         // AddSimulationTimeEvent.
         MetaScheduler::BaseSchedule::epActivate();
-        getMetaScheduler()->_scheduler->SetEventSimulationTime(GetEventId(),
-                _simulationTime==-1?0:_simulationTime);
+        Smp::Duration nextTime=0;
                 // _simulationTime == -1 is related to an inactive schedule
                 // event not explicitely defined with setActive(). On event,
                 // such schedule shall be reset to run now (0 relative
                 // simulation time)
+        if (_simulationTime!=-1 && _cycleTime>0) {
+            // compute next activation time according to cycle time phase and
+            // offset time, to make it match a time equal to the next from now
+            // in the case the schedule is activated since simulation start.
+            nextTime=( _cycleTime 
+                        - ( getMetaScheduler()->_timeKeeper->GetSimulationTime() % _cycleTime )
+                        + _simulationTime)
+                     % _cycleTime;
+        }
+        getMetaScheduler()->_scheduler->SetEventSimulationTime(GetEventId(),
+                                                                nextTime);
     }
     void epDeactivate() override {
         MetaScheduler::BaseSchedule::epActivate();
