@@ -44,19 +44,14 @@ Smp::IField* Type::Publish(Smp::Publication::IPublishField* receiver,
     auto f=receiver->PublishField(name, description, (Smp::UInt8*)address,view, state, input, output);
     if (f!=nullptr) {
 
-        Smp::IObject* parent;
-        auto parentComponent=dynamic_cast<Smp::IComponent*>(f->GetParent());
+        Smp::IObject* parent = f->GetParent();
+        auto parentComponent=dynamic_cast<Smp::IComponent*>(parent);
         if (parentComponent!=nullptr) {
             // and remove the dummy temp field once no more useful.
             parentComponent->RemoveChild(f, parentComponent->GetFields());
             parent = parentComponent;
         }
-        auto parentField = dynamic_cast<Smp::IField*>(f->GetParent());
-        if (parentField != nullptr){
-            
-            parent = parentField;
-        }
-        
+
         auto field = this->createField(
                                 name,
                                 description,
