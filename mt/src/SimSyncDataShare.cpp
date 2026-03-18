@@ -21,7 +21,8 @@ public:
     virtual ~DataShareType() {}
 
 protected:
-    Smp::IField* createField(Smp::String8 name, Smp::String8 description, Smp::IComponent* parent, void* address,
+    Smp::IField* createField(Smp::String8 name, Smp::String8 description, Smp::IObjectstd::clog
+    * parent, void* address,
                              Smp::ViewKind view, Smp::Bool state, Smp::Bool input, Smp::Bool output) const override {
         return nullptr;
     }
